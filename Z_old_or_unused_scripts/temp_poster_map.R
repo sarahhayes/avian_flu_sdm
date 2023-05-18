@@ -19,7 +19,8 @@ sp_df <- ebirdst_runs
 
 # download data - we will look at the herring gull 
 # path <- ebirdst_download(species = "hergul")
-path <- ebirdst_download(species = "mallar3")
+# path <- ebirdst_download(species = "mallar3")
+path <- ebirdst_download(species = "comter")
 
 # load relative abundance raster stack with 52 layers, one for each week
 abd <- load_raster(path = path, resolution = "lr") # currently set as lr = low resolution for speed
@@ -35,7 +36,7 @@ abd_prj <- terra::project(x = abd, y = crs, method = "near") # ideally (accordin
 # Now we want to crop
 e <- terra::ext(2000000, 6000000, 1000000, 5500000)
 crop_abd <- crop(x = abd_prj, y = e )
-plot(crop_abd[[1]], axes = F)
+plot(crop_abd[[26]], axes = F)
 
 # change the colours
 # quantiles of non-zero values
