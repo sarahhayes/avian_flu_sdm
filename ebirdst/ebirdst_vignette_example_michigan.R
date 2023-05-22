@@ -21,7 +21,7 @@ library(rnaturalearth)
 #remotes::install_github("ropensci/rnaturalearthhires")
 
 # download example data, yellow-bellied sapsucker in michigan
- path <- ebirdst_download(species = "example_data")
+path <- ebirdst_download(species = "example_data")
 
 # load relative abundance raster stack with 52 layers, one for each week
 abd <- load_raster(path = path, resolution = "lr")
