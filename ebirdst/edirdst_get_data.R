@@ -26,7 +26,7 @@ path <- ebirdst_download(species = "mallar3")
 
 # load relative abundance raster stack with 52 layers, one for each week
 abd <- load_raster(path = path, resolution = "lr") # currently set as lr = low resolution for speed
-abd <- load_raster(path = path, resolution = "hr")
+# abd <- load_raster(path = path, resolution = "hr")
 abd
 
 # select one layer of the raster
@@ -82,7 +82,8 @@ crs <- "epsg:3035"
 
 euro_ext <- terra::ext(2000000, 6000000, 1000000, 5500000) # swap to base raster later
 
-
+# Add directory to store output layers if one does not exist
+dir.create(file.path("ebirdst", "output_layers"), showWarnings = FALSE)
 for (i in 1:length(first_ten)) {
   species_sel <- first_ten[i]
   path <- ebirdst_download(species = species_sel)
