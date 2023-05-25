@@ -10,6 +10,7 @@ library(terra)
 library(sf)
 library(fields)
 library(rnaturalearth)
+library(raster)
 
 #remotes::install_github("ropensci/rnaturalearthhires")
 
@@ -22,7 +23,7 @@ sp_df <- ebirdst_runs
 
 # download data - we will look at the herring gull 
 path <- ebirdst_download(species = "hergul")
-path <- ebirdst_download(species = "mallar3")
+# path <- ebirdst_download(species = "mallar3")
 
 # load relative abundance raster stack with 52 layers, one for each week
 abd <- load_raster(path = path, resolution = "lr") # currently set as lr = low resolution for speed
@@ -82,18 +83,35 @@ crs <- "epsg:3035"
 
 euro_ext <- terra::ext(2000000, 6000000, 1000000, 5500000) # swap to base raster later
 
+species_sel <- first_ten[1]
+path <- ebirdst_download(species = species_sel)
+bird_rast <-  load_raster(path = path, resolution = "lr")
+
+par(mfrow = c(5, 2))
+plot(bird_rast[[26]])
+
 # Add directory to store output layers if one does not exist
 dir.create(file.path("ebirdst", "output_layers"), showWarnings = FALSE)
-for (i in 1:length(first_ten)) {
+for (i in 2:length(first_ten)) {
   species_sel <- first_ten[i]
   path <- ebirdst_download(species = species_sel)
-  bird_rast <-  load_raster(path = path, resolution = "lr")
-  bird_rast <- project(x = bird_rast, y = crs, method = "near") 
-  bird_rast <- crop_abd <- crop(x = bird_rast, y = euro_ext )
-  terra::writeRaster(crop_abd, paste("ebirdst/output_layers/", species_sel, ".tif", sep = ""), overwrite = T) 
-
-
+  bird_rast <-  c(bird_rast, load_raster(path = path, resolution = "lr"))
+  plot(bird_rast[[52*(i-1) + 26]])
 }
+
+
+proj_abd <- project(x = bird_rast, y = crs, method = "near") 
+for (i in 1:length(first_ten)) {
+  plot(bird_rast[[52*(i-1) + 1]])
+}
+
+
+crop_abd <- crop(x = proj_abd, y = euro_ext )
+for (i in 1:length(first_ten)) {
+  plot(crop_abd[[52*(i-1) + 26]])
+}
+
+terra::writeRaster(crop_abd, paste("ebirdst/output_layers/first_ten.tif", sep = ""), overwrite = T) 
 
 
 
