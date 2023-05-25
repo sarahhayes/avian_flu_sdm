@@ -37,22 +37,45 @@ plot(abd1)
 # set the crs we want to use
 crs <- "epsg:3035"
 
+# Define an area to crop to
+e <- terra::ext(2000000, 6000000, 1000000, 5500000)
+
+# Create a blank raster with appropriate projection and extent
+blank_3035 <- rast(crs=crs, extent=e, res=(res(abd)))
+
 # get reference data from the rnaturalearth package for Europe
 wh_europe <- ne_countries(continent = "europe",
                           returnclass = "sf") %>% 
   st_transform(crs = crs) %>% 
   st_geometry()
 
+# Test to see if projecting to cropped version of 3035 projection is quicker.
+# This needs to all be run as one block to work.
+
+# First try projecting to full global-level coordinates:
 #change the projection of the bird data
-abd_prj <- project(x = abd, y = crs, method = "near") # ideally (according to help file) would use our template 
-# Spatraster of the area we want as y. 
+start.time <- Sys.time()
+abd_prj_global <- project(x = abd, y = crs, method = "near") # ideally (according to help file) would use our template 
+end.time <- Sys.time()
+cat("Projecting to basic 3035 coords took ",
+    as.numeric(difftime(end.time, start.time, units="secs")),
+    " seconds.")
 
-plot(abd_prj[[1]]) # This is now nicely centred on Europe
+# Now try projecting to cropped version:
+start.time <- Sys.time()
+abd_prj_cropped <- project(x = abd, y = blank_3035, method = "near") # ideally (according to help file) would use our template 
+end.time <- Sys.time()
+cat("Projecting to cropped 3035 coords took ",
+    as.numeric(difftime(end.time, start.time, units="secs")),
+    " seconds.")
+
+plot(abd_prj_global[[1]]) # This is now nicely centred on Europe
 # Now we want to crop
-
-e <- terra::ext(2000000, 6000000, 1000000, 5500000)
-crop_abd <- crop(x = abd_prj, y = e )
+crop_abd <- crop(x = abd_prj_global, y = e )
 plot(crop_abd[[1]])
+
+# Compare plot we got from cropping first - should look the same up to resolution.
+plot(abd_prj_cropped[[1]])
 
 # Have a look at what we have created
 crop_abd
