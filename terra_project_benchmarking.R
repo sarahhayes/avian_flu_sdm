@@ -39,7 +39,7 @@ for (i in 1:1) {
   start.time <- Sys.time()
   test_prj <- project(test_rast, crs)
   end.time <- Sys.time()
-  benchmark_vals <- as.numeric(end.time - start.time)
+  benchmark_vals <- as.numeric(difftime(end.time, start.time, units="secs"))
 }
 
 loop.start <- Sys.time()
@@ -57,13 +57,13 @@ for (i in 2:no_increments) {
   start.time <- Sys.time()
   test_prj <- project(test_rast, crs)
   end.time <- Sys.time()
-  benchmark_vals <- c(benchmark_vals, as.numeric(end.time - start.time))
+  benchmark_vals <- c(benchmark_vals, as.numeric(difftime(end.time, start.time, units="secs")))
   cat("Iteration ", i, " of ", no_increments, "completed. \n")
-  if (i>2){
-    m_est = (benchmark_vals[i] - benchmark_vals[2])/(i-2)
+  if (i>5){
+    m_est = (benchmark_vals[i] - benchmark_vals[i-5])/5
   }
   else {
-    m_est = (benchmark_vals[2] - benchmark_vals[1])
+    m_est = (benchmark_vals[i] - benchmark_vals[i-1])
   }
   time_remaining = (no_increments - i) * benchmark_vals[i] + m_est * sum(1:(no_increments-i))
   cat(end.time - loop.start,
