@@ -41,7 +41,7 @@ crs <- "epsg:3035"
 e <- terra::ext(2000000, 6000000, 1000000, 5500000)
 
 # Create a blank raster with appropriate projection and extent
-blank_3035 <- rast(crs=crs, extent=e, res=(res(abd)))
+blank_3035 <- rast(crs=crs, extent=e, res=9042.959)
 
 # get reference data from the rnaturalearth package for Europe
 wh_europe <- ne_countries(continent = "europe",
@@ -106,36 +106,34 @@ crs <- "epsg:3035"
 
 euro_ext <- terra::ext(2000000, 6000000, 1000000, 5500000) # swap to base raster later
 
+# Create a blank raster with appropriate projection and extent
+blank_3035 <- rast(crs=crs, extent=euro_ext, res=9042.959)
+
 species_sel <- first_ten[1]
 path <- ebirdst_download(species = species_sel)
-bird_rast <-  load_raster(path = path, resolution = "lr")
+bird_rast <- load_raster(path = path, resolution = "lr")
+bird_rast <- project(x = bird_rast, y = blank_3035, method = "near") 
 
 par(mfrow = c(5, 2))
-plot(bird_rast[[26]])
 
 # Add directory to store output layers if one does not exist
 dir.create(file.path("ebirdst", "output_layers"), showWarnings = FALSE)
 for (i in 2:length(first_ten)) {
   species_sel <- first_ten[i]
   path <- ebirdst_download(species = species_sel)
-  bird_rast <-  c(bird_rast, load_raster(path = path, resolution = "lr"))
-  plot(bird_rast[[52*(i-1) + 26]])
+  this_rast <- load_raster(path = path, resolution = "lr")
+  this_rast <- project(x = this_rast, y = blank_3035, method = "near") 
+  bird_rast <-  c(bird_rast, this_rast)
 }
 
+terra::writeRaster(bird_rast, paste("ebirdst/output_layers/first_ten.tif", sep = ""), overwrite = T) 
 
-proj_abd <- project(x = bird_rast, y = crs, method = "near") 
-for (i in 1:length(first_ten)) {
-  plot(bird_rast[[52*(i-1) + 1]])
+# Do some plots of abundance at quarterly intervals
+for (week in c(1,14,27,40)){
+  for (spec_idx in 1:length(first_ten)) {
+    plot(bird_rast[[52*(spec_idx-1) + week]])
+  }
 }
-
-
-crop_abd <- crop(x = proj_abd, y = euro_ext )
-for (i in 1:length(first_ten)) {
-  plot(crop_abd[[52*(i-1) + 26]])
-}
-
-terra::writeRaster(crop_abd, paste("ebirdst/output_layers/first_ten.tif", sep = ""), overwrite = T) 
-
 
 
 # Projection
