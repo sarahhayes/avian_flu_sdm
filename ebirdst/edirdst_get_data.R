@@ -114,20 +114,29 @@ path <- ebirdst_download(species = species_sel)
 bird_rast <- load_raster(path = path, resolution = "lr")
 bird_rast <- project(x = bird_rast, y = blank_3035, method = "near") 
 
-par(mfrow = c(5, 2))
 
-# Add directory to store output layers if one does not exist
-dir.create(file.path("ebirdst", "output_layers"), showWarnings = FALSE)
+# Loop over other 9 species:
+loop.start <- Sys.time()
 for (i in 2:length(first_ten)) {
   species_sel <- first_ten[i]
   path <- ebirdst_download(species = species_sel)
   this_rast <- load_raster(path = path, resolution = "lr")
   this_rast <- project(x = this_rast, y = blank_3035, method = "near") 
   bird_rast <-  c(bird_rast, this_rast)
+  time.now <- Sys.time()
+  time_remaining <- (length(first_ten) - i) * 
+    as.numeric(difftime(time.now, loop.start, units="mins"))/(i-1)
+  cat(time.now - loop.start,
+      " seconds elapsed since start, estimated ",
+      time_remaining,
+      " remaining.\n")
 }
 
+# Add directory to store output layers if one does not exist
+dir.create(file.path("ebirdst", "output_layers"), showWarnings = FALSE)
 terra::writeRaster(bird_rast, paste("ebirdst/output_layers/first_ten.tif", sep = ""), overwrite = T) 
 
+par(mfrow = c(5, 2))
 # Do some plots of abundance at quarterly intervals
 for (week in c(1,14,27,40)){
   for (spec_idx in 1:length(first_ten)) {
