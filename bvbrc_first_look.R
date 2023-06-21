@@ -98,10 +98,10 @@ neg_data_europe %>%
   rename(Country = "as.factor(Collection.Country)") %>%
   ggplot(., aes(x = Country, y = n, fill = Country, colour = Country)) + 
   geom_bar(stat = "identity", position = "dodge") + 
-  labs(x = "Year", y = "Frequency", title = "Negative samples from wild and captive-wild 
+  labs(x = "Year", y = "Frequency", title = "Negative samples from wild  
        birds in Europe (BV-BRC)") +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), legend.position = "none")
-#ggsave("plots/by_country_neg_bvbrc.png")
+# ggsave("plots/by_country_neg_bvbrc.png")
 
 
 ## plots of time series of the data
