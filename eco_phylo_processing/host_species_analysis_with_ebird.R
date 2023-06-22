@@ -6,6 +6,7 @@ library(dplyr)
 library(ggplot2)
 library(ggfortify)
 library(gridExtra)
+library(readxl)
 
 setwd("Github/clover")
 
@@ -52,10 +53,50 @@ p + coord_flip() +
   xlab("Host species")
 
 ################################################################################
-# Now introduce trait data
+# Now introduce eBird data
 
 setwd('..')
 setwd('avian_flu_sdm')
+
+# Read in codes
+ebird_names <- read.csv("ebird/ebird_species_europe_copy.csv", header = F)
+
+# Remove number and URL rows:
+remove_rows <- sort(c(seq(from = 1, to = nrow(ebird_names), by = 4),
+                      seq(from = 4, to = nrow(ebird_names), by = 4)))
+ebird_names <- ebird_names[-remove_rows, ]
+
+# The data now has a line with the common name followed by a line with the the
+# common name and the binomial name for each species. The following loop removes
+# the common name from the second row for each species.
+for (i in seq(2, length(ebird_names), 2)){
+  ebird_names[i] <- substr(ebird_names[i],
+                           nchar(ebird_names[i-1]) + 2,
+                           1000)
+}
+ebird_names <- ebird_names[seq(2, length(ebird_names), 2)]
+ebird_names <- sapply(ebird_names, tolower)
+
+# Now filter CLOVER data for names in ebird
+ebird_names_in_clover <- species_list[which(species_list %in% ebird_names)]
+
+# Check it's symmetric in terms of which way round we do it - it should be, but
+# if it wasn't that might tell us something interesting!
+clover_names_in_ebird <- ebird_names[which(ebird_names %in% species_list)]
+setequal(ebird_names_in_clover, clover_names_in_ebird)
+
+# Not all the names from CLOVER appear in the ebird data - this could be because
+# these species aren't found in Europe, but it could also be because the two
+# datasets are using inconsistent binomial names. There should only be 50 names
+# from CLOVER missing in the ebird data, so we'll inspect visually
+clover_names_not_in_ebird <- species_list[-which(species_list %in% ebird_names)]
+for (c in clover_names_in_ebird){
+  cat(c, "\n")
+}
+
+################################################################################
+# Now introduce trait data
+
 # Load in from file
 elton_trait_df <- 
   read.table("data/variables/bird_data/elton_traits/BirdFuncDat.txt",
@@ -150,6 +191,20 @@ for (name_idx in 1:nrow(name_lookup)){
 species_list <- unique(species_list)
 no_host_species <- length(species_list)
 
+# Try rechecking CLOVER-eBird matchups to see if we do anything better with new
+# binomial names
+for (name_idx in 1:nrow(name_lookup)){
+  ebird_names[which(ebird_names==name_lookup$CLOVER[name_idx])] <- 
+    name_lookup$elton_traits[name_idx]
+}
+# Now filter CLOVER data for names in ebird
+ebird_names_in_clover <- species_list[which(species_list %in% ebird_names)]
+
+# Check it's symmetric in terms of which way round we do it - it should be, but
+# if it wasn't that might tell us something interesting!
+clover_names_in_ebird <- ebird_names[which(ebird_names %in% species_list)]
+setequal(ebird_names_in_clover, clover_names_in_ebird)
+
 # Identify species that appear in CLOVER
 hosts_in_elton <- elton_trait_df[which(elton_trait_df$Scientific %in% species_list), 'Scientific']
 
@@ -162,6 +217,9 @@ host_indicator = c(elton_trait_df$Scientific %in% species_list)
 
 # Append it to trait database
 matched_data <- data.frame(elton_trait_df, host_indicator)
+
+# Now filter for species in Europe according to eBird:
+matched_data <- matched_data[which(matched_data$Scientific %in% ebird_names), ]
 
 # Remove fields we definitely won't want for fitting
 
@@ -336,6 +394,7 @@ legend("topright",
        col = 1:6,
        lty = 1,
        xpd = TRUE)
+
 ################################################################################
 # Now try some PCA.
 
