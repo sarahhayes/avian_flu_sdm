@@ -319,7 +319,10 @@ ytrain <- y[train]
 xtest <- x[-train, ]
 ytest <- y[-train]
 
-bartfit <- lbart(xtrain, ytrain, x.test = xtest)
+bartfit <- lbart(xtrain,
+                 ytrain,
+                 x.test = xtest,
+                 ntree = 1000)
 
 # Use a majority judgement to decide whether to accept
 yhat.train <- plogis(bartfit$yhat.train - bartfit$binaryOffset)
@@ -343,13 +346,36 @@ misclass_rate <- (length(which((!yhat.maj)&ytest)) +
 
 # How manyu times to variables appear?
 ord <- order(bartfit$varcount.mean, decreasing = T)
-varcount_df <- data.frame(bartfit$varcount.mean/sum(bartfit$varcount.mean))
-colnames(varcount_df) <- c("MeanCountsPerTree")
-plot(varcount_df$MeanCountsPerTree[ord, ],
-     xlab = "",
-     ylab = "Mean appearances per tree",
-     xaxt = "n")
-axis(1, at = 1:18, labels = names(xtrain)[ord], las = 2)
+varcount_df <- data.frame((1/1000) * bartfit$varcount.mean)
+par(mar= c(10, 8, 1, 5))
+matplot(varcount_df[ord, ],
+        type = "l",
+        xlab = "",
+        ylab = "Normalised mean\n appearances per tree",
+        xaxt = "n",
+        lty = 1)
+points(x = 1:length(ord),
+         y = varcount_df[ord, ],
+         pch = 16)
+axis(1, at = 1:18, labels = rownames(varcount_df)[ord], las = 2)
+
+varimp_ord <- data.frame(varcount_df[ord, ])
+rownames(varimp_ord) <- rownames(varcount_df)[ord]
+diet_vars <- which(rownames(varimp_ord) %like% "Diet.")
+forstrat_vars <- which(rownames(varimp_ord) %like% "ForStrat.")
+other_vars <- 1:18
+other_vars <- other_vars[-which(other_vars %in% diet_vars)]
+other_vars <- other_vars[-which(other_vars %in% forstrat_vars)]
+bar_cols <- vector(mode = "list", length = 18)
+bar_cols[diet_vars] <- rgb(0.3,0.1,0.4,0.6)
+bar_cols[forstrat_vars] <- rgb(0.3,0.5,0.4,0.6)
+bar_cols[other_vars] <- rgb(0.3,0.9,0.4,0.6)
+varimp_bars <- barplot(varimp_ord[, 1],
+                       border = F,
+                       las = 2,
+                       names.arg = rownames(varimp_ord),
+                       col = bar_cols,
+                       ylab = "Mean appearances\n per tree")
 
 # Do a more thorough variable importance
 tree_nos <- c(10,
@@ -394,6 +420,22 @@ legend("topright",
        col = 1:6,
        lty = 1,
        xpd = TRUE)
+
+# Plot based on Liam's version:
+ggplot(varimp %>%
+         # This bit just sticks some category labels on the variables depending on what type they are
+         mutate(name = factor(name, levels = varimp_order),
+                type = case_when(grepl("^[A|C|G|U]$", name) ~ "nucleotide biases",
+                                 grepl("^[A|C|G|U][A|C|G|U] ", name) ~ "dinucleotide biases",
+                                 grepl("^[A|C|G|U][A|C|G|U][A|C|G|U]$", name) ~ "codon biases")), 
+       aes(x=name, y=relGini, fill=type)) +
+  stat_summary(geom = "bar", fun.y = "mean") +
+  stat_summary(geom = "errorbar", fun.data=mean_sdl, fun.args=list(mult=1), lwd=0.25, width=0) +
+  coord_flip(ylim=c(0,1.02), expand=FALSE) + 
+  scale_y_continuous(breaks=seq(0,1,0.1)) +
+  theme_bw(base_size = 11) + xlab("Genomic feature") + ylab("Mean rel. Gini decrease") +
+  theme(legend.justification=c(1,1), legend.position=c(.98,.98), panel.spacing = unit(1.1, "lines"), legend.title = element_blank()) +
+  scale_fill_manual(values=c("#F0E442","#CC79A7","#56B4E9"))
 
 ################################################################################
 # Now try some PCA.
