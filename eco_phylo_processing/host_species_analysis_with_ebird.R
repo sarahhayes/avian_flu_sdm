@@ -359,6 +359,7 @@ points(x = 1:length(ord),
          pch = 16)
 axis(1, at = 1:18, labels = rownames(varcount_df)[ord], las = 2)
 
+par(mar= c(14, 5, 1, 8))
 varimp_ord <- data.frame(varcount_df[ord, ])
 rownames(varimp_ord) <- rownames(varcount_df)[ord]
 diet_vars <- which(rownames(varimp_ord) %like% "Diet.")
@@ -366,16 +367,44 @@ forstrat_vars <- which(rownames(varimp_ord) %like% "ForStrat.")
 other_vars <- 1:18
 other_vars <- other_vars[-which(other_vars %in% diet_vars)]
 other_vars <- other_vars[-which(other_vars %in% forstrat_vars)]
-bar_cols <- vector(mode = "list", length = 18)
+short_varnames <- c("Around water surface",
+                    "Seeds",
+                    ">5cm below water surface",
+                    "Nocturnal",
+                    ">2m above ground, below canopy",
+                    "Pelagic specialist",
+                    "Other plant matter",
+                    "Mammals and birds",
+                    "Fish",
+                    "Canopy",
+                    "Understory",
+                    "Fruit",
+                    "Nectar",
+                    "Amphibians and reptiles",
+                    "Scavenging",
+                    "Body mass",
+                    "Aerial",
+                    "Unknown vertebrates"
+                    )
+bar_cols <- vector(length = 18)
 bar_cols[diet_vars] <- rgb(0.3,0.1,0.4,0.6)
 bar_cols[forstrat_vars] <- rgb(0.3,0.5,0.4,0.6)
 bar_cols[other_vars] <- rgb(0.3,0.9,0.4,0.6)
 varimp_bars <- barplot(varimp_ord[, 1],
                        border = F,
                        las = 2,
-                       names.arg = rownames(varimp_ord),
+                       names.arg = short_varnames,
                        col = bar_cols,
                        ylab = "Mean appearances\n per tree")
+legend("topright",
+       inset=c(-0.5,0),
+       legend = c("Dietary (% of calories)", "Foraging (% strategy)", "Other"),
+       col = c(rgb(0.3,0.1,0.4,0.6), rgb(0.3,0.5,0.4,0.6), rgb(0.3,0.9,0.4,0.6)),
+       bty = "n",
+       pch = 20,
+       pt.cex = 2,
+       cex = 0.8,
+       xpd = TRUE)
 
 # Do a more thorough variable importance
 tree_nos <- c(10,
@@ -420,22 +449,6 @@ legend("topright",
        col = 1:6,
        lty = 1,
        xpd = TRUE)
-
-# Plot based on Liam's version:
-ggplot(varimp %>%
-         # This bit just sticks some category labels on the variables depending on what type they are
-         mutate(name = factor(name, levels = varimp_order),
-                type = case_when(grepl("^[A|C|G|U]$", name) ~ "nucleotide biases",
-                                 grepl("^[A|C|G|U][A|C|G|U] ", name) ~ "dinucleotide biases",
-                                 grepl("^[A|C|G|U][A|C|G|U][A|C|G|U]$", name) ~ "codon biases")), 
-       aes(x=name, y=relGini, fill=type)) +
-  stat_summary(geom = "bar", fun.y = "mean") +
-  stat_summary(geom = "errorbar", fun.data=mean_sdl, fun.args=list(mult=1), lwd=0.25, width=0) +
-  coord_flip(ylim=c(0,1.02), expand=FALSE) + 
-  scale_y_continuous(breaks=seq(0,1,0.1)) +
-  theme_bw(base_size = 11) + xlab("Genomic feature") + ylab("Mean rel. Gini decrease") +
-  theme(legend.justification=c(1,1), legend.position=c(.98,.98), panel.spacing = unit(1.1, "lines"), legend.title = element_blank()) +
-  scale_fill_manual(values=c("#F0E442","#CC79A7","#56B4E9"))
 
 ################################################################################
 # Now try some PCA.
