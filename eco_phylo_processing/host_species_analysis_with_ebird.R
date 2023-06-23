@@ -1,5 +1,5 @@
-# Load in CLOVER database and identify all avian species known to be hosts of
-# influenza A.
+# In this script we analyse species-level patterns regarding avian influenza
+# host status.
 
 library(BART)
 library(dplyr)
@@ -8,7 +8,57 @@ library(ggfortify)
 library(gridExtra)
 library(readxl)
 
-setwd("Github/clover")
+# First use the AVONET data to create a mapping between names and alphanumeric
+# identifiers
+AVONET_df <- read_excel("data/AVONETSupplementarydataset1.xlsx",
+                        sheet = "AVONET_Raw_Data")
+AVONET_df <- AVONET_df[,
+                        c("Avibase.ID",
+                          "Species1_BirdLife",
+                          "Species2_eBird",
+                          "Species3_BirdTree")]
+AVONET_df <- distinct(AVONET_df)
+AVONET_df[, 2:4] <- sapply(AVONET_df[, 2:4], tolower)
+
+get_single_bird_id <- function(binomial_name){
+  if (binomial_name=="na"){
+    return("-100")
+  }
+  if (binomial_name %in% AVONET_df$Species1_BirdLife){
+    return(AVONET_df$Avibase.ID[
+      which(AVONET_df$Species1_BirdLife==binomial_name)][1])
+  }
+  else if (binomial_name %in% AVONET_df$Species2_eBird){
+    return(AVONET_df$Avibase.ID[
+      which(AVONET_df$Species2_eBird==binomial_name)][1])
+  }
+  else if (binomial_name %in% AVONET_df$Species3_BirdTree){
+    return(AVONET_df$Avibase.ID[
+      which(AVONET_df$Species3_BirdTree==binomial_name)][1])
+  }
+  else{
+    return("-100")
+  }
+}
+
+get_bird_ids <- function(name_vect){
+  id_vect <- vector(length = length(name_vect))
+  for (n in 1:length(name_vect)){
+    id_vect[n] <- get_single_bird_id(name_vect[n])
+  }
+  return(id_vect)
+}
+
+# Need to test this is doing the right thing:
+test_id_list1 <- get_bird_ids(AVONET_df$Species1_BirdLife)
+test_id_list2 <- get_bird_ids(AVONET_df$Species2_eBird)
+test_id_list3 <- get_bird_ids(AVONET_df$Species3_BirdTree)
+
+################################################################################
+# Now introduce CLOVER database and identify all avian species known to be hosts
+# of influenza A.
+
+setwd("../clover")
 
 # Load data
 CLOVER_df <- read.csv("clover/clover_1.0_allpathogens/CLOVER_1.0_Viruses_AssociationsFlatFile.csv")
@@ -55,8 +105,7 @@ p + coord_flip() +
 ################################################################################
 # Now introduce eBird data
 
-setwd('..')
-setwd('avian_flu_sdm')
+setwd('../avian_flu_sdm')
 
 # Read in codes
 ebird_names <- read.csv("ebird/ebird_species_europe_copy.csv", header = F)
