@@ -6,6 +6,13 @@ library(readxl)
 # Load the page from AVONET data which includes the multiple name formats
 AVONET_df <- read_excel("data/AVONETSupplementarydataset1.xlsx",
                         sheet = "AVONET_Raw_Data")
+AVONET_df <- AVONET_df[,
+                       c("Avibase.ID",
+                         "Species1_BirdLife",
+                         "Species2_eBird",
+                         "Species3_BirdTree")]
+AVONET_df <- distinct(AVONET_df)
+AVONET_df[, 2:4] <- sapply(AVONET_df[, 2:4], tolower)
 
 # Extract names under each naming scheme
 BirdLife_names <- AVONET_df$Species1_BirdLife
@@ -18,12 +25,156 @@ nonconflict_rows <- which(
 
 # We're only interested in inconsistent species so we remove the consistent ones
 # from the dataframe:
-AVONET_df <- AVONET_df[-nonconflict_rows,
-                       c("Avibase.ID",
-                         "Species1_BirdLife",
-                         "Species2_eBird",
-                         "Species3_BirdTree")]
+AVONET_conflicts <- AVONET_df[-nonconflict_rows, ]
 
 # Reduce to unique combinations
-AVONET_df <- distinct(AVONET_df)
-cat("Total number of conflicts is", nrow(AVONET_df))
+AVONET_conflicts <- distinct(AVONET_conflicts)
+cat("Total number of conflicts is", nrow(AVONET_conflicts))
+
+# Assign ID based on consensus
+get_single_bird_id <- function(binomial_name, priority_list){
+  # priority_list defines the order we should consult the lists if we need to
+  # make an arbitrary decision
+  if (missing(priority_list)){
+    priority_list <- c("eBird", "BirdLife", "BirdTree")
+  }
+  # Return -100 if provided with na
+  if (binomial_name=="na"){
+    return("-100")
+  }
+  # Find IDs from each list and keep track of which species list they came from.
+  ID_candidates <- c()
+  ID_weightings <- c()
+  ID_sources <- c()
+  if (binomial_name %in% AVONET_df$Species1_BirdLife){
+    ID_candidates <- append(ID_candidates, AVONET_df$Avibase.ID[
+      which(AVONET_df$Species1_BirdLife==binomial_name)])
+    no_matches <- length(which(AVONET_df$Species1_BirdLife==binomial_name))
+    for (i in 1:no_matches){
+      ID_weightings <- append(ID_weightings, 1/no_matches)
+      ID_sources <- append(ID_sources, "BirdLife")
+    }
+  }
+  if (binomial_name %in% AVONET_df$Species2_eBird){
+    ID_candidates <- append(ID_candidates, AVONET_df$Avibase.ID[
+      which(AVONET_df$Species2_eBird==binomial_name)])
+    no_matches <- length(which(AVONET_df$Species1_BirdLife==binomial_name))
+    for (i in 1:no_matches){
+      ID_weightings <- append(ID_weightings, 1/no_matches)
+      ID_sources <- append(ID_sources, "eBird")
+    }
+  }
+  if (binomial_name %in% AVONET_df$Species3_BirdTree){
+    ID_candidates <- append(ID_candidates, AVONET_df$Avibase.ID[
+      which(AVONET_df$Species3_BirdTree==binomial_name)])
+    no_matches <- length(which(AVONET_df$Species1_BirdLife==binomial_name))
+    for (i in 1:no_matches){
+      ID_weightings <- append(ID_weightings, 1/no_matches)
+      ID_sources <- append(ID_sources, "BirdTree")
+    }
+  }
+  # How we work out the consensus depends on how many candidates are identified
+  if (length(ID_candidates)==0){
+    # If ID doesn't appear in any list, return -100
+    return("-100")
+  }
+  else{
+    # Construct consensus distribution of candidate names
+    unique_candidates <- unique(ID_candidates)
+    if (length(unique_candidates)==1){
+      # cat("Number of unique candidates is", length(unique_candidates), "\n")
+      # cat(unique_candidates, "\n")
+      return(unique_candidates)
+    }
+    candidate_dist <- c()
+    for (i in 1:length(unique_candidates)){
+      cat("i=", i, "\n")
+      candidate_dist <- append(candidate_dist,
+                               sum(ID_weightings[
+                                 which(ID_candidates==unique_candidates[i])]))
+    }
+    cat(unique_candidates, "\n", ID_candidates, "\n", candidate_dist, "\n", ID_weightings, "\n")
+    return(unique_candidates[which.max(candidate_dist)])
+  }
+  
+  
+  
+  # else if (length(unique(ID_candidates))==1){
+  #   # If we only have one candidate, return it - note that in this case it
+  #   # doesn't matter how many of the species lists actually contain the
+  #   # requested species.
+  #   return(ID_candidates[1])
+  # }
+  # else if ((length(ID_candidates)==3)&(length(unique(ID_candidates))==2)){
+  #   # If the species appears in all three lists and there is a majority choice,
+  #   # then return that majority choice:
+  #   return(names(sort(table(ID_candidates), decreasing=TRUE))[1])
+  # }
+  # else if ((length(ID_candidates)==2)&(length(unique(ID_candidates))==2)){
+  #   # If there are two candidates identified which differ, which one we return
+  #   # depends on where the candidates' sources sit in the priority list
+  #   if (priority_list[1] %in% ID_sources){
+  #     # If top priority list contains the species, return the ID identified by
+  #     # that list
+  #     return(ID_candidates[which(ID_sources==priority_list[1])])
+  #   }
+  #   else{
+  #     # Otherwise return choice identified by second priority list
+  #     return(ID_candidates[which(ID_sources==priority_list[2])])
+  #   }
+  # }
+  # else if (length(unique(ID_candidates))==3){
+  #   # If we have three different options return the one identified by the top
+  #   # priority list
+  #   return(ID_candidates[which(ID_sources==priority_list[1])])
+  # }
+}
+
+get_bird_ids <- function(name_vect, priority_list){
+  if (missing(priority_list)){
+    priority_list <- c("eBird", "BirdLife", "BirdTree")
+  }
+  id_vect <- vector(length = length(name_vect))
+  for (n in 1:length(name_vect)){
+    cat("n=",n,"\n")
+    id_vect[n] <- get_single_bird_id(name_vect[n], priority_list)
+  }
+  return(id_vect)
+}
+
+# Need to test this is doing the right thing:
+test_id_list1 <- get_bird_ids(AVONET_df$Species1_BirdLife)
+test_id_list2 <- get_bird_ids(AVONET_df$Species2_eBird)
+test_id_list3 <- get_bird_ids(AVONET_df$Species3_BirdTree)
+
+list1_mistmatch <- which(test_id_list1!=AVONET_df$Avibase.ID)
+mismatch_species1 <- AVONET_df$Species1_BirdLife[list1_mistmatch]
+list2_mistmatch <- which(test_id_list2!=AVONET_df$Avibase.ID)
+mismatch_species2 <- AVONET_df$Species2_eBird[list2_mistmatch]
+list3_mistmatch <- which(test_id_list3!=AVONET_df$Avibase.ID)
+mismatch_species3 <- AVONET_df$Species3_BirdTree[list3_mistmatch]
+
+# Try looking at all possible priority lists to see if there's one that gives
+# us fewer mismatches
+source_list <- c("BirdLife", "eBird", "BirdTree")
+source_list_perms <- permn(source_list)
+total_mismatch <- c()
+for (i in 1:length(source_list_perms)){
+  test_id_list1 <- get_bird_ids(AVONET_df$Species1_BirdLife,
+                                source_list_perms[i])
+  test_id_list2 <- get_bird_ids(AVONET_df$Species2_eBird,
+                                source_list_perms[i])
+  test_id_list3 <- get_bird_ids(AVONET_df$Species3_BirdTree,
+                                source_list_perms[i])
+  
+  list1_mistmatch <- which(test_id_list1!=AVONET_df$Avibase.ID)
+  mismatch_species1 <- AVONET_df$Species1_BirdLife[list1_mistmatch]
+  list2_mistmatch <- which(test_id_list2!=AVONET_df$Avibase.ID)
+  mismatch_species2 <- AVONET_df$Species2_eBird[list2_mistmatch]
+  list3_mistmatch <- which(test_id_list3!=AVONET_df$Avibase.ID)
+  mismatch_species3 <- AVONET_df$Species3_BirdTree[list3_mistmatch]
+  total_mismatch <- append(total_mismatch,
+                           length(list1_mistmatch) + 
+                             length(list2_mistmatch) + 
+                             length(list3_mistmatch))
+}
