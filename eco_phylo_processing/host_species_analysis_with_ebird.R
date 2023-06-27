@@ -20,39 +20,91 @@ AVONET_df <- AVONET_df[,
 AVONET_df <- distinct(AVONET_df)
 AVONET_df[, 2:4] <- sapply(AVONET_df[, 2:4], tolower)
 
-get_single_bird_id <- function(binomial_name){
+# Assign ID based on consensus
+get_single_bird_id <- function(binomial_name, name_sources){
+  
+  # Return -100 if provided with na
   if (binomial_name=="na"){
     return("-100")
   }
-  if (binomial_name %in% AVONET_df$Species1_BirdLife){
-    return(AVONET_df$Avibase.ID[
-      which(AVONET_df$Species1_BirdLife==binomial_name)][1])
+  # Find IDs from each list and keep track of which species list they came from.
+  ID_candidates <- c()
+  ID_weightings <- c()
+  ID_sources <- c()
+  if (("BirdLife" %in% name_sources) & 
+      (binomial_name %in% AVONET_df$Species1_BirdLife)){
+    ID_candidates <- append(ID_candidates, AVONET_df$Avibase.ID[
+      which(AVONET_df$Species1_BirdLife==binomial_name)])
+    no_matches <- length(which(AVONET_df$Species1_BirdLife==binomial_name))
+    for (i in 1:no_matches){
+      ID_weightings <- append(ID_weightings, 1/no_matches)
+      ID_sources <- append(ID_sources, "BirdLife")
+    }
   }
-  else if (binomial_name %in% AVONET_df$Species2_eBird){
-    return(AVONET_df$Avibase.ID[
-      which(AVONET_df$Species2_eBird==binomial_name)][1])
+  if (("eBird" %in% name_sources) & 
+      (binomial_name %in% AVONET_df$Species2_eBird)){
+    ID_candidates <- append(ID_candidates, AVONET_df$Avibase.ID[
+      which(AVONET_df$Species2_eBird==binomial_name)])
+    no_matches <- length(which(AVONET_df$Species2_eBird==binomial_name))
+    for (i in 1:no_matches){
+      ID_weightings <- append(ID_weightings, 1/no_matches)
+      ID_sources <- append(ID_sources, "eBird")
+    }
   }
-  else if (binomial_name %in% AVONET_df$Species3_BirdTree){
-    return(AVONET_df$Avibase.ID[
-      which(AVONET_df$Species3_BirdTree==binomial_name)][1])
+  if (("BirdTree" %in% name_sources) & 
+      (binomial_name %in% AVONET_df$Species3_BirdTree)){
+    ID_candidates <- append(ID_candidates, AVONET_df$Avibase.ID[
+      which(AVONET_df$Species3_BirdTree==binomial_name)])
+    no_matches <- length(which(AVONET_df$Species3_BirdTree==binomial_name))
+    for (i in 1:no_matches){
+      ID_weightings <- append(ID_weightings, 1/no_matches)
+      ID_sources <- append(ID_sources, "BirdTree")
+    }
+  }
+  # How we work out the consensus depends on how many candidates are identified
+  if (length(ID_candidates)==0){
+    # If ID doesn't appear in any list, return -100
+    return("-100")
   }
   else{
-    return("-100")
+    # Construct consensus distribution of candidate names
+    unique_candidates <- unique(ID_candidates)
+    if (length(unique_candidates)==1){
+      # cat("Number of unique candidates is", length(unique_candidates), "\n")
+      # cat(unique_candidates, "\n")
+      return(unique_candidates)
+    }
+    candidate_dist <- c()
+    for (i in 1:length(unique_candidates)){
+      # cat("i=", i, "\n")
+      candidate_dist <- append(candidate_dist,
+                               sum(ID_weightings[
+                                 which(ID_candidates==unique_candidates[i])]))
+    }
+    # cat(unique_candidates, "\n", ID_candidates, "\n", candidate_dist, "\n", ID_weightings, "\n")
+    if (length(which(candidate_dist==max(candidate_dist)))==1){
+      return(unique_candidates[which(candidate_dist==max(candidate_dist))])
+    }
+    else{
+      # cat("Multiple consensus options for species", binomial_name,"\n")
+      return(sample(unique_candidates[which(candidate_dist==max(candidate_dist))], 1))
+    }
   }
 }
 
-get_bird_ids <- function(name_vect){
+get_bird_ids <- function(name_vect, name_sources){
+  if (missing(name_sources)){
+    name_sources <-c("BirdLife",
+                     "eBird",
+                     "BirdTree")
+  }
   id_vect <- vector(length = length(name_vect))
   for (n in 1:length(name_vect)){
-    id_vect[n] <- get_single_bird_id(name_vect[n])
+    # cat("n=",n,"\n")
+    id_vect[n] <- get_single_bird_id(name_vect[n], name_sources)
   }
   return(id_vect)
 }
-
-# Need to test this is doing the right thing:
-test_id_list1 <- get_bird_ids(AVONET_df$Species1_BirdLife)
-test_id_list2 <- get_bird_ids(AVONET_df$Species2_eBird)
-test_id_list3 <- get_bird_ids(AVONET_df$Species3_BirdTree)
 
 ################################################################################
 # Now introduce CLOVER database and identify all avian species known to be hosts
@@ -102,6 +154,28 @@ p + coord_flip() +
   scale_x_discrete(limits=species_counts$Host[-which(species_counts$Host %in% below_10_species)]) + 
   xlab("Host species")
 
+# Get species ID's of species in CLOVER
+host_species_IDs <- get_bird_ids(species_list)
+
+# See if any species were not successfully ID'd
+cat(length(which(host_species_IDs=="-100")), "species were not ID'd.")
+cat("Unidentified species are:",
+    species_list[which(host_species_IDs=="-100")],
+    sep = "\n")
+
+# We manually replace these three species names with names found in AVONET.
+# These are all unambiguous replacements - they are present in all three source
+# datasets and associated with a single Avibase ID.
+species_list[which(species_list=="coloeus monedula")] <- "corvus monedula"
+species_list[which(species_list=="larus mongolicus")] <- "larus cachinnans"
+species_list[which(species_list=="piaya minuta")] <- "coccycua minuta"
+
+# Try again with ID's
+host_species_IDs <- get_bird_ids(species_list)
+
+# We now shouldn't see any failed ID's
+cat(length(which(host_species_IDs=="-100")), "species were not ID'd.")
+
 ################################################################################
 # Now introduce eBird data
 
@@ -142,6 +216,15 @@ clover_names_not_in_ebird <- species_list[-which(species_list %in% ebird_names)]
 for (c in clover_names_in_ebird){
   cat(c, "\n")
 }
+
+# We now want the ID's for the species in eBird. 
+eBird_IDs <- get_bird_ids(ebird_names, c("eBird"))
+
+# See if any species were not successfully ID'd
+cat(length(which(eBird_IDs=="-100")), "species were not ID'd.")
+cat("Unidentified species are:",
+    ebird_names[which(eBird_IDs=="-100")],
+    sep = "\n")
 
 ################################################################################
 # Now introduce trait data
@@ -219,7 +302,7 @@ elton_traits_names <- c(
   "anas strepera",
   "sterna fuscata",
   "seiurus noveboracensis",
-  "crotophaga sulcirostris",
+  "coccycua minuta",
   "anas formosa",
   "anas clypeata",
   "anas discors"
