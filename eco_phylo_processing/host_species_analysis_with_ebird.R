@@ -512,21 +512,11 @@ cat("Test false negative rate is",
 # How many times to variables appear?
 ord <- order(bartfit$varcount.mean, decreasing = T)
 varcount_df <- data.frame((1/1000) * bartfit$varcount.mean)
-par(mar= c(10, 8, 1, 5))
-matplot(varcount_df[ord, ],
-        type = "l",
-        xlab = "",
-        ylab = "Normalised mean\n appearances per tree",
-        xaxt = "n",
-        lty = 1)
-points(x = 1:length(ord),
-         y = varcount_df[ord, ],
-         pch = 16)
-axis(1, at = 1:18, labels = rownames(varcount_df)[ord], las = 2)
 
 par(mar= c(14, 5, 1, 8))
 varimp_ord <- data.frame(varcount_df[ord, ])
 rownames(varimp_ord) <- rownames(varcount_df)[ord]
+short_varnames <- expand_names(rownames(varimp_ord))
 diet_vars <- which(rownames(varimp_ord) %like% "Diet.")
 forstrat_vars <- which(rownames(varimp_ord) %like% "ForStrat.")
 other_vars <- 1:18
@@ -540,7 +530,7 @@ bar_cols[other_vars] <- pal[3]
 varimp_bars <- barplot(varimp_ord[, 1],
                        border = F,
                        las = 2,
-                       names.arg = short_varnames[ord],
+                       names.arg = short_varnames,
                        col = bar_cols,
                        ylab = "Mean appearances\n per tree")
 legend("topright",
