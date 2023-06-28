@@ -6,6 +6,7 @@ library(dplyr)
 library(ggplot2)
 library(ggfortify)
 library(gridExtra)
+library(RColorBrewer)
 library(readxl)
 
 # First use the AVONET data to create a mapping between names and alphanumeric
@@ -176,55 +177,107 @@ host_species_IDs <- get_bird_ids(species_list)
 # We now shouldn't see any failed ID's
 cat(length(which(host_species_IDs=="-100")), "species were not ID'd.")
 
+# Remove possible repeats:
+host_species_IDs <- unique(host_species_IDs)
+no_host_species <- length(host_species_IDs)
+
 ################################################################################
 # Now introduce eBird data
 
 setwd('../avian_flu_sdm')
 
 # Read in codes
-ebird_names <- read.csv("ebird/ebird_species_europe_copy.csv", header = F)
+eBird_names <- read.csv("eBird/eBird_species_europe_copy.csv", header = F)
 
 # Remove number and URL rows:
-remove_rows <- sort(c(seq(from = 1, to = nrow(ebird_names), by = 4),
-                      seq(from = 4, to = nrow(ebird_names), by = 4)))
-ebird_names <- ebird_names[-remove_rows, ]
+remove_rows <- sort(c(seq(from = 1, to = nrow(eBird_names), by = 4),
+                      seq(from = 4, to = nrow(eBird_names), by = 4)))
+eBird_names <- eBird_names[-remove_rows, ]
 
 # The data now has a line with the common name followed by a line with the the
 # common name and the binomial name for each species. The following loop removes
 # the common name from the second row for each species.
-for (i in seq(2, length(ebird_names), 2)){
-  ebird_names[i] <- substr(ebird_names[i],
-                           nchar(ebird_names[i-1]) + 2,
+for (i in seq(2, length(eBird_names), 2)){
+  eBird_names[i] <- substr(eBird_names[i],
+                           nchar(eBird_names[i-1]) + 2,
                            1000)
 }
-ebird_names <- ebird_names[seq(2, length(ebird_names), 2)]
-ebird_names <- sapply(ebird_names, tolower)
+eBird_names <- eBird_names[seq(2, length(eBird_names), 2)]
+eBird_names <- sapply(eBird_names, tolower)
 
-# Now filter CLOVER data for names in ebird
-ebird_names_in_clover <- species_list[which(species_list %in% ebird_names)]
+# Now filter CLOVER data for names in eBird
+eBird_names_in_clover <- species_list[which(species_list %in% eBird_names)]
 
 # Check it's symmetric in terms of which way round we do it - it should be, but
 # if it wasn't that might tell us something interesting!
-clover_names_in_ebird <- ebird_names[which(ebird_names %in% species_list)]
-setequal(ebird_names_in_clover, clover_names_in_ebird)
+clover_names_in_eBird <- eBird_names[which(eBird_names %in% species_list)]
+setequal(eBird_names_in_clover, clover_names_in_eBird)
 
-# Not all the names from CLOVER appear in the ebird data - this could be because
+# Not all the names from CLOVER appear in the eBird data - this could be because
 # these species aren't found in Europe, but it could also be because the two
 # datasets are using inconsistent binomial names. There should only be 50 names
-# from CLOVER missing in the ebird data, so we'll inspect visually
-clover_names_not_in_ebird <- species_list[-which(species_list %in% ebird_names)]
-for (c in clover_names_in_ebird){
+# from CLOVER missing in the eBird data, so we'll inspect visually
+clover_names_not_in_eBird <- species_list[-which(species_list %in% eBird_names)]
+for (c in clover_names_in_eBird){
   cat(c, "\n")
 }
 
 # We now want the ID's for the species in eBird. 
-eBird_IDs <- get_bird_ids(ebird_names, c("eBird"))
+eBird_IDs <- get_bird_ids(eBird_names, c("eBird"))
 
 # See if any species were not successfully ID'd
 cat(length(which(eBird_IDs=="-100")), "species were not ID'd.")
+non_IDd_species <- eBird_names[which(eBird_IDs=="-100")]
 cat("Unidentified species are:",
-    ebird_names[which(eBird_IDs=="-100")],
+    non_IDd_species,
     sep = "\n")
+for (spe in non_IDd_species){
+  if (spe %in% AVONET_df$Species1_BirdLife){
+    cat(spe,
+        "is in BirdLife and cross-referenced with",
+        AVONET_df$Species2_eBird[which(AVONET_df$Species1_BirdLife==spe)],
+        "in eBird.\n")
+  }
+  else{
+    cat(spe, "does not appear in BirdLife.\n")
+  }
+  if (spe %in% AVONET_df$Species2_eBird){
+    cat(spe,
+        "is in eBird.\n")
+  }
+  else{
+    cat(spe, "does not appear in eBird\n")
+  }
+  if (spe %in% AVONET_df$Species3_BirdTree){
+    cat(spe,
+        "is in BirdTree and cross-referenced with",
+        AVONET_df$Species2_eBird[which(AVONET_df$Species3_BirdTree==spe)],
+        "in eBird.\n")
+  }
+  else{
+    cat(spe, "does not appear in BirdTree.\n")
+  }
+}
+
+# Should find a matchup between Cuculus Optatus and Cuculus Solitarius, but
+# if you look this up online it appears to be spurious.
+# We match up Cuculus Optatus with Cuculus Saturatus because C. Optatus was
+# formerly classed as a subspecies of C. Saturatus.
+eBird_names[which(eBird_names=="cuculus optatus")] <- "cuculus saturatus"
+
+# Porphyrio Poliocephalus doesn't have an obvious match in AVONET and is only
+# found in small numbers at the very edge of the EPSG:3035 range so we just
+# remove it from the list
+eBird_names <- eBird_names[which(eBird_names!="porphyrio poliocephalus")]
+
+# This is a simple alternative name:
+eBird_names[which(eBird_names=="daptrius chimachima")] <- "milvago chimachima"
+
+# Now try doing ID matchup again:
+eBird_IDs <- get_bird_ids(eBird_names, c("eBird"))
+
+# Check we got everything:
+cat(length(which(eBird_IDs=="-100")), "species were not ID'd.")
 
 ################################################################################
 # Now introduce trait data
@@ -237,112 +290,46 @@ elton_trait_df <-
              header = TRUE)
 # elton trait data has two rows of NA's at the bottom which we need to remove:
 elton_trait_df <- elton_trait_df[1:9993, ]
-
-# Set scientific names to lower case to match with CLOVER data
 elton_trait_df$Scientific <- tolower(elton_trait_df$Scientific)
-# Identify species that appear in CLOVER
-hosts_in_elton <- elton_trait_df[which(elton_trait_df$Scientific %in% species_list), 'Scientific']
 
-# Check if number of species left in trait database matches number from CLOVER:
-length(hosts_in_elton)==no_host_species
+# Search for IDs
+elton_trait_IDs <- get_bird_ids(elton_trait_df$Scientific)
 
-# The numbers don't match because elton_traits uses outdated binomial names
-# and doesn't account for some recently classified species. We make a look-up
-# table to match the names used by the two datasets.
+# Check we got everything:
+cat(length(which(elton_trait_IDs=="-100")), "species were not ID'd.")
+non_IDd_species <- elton_trait_df$Scientific[which(elton_trait_IDs=="-100")]
+cat("Unidentified species are:",
+    non_IDd_species,
+    sep = "\n")
 
-# Important caveat: I generated the list of alternative names to match with the
-# ones from CLOVER using ChatGPT. I've cleaned it up enough to make sure all the
-# names are present in elton_trait but I'm not totally certain that all the
-# matches are correct. For instance, ChatGPT tried to replace the binomial name
-# for the Northern waterthrush with that of the Kentucky warbler.
+# Rename to match AVONET:
+elton_trait_df$Scientific[
+  which(elton_trait_df$Scientific=="anthus longicaudatus")
+  ] <- "anthus vaalensis"
+elton_trait_df$Scientific[
+  which(elton_trait_df$Scientific=="polioptila clementsi")
+] <- "polioptila guianensis"
+elton_trait_df$Scientific[
+  which(elton_trait_df$Scientific=="hypositta perdita")
+] <- "oxylabes madagascariensis"
 
-CLOVER_names <- c(
-  "anas carolinensis",
-  "anser caerulescens",
-  "ardea alba",
-  "ardenna pacifica",
-  "bubo scandiacus",
-  "chroicocephalus brunnicephalus",
-  "chroicocephalus novaehollandiae",
-  "chroicocephalus ridibundus",
-  "coloeus monedula",
-  "geothlypis tolmiei",
-  "ichthyaetus ichthyaetus",
-  "ichthyaetus melanocephalus",
-  "larus mongolicus",
-  "leucophaeus atricilla",
-  "mareca americana",
-  "mareca penelope",
-  "mareca strepera",
-  "onychoprion fuscatus",
-  "parkesia noveboracensis",
-  "piaya minuta",
-  "sibirionetta formosa",
-  "spatula clypeata",
-  "spatula discors"
-)
+# This next species just seems to be missing from AVONET so we remove it:
+elton_trait_df <- elton_trait_df[
+  which(elton_trait_df$Scientific!="amaurospiza carrizalensis"), ]
 
-elton_traits_names <- c(
-  "anas crecca",
-  "chen caerulescens",
-  "casmerodius albus",
-  "puffinus pacificus",
-  "bubo scandiaca",
-  "larus brunnicephalus",
-  "larus novaehollandiae",
-  "larus ridibundus",
-  "corvus monedula",
-  "oporornis tolmiei",
-  "larus ichthyaetus",
-  "larus melanocephalus",
-  "larus cachinnans",
-  "larus atricilla",
-  "anas americana",
-  "anas penelope",
-  "anas strepera",
-  "sterna fuscata",
-  "seiurus noveboracensis",
-  "coccycua minuta",
-  "anas formosa",
-  "anas clypeata",
-  "anas discors"
-)
+elton_trait_df$Scientific[
+  which(elton_trait_df$Scientific=="lophura hatinhensis")
+] <- "lophura edwardsi"
 
-name_lookup <- data.frame(CLOVER = CLOVER_names,
-                          elton_traits = elton_traits_names)
-
-# Replace names in species_list:
-for (name_idx in 1:nrow(name_lookup)){
-  species_list[which(species_list==name_lookup$CLOVER[name_idx])] <- 
-    name_lookup$elton_traits[name_idx]
-}
-# elton_traits treats the Green-winged and Eurasian teals as the same species,
-# meaning the species_list now has a repeated element. We reduce to its unique
-# elements, noting that this won't affect our analysis since based on the
-# elton_traits data we'd just have two identical species.
-species_list <- unique(species_list)
-no_host_species <- length(species_list)
-
-# Try rechecking CLOVER-eBird matchups to see if we do anything better with new
-# binomial names
-for (name_idx in 1:nrow(name_lookup)){
-  ebird_names[which(ebird_names==name_lookup$CLOVER[name_idx])] <- 
-    name_lookup$elton_traits[name_idx]
-}
-# Now filter CLOVER data for names in ebird
-ebird_names_in_clover <- species_list[which(species_list %in% ebird_names)]
-
-# Check it's symmetric in terms of which way round we do it - it should be, but
-# if it wasn't that might tell us something interesting!
-clover_names_in_ebird <- ebird_names[which(ebird_names %in% species_list)]
-setequal(ebird_names_in_clover, clover_names_in_ebird)
+# Try again:
+elton_trait_IDs <- get_bird_ids(elton_trait_df$Scientific)
+cat(length(which(elton_trait_IDs=="-100")), "species were not ID'd.")
 
 # Identify species that appear in CLOVER
-hosts_in_elton <- elton_trait_df[which(elton_trait_df$Scientific %in% species_list), 'Scientific']
+host_IDs_in_elton <- unique(elton_trait_IDs[which(elton_trait_IDs %in% host_species_IDs)])
 
 # Check if number of species left in trait database matches number from CLOVER:
-length(hosts_in_elton)==no_host_species
-# We now have matching numbers!
+length(host_IDs_in_elton)==no_host_species
 
 # Create column indicating whether species is a host
 host_indicator = c(elton_trait_df$Scientific %in% species_list)
@@ -351,7 +338,7 @@ host_indicator = c(elton_trait_df$Scientific %in% species_list)
 matched_data <- data.frame(elton_trait_df, host_indicator)
 
 # Now filter for species in Europe according to eBird:
-matched_data <- matched_data[which(matched_data$Scientific %in% ebird_names), ]
+matched_data <- matched_data[which(elton_trait_IDs %in% eBird_IDs), ]
 
 # Remove fields we definitely won't want for fitting
 
@@ -387,20 +374,15 @@ certain_data <- certain_data[
   which(certain_data$BodyMass.SpecLevel==1),
 ]
 
-# Should find around 80% of species have a good level of certainty
-proportion_certain <- nrow(certain_data) / nrow(matched_data)
+# Check proportion of species with a good level of certainty
+cat(100 * nrow(certain_data) / nrow(matched_data),
+    "% of species in Europe remain if we filter for certainty.\n")
 
-# Should also find all but one confirmed host species stay in the data when
-# filtering for certainty:
-sum(certain_data$host_indicator)
-
-# Identify this species and see how many samples there are from it
-hosts_with_certainty <- certain_data[which(certain_data$host_indicator),
-                                     "Scientific"]
-uncertain_host <- species_list[-which(species_list %in% hosts_with_certainty)]
-species_counts[which(species_counts$Host==uncertain_host), "n"]
-# Should find there are 8 samples from this species - so not totally negligible
-# but not a massive chunk of the data either!
+# Check what this is in terms of number of species:
+cat(sum(certain_data$host_indicator),
+    "of",
+    sum(certain_data$host_indicator),
+    "host species remain if we filter for certainty.\n")
 
 # Some of the ecological data is expressed as percentages which add up to 100.
 # This makes them colinear and so to avoid this we will remove some of the
@@ -465,6 +447,13 @@ false_neg_rate <- length(which((!yhat.maj)&ytrain))/length(which(ytrain))
 false_pos_rate <- length(which(yhat.maj&!ytrain))/length(which(!ytrain))
 misclass_rate <- (length(which((!yhat.maj)&ytrain)) +
   length(which(yhat.maj&!ytrain))) / length(ytrain)
+cat("Training false negative rate is",
+    false_neg_rate,
+    ".\n Training false positive rate is",
+    false_pos_rate,
+    ".\n Training misclassification rate is",
+    misclass_rate,
+    ".\n")
 
 # And for test data:
 yhat.test <- plogis(bartfit$yhat.test - bartfit$binaryOffset)
@@ -475,8 +464,15 @@ false_neg_rate <- length(which((!yhat.maj)&ytest))/length(which(ytest))
 false_pos_rate <- length(which(yhat.maj&!ytest))/length(which(!ytest))
 misclass_rate <- (length(which((!yhat.maj)&ytest)) +
                     length(which(yhat.maj&!ytest))) / length(ytest)
+cat("Test false negative rate is",
+    false_neg_rate,
+    ".\n Test false positive rate is",
+    false_pos_rate,
+    ".\n Test misclassification rate is",
+    misclass_rate,
+    ".\n")
 
-# How manyu times to variables appear?
+# How many times to variables appear?
 ord <- order(bartfit$varcount.mean, decreasing = T)
 varcount_df <- data.frame((1/1000) * bartfit$varcount.mean)
 par(mar= c(10, 8, 1, 5))
@@ -519,9 +515,10 @@ short_varnames <- c("Around water surface",
                     "Unknown vertebrates"
                     )
 bar_cols <- vector(length = 18)
-bar_cols[diet_vars] <- rgb(0.3,0.1,0.4,0.6)
-bar_cols[forstrat_vars] <- rgb(0.3,0.5,0.4,0.6)
-bar_cols[other_vars] <- rgb(0.3,0.9,0.4,0.6)
+pal <- brewer.pal(3, "Dark2")
+bar_cols[diet_vars] <- pal[1]
+bar_cols[forstrat_vars] <- pal[2]
+bar_cols[other_vars] <- pal[3]
 varimp_bars <- barplot(varimp_ord[, 1],
                        border = F,
                        las = 2,
@@ -529,9 +526,9 @@ varimp_bars <- barplot(varimp_ord[, 1],
                        col = bar_cols,
                        ylab = "Mean appearances\n per tree")
 legend("topright",
-       inset=c(-0.5,0),
+       inset=c(-0.225,0),
        legend = c("Dietary (% of calories)", "Foraging (% strategy)", "Other"),
-       col = c(rgb(0.3,0.1,0.4,0.6), rgb(0.3,0.5,0.4,0.6), rgb(0.3,0.9,0.4,0.6)),
+       col = pal,
        bty = "n",
        pch = 20,
        pt.cex = 2,
@@ -560,25 +557,28 @@ for (i in 1:(length(tree_nos)-1)){
 }
 varimp_df <- data.frame(varimp_df, varcount_df)
 
+pal <- brewer.pal(6, "Dark2")
+
 par(mar= c(10, 8, 1, 5))
 matplot(varimp_df[ord, ],
         type = "l",
         xlab = "",
         ylab = "Normalised mean\n appearances per tree",
         xaxt = "n",
-        col=1:6,
+        col=pal,
         lty = 1)
 for (i in 1:length(tree_nos)){
   points(x = 1:length(ord),
          y = varimp_df[ord, i],
-         col = i,
+         col = pal[i],
          pch = 16)
 }
 axis(1, at = 1:18, labels = names(xtrain)[ord], las = 2)
 legend("topright",
-       inset=c(-0.3,0),
+       inset = c(-0.0,0),
        legend = tree_nos,
-       col = 1:6,
+       title = "Number of trees",
+       col = pal,
        lty = 1,
        xpd = TRUE)
 
