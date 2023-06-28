@@ -410,6 +410,43 @@ forstrat_data <- matched_data[, c("ForStrat.watbelowsurf",
                                   "ForStrat.midhigh")]
 max_forstrat_comp <- names(forstrat_data)[which.max(colMeans(forstrat_data))]
 
+# For interpretative purposes it is useful to have idiomatic versions of the
+# elton traits variable names
+name_pairs <- data.frame(0)
+name_pairs$Diet.Inv <- "Invertebrates"
+name_pairs$Diet.Vend <- "Mammals and birds"
+name_pairs$Diet.Vect <- "Amphibians and reptiles"
+name_pairs$Diet.Vfish <- "Fish"
+name_pairs$Diet.Vunk <- "Unknown vertebrates"
+name_pairs$Diet.Scav <- "Scavenging"
+name_pairs$Diet.Nect <- "Nectar"
+name_pairs$Diet.Fruit <- "Fruit"
+name_pairs$Diet.Seed <- "Seeds"
+name_pairs$Diet.PlantO <- "Other plant matter"
+name_pairs$ForStrat.watbelowsurf <- ">5cm below water surface"
+name_pairs$ForStrat.wataroundsurf <- "Around water surface"
+name_pairs$ForStrat.aerial <- "Aerial"
+name_pairs$ForStrat.canopy <- "Canopy"
+name_pairs$ForStrat.ground <- "Ground"
+name_pairs$ForStrat.understory <- "Understory"
+name_pairs$ForStrat.midhigh <- ">2m above ground, below canopy"
+name_pairs$PelagicSpecialist <-  "Pelagic specialist"
+name_pairs$Nocturnal <- "Nocturnal"
+name_pairs$BodyMass.Value <- "Body mass"
+
+expand_names <- function(name_list){
+  expanded_names <- c()
+  for (n in name_list){
+    if (n %in% colnames(name_pairs)){
+      expanded_names <- append(expanded_names, name_pairs[n])
+    }
+    else{
+      expanded_names <- append(expanded_names, n)
+    }
+  }
+  return(expanded_names)
+}
+
 ################################################################################
 # Now train BART
 
@@ -495,25 +532,6 @@ forstrat_vars <- which(rownames(varimp_ord) %like% "ForStrat.")
 other_vars <- 1:18
 other_vars <- other_vars[-which(other_vars %in% diet_vars)]
 other_vars <- other_vars[-which(other_vars %in% forstrat_vars)]
-short_varnames <- c("Around water surface",
-                    "Seeds",
-                    ">5cm below water surface",
-                    "Nocturnal",
-                    ">2m above ground, below canopy",
-                    "Pelagic specialist",
-                    "Other plant matter",
-                    "Mammals and birds",
-                    "Fish",
-                    "Canopy",
-                    "Understory",
-                    "Fruit",
-                    "Nectar",
-                    "Amphibians and reptiles",
-                    "Scavenging",
-                    "Body mass",
-                    "Aerial",
-                    "Unknown vertebrates"
-                    )
 bar_cols <- vector(length = 18)
 pal <- brewer.pal(3, "Dark2")
 bar_cols[diet_vars] <- pal[1]
@@ -522,7 +540,7 @@ bar_cols[other_vars] <- pal[3]
 varimp_bars <- barplot(varimp_ord[, 1],
                        border = F,
                        las = 2,
-                       names.arg = short_varnames,
+                       names.arg = short_varnames[ord],
                        col = bar_cols,
                        ylab = "Mean appearances\n per tree")
 legend("topright",
