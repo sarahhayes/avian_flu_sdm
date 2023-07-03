@@ -283,62 +283,62 @@ cat(length(which(eBird_IDs=="-100")), "species were not ID'd.")
 # Now introduce trait data
 
 # Load in from file
-elton_trait_df <- 
+EltonTraits_df <- 
   read.table("data/variables/bird_data/elton_traits/BirdFuncDat.txt",
              sep = '\t',
              quote="\"",
              header = TRUE)
 # elton trait data has two rows of NA's at the bottom which we need to remove:
-elton_trait_df <- elton_trait_df[1:9993, ]
-elton_trait_df$Scientific <- tolower(elton_trait_df$Scientific)
+EltonTraits_df <- EltonTraits_df[1:9993, ]
+EltonTraits_df$Scientific <- tolower(EltonTraits_df$Scientific)
 
 # Search for IDs
-elton_trait_IDs <- get_bird_ids(elton_trait_df$Scientific)
+EltonTraits_IDs <- get_bird_ids(EltonTraits_df$Scientific)
 
 # Check we got everything:
-cat(length(which(elton_trait_IDs=="-100")), "species were not ID'd.")
-non_IDd_species <- elton_trait_df$Scientific[which(elton_trait_IDs=="-100")]
+cat(length(which(EltonTraits_IDs=="-100")), "species were not ID'd.")
+non_IDd_species <- EltonTraits_df$Scientific[which(EltonTraits_IDs=="-100")]
 cat("Unidentified species are:",
     non_IDd_species,
     sep = "\n")
 
 # Rename to match AVONET:
-elton_trait_df$Scientific[
-  which(elton_trait_df$Scientific=="anthus longicaudatus")
+EltonTraits_df$Scientific[
+  which(EltonTraits_df$Scientific=="anthus longicaudatus")
   ] <- "anthus vaalensis"
-elton_trait_df$Scientific[
-  which(elton_trait_df$Scientific=="polioptila clementsi")
+EltonTraits_df$Scientific[
+  which(EltonTraits_df$Scientific=="polioptila clementsi")
 ] <- "polioptila guianensis"
-elton_trait_df$Scientific[
-  which(elton_trait_df$Scientific=="hypositta perdita")
+EltonTraits_df$Scientific[
+  which(EltonTraits_df$Scientific=="hypositta perdita")
 ] <- "oxylabes madagascariensis"
 
 # This next species just seems to be missing from AVONET so we remove it:
-elton_trait_df <- elton_trait_df[
-  which(elton_trait_df$Scientific!="amaurospiza carrizalensis"), ]
+EltonTraits_df <- EltonTraits_df[
+  which(EltonTraits_df$Scientific!="amaurospiza carrizalensis"), ]
 
-elton_trait_df$Scientific[
-  which(elton_trait_df$Scientific=="lophura hatinhensis")
+EltonTraits_df$Scientific[
+  which(EltonTraits_df$Scientific=="lophura hatinhensis")
 ] <- "lophura edwardsi"
 
 # Try again:
-elton_trait_IDs <- get_bird_ids(elton_trait_df$Scientific)
-cat(length(which(elton_trait_IDs=="-100")), "species were not ID'd.")
+EltonTraits_IDs <- get_bird_ids(EltonTraits_df$Scientific)
+cat(length(which(EltonTraits_IDs=="-100")), "species were not ID'd.")
 
 # Identify species that appear in CLOVER
-host_IDs_in_elton <- unique(elton_trait_IDs[which(elton_trait_IDs %in% host_species_IDs)])
+host_IDs_in_elton <- unique(EltonTraits_IDs[which(EltonTraits_IDs %in% host_species_IDs)])
 
 # Check if number of species left in trait database matches number from CLOVER:
 length(host_IDs_in_elton)==no_host_species
 
 # Create column indicating whether species is a host
-host_indicator = c(elton_trait_df$Scientific %in% species_list)
+host_indicator = c(EltonTraits_df$Scientific %in% species_list)
 
 # Append it to trait database
-matched_data <- data.frame(elton_trait_df, host_indicator)
+matched_data <- data.frame(EltonTraits_df, host_indicator)
 
 # Now filter for species in Europe according to eBird:
-matched_data <- matched_data[which(elton_trait_IDs %in% eBird_IDs), ]
+matched_data <- matched_data[which(EltonTraits_IDs %in% eBird_IDs), ]
 
 # Remove fields we definitely won't want for fitting
 
