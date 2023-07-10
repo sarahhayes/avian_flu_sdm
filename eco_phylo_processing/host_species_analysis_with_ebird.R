@@ -610,6 +610,35 @@ if (PLOT){
 }
 
 ################################################################################
+# One thing we might be interested in is distance to relevant taxa. We now try
+# to identify taxa of interest:
+order_counts <- matched_data %>% count(IOCOrder, sort = TRUE)
+family_counts <- matched_data %>% count(BLFamilyLatin, sort = TRUE)
+
+if (PLOT){
+  # Plot order counts:
+  p <- ggplot(data=matched_data, aes(x=factor(IOCOrder))) + 
+    geom_bar(stat="count")
+  p + coord_flip() + 
+    scale_x_discrete(limits=order_counts$IOCOrder) + 
+    xlab("Host order") +
+    ylab("Number of species")
+}
+
+if (PLOT){
+  # Plot family counts, but just do families with at least 5 host species:
+  atleast5_families <- family_counts$BLFamilyLatin[which(family_counts$n>=5)]
+  data_to_plot <- matched_data[which(matched_data$BLFamilyLatin %in% atleast5_families), ]
+  plot_lims <- family_counts$BLFamilyLatin[which(family_counts$BLFamilyLatin %in% atleast5_families)]
+  p <- ggplot(data=data_to_plot, aes(x=factor(BLFamilyLatin))) + 
+    geom_bar(stat="count")
+  p + coord_flip() + 
+    scale_x_discrete(limits=plot_lims) + 
+    xlab("Host family") +
+    ylab("Number of species")
+}
+
+################################################################################
 # For interpretative purposes it is useful to have idiomatic versions of the
 # Elton traits variable names
 name_pairs <- data.frame(0)
