@@ -1,13 +1,22 @@
 # In this script we analyse species-level patterns regarding avian influenza
 # host status.
 
+# Some globals to decide if we want to do plots and full variable importance
+# experiments:
+PLOT <- TRUE
+VARIMPS <- TRUE
+
+require(ape)
 library(BART)
+library(data.table)
 library(dplyr)
 library(ggplot2)
 library(ggfortify)
 library(gridExtra)
+require(PhyloMeasures)
 library(RColorBrewer)
 library(readxl)
+require(TreeTools)
 
 # First use the AVONET data to create a mapping between names and alphanumeric
 # identifiers
@@ -142,18 +151,20 @@ no_host_species <- length(species_list)
 
 species_counts <- CLOVER_df %>% count(Host, sort = TRUE)
 
-# Plot species counts:
-p <- ggplot(data=CLOVER_df, aes(x=factor(Host))) + geom_bar(stat="count")
-p + coord_flip() + 
-  scale_x_discrete(limits=species_counts$Host) + 
-  xlab("Host species")
-
-# Try plotting only those species with at least 10 recorded cases:
-below_10_species <- species_counts$Host[which(species_counts$n<10)]
-p <- ggplot(data=CLOVER_df[-which(CLOVER_df$Host %in% below_10_species), ], aes(x=factor(Host))) + geom_bar(stat="count")
-p + coord_flip() + 
-  scale_x_discrete(limits=species_counts$Host[-which(species_counts$Host %in% below_10_species)]) + 
-  xlab("Host species")
+if (PLOT){
+  # Plot species counts:
+  p <- ggplot(data=CLOVER_df, aes(x=factor(Host))) + geom_bar(stat="count")
+  p + coord_flip() + 
+    scale_x_discrete(limits=species_counts$Host) + 
+    xlab("Host species")
+  
+  # Try plotting only those species with at least 10 recorded cases:
+  below_10_species <- species_counts$Host[which(species_counts$n<10)]
+  p <- ggplot(data=CLOVER_df[-which(CLOVER_df$Host %in% below_10_species), ], aes(x=factor(Host))) + geom_bar(stat="count")
+  p + coord_flip() + 
+    scale_x_discrete(limits=species_counts$Host[-which(species_counts$Host %in% below_10_species)]) + 
+    xlab("Host species")
+}
 
 # Get species ID's of species in CLOVER
 host_species_IDs <- get_bird_ids(species_list)
@@ -324,6 +335,7 @@ EltonTraits_df$Scientific[
 # Try again:
 EltonTraits_IDs <- get_bird_ids(EltonTraits_df$Scientific)
 cat(length(which(EltonTraits_IDs=="-100")), "species were not ID'd.")
+EltonTraits_df$Avibase_ID <- c(EltonTraits_IDs)
 
 # Identify species that appear in CLOVER
 host_IDs_in_elton <- unique(EltonTraits_IDs[which(EltonTraits_IDs %in% host_species_IDs)])
@@ -332,7 +344,7 @@ host_IDs_in_elton <- unique(EltonTraits_IDs[which(EltonTraits_IDs %in% host_spec
 length(host_IDs_in_elton)==no_host_species
 
 # Create column indicating whether species is a host
-host_indicator = c(EltonTraits_df$Scientific %in% species_list)
+host_indicator = c(EltonTraits_df$Avibase_ID %in% host_species_IDs)
 
 # Append it to trait database
 matched_data <- data.frame(EltonTraits_df, host_indicator)
@@ -410,8 +422,196 @@ forstrat_data <- matched_data[, c("ForStrat.watbelowsurf",
                                   "ForStrat.midhigh")]
 max_forstrat_comp <- names(forstrat_data)[which.max(colMeans(forstrat_data))]
 
+################################################################################
+# Bring in phylogenetic data
+
+# If data already exists, load it in, otherwise calculate average phylogenetic
+# distances across ABC samples.
+
+{
+  if (!file.exists("eco_phylo_processing/mean_phylo_distances.rds")){
+    # Attempt to load in BirdTree data
+    bird_tree <- read.tree("eco_phylo_processing/BirdzillaHackett10.tre")
+    
+    for (i in seq_along(bird_tree)){
+      bird_tree[[i]]$tip.label <- tolower(bird_tree[[i]]$tip.label)
+    }
+    
+    no_samples <- 100
+    dmat_mean <- (1 / no_samples) * cophenetic.phylo(bird_tree[[1]])
+    dmat_mean <- dmat_mean[order(rownames(dmat_mean)), order(colnames(dmat_mean))]
+    for (i in 2:no_samples){
+      start_time <- Sys.time()
+      dmat <- cophenetic.phylo(bird_tree[[i]])
+      dmat <- dmat[order(rownames(dmat)), order(colnames(dmat))]
+      dmat_mean <- dmat_mean + (1 / no_samples) * dmat
+      end_time <- Sys.time()
+      cat("Matrix", i, "processed in", end_time - start_time, ".\n")
+    }
+    rownames(dmat_mean) <- gsub("_", " ", rownames(dmat_mean))
+    colnames(dmat_mean) <- gsub("_", " ", colnames(dmat_mean))
+    
+    saveRDS(dmat_mean, "eco_phylo_processing/mean_phylo_distances.rds")
+  }
+  else{
+    dmat_mean <- readRDS("eco_phylo_processing/mean_phylo_distances.rds")
+  }
+}
+
+dmat_ids <- get_bird_ids(rownames(dmat_mean))
+# 
+# # See if any species were not successfully ID'd
+# cat(length(which(dmat_ids=="-100")), "species were not ID'd.\n")
+# cat("Unidentified species are:",
+#     rownames(dmat_mean)[which(dmat_ids=="-100")],
+#     sep = "\n")
+# 
+# # These turn out to be the same species that were not ID'd from EltonTraits.
+# # Rename to match AVONET:
+# rownames(dmat_mean)[
+#   which(rownames(dmat_mean)=="anthus longicaudatus")
+# ] <- "anthus vaalensis"
+# rownames(dmat_mean)[
+#   which(rownames(dmat_mean)=="polioptila clementsi")
+# ] <- "polioptila guianensis"
+# rownames(dmat_mean)[
+#   which(rownames(dmat_mean)=="hypositta perdita")
+# ] <- "oxylabes madagascariensis"
+# 
+# # This next species just seems to be missing from AVONET so we remove it:
+# dmat_mean <- dmat_mean[
+#   which(rownames(dmat_mean)!="amaurospiza carrizalensis"), ]
+# dmat_mean <- dmat_mean[,
+#   which(colnames(dmat_mean)!="amaurospiza carrizalensis")]
+# 
+# rownames(dmat_mean)[
+#   which(rownames(dmat_mean)=="lophura hatinhensis")
+# ] <- "lophura edwardsi"
+# dmat_ids <- get_bird_ids(rownames(dmat_mean))
+# 
+# # Try again after renaming:
+# dmat_ids <- get_bird_ids(rownames(dmat_mean))
+# cat(length(which(dmat_ids=="-100")), "species were not ID'd.")
+# 
+# # Find any species that are in EltonTraits but not in BirdTree:
+# cat("The following species do not have IDs in the phylogenetic data:",
+#     matched_data$Scientific[-which(matched_data$Avibase_ID %in% dmat_ids)],
+#     sep = "\n"
+# )
+cat("There are",
+    length(setdiff(unique(EltonTraits_df$Scientific),
+                   unique(rownames(dmat_mean)))),
+    "species names in EltonTraits missing from the phylogeny and",
+    length(setdiff(unique(rownames(dmat_mean)),
+                   unique(EltonTraits_df$Scientific))),
+    "species in the phylogeny missing from EltonTraits.\n"
+    )
+# Should find that the phylogeny contains exactly the same species with the same
+# names as EltonTraits, so we pass in the IDs from EltonTraits
+for (i in 1:nrow(dmat_mean)){
+  rownames(dmat_mean)[i] <- EltonTraits_df$Avibase_ID[which(EltonTraits_df$Scientific==rownames(dmat_mean)[i])[1]]
+  colnames(dmat_mean)[i] <- EltonTraits_df$Avibase_ID[which(EltonTraits_df$Scientific==colnames(dmat_mean)[i])[1]]
+}
+
+dmat_host_cols <- dmat_mean[, which(dmat_ids %in% host_species_IDs)]
+nearest_host_distance <- apply(dmat_host_cols, 1, min)
+for (i in 1:nrow(matched_data)){
+  species_in_dmat <- which(
+    names(nearest_host_distance)==matched_data$Avibase_ID[i])
+  if (length(species_in_dmat)==1){
+    matched_data$nearest_host_distance[i] <- nearest_host_distance[species_in_dmat]
+  }
+  else if (length(species_in_dmat)==0){
+    matched_data$nearest_host_distance[i] <- 1000
+  }
+  else{
+    matched_data$nearest_host_distance[i] <- min(
+      nearest_host_distance[species_in_dmat])
+  }
+}
+
+# Do a quick check to make sure all host species have distance zero and all
+# non-host species have nonzero distance
+cat("Maximum distance for host species is",
+    max(matched_data$nearest_host_distance[which(matched_data$host_indicator)]),
+    ".\n")
+cat("Minimum distance for non-host species is",
+    min(matched_data$nearest_host_distance[which(!matched_data$host_indicator)]),
+    ".\n")
+# Check every species has had a valid distance assigned (i.e. not 1000))
+cat("There are",
+    length(which(matched_data$nearest_host_distance==1000)),
+    "species without distances assigned.\n")
+
+# Zeros will be too informative since they immediately tell us where the host
+# species are, so we should really use the minimum non-zero value:
+nearest_host_distance <- apply(dmat_host_cols, 1, FUN = function(x) {min(x[x>0])})
+for (i in 1:nrow(matched_data)){
+  species_in_dmat <- which(
+    names(nearest_host_distance)==matched_data$Avibase_ID[i])
+  if (length(species_in_dmat)==1){
+    matched_data$nearest_host_distance[i] <- nearest_host_distance[species_in_dmat]
+  }
+  else if (length(species_in_dmat)==0){
+    matched_data$nearest_host_distance[i] <- 1000
+  }
+  else{
+    matched_data$nearest_host_distance[i] <- min(
+      nearest_host_distance[species_in_dmat])
+  }
+}
+
+cat("Mean distance to nearest confirmed host for confirmed hosts is",
+    mean(matched_data$nearest_host_distance[which(matched_data$host_indicator)]),
+    "and",
+    mean(matched_data$nearest_host_distance[-which(matched_data$host_indicator)]),
+    "for other species.\n")
+cat("Median distance to nearest confirmed host for confirmed hosts is",
+    median(matched_data$nearest_host_distance[which(matched_data$host_indicator)]),
+    "and",
+    median(matched_data$nearest_host_distance[-which(matched_data$host_indicator)]),
+    "for other species.\n")
+
+# Do a quick plot to see if there's an obvious difference in the distances for
+# confirmed hosts:
+if (PLOT){
+  bin_size <- 10
+  
+  plot_ulim <- bin_size * ceiling(max(matched_data$nearest_host_distance) / bin_size)
+  
+  host_dhist <- hist(matched_data$nearest_host_distance[which(matched_data$host_indicator)],
+                     breaks = seq(0, plot_ulim, by=bin_size),
+                     plot = FALSE)
+  nonhost_dhist <- hist(matched_data$nearest_host_distance[-which(matched_data$host_indicator)],
+                        breaks = seq(0, plot_ulim, by=bin_size),
+                        plot = FALSE)
+  pal <- brewer.pal(6, "Dark2")
+  plot(seq(0, plot_ulim-bin_size, by=bin_size),
+       host_dhist$density,
+       type = "l",
+       lwd = 2,
+       col = pal[1],
+       xlab = "Distance to nearest\n confirmed host species",
+       ylab = "Density")
+  lines(seq(0, plot_ulim-bin_size, by=bin_size),
+        nonhost_dhist$density,
+        type = "l",
+        lwd = 2,
+        col = pal[2])
+  legend("topright",
+         inset=c(.025,0),
+         legend = c("Confirmed hosts", "Other species"),
+         col = pal,
+         bty = "n",
+         pch = 20,
+         pt.cex = 2,
+         cex = 0.8,
+         xpd = TRUE)
+}
+
+################################################################################
 # For interpretative purposes it is useful to have idiomatic versions of the
-# elton traits variable names
+# Elton traits variable names
 name_pairs <- data.frame(0)
 name_pairs$Diet.Inv <- "Invertebrates"
 name_pairs$Diet.Vend <- "Mammals and birds"
@@ -433,6 +633,7 @@ name_pairs$ForStrat.midhigh <- ">2m above ground, below canopy"
 name_pairs$PelagicSpecialist <-  "Pelagic specialist"
 name_pairs$Nocturnal <- "Nocturnal"
 name_pairs$BodyMass.Value <- "Body mass"
+name_pairs$nearest_host_distance <- "Phylo. distance to confirmed host"
 
 expand_names <- function(name_list){
   expanded_names <- c()
@@ -462,6 +663,7 @@ x <- matched_data[,!(names(matched_data) %in% c("PassNonPass",
                                                 "ForStrat.SpecLevel",
                                                 "BodyMass.SpecLevel",
                                                 "host_indicator",
+                                                "Avibase_ID",
                                                 max_diet_comp,
                                                 max_forstrat_comp))]
 y <- matched_data[, "host_indicator"]
@@ -483,7 +685,7 @@ yhat.maj <- colSums(yhat.train) >= nrow(yhat.train)/2
 false_neg_rate <- length(which((!yhat.maj)&ytrain))/length(which(ytrain))
 false_pos_rate <- length(which(yhat.maj&!ytrain))/length(which(!ytrain))
 misclass_rate <- (length(which((!yhat.maj)&ytrain)) +
-  length(which(yhat.maj&!ytrain))) / length(ytrain)
+                    length(which(yhat.maj&!ytrain))) / length(ytrain)
 cat("Training false negative rate is",
     false_neg_rate,
     ".\n Training false positive rate is",
@@ -513,82 +715,90 @@ cat("Test false negative rate is",
 ord <- order(bartfit$varcount.mean, decreasing = T)
 varcount_df <- data.frame((1/1000) * bartfit$varcount.mean)
 
-par(mar= c(14, 5, 1, 8))
-varimp_ord <- data.frame(varcount_df[ord, ])
-rownames(varimp_ord) <- rownames(varcount_df)[ord]
-short_varnames <- expand_names(rownames(varimp_ord))
-diet_vars <- which(rownames(varimp_ord) %like% "Diet.")
-forstrat_vars <- which(rownames(varimp_ord) %like% "ForStrat.")
-other_vars <- 1:18
-other_vars <- other_vars[-which(other_vars %in% diet_vars)]
-other_vars <- other_vars[-which(other_vars %in% forstrat_vars)]
-bar_cols <- vector(length = 18)
-pal <- brewer.pal(3, "Dark2")
-bar_cols[diet_vars] <- pal[1]
-bar_cols[forstrat_vars] <- pal[2]
-bar_cols[other_vars] <- pal[3]
-varimp_bars <- barplot(varimp_ord[, 1],
-                       border = F,
-                       las = 2,
-                       names.arg = short_varnames,
-                       col = bar_cols,
-                       ylab = "Mean appearances\n per tree")
-legend("topright",
-       inset=c(-0.225,0),
-       legend = c("Dietary (% of calories)", "Foraging (% strategy)", "Other"),
-       col = pal,
-       bty = "n",
-       pch = 20,
-       pt.cex = 2,
-       cex = 0.8,
-       xpd = TRUE)
-
-# Do a more thorough variable importance
-tree_nos <- c(10,
-              20,
-              50,
-              100,
-              150,
-              200)
-
-for (i in 1:(length(tree_nos)-1)){
-  this_bartfit <- lbart(xtrain,
-                        ytrain,
-                        x.test = xtest,
-                        ntree = tree_nos[i])
-  if (i==1){
-    varimp_df <- data.frame(this_bartfit$varcount.mean/sum(this_bartfit$varcount.mean))
-  }
-  else{
-    varimp_df <- data.frame(varimp_df, this_bartfit$varcount.mean/sum(this_bartfit$varcount.mean))
-  }
+if (PLOT){
+  par(mar= c(14, 5, 1, 8))
+  varimp_ord <- data.frame(varcount_df[ord, ])
+  rownames(varimp_ord) <- rownames(varcount_df)[ord]
+  short_varnames <- expand_names(rownames(varimp_ord))
+  diet_vars <- which(rownames(varimp_ord) %like% "Diet.")
+  forstrat_vars <- which(rownames(varimp_ord) %like% "ForStrat.")
+  other_vars <- 1:18
+  other_vars <- other_vars[-which(other_vars %in% diet_vars)]
+  other_vars <- other_vars[-which(other_vars %in% forstrat_vars)]
+  bar_cols <- vector(length = 18)
+  pal <- brewer.pal(3, "Dark2")
+  bar_cols[diet_vars] <- pal[1]
+  bar_cols[forstrat_vars] <- pal[2]
+  bar_cols[other_vars] <- pal[3]
+  varimp_bars <- barplot(varimp_ord[, 1],
+                         border = F,
+                         las = 2,
+                         names.arg = short_varnames,
+                         col = bar_cols,
+                         ylab = "Mean appearances\n per tree")
+  legend("topright",
+         inset=c(-0.225,0),
+         legend = c("Dietary (% of calories)", "Foraging (% strategy)", "Other"),
+         col = pal,
+         bty = "n",
+         pch = 20,
+         pt.cex = 2,
+         cex = 0.8,
+         xpd = TRUE)
 }
-varimp_df <- data.frame(varimp_df, varcount_df)
 
-pal <- brewer.pal(6, "Dark2")
-
-par(mar= c(10, 8, 1, 5))
-matplot(varimp_df[ord, ],
-        type = "l",
-        xlab = "",
-        ylab = "Normalised mean\n appearances per tree",
-        xaxt = "n",
-        col=pal,
-        lty = 1)
-for (i in 1:length(tree_nos)){
-  points(x = 1:length(ord),
-         y = varimp_df[ord, i],
-         col = pal[i],
-         pch = 16)
+if (VARIMPS){
+  # Do a more thorough variable importance
+  tree_nos <- c(10,
+                20,
+                50,
+                100,
+                150,
+                200)
+  
+  for (i in 1:(length(tree_nos)-1)){
+    this_bartfit <- lbart(xtrain,
+                          ytrain,
+                          x.test = xtest,
+                          ntree = tree_nos[i])
+    if (i==1){
+      varimp_df <- data.frame(this_bartfit$varcount.mean/sum(this_bartfit$varcount.mean))
+    }
+    else{
+      varimp_df <- data.frame(varimp_df, this_bartfit$varcount.mean/sum(this_bartfit$varcount.mean))
+    }
+  }
+  varimp_df <- data.frame(varimp_df, varcount_df)
+  
+  pal <- brewer.pal(6, "Dark2")
+  
+  par(mar= c(15, 8, 1, 5))
+  matplot(varimp_df[ord, ],
+          type = "l",
+          xlab = "",
+          ylab = "Normalised mean\n appearances per tree",
+          xaxt = "n",
+          col=pal,
+          lty = 1)
+  for (i in 1:length(tree_nos)){
+    points(x = 1:length(ord),
+           y = varimp_df[ord, i],
+           col = pal[i],
+           pch = 16)
+  }
+  axis(1, at = 1:19, labels = short_varnames,, las = 2)
+  legend("topright",
+         inset=c(-0.125,0),
+         legend = tree_nos,
+         title = "Number of\n trees",
+         col = pal,
+         bty = "n",
+         pch = 20,
+         pt.cex = 2,
+         cex = 0.8,
+         xpd = TRUE)
 }
-axis(1, at = 1:18, labels = names(xtrain)[ord], las = 2)
-legend("topright",
-       inset = c(-0.0,0),
-       legend = tree_nos,
-       title = "Number of trees",
-       col = pal,
-       lty = 1,
-       xpd = TRUE)
+
 
 ################################################################################
 # Now try some PCA.
