@@ -166,6 +166,48 @@ if (PLOT){
     xlab("Host species")
 }
 
+# Do the same for higher taxonomic levels; this will be useful for identifying
+# taxa of interest.
+order_case_counts <- CLOVER_df %>% count(HostOrder, sort = TRUE)
+family_case_counts <- CLOVER_df %>% count(HostFamily, sort = TRUE)
+genus_case_counts <- CLOVER_df %>% count(HostGenus, sort = TRUE)
+
+if (PLOT){
+  # Plot order counts:
+  p <- ggplot(data=CLOVER_df, aes(x=factor(HostOrder))) + 
+    geom_bar(stat="count")
+  p + coord_flip() + 
+    scale_x_discrete(limits=order_case_counts$HostOrder) + 
+    xlab("Host order") +
+    ylab("Number of cases")
+}
+
+if (PLOT){
+  # Plot family counts, but just do families with at least 5 host species:
+  atleast5_families <- family_case_counts$HostFamily[which(family_case_counts$n>=5)]
+  data_to_plot <- CLOVER_df[which(CLOVER_df$HostFamily %in% atleast5_families), ]
+  plot_lims <- family_case_counts$HostFamily[which(family_case_counts$HostFamily %in% atleast5_families)]
+  p <- ggplot(data=data_to_plot, aes(x=factor(HostFamily))) + 
+    geom_bar(stat="count")
+  p + coord_flip() + 
+    scale_x_discrete(limits=plot_lims) + 
+    xlab("Host family") +
+    ylab("Number of cases")
+}
+
+if (PLOT){
+  # Plot genus counts, but just do families with at least 10 host species:
+  atleast10_genuses <- genus_case_counts$HostGenus[which(genus_case_counts$n>=10)]
+  data_to_plot <- CLOVER_df[which(CLOVER_df$HostGenus %in% atleast10_genuses), ]
+  plot_lims <- genus_case_counts$HostGenus[which(genus_case_counts$HostGenus %in% atleast10_genuses)]
+  p <- ggplot(data=data_to_plot, aes(x=factor(HostGenus))) + 
+    geom_bar(stat="count")
+  p + coord_flip() + 
+    scale_x_discrete(limits=plot_lims) + 
+    xlab("Host genus") +
+    ylab("Number of cases")
+}
+
 # Get species ID's of species in CLOVER
 host_species_IDs <- get_bird_ids(species_list)
 
@@ -639,6 +681,45 @@ if (PLOT){
 }
 
 ################################################################################
+# Work out proximity to Anatidae family and Larus genus
+
+families_in_dmat <- lapply(rownames(dmat_mean), FUN = function(x) EltonTraits_df$BLFamilyLatin[which(EltonTraits_df$Avibase_ID==x)[1]])
+anatidae_cols <- dmat_mean[, which(families_in_dmat=="Anatidae")]
+anatidae_distance <- apply(anatidae_cols, 1, min)
+for (i in 1:nrow(matched_data)){
+  species_in_dmat <- which(
+    names(anatidae_distance)==matched_data$Avibase_ID[i])
+  if (length(species_in_dmat)==1){
+    matched_data$anatidae_distance[i] <- anatidae_distance[species_in_dmat]
+  }
+  else if (length(species_in_dmat)==0){
+    matched_data$anatidae_distance[i] <- 1000
+  }
+  else{
+    matched_data$anatidae_distance[i] <- min(
+      anatidae_distance[species_in_dmat])
+  }
+}
+
+species_in_dmat <- lapply(rownames(dmat_mean), FUN = function(x) EltonTraits_df$Scientific[which(EltonTraits_df$Avibase_ID==x)[1]])
+larus_cols <- dmat_mean[, grepl("larus", species_in_dmat)]
+larus_distance <- apply(larus_cols, 1, min)
+for (i in 1:nrow(matched_data)){
+  species_in_dmat <- which(
+    names(larus_distance)==matched_data$Avibase_ID[i])
+  if (length(species_in_dmat)==1){
+    matched_data$larus_distance[i] <- larus_distance[species_in_dmat]
+  }
+  else if (length(species_in_dmat)==0){
+    matched_data$larus_distance[i] <- 1000
+  }
+  else{
+    matched_data$larus_distance[i] <- min(
+      larus_distance[species_in_dmat])
+  }
+}
+
+################################################################################
 # For interpretative purposes it is useful to have idiomatic versions of the
 # Elton traits variable names
 name_pairs <- data.frame(0)
@@ -663,6 +744,8 @@ name_pairs$PelagicSpecialist <-  "Pelagic specialist"
 name_pairs$Nocturnal <- "Nocturnal"
 name_pairs$BodyMass.Value <- "Body mass"
 name_pairs$nearest_host_distance <- "Phylo. distance to confirmed host"
+name_pairs$anatidae_distance <- "Phylo. distance to Anatidae"
+name_pairs$larus_distance <- "Phylo. distance to Larus"
 
 expand_names <- function(name_list){
   expanded_names <- c()
@@ -751,10 +834,10 @@ if (PLOT){
   short_varnames <- expand_names(rownames(varimp_ord))
   diet_vars <- which(rownames(varimp_ord) %like% "Diet.")
   forstrat_vars <- which(rownames(varimp_ord) %like% "ForStrat.")
-  other_vars <- 1:18
+  other_vars <- 1:ncol(x)
   other_vars <- other_vars[-which(other_vars %in% diet_vars)]
   other_vars <- other_vars[-which(other_vars %in% forstrat_vars)]
-  bar_cols <- vector(length = 18)
+  bar_cols <- vector(length = ncol(x))
   pal <- brewer.pal(3, "Dark2")
   bar_cols[diet_vars] <- pal[1]
   bar_cols[forstrat_vars] <- pal[2]
@@ -815,7 +898,7 @@ if (VARIMPS){
            col = pal[i],
            pch = 16)
   }
-  axis(1, at = 1:19, labels = short_varnames,, las = 2)
+  axis(1, at = 1:ncol(x), labels = short_varnames, las = 2)
   legend("topright",
          inset=c(-0.125,0),
          legend = tree_nos,
@@ -828,36 +911,36 @@ if (VARIMPS){
          xpd = TRUE)
 }
 
-
-################################################################################
-# Now try some PCA.
-
-matched_numeric <- data.frame(x, as.numeric(y))
-names(matched_numeric)[21] <- 'host_indicator'
-
-pc_all <- prcomp(matched_numeric,
-             center = TRUE,
-             scale. = TRUE)
-summary(pc_all)
-
-layout(matrix(1:100, ncol = 10), respect = TRUE)
-
-for (i in 1:5){
-  for (j in 1:5){
-    if (i > j){
-      autoplot(pc_all,
-               data = matched_numeric,
-               colour = 'host_indicator',
-               x=i,
-               y=j)
-    }
-  }
-}
-
-host_species_traits <- data.frame(x[which(y==TRUE), ])
-
-pc_host <- prcomp(host_species_traits,
-             center = TRUE,
-             scale. = TRUE)
-summary(pc_host)
-autoplot(pc_host, data = host_species_traits)
+# 
+# ################################################################################
+# # Now try some PCA.
+# 
+# matched_numeric <- data.frame(x, as.numeric(y))
+# names(matched_numeric)[21] <- 'host_indicator'
+# 
+# pc_all <- prcomp(matched_numeric,
+#              center = TRUE,
+#              scale. = TRUE)
+# summary(pc_all)
+# 
+# layout(matrix(1:100, ncol = 10), respect = TRUE)
+# 
+# for (i in 1:5){
+#   for (j in 1:5){
+#     if (i > j){
+#       autoplot(pc_all,
+#                data = matched_numeric,
+#                colour = 'host_indicator',
+#                x=i,
+#                y=j)
+#     }
+#   }
+# }
+# 
+# host_species_traits <- data.frame(x[which(y==TRUE), ])
+# 
+# pc_host <- prcomp(host_species_traits,
+#              center = TRUE,
+#              scale. = TRUE)
+# summary(pc_host)
+# autoplot(pc_host, data = host_species_traits)
