@@ -18,11 +18,13 @@ grid <- st_make_grid(euromap, cellsize = 1000, what = "centers") ## Need to look
 plot(euromap, max.plot = 1)
 plot(eurogrid, add = T)
 
-eurogrid <- st_intersection(grid, euromap)   
+tictoc::tic()
+eurogrid <- st_intersection(grid, euromap) 
+tictoc::toc()
 # the net should now just be the area of land 
 plot(eurogrid)
 
-#transform Iceland from polygon shape to line
+#transform from polygon shape to line
 euroline <- st_cast(euromap, "MULTILINESTRING")
 plot(euroline)
 
