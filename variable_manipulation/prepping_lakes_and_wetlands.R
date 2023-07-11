@@ -102,10 +102,10 @@ plot(euromap)
 plot(glwd_crop_prj_combo2, add = T, axes = F, col = "blue", legend = F)
 
 # save a copy of this plot
-pdf("plots/inland_water.pdf", height = 5, width = 7)
-plot(euromap)
-plot(glwd_crop_prj_combo2, add = T, axes = F, col = "blue", legend = F)
-dev.off()
+#pdf("plots/inland_water.pdf", height = 5, width = 7)
+#plot(euromap)
+#plot(glwd_crop_prj_combo2, add = T, axes = F, col = "blue", legend = F)
+#dev.off()
 
 ## Next step is to try and work out distance to nearest water for each cell of the blank raster. 
 
@@ -215,3 +215,33 @@ dev.off()
 #table(values(blank_raster_km))
 
 #writeRaster(blank_raster, "output/distance_to_inland_water.tif", overwrite=TRUE)
+
+# want to try and make the background white/blue
+
+# make a copy of the raster
+trial <- glwd_crop_prj_combo2
+#bring in the europe shapefile
+euromap <- terra::vect(x = "output/euro_map.shp")
+
+plot(trial)
+plot(euromap)
+plot(blank_raster_km)
+eurorast <- rasterize(euromap, blank_raster_km)
+plot(eurorast)
+
+
+masked <- terra::mask(blank_raster_km, eurorast)
+plot(masked)
+
+bp_km_500 <- c(1,5, 10, 15,20, 25, 30, 40, 50,100, 200, 500)
+plot(masked, breaks = c(0, bp_km_500), 
+     plg = list(title = "Distance in km"),
+     col= c("white", viridis::viridis(13)), background = "light blue")
+
+pdf("plots/distance_to_water_masked.pdf", width = 7, height = 5)
+plot(masked, breaks = c(0, bp_km_500), 
+     plg = list(title = "Distance in km"),
+     pax=list(side=1:2, cex.axis = 0.8),
+     col= c("white", viridis::viridis(13)), background = "grey")
+dev.off()
+
