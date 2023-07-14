@@ -40,8 +40,6 @@ bvbrc_species[which(bvbrc_species$species == "Larus sp."),"species"] <- "Larus"
 bvbrc_species[which(bvbrc_species$species == "Larus sp"),"species"] <- "Larus"
 
 
-
-
 # reports bad request intermittently. 
 # Connection issue? Can just restart from where it had got to. 
 
@@ -113,6 +111,9 @@ colnames(bvbrc_species_pos) <- c("species", "count_pos")
 bvbrc_pos_neg <- merge(bvbrc_species_neg, bvbrc_species_pos) # default for merge is to just include 
 # columns that have entries for both. Probably most suitable here
 
+bvbrc_pos_neg <- full_join(bvbrc_species_neg, bvbrc_species_pos)
+
+
 bvbrc_pos_neg[,"total_tested"] <- bvbrc_pos_neg[,"count_pos"] + bvbrc_pos_neg[,"count_neg"]
 bvbrc_pos_neg[,"percent_pos"] <- (bvbrc_pos_neg[,"count_pos"]/bvbrc_pos_neg[,"total_tested"])*100
 
@@ -122,6 +123,29 @@ bvbrc_pos_neg[,"percent_pos"] <- (bvbrc_pos_neg[,"count_pos"]/bvbrc_pos_neg[,"to
 bvbrc_pos_neg_fifty <- bvbrc_pos_neg %>%
   filter(total_tested >= 50)
 
+# the list below isn't exhaustive as yet
+# bvbrc_pos_neg[which(bvbrc_pos_neg$species %in% c("Anas sp.", "Anas sp", "Anas spp.")),"species"] <- "Anas"
+# bvbrc_pos_neg[which(bvbrc_pos_neg$species == "Cygnus sp."),"species"] <- "Cygnus"
+# bvbrc_pos_neg[which(bvbrc_pos_neg$species == "Gallinago spp"),"species"] <- "Gallinago"
+# bvbrc_pos_neg[which(bvbrc_pos_neg$species == "Anas sp."),"species"] <- "Anas"
+# bvbrc_pos_neg[which(bvbrc_pos_neg$species == "Columba sp."),"species"] <- "Columba"
+# bvbrc_pos_neg[which(bvbrc_pos_neg$species == "Larus sp."),"species"] <- "Larus"
+# bvbrc_pos_neg[which(bvbrc_pos_neg$species == "Larus sp"),"species"] <- "Larus"
+# 
+
+## now do for families
+for (i in 1077:nrow(bvbrc_pos_neg)) {
+  bvbrc_pos_neg[i,"family"] <- tax_name(bvbrc_pos_neg[i,"species"], 
+                                        get = "family",
+                                        db = "ncbi")$family 
+  print(i)
+}
+
+bvbrc_families_pos_neg <- bvbrc_pos_neg %>%
+  group_by(family) %>%
+  summarise(bvbrc_family_count = sum(count))
+
+unique(bvbrc_pos_neg$family)
 
 ###################################################################
 ### empres-i data
@@ -143,13 +167,29 @@ emp_species <- emp_species %>% mutate(sp_edit = str_remove(species, ' \\(.*')) %
   mutate(sp_edit =  str_remove(sp_edit, '\\:.*')) %>%
   mutate(sp_edit = str_remove(sp_edit, '\\?.*'))
 
-# let's now combine species where possible
 
 emp_species <- emp_species %>%
   group_by(sp_edit) %>%
   summarise(counts = sum(counts)) 
 
 #colnames(emp_species) <- c("species", "counts")
+
+# I want to know how many species across the different data frames
+# However bvbrc as scientific and empres are common
+
+emp_species_df <- as.data.frame(emp_species)
+
+sp_uids <- get_uid(emp_species_df[,"sp_edit"])   
+uids.found <- as.uid(sp_uids[!is.na(sp_uids)])
+
+sci.names <- comm2sci(uids.found, db = 'ncbi')
+
+sci_names_emp <- unlist(sci.names)
+sci_names_bvbrc <- bvbrc_pos_neg$species
+
+sci_names_comb <- unique(c(sci_names_bvbrc, sci_names_emp))
+sci_names_comb_df <- as.data.frame(sci_names_comb)
+# let's now combine databases where possible
 
 # first order
 for (i in 1:nrow(emp_species)) {
