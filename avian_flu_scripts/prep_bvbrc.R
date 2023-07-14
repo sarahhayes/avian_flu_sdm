@@ -52,8 +52,8 @@ nd <- nd[which(nd$Collection.Date != "0005-12-09T00:00:00Z"),]
 
 # Save these files 
 
-#write.csv(pos_data_europe, "data/flu_data/prepped_data/bvbrc_pos_europe.csv")
-#write.csv(nd, "data/flu_data/prepped_data/bvbrc_neg_europe.csv")
+#write.csv(pos_data_europe, "data/flu_data/prepped_data/bvbrc_pos_europe.csv", row.names = F)
+#write.csv(nd, "data/flu_data/prepped_data/bvbrc_neg_europe.csv", row.names = F)
 
 
 
