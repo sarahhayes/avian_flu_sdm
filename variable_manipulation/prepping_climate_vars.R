@@ -36,6 +36,7 @@ euro_ext <- terra::ext(2000000, 6000000, 1000000, 5500000) # swap to base raster
 #blank_3035_1km <- rast(crs=crs, extent=euro_ext, res = 1000)
 
 blank_3035 <- rast(crs=crs, extent=euro_ext, res = 1000)
+blank_3035
 
 # The method below is very slow and throws lots of errors
 # mean_tmin_first_quart_crs <- terra::project(x = mean_tmin_first_quart, y = crs, method = "near") 
@@ -85,6 +86,7 @@ climate_mean_fun <- function(data_list, blank_raster, name_to_save){
   multi_layer_file <- terra::rast(data_list)
   mean_multi_layer <- terra::app(multi_layer_file, mean)
   mean_multi_layer_crs <- terra::project(x = mean_multi_layer, y = blank_raster, method = "near")
+  names(mean_multi_layer_crs) <- name_to_save
   terra::writeRaster(mean_multi_layer_crs, paste("data/variables/climate/climate_prepped/",
                                                       name_to_save, ".tif", sep = ""), overwrite = T)
   
@@ -198,7 +200,7 @@ diff_vals == values(diff_temps_1)[9000000:9000050]
 ## seems to be doing what we want
 
 ## now crop and project
-diff_temps_1_prj <- terra::project(x = diff_temps_1, y = blank_raster, method = "near")
+diff_temps_1_prj <- terra::project(x = diff_temps_1, y = blank_3035, method = "near")
 diff_temps_1_prj
 
 ## Pop this into a function to make the 12 diff rasters
@@ -319,7 +321,6 @@ mean_diff_third_quart <- terra::rast("data/variables/climate/climate_prepped/mea
 mean_diff_fourth_quart <- terra::rast("data/variables/climate/climate_prepped/mean_diff_fourth_quart.tif")
 
 temp_diff_breaks <- seq(0,20,by = 1)
-
 
 plot(mean_diff_first_quart, breaks = temp_diff_breaks, 
      plg = list(title = "Temperature difference - centigrade"),

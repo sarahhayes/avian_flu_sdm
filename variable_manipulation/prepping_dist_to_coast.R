@@ -9,27 +9,70 @@ library(sf)
 
 #euromap <- terra::vect("output/euro_map.shp")
 euromap <- st_read("output/euro_map.shp")
-euromap
+
+# look at one/two countries only whilst working it out
+# euromap <- euromap[which(euromap$NAME_ENGL %in% c("France", "Spain")),]
+# euromap <- euromap[which(euromap$NAME_ENGL %in% c("Denmark")),]
+
+plot(euromap)
+ 
+# euromap
+# The information that is printed when this is read in shows that the extent is the
+# same as the one we have set for our base raster - see bounding box. 
+# (2000000, 6000000, 1000000, 5500000)
+
+cell_size <- c(1000,1000)
+crs <- "epsg:3035"
 
 ##
-grid <- st_make_grid(euromap, cellsize = 1000, what = "centers") ## Need to look 
+grid_centers <- st_make_grid(euromap, cellsize = cell_size, crs = crs, what = "centers") ## Need to look 
+grid_centers # the extent is different to our raster but the XY look like they are the 
+# midpoints of the boxes, which I think is what we need.
+
+#grid_corners <- st_make_grid(euromap, cellsize = cell_size, what = "corners") ## Need to look 
+#grid_corners # this seems to keep the extent the same as we want it to be. 
+
 ## at this more closely and ensure that our grid will be the same as the blank raster 
 ## we are using
 plot(euromap, max.plot = 1)
-plot(eurogrid, add = T)
+plot(grid_centers, add = T)
 
-tictoc::tic()
-eurogrid <- st_intersection(grid, euromap) 
-tictoc::toc()
+# below is incredibly slow
+#tictoc::tic()
+#eurogrid_centers <- st_intersection(grid_centers, euromap) 
+#tictoc::toc()
 # the net should now just be the area of land 
-plot(eurogrid)
+#plot(eurogrid_centers)
 
 #transform from polygon shape to line
-euroline <- st_cast(euromap, "MULTILINESTRING")
+# However, we just want the outline so have to remove the internal lines
+class(euromap)
+
+eurounion <- st_union(euromap$geom)
+plot(eurounion)
+eurounion
+
+euroline <- st_cast(eurounion, "MULTILINESTRING")
+euroline
 plot(euroline)
 
+## work out the intersection using the line
+## use intersects instead of intersection
+
+tictoc::tic()
+eurogrid <- st_intersects(grid_centers, eurounion, sparse = F)
+tictoc::toc()
+
+#g3 <- grid_centers[which(eurogrid_3[,1] == T)]
+#plot(g3, col = "green")
+
+g4 <- grid_centers[eurogrid]
+plot(g4, col = "pink")
+
 #calculation of the distance between the coast and our points
-dist <- st_distance(euroline, eurogrid)
+tictoc::tic()
+dist <- st_distance(euroline, g4)
+tictoc::toc()
 
 #distance with unit in meters
 head(dist[1,])
@@ -37,16 +80,18 @@ head(dist[1,])
 
 ## plotting the distances
 df <- data.frame(dist = as.vector(dist)/1000,
-                 st_coordinates(eurogrid))
+                 st_coordinates(g4))
 
 #structure
 str(df)
 
 #colors 
+library(RColorBrewer)
 col_dist <- brewer.pal(11, "RdGy")
 
+#df_small <- df[1000000: 1200000,]
 
-ggplot(df, aes(X, Y, fill = dist))+ #variables
+ggplot(df, aes(X, Y, fill = dist)) + #variables
   geom_tile()+ #geometry
   scale_fill_gradientn(colours = rev(col_dist))+ #colors for plotting the distance
   labs(fill = "Distance (km)")+ #legend name
@@ -70,15 +115,33 @@ iceland
 
 iceland <- st_transform(iceland, 3055)
 
-grid <- st_make_grid(iceland, cellsize = 5000, what = "centers")
+grid_centers <- st_make_grid(iceland, cellsize = 5000, what = "centers")
+#grid_corners <- st_make_grid(iceland, cellsize = 5000, what = "corners")
 
+grid_centers
+#grid_corners
 #our fishnet with the extension of Iceland
-plot(grid)
+plot(grid_centers)
+#plot(grid_corners, col = "blue", add = T)
 
-grid <- st_intersection(grid, iceland)   
+tictoc::tic()
+grid <- st_intersection(grid_centers, iceland)   
+tictoc::toc()
+
+# looking for a way to speed things up. 
+tictoc::tic()
+grid2 <- st_intersects(grid_centers, iceland, sparse = F)
+tictoc::toc()
+
+grid3 <- st_intersects(grid_centers, iceland, sparse = T)
+
+grid4 <- grid_centers[grid2]
+
+plot(grid4)
 
 #our fishnet now
 plot(grid)
+plot(grid2)
 
 #transform Iceland from polygon shape to line
 iceland <- st_cast(iceland, "MULTILINESTRING")

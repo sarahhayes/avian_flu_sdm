@@ -29,6 +29,17 @@ data_europe <-filter(bvbrc_data_slim, Collection.Country %in% euro_countries)
 table(data_europe$Host.Natural.State) # select wild only
 data_europe <- filter(data_europe, Host.Natural.State == "Wild")
 
+# check if have dates for all the samples
+
+sum(is.na(data_europe$Collection.Year))
+# remove the ones without a year
+data_europe <- drop_na(data_europe, Collection.Year)
+
+table(data_europe$Host.Species)
+
+# There are samples labelled "env" which I assume are environmental so remove these
+data_europe <- data_europe[which(data_europe$Host.Species != "Env"),]
+
 table(data_europe$Pathogen.Test.Result) # separate positive and negative
 pos_data_europe <- filter(data_europe, Pathogen.Test.Result == "Positive")
 neg_data_europe <- filter(data_europe, Pathogen.Test.Result == "Negative")
@@ -42,18 +53,10 @@ neg_data_europe %>%
   count()
 
 
-## there are two wrongly entered collection dates in the negative data.
-## Opt to remove 
-## Doing step-by-step to ensure removing just one at a time 
-
-nd <- neg_data_europe[which(neg_data_europe$Collection.Date != "0002-10-11T00:00:00Z"),] 
-nd <- nd[which(nd$Collection.Date != "0005-12-09T00:00:00Z"),]
-
-
 # Save these files 
 
 #write.csv(pos_data_europe, "data/flu_data/prepped_data/bvbrc_pos_europe.csv", row.names = F)
-#write.csv(nd, "data/flu_data/prepped_data/bvbrc_neg_europe.csv", row.names = F)
+#write.csv(neg_data_europe, "data/flu_data/prepped_data/bvbrc_neg_europe.csv", row.names = F)
 
 
 
