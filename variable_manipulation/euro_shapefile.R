@@ -17,6 +17,9 @@ euro_ext <- terra::ext(2000000, 6000000, 1000000, 5500000)
 # using the blank raster doesn't seem to work with the vector so do step by step 
 euro_map_crop <- terra::project(x = zipmap, y = crs) 
 euro_map_crop2 <- terra::crop(euro_map_crop, euro_ext) 
+euro_map_crop
+euro_map_crop2
+
 plot(euro_map_crop)
 plot(euro_map_crop2)
 

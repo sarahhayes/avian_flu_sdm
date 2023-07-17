@@ -9,12 +9,12 @@ library(tidyverse)
 library(zoo)
 
 # This is wild and captive wild
-pos_data <- read.csv("data/flu_data/BVBRC_wild_captivewild_positive.csv")
-neg_data <- read.csv("data/flu_data/BVBRC_wild_captivewild_negative.csv")
+pos_data <- read.csv("data/flu_data/older_downloads/BVBRC_wild_captivewild_positive.csv")
+neg_data <- read.csv("data/flu_data/older_downloads/BVBRC_wild_captivewild_negative.csv")
 # if we just want to use wild data. 
-pos_data <- read.csv("data/flu_data/BVBRC_wild_captivewild_positive.csv") %>%
+pos_data <- read.csv("data/flu_data/older_downloads/BVBRC_wild_captivewild_positive.csv") %>%
   filter(Host.Natural.State == "Wild")
-neg_data <- read.csv("data/flu_data/BVBRC_wild_captivewild_negative.csv")%>%
+neg_data <- read.csv("data/flu_data/older_downloads/BVBRC_wild_captivewild_negative.csv")%>%
   filter(Host.Natural.State == "Wild")
 
 
