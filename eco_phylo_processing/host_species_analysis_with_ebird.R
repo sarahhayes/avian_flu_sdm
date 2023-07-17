@@ -8,6 +8,7 @@ VARIMPS <- TRUE
 
 require(ape)
 library(BART)
+library(DALEX)
 library(data.table)
 library(dplyr)
 library(ggplot2)
@@ -16,6 +17,7 @@ library(gridExtra)
 require(PhyloMeasures)
 library(RColorBrewer)
 library(readxl)
+library(stringr)
 require(TreeTools)
 
 # First use the AVONET data to create a mapping between names and alphanumeric
@@ -465,6 +467,116 @@ forstrat_data <- matched_data[, c("ForStrat.watbelowsurf",
 max_forstrat_comp <- names(forstrat_data)[which.max(colMeans(forstrat_data))]
 
 ################################################################################
+# Incorporate additional ecological data from IUCN
+
+IUCN_df <- rbind(
+  read.csv("eco_phylo_processing/iucn-data-vol1/all_other_fields.csv"),
+  read.csv("eco_phylo_processing/iucn-data-vol2/all_other_fields.csv"))
+synonym_df <- rbind(
+  read.csv("eco_phylo_processing/iucn-data-vol1/synonyms.csv"),
+  read.csv("eco_phylo_processing/iucn-data-vol2/synonyms.csv"))
+# IUCN_df <- IUCN_df[, c("scientificName",
+#                        "Congregatory.value",
+#                        "MovementPatterns.pattern")]
+# There is lots of redundancy in this dataset because of the way we collated it:
+IUCN_df <- distinct(IUCN_df)
+IUCN_df$scientificName <- sapply(IUCN_df$scientificName, tolower)
+synonym_df$scientificName <- sapply(synonym_df$scientificName, tolower)
+IUCN_df$Avibase_ID <- get_bird_ids(IUCN_df$scientificName)
+unmatched_names <- IUCN_df$scientificName[which(IUCN_df$Avibase_ID=="-100")]
+cat("A total of", length(unmatched_names), "species where not ID'd.\n")
+
+# Try using synonyms. First reduce synonyms to ones connected to species which
+# were not ID'd.
+synonym_df <- synonym_df[which(synonym_df$scientificName %in% unmatched_names), ]
+# Convert synonyms to lower case and first two words only
+synonym_df$name <- sapply(synonym_df$name, tolower)
+synonym_df$name <- sapply(synonym_df$name, FUN = function(x) {str_extract(x, "[^ ]+ [^ ]+")})
+
+# Find out which synonyms appear in AVONET and can be renamed
+in_avonet <- sapply(synonym_df$name,
+                    FUN = function(x) {(x %in% AVONET_df$Species1_BirdLife)|
+                        (x %in% AVONET_df$Species2_eBird)|
+                        (x %in% AVONET_df$Species3_BirdTree)})
+species_in_avonet <- synonym_df$scientificName[which(in_avonet)]
+cat("Of the",
+    length(unmatched_names),
+    "species which were not ID'd, a total of",
+    length(unique(species_in_avonet)),
+    "have a synonym which appears in AVONET.\n")
+
+for (i in 1:length(which(in_avonet))){
+  syn <- synonym_df$name[which(in_avonet)[i]]
+  sp <- species_in_avonet[i]
+  IUCN_df$scientificName[which(IUCN_df$scientificName==sp)] <- syn
+}
+IUCN_df$Avibase_ID <- get_bird_ids(IUCN_df$scientificName)
+unmatched_names <- IUCN_df$scientificName[which(IUCN_df$Avibase_ID=="-100")]
+cat("After relabelling with synonyms a total of",
+    length(unmatched_names),
+    "species where not ID'd.\n")
+
+# Check if any of the remaining unmatched species are in the eBird list:
+matched_IDs_not_in_IUCN <- setdiff(matched_data$Avibase_ID, IUCN_df$Avibase_ID)
+cat("The following species of interest are not assigned ID's in the IUCN data:",
+    matched_data$Scientific[
+      which(matched_data$Avibase_ID %in% matched_IDs_not_in_IUCN)],
+    sep="\n")
+
+# Should find problem species are carduelis flammea/hornemanni and himantopus
+# mexicanus
+# We can fix the issue with carduelis flammea by renaming in the original IUCN
+# data:
+IUCN_df$scientificName[which(IUCN_df$scientificName=="acanthis flammea")] <-
+  "carduelis flammea"
+
+# himantopus mexicanus is a vagrant and should have very low numbers in Europe,
+# so we remove it from the matched data:
+matched_data <- matched_data[
+  -which(matched_data$Scientific=="himantopus mexicanus"),
+  ]
+
+# Now try again
+IUCN_df$Avibase_ID <- get_bird_ids(IUCN_df$scientificName)
+matched_IDs_not_in_IUCN <- setdiff(matched_data$Avibase_ID, IUCN_df$Avibase_ID)
+cat("There are now",
+    length(matched_IDs_not_in_IUCN),
+    "species of interest are not assigned ID's in the IUCN data.\n")
+
+# Inspect coding of congregatory and migratory behaviours: 
+cong_vals <- unique(IUCN_df$Congregatory.value)
+move_vals <- unique(IUCN_df$MovementPatterns.pattern)
+cat("Possible values of Congregatory.value are",
+    cong_vals,
+    sep = "\n")
+cat("Possible values of MovementPatterns.pattern are",
+    move_vals,
+    sep = "\n")
+
+# Set congregatory indicator to true if dispersive or year-round:
+IUCN_df$is_congregatory <- (IUCN_df$Congregatory.value != "")
+
+# Set migratory indicator to true if recorded as full migrant or not known:
+IUCN_df$is_migratory <- (IUCN_df$MovementPatterns.pattern == "Full Migrant") |
+  (IUCN_df$MovementPatterns.pattern == "Unknown")
+
+# Attach migratory/congregatory indicators to matched_data
+# Use any function so that if IUCN has multiple species for an ID we count it as
+# congregatory/migatory if any of the matching species are.
+# Set congregatory indicator to true if dispersive or year-round:
+matched_data$is_congregatory <- sapply(matched_data$Avibase_ID,
+               FUN = function(x){
+                 any(IUCN_df$Congregatory.value[which(IUCN_df$Avibase_ID==x)] != "")
+               })
+# Set migratory indicator to true if recorded as full:
+matched_data$is_migratory <- sapply(matched_data$Avibase_ID,
+                                       FUN = function(x){
+                                         any(IUCN_df$MovementPatterns.pattern[
+                                           which(IUCN_df$Avibase_ID==x)
+                                           ] == "Full Migrant")
+                                       })
+
+################################################################################
 # Bring in phylogenetic data
 
 # If data already exists, load it in, otherwise calculate average phylogenetic
@@ -702,7 +814,7 @@ for (i in 1:nrow(matched_data)){
 }
 
 species_in_dmat <- lapply(rownames(dmat_mean), FUN = function(x) EltonTraits_df$Scientific[which(EltonTraits_df$Avibase_ID==x)[1]])
-larus_cols <- dmat_mean[, grepl("larus", species_in_dmat)]
+larus_cols <- dmat_mean[, grepl("^larus", species_in_dmat)]
 larus_distance <- apply(larus_cols, 1, min)
 for (i in 1:nrow(matched_data)){
   species_in_dmat <- which(
@@ -787,7 +899,7 @@ ytest <- y[-train]
 bartfit <- lbart(xtrain,
                  ytrain,
                  x.test = xtest,
-                 ntree = 1000)
+                 ntree = 5000)
 
 # Use a majority judgement to decide whether to accept
 yhat.train <- plogis(bartfit$yhat.train - bartfit$binaryOffset)
@@ -808,7 +920,7 @@ cat("Training false negative rate is",
 
 # And for test data:
 yhat.test <- plogis(bartfit$yhat.test - bartfit$binaryOffset)
-yhat.maj <- colSums(yhat.test) >= nrow(yhat.test)/2
+yhat.maj <- colSums(yhat.test) >= .5*nrow(yhat.test)
 
 # Calculate error rates
 false_neg_rate <- length(which((!yhat.maj)&ytest))/length(which(ytest))
@@ -858,6 +970,15 @@ if (PLOT){
          cex = 0.8,
          xpd = TRUE)
 }
+
+predict_function <- function(model, data){
+  return(predict(model, data)$yhat.test)
+}
+
+ex <- explain.default(bartfit,
+                      data = xtrain,
+                      predict_function = predict_function)
+mp <- model_profile(ex)
 
 if (VARIMPS){
   # Do a more thorough variable importance
