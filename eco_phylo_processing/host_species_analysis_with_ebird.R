@@ -858,6 +858,8 @@ name_pairs$BodyMass.Value <- "Body mass"
 name_pairs$nearest_host_distance <- "Phylo. distance to confirmed host"
 name_pairs$anatidae_distance <- "Phylo. distance to Anatidae"
 name_pairs$larus_distance <- "Phylo. distance to Larus"
+name_pairs$is_congregatory <- "Congregatory"
+name_pairs$is_migratory <- "Migratory"
 
 expand_names <- function(name_list){
   expanded_names <- c()
@@ -896,14 +898,15 @@ ytrain <- y[train]
 xtest <- x[-train, ]
 ytest <- y[-train]
 
+ntree = 1000
 bartfit <- lbart(xtrain,
                  ytrain,
                  x.test = xtest,
-                 ntree = 5000)
+                 ntree = ntree)
 
 # Use a majority judgement to decide whether to accept
 yhat.train <- plogis(bartfit$yhat.train - bartfit$binaryOffset)
-yhat.maj <- colSums(yhat.train) >= nrow(yhat.train)/2
+yhat.maj <- colSums(yhat.train) >= .5*nrow(yhat.train)
 
 # Calculate error rates
 false_neg_rate <- length(which((!yhat.maj)&ytrain))/length(which(ytrain))
@@ -935,9 +938,60 @@ cat("Test false negative rate is",
     misclass_rate,
     ".\n")
 
+# Explore impact of classification threshold on error rate:
+threshold_vals <- seq(0.01, 1., 0.01)
+yhat_vals <- sapply(threshold_vals,
+                    FUN = function(x) {colSums(yhat.test) >= x*nrow(yhat.test)})
+false_neg_vals <- apply(yhat_vals,
+                        2,
+                        FUN = function(x) {
+                          length(which((!x)&ytest))/length(which(ytest))})
+false_pos_vals <- apply(yhat_vals,
+                        2,
+                        FUN = function(x) {
+                          length(which((x)&!ytest))/length(which(!ytest))})
+misclass_vals <- apply(yhat_vals,
+                        2,
+                        FUN = function(x) {(length(which((!x)&ytest)) +
+                          length(which((x)&!ytest)))/length(ytest)})
+
+if (PLOT){
+  par(mar= c(5, 5, 1, 8))
+  pal <- brewer.pal(3, "Dark2")
+  misclass_plot <- plot(threshold_vals,
+                        false_neg_vals,
+                        xlab = "Threshold",
+                        ylab = "Rate",
+                        type = "l",
+                        col = pal[1],
+                        lwd = 5)
+  lines(x = threshold_vals,
+        y = false_pos_vals,
+        col = pal[2],
+        lwd = 5)
+  lines(x = threshold_vals,
+        y = misclass_vals,
+        col = pal[3],
+        lwd = 5)
+  legend("topright",
+         inset=c(-0.2,0),
+         legend = c("False negative", "False positive", "Misclassification"),
+         col = pal,
+         bty = "n",
+         pch = 20,
+         pt.cex = 2,
+         cex = 0.8,
+         xpd = TRUE)
+}
+
+# Should find that a threshold of about 50% looks optimal!
+cat("Difference between error rates is minimised when threshold is",
+    threshold_vals[which.min(abs(false_neg_vals-false_pos_vals))],
+    ".\n")
+
 # How many times to variables appear?
 ord <- order(bartfit$varcount.mean, decreasing = T)
-varcount_df <- data.frame((1/1000) * bartfit$varcount.mean)
+varcount_df <- data.frame((1/ntree) * bartfit$varcount.mean)
 
 if (PLOT){
   par(mar= c(14, 5, 1, 8))
@@ -972,13 +1026,26 @@ if (PLOT){
 }
 
 predict_function <- function(model, data){
-  return(predict(model, data)$yhat.test)
+  yhat.test <- plogis(predict(model, data)$yhat.test - model$binaryOffset)
+  yhat.maj <- colSums(yhat.test) >= .5*nrow(yhat.test)
+  return(yhat.maj)
 }
 
-ex <- explain.default(bartfit,
+residual_function <- function(model, data, target_data, predict_function){
+  yhat.maj <- predict_function(model, data)
+  misclass_rate <- (length(which((!yhat.maj)&target_data)) +
+                    length(which(yhat.maj&!target_data))) / length(target_data)
+  return(misclass_rate)
+}
+
+bart_explainer <- explain.default(bartfit,
                       data = xtrain,
-                      predict_function = predict_function)
-mp <- model_profile(ex)
+                      y = ytrain,
+                      predict_function = predict_function,
+                      residual_function = residual_function,
+                      type = "classification")
+bart_performance <- model_performance(bart_explainer)
+cat("AUC is", bart_performance$measures$auc, ".\n")
 
 if (VARIMPS){
   # Do a more thorough variable importance
