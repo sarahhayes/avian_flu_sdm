@@ -613,45 +613,8 @@ matched_data$is_migratory <- sapply(matched_data$Avibase_ID,
 }
 
 dmat_ids <- get_bird_ids(rownames(dmat_mean))
-# 
-# # See if any species were not successfully ID'd
-# cat(length(which(dmat_ids=="-100")), "species were not ID'd.\n")
-# cat("Unidentified species are:",
-#     rownames(dmat_mean)[which(dmat_ids=="-100")],
-#     sep = "\n")
-# 
-# # These turn out to be the same species that were not ID'd from EltonTraits.
-# # Rename to match AVONET:
-# rownames(dmat_mean)[
-#   which(rownames(dmat_mean)=="anthus longicaudatus")
-# ] <- "anthus vaalensis"
-# rownames(dmat_mean)[
-#   which(rownames(dmat_mean)=="polioptila clementsi")
-# ] <- "polioptila guianensis"
-# rownames(dmat_mean)[
-#   which(rownames(dmat_mean)=="hypositta perdita")
-# ] <- "oxylabes madagascariensis"
-# 
-# # This next species just seems to be missing from AVONET so we remove it:
-# dmat_mean <- dmat_mean[
-#   which(rownames(dmat_mean)!="amaurospiza carrizalensis"), ]
-# dmat_mean <- dmat_mean[,
-#   which(colnames(dmat_mean)!="amaurospiza carrizalensis")]
-# 
-# rownames(dmat_mean)[
-#   which(rownames(dmat_mean)=="lophura hatinhensis")
-# ] <- "lophura edwardsi"
-# dmat_ids <- get_bird_ids(rownames(dmat_mean))
-# 
-# # Try again after renaming:
-# dmat_ids <- get_bird_ids(rownames(dmat_mean))
-# cat(length(which(dmat_ids=="-100")), "species were not ID'd.")
-# 
-# # Find any species that are in EltonTraits but not in BirdTree:
-# cat("The following species do not have IDs in the phylogenetic data:",
-#     matched_data$Scientific[-which(matched_data$Avibase_ID %in% dmat_ids)],
-#     sep = "\n"
-# )
+
+# See if any species were not successfully ID'd
 cat("There are",
     length(setdiff(unique(EltonTraits_df$Scientific),
                    unique(rownames(dmat_mean)))),
@@ -898,7 +861,7 @@ ytrain <- y[train]
 xtest <- x[-train, ]
 ytest <- y[-train]
 
-ntree = 1000
+ntree <- 5000
 bartfit <- lbart(xtrain,
                  ytrain,
                  x.test = xtest,
@@ -939,7 +902,7 @@ cat("Test false negative rate is",
     ".\n")
 
 # Explore impact of classification threshold on error rate:
-threshold_vals <- seq(0.01, 1., 0.01)
+threshold_vals <- seq(0.001, 1., 0.001)
 yhat_vals <- sapply(threshold_vals,
                     FUN = function(x) {colSums(yhat.test) >= x*nrow(yhat.test)})
 false_neg_vals <- apply(yhat_vals,
@@ -954,6 +917,43 @@ misclass_vals <- apply(yhat_vals,
                         2,
                         FUN = function(x) {(length(which((!x)&ytest)) +
                           length(which((x)&!ytest)))/length(ytest)})
+
+true_pos_vals <- apply(yhat_vals,
+                        2,
+                        FUN = function(x) {
+                          length(which((x)&ytest))/length(which(ytest))})
+L <- length(threshold_vals)
+xvals <- order(false_pos_vals)
+xvals1 <- xvals[1:L-1]
+xvals2 <- xvals[2:L]
+AUC <- sum(0.5*(true_pos_vals[xvals1] + true_pos_vals[xvals2]) *
+  (false_pos_vals[xvals2] - false_pos_vals[xvals1]))
+cat("My estimate of AUC is", AUC, ".\n")
+if (PLOT){
+  par(mar= c(5, 5, 1, 8))
+  pal <- brewer.pal(3, "Dark2")
+  auc_plot <- plot(false_pos_vals,
+       true_pos_vals,
+       xlab = "False positive rate",
+       ylab = "True positive rate",
+       type = "l",
+       col = pal[1],
+       lwd = 5)
+  lines(seq(0., 1.),
+       seq(0., 1.),
+       lty = "dashed",
+       col = pal[2],
+       lwd = 2.5)
+  legend("topright",
+         inset=c(-0.15,0),
+         legend = c("ROC", "Uninformative\n classifier"),
+         col = pal,
+         bty = "n",
+         pch = 20,
+         pt.cex = 2,
+         cex = 0.8,
+         xpd = TRUE)
+}
 
 if (PLOT){
   par(mar= c(5, 5, 1, 8))
@@ -1033,9 +1033,9 @@ predict_function <- function(model, data){
 
 residual_function <- function(model, data, target_data, predict_function){
   yhat.maj <- predict_function(model, data)
-  misclass_rate <- (length(which((!yhat.maj)&target_data)) +
-                    length(which(yhat.maj&!target_data))) / length(target_data)
-  return(misclass_rate)
+  res <- (length(which((!yhat.maj)&target_data)) +
+                    length(which(yhat.maj&!target_data)))
+  return(res)
 }
 
 bart_explainer <- explain.default(bartfit,
@@ -1098,37 +1098,3 @@ if (VARIMPS){
          cex = 0.8,
          xpd = TRUE)
 }
-
-# 
-# ################################################################################
-# # Now try some PCA.
-# 
-# matched_numeric <- data.frame(x, as.numeric(y))
-# names(matched_numeric)[21] <- 'host_indicator'
-# 
-# pc_all <- prcomp(matched_numeric,
-#              center = TRUE,
-#              scale. = TRUE)
-# summary(pc_all)
-# 
-# layout(matrix(1:100, ncol = 10), respect = TRUE)
-# 
-# for (i in 1:5){
-#   for (j in 1:5){
-#     if (i > j){
-#       autoplot(pc_all,
-#                data = matched_numeric,
-#                colour = 'host_indicator',
-#                x=i,
-#                y=j)
-#     }
-#   }
-# }
-# 
-# host_species_traits <- data.frame(x[which(y==TRUE), ])
-# 
-# pc_host <- prcomp(host_species_traits,
-#              center = TRUE,
-#              scale. = TRUE)
-# summary(pc_host)
-# autoplot(pc_host, data = host_species_traits)
