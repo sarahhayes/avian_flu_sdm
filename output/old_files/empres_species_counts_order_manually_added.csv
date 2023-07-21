@@ -1,0 +1,70 @@
+species,counts,order
+Accipiter Gentilis ,10,accipitriformes
+Accipitridae (Accipitridae),159,accipitriformes
+Accipitridae (Incognita),12,accipitriformes
+Accipitridae (Unidentified):Accipitridae (Incognita)(Accipitridae),22,accipitriformes
+Anatidae (Incognita),55,anseriformes
+Anatidae (Unidentified),306,anseriformes
+Anatidae (Unidentified):Anatidae (Incognita)(Anatidae),583,anseriformes
+Anserinae (Unidentified):Anserinae (Incognita)(Anatidae),154,anseriformes
+Barnacle Goose:branta Leucopsis(Anatidae),229,anseriformes
+Black Headed Gull (Chroicocephalus Ridibundus),61,charadriiformes
+Brent Goose:branta Bernicla(Anatidae),10,anseriformes
+Buzzard,219,accipitriformes
+Canada Goose:branta Canadensis(Anatidae),102,anseriformes
+Charadriidae (Unidentified):Charadriidae (Incognita)(Charadriidae),43,charadriiformes
+Common Eider (Somateria Mollissima),13,anseriformes
+Common Kestrel:falco Tinnunculus(Falconidae),19,falconiformes
+Common Murre (Uria Aalge) ,15,charadriiformes
+Common Tern (Sterna Hirundo),11,charadriiformes
+Cormorant,15,suliformes
+Crow,31,passeriformes
+Curlew,15,charadriiformes
+Dalmatian Pelican (Pelecanus Crispus),19,pelecaniformes
+Duck,91,anseriformes
+Eurasian Buzzard (Common Buzzard) (Buteo Buteo),19,accipitriformes
+Eurasian Buzzard (Common Buzzard):Buteo Buteo(Accipitridae),36,accipitriformes
+Eurasian Sparrowhawk:accipiter Nisus(Accipitridae),13,accipitriformes
+Eurasian Wigeon (Anas Penelope),40,anseriformes
+Goose,201,anseriformes
+Great Black-Backed Gull (Larus Marinus),30,charadriiformes
+Great Cormorant (Phalacrocorax Carbo),27,suliformes
+Great Crested Grebe,16,podicipediformes
+Great Skua (Stercorarius Skua),18,charadriiformes
+Greater White-Fronted Goose (Anser Albifrons),25,anseriformes
+Grey Heron,23,pelecaniformes
+Grey Heron:ardea Cinerea(Ardeidae),28,pelecaniformes
+Greylag Goose,55,anseriformes
+Greylag Goose:anser Anser(Anatidae),179,anseriformes
+Gull,121,charadriiformes
+Heron,27,pelecaniformes
+Herring Gull,36,charadriiformes
+Herring Gull:larus Argentatus(Laridae),147,charadriiformes
+Laridae (Unidentified):Laridae (Incognita)(Laridae),160,charadriiformes
+Magpie,16,passeriformes
+Mallard,73,anseriformes
+Mallard:anas Platyrhynchos(Anatidae),48,anseriformes
+Mew Gull (Larus Canus),10,charadriiformes
+Mute Swan  (Cygnus Olor),345,anseriformes
+Mute Swan:cygnus Olor(Anatidae),476,anseriformes
+Northern Gannet:morus Bassanus(Sulidae),204,suliformes
+Owl,25,strigiformes
+Pelecanidae (Unidentified):Pelecanidae (Incognita)(Pelecanidae),10,pelecaniformes
+Peregrin Falcon:falco Peregrinus(Falconidae),41,falconiformes
+Peregrine Falcon,23,falconiformes
+Phasianidae (Unidentified):Phasianidae (Incognita)(Phasianidae),45,galliformes
+Phasianus Colchicus (Common Pheasant) - Phasanidae,14,galliformes
+Rook,10,passeriformes
+Sandwich Tern,24,charadriiformes
+Stork,35,ciconiiformes
+Strigidae (Unidentified):Strigidae (Incognita)(Strigidae),15,strigiformes
+Sulids (Sulidae),18,suliformes
+Swan,519,anseriformes
+Teal,19,anseriformes
+Tufted Duck,83,anseriformes
+Unspecified Bird,530,NA
+White Tailed Eagle (Haliaeetus Albicilla),96,accipitriformes
+Whooper Swan,65,anseriformes
+Whooper Swan:cygnus Cygnus(Anatidae),88,anseriformes
+Wild Duck,64,anseriformes
+Yellow-Legged Gull ,10,charadriiformes

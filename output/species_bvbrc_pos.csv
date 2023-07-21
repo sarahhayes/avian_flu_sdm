@@ -3,10 +3,10 @@
 "2","Alopochen aegyptiaca",1
 "3","Alopochen aegyptiacus",4
 "4","Anas acuta",12
-"5","Anas clypeata",49
-"6","Anas crecca",449
+"5","Anas clypeata",48
+"6","Anas crecca",446
 "7","Anas penelope",796
-"8","Anas platyrhynchos",9717
+"8","Anas platyrhynchos",9270
 "9","Anas querquedula",2
 "10","Anas sp.",12
 "11","Anas strepera",253
@@ -16,11 +16,11 @@
 "15","Anser fabalis",48
 "16","Anser fabalis serrirostris",2
 "17","Aquila heliaca",1
-"18","Arenaria interpres",34
+"18","Arenaria interpres",32
 "19","Aythya ferina",1
 "20","Aythya fuligula",3
 "21","Branta bernicla",11
-"22","Branta leucopsis",239
+"22","Branta leucopsis",237
 "23","Bucephala clangula",2
 "24","Buteo buteo",3
 "25","Calcarius lapponicus",4
@@ -28,7 +28,7 @@
 "27","Calidris alpina",4
 "28","Cepphus grylle",4
 "29","Chlidonias niger",1
-"30","Chroicocephalus ridibundus",273
+"30","Chroicocephalus ridibundus",228
 "31","Coloeus monedula",1
 "32","Coturnix coturnix",1
 "33","Cygnus atratus",1
@@ -41,7 +41,7 @@
 "40","Gallinago gallinago",1
 "41","Gallinula chloropus",6
 "42","Haematopus ostralegus",1
-"43","Larus argentatus",52
+"43","Larus argentatus",51
 "44","Larus argentatus cachinnans",1
 "45","Larus armenicus",42
 "46","Larus cachinnans",3
@@ -54,7 +54,7 @@
 "53","Larus melanocephalus",5
 "54","Larus michahellis",126
 "55","Larus ridibundus",1137
-"56","Larus sp.",24
+"56","Larus sp.",23
 "57","Phalacrocorax carbo",1
 "58","Plectrophenax nivalis",1
 "59","Podiceps cristatus",2

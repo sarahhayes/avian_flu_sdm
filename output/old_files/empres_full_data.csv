@@ -1,0 +1,187 @@
+,sp_edit,counts,order,family,genus
+1,Accipiter Gentilis ,10,Accipitriformes,Accipitridae,Accipiter
+2,Accipitridae,193,Accipitriformes,Accipitridae,NA
+3,Anatidae,944,Anseriformes,Anatidae,NA
+4,Anserinae,154,Anseriformes,Anatidae,NA
+5,Arctic Skua,1,NA,NA,NA
+6,Arctic Tern,3,Charadriiformes,Laridae,Sterna
+7,Ardeidae,6,Pelecaniformes,Ardeidae,NA
+8,Arenaria Interpres,1,Charadriiformes,Scolopacidae,Arenaria
+9,Armenian Gull,1,Charadriiformes,Laridae,Larus
+10,Atlantic Puffin,2,Charadriiformes,Alcidae,Fratercula
+11,Barn Owl,3,Strigiformes,Tytonidae,Tyto
+12,Barnacle Goose,229,Anseriformes,Anatidae,Branta
+13,Bean Goose,7,Anseriformes,Anatidae,Anser
+14,Bearded Vulture,5,NA,NA,NA
+15,Black-Faced Spoonbill,1,Pelecaniformes,Threskiornithidae,Platalea
+16,Black-Headed Gull,2,Charadriiformes,Laridae,Chroicocephalus
+17,Black-Legged Kittiwake,5,Charadriiformes,Laridae,Rissa
+18,Black-Necked Grebe,1,Podicipediformes,Podicipedidae,Podiceps
+19,Black Guillemot,7,NA,NA,NA
+20,Black Headed Gull,66,Charadriiformes,Laridae,Chroicocephalus
+21,Black Swan,8,Anseriformes,Anatidae,Cygnus
+22,Brent Goose,10,NA,NA,NA
+23,Brown-Headed Gull,2,Charadriiformes,Laridae,Chroicocephalus
+24,Buzzard,219,NA,NA,NA
+25,Cackling Goose,1,Anseriformes,Anatidae,Branta
+26,Canada Goose,108,Anseriformes,Anatidae,Branta
+27,Caspian Gull,1,Charadriiformes,Laridae,Larus
+28,Caspian Tern,2,Charadriiformes,Laridae,Hydroprogne
+29,Cattle Egret,2,Pelecaniformes,Ardeidae,Bubulcus
+30,Charadriidae,43,Charadriiformes,Charadriidae,NA
+31,Charadrius Pallidus,3,Charadriiformes,Charadriidae,Charadrius
+32,Ciconiidae,6,Ciconiiformes,Ciconiidae,NA
+33,Cockatiel,2,Psittaciformes,Cacatuidae,Nymphicus
+34,Columbidae,2,Columbiformes,Columbidae,NA
+35,Common Coot,6,Gruiformes,Rallidae,Fulica
+36,Common Eider,13,Anseriformes,Anatidae,Somateria
+37,Common Goldeneye,2,Anseriformes,Anatidae,Bucephala
+38,Common Kestrel,22,Falconiformes,Falconidae,Falco
+39,Common Loon,1,Gaviiformes,Gaviidae,Gavia
+40,Common Moorhen,5,Gruiformes,Rallidae,Gallinula
+41,Common Murre,15,Charadriiformes,Alcidae,Uria
+42,Common Pheasant,5,Galliformes,Phasianidae,Phasianus
+43,Common Pochard,11,Anseriformes,Anatidae,Aythya
+44,Common Raven,2,Passeriformes,Corvidae,Corvus
+45,Common Shelduck,9,Anseriformes,Anatidae,Tadorna
+46,Common Tern,13,Charadriiformes,Laridae,Sterna
+47,Common Wood-Pigeon,3,NA,NA,NA
+48,Coot,8,Gruiformes,Rallidae,Fulica
+49,Cormorant,15,Pelecaniformes,Phalacrocoracidae,Phalacrocorax
+50,Corvidae,2,Passeriformes,Corvidae,NA
+51,Crane,9,NA,NA,NA
+52,Crow,31,NA,NA,NA
+53,Crowned Cormorant,1,Pelecaniformes,Phalacrocoracidae,Microcarbo
+54,Curlew,15,NA,NA,NA
+55,Dalmatian Pelican,24,Pelecaniformes,Pelecanidae,Pelecanus
+56,Duck,91,Anseriformes,Anatidae,Anas
+57,Egret,6,NA,NA,NA
+58,Egyptian Goose,8,Anseriformes,Anatidae,Alopochen
+59,Emu,3,Casuariiformes,Dromaiidae,Dromaius
+60,Eurasian Blackbird,1,Passeriformes,Turdidae,Turdus
+61,Eurasian Buzzard,55,NA,NA,NA
+62,Eurasian Collared Dove,2,Columbiformes,Columbidae,Streptopelia
+63,Eurasian Coot,1,Gruiformes,Rallidae,Fulica
+64,Eurasian Eagle-Owl,8,Strigiformes,Strigidae,Bubo
+65,Eurasian Oystercatcher,2,Charadriiformes,Haematopodidae,Haematopus
+66,Eurasian Sparrowhawk,13,Accipitriformes,Accipitridae,Accipiter
+67,Eurasian Spoonbill,3,Pelecaniformes,Threskiornithidae,Platalea
+68,Eurasian Tree Sparrow ,1,Passeriformes,Passeridae,Passer
+69,Eurasian Wigeon,52,Anseriformes,Anatidae,Mareca
+70,Falcon,6,NA,NA,NA
+71,Fox,2,NA,NA,NA
+72,Gadwall,7,Anseriformes,Anatidae,Mareca
+73,Garganey,1,Anseriformes,Anatidae,Spatula
+74,Goosander,4,NA,NA,NA
+75,Goose,201,Anseriformes,Anatidae,Anser
+76,Goshawk,6,Accipitriformes,Accipitridae,Accipiter
+77,Gray Seal,1,Carnivora,Phocidae,Halichoerus
+78,Great Black-Backed Gull,30,Charadriiformes,Laridae,Larus
+79,Great Black-Headed Gull,5,Charadriiformes,Laridae,Ichthyaetus
+80,Great Blue Heron,4,Pelecaniformes,Ardeidae,Ardea
+81,Great Cormorant,30,Pelecaniformes,Phalacrocoracidae,Phalacrocorax
+82,Great Crested Grebe,23,Podicipediformes,Podicipedidae,Podiceps
+83,Great Egret,9,Pelecaniformes,Ardeidae,Ardea
+84,Great Skua,18,Charadriiformes,Stercorariidae,Stercorarius
+85,Greater Flamingo,3,Phoenicopteriformes,Phoenicopteridae,Phoenicopterus
+86,Greater Rhea,3,Rheiformes,Rheidae,Rhea
+87,Greater Scaup,2,Anseriformes,Anatidae,Aythya
+88,Greater White-Fronted Goose,25,NA,NA,NA
+89,Grebe,4,NA,NA,NA
+90,Green Sandpiper,2,Charadriiformes,Scolopacidae,Tringa
+91,Grey Crowned Crane,1,Gruiformes,Gruidae,Balearica
+92,Grey Headed Gull,8,Charadriiformes,Laridae,Chroicocephalus
+93,Grey Heron,51,Pelecaniformes,Ardeidae,Ardea
+94,Greylag Goose,234,Anseriformes,Anatidae,Anser
+95,Griffon Vulture,5,Accipitriformes,Accipitridae,Gyps
+96,Gruidae,2,Gruiformes,Gruidae,NA
+97,Gull,121,Charadriiformes,Laridae,NA
+98,Haematopodidae,2,Charadriiformes,Haematopodidae,NA
+99,Harbor Seal,1,Carnivora,Phocidae,Phoca
+100,Harris's Hawk,1,Accipitriformes,Accipitridae,Parabuteo
+101,Hawk,4,NA,NA,NA
+102,Heron,27,NA,NA,NA
+103,Herring Gull,183,Charadriiformes,Laridae,Larus
+104,Hooded Crow,7,Passeriformes,Corvidae,Corvus
+105,House Sparrow,6,Passeriformes,Passeridae,Passer
+106,Ivory Gull,1,Charadriiformes,Laridae,Pagophila
+107,Jackdaw,2,Passeriformes,Corvidae,Coloeus
+108,Kite,3,NA,NA,NA
+109,Laridae,160,Charadriiformes,Laridae,NA
+110,Lesser Black-Backed Gull,6,Charadriiformes,Laridae,Larus
+111,Lesser Black Backed Gull,3,Charadriiformes,Laridae,Larus
+112,Little Egret,1,Pelecaniformes,Ardeidae,Egretta
+113,Little Grebe,6,Podicipediformes,Podicipedidae,Tachybaptus
+114,Little Owl,1,Strigiformes,Strigidae,Athene
+115,Magpie,16,NA,NA,NA
+116,Mallard,121,Anseriformes,Anatidae,Anas
+117,Marbled Teal,1,Anseriformes,Anatidae,Marmaronetta
+118,Mediterranean Gull ,4,Charadriiformes,Laridae,Ichthyaetus
+119,Mew Gull,10,Charadriiformes,Laridae,Larus
+120,Mink,2,Carnivora,Mustelidae,Mustela
+121,Muscovy Duck,1,Anseriformes,Anatidae,Cairina
+122,Mute Swan,476,Anseriformes,Anatidae,Cygnus
+123,Mute Swan ,345,Anseriformes,Anatidae,Cygnus
+124,Northern Bald Ibis,1,Pelecaniformes,Threskiornithidae,Geronticus
+125,Northern Crested Caracara,1,NA,NA,NA
+126,Northern Fulmar,2,Procellariiformes,Procellariidae,Fulmarus
+127,Northern Gannet,204,Pelecaniformes,Sulidae,Morus
+128,Northern Lapwing,1,Charadriiformes,Charadriidae,Vanellus
+129,Northern Pintail,2,Anseriformes,Anatidae,Anas
+130,Northern Shoveler,1,Anseriformes,Anatidae,Spatula
+131,Numididae,1,Galliformes,Numididae,NA
+132,Owl,25,NA,NA,NA
+133,Oyster Catcher,1,NA,NA,NA
+134,Pallas's Gull,1,NA,NA,NA
+135,Passeridae,5,Passeriformes,Passeridae,NA
+136,Peacock,1,Lepidoptera,Nymphalidae,Nymphalis
+137,Pelecanidae,10,Pelecaniformes,Pelecanidae,NA
+138,Peregrin Falcon,41,NA,NA,NA
+139,Peregrine Falcon,23,Falconiformes,Falconidae,Falco
+140,Phasianidae,54,Galliformes,Phasianidae,NA
+141,Phasianus Colchicus,14,Galliformes,Phasianidae,Phasianus
+142,Pheasant,2,NA,NA,NA
+143,Pigeon,3,NA,NA,NA
+144,Pink-Footed Goose,3,Anseriformes,Anatidae,Anser
+145,Pochard,3,Anseriformes,Anatidae,Aythya
+146,Quail,2,NA,NA,NA
+147,Razorbill,2,Charadriiformes,Alcidae,Alca
+148,Red-Billed Gull,1,Charadriiformes,Laridae,Chroicocephalus
+149,Red Fox,2,Carnivora,Canidae,Vulpes
+150,Red Knot,2,Charadriiformes,Scolopacidae,Calidris
+151,Rock Dove,9,Columbiformes,Columbidae,Columba
+152,Rook,10,Passeriformes,Corvidae,Corvus
+153,Rose Pelican,1,NA,NA,NA
+154,Sanderling ,3,Charadriiformes,Scolopacidae,Calidris
+155,Sandwich Tern,24,Charadriiformes,Laridae,Thalasseus
+156,Scolopacidae,3,Charadriiformes,Scolopacidae,NA
+157,Semipalmated Sandpiper,3,Charadriiformes,Scolopacidae,Calidris
+158,Silver Teal,1,NA,NA,NA
+159,Spotted Dove,1,Columbiformes,Columbidae,Spilopelia
+160,Starling,2,Passeriformes,Sturnidae,Sturnus
+161,Stone Marten,1,NA,NA,NA
+162,Stork,35,NA,NA,NA
+163,Strigidae,15,Strigiformes,Strigidae,NA
+164,Sulids,18,NA,NA,NA
+165,Swallow,1,NA,NA,NA
+166,Swan,519,NA,NA,NA
+167,Tawny Owl,2,Strigiformes,Strigidae,Strix
+168,Teal,19,NA,NA,NA
+169,Tern,2,NA,NA,NA
+170,Threskiornithidae,2,Pelecaniformes,Threskiornithidae,NA
+171,Thrush,2,NA,NA,NA
+172,Tufted Duck,83,Anseriformes,Anatidae,Aythya
+173,Tundra Swan,2,Anseriformes,Anatidae,Cygnus
+174,Unspecified Bird,530,NA,NA,NA
+175,Unspecified Mammal,1,NA,NA,NA
+176,Variable Hawk,1,NA,NA,NA
+177,Vulture,2,NA,NA,NA
+178,Wader,1,NA,NA,NA
+179,Water Hen,1,NA,NA,NA
+180,Western Grebe,1,Podicipediformes,Podicipedidae,Aechmophorus
+181,White Stork,3,Ciconiiformes,Ciconiidae,Ciconia
+182,White Tailed Eagle,96,Accipitriformes,Accipitridae,Haliaeetus
+183,Whooper Swan,153,NA,NA,NA
+184,Wigeons,1,NA,NA,NA
+185,Wild Duck,64,NA,NA,NA
+186,Yellow-Legged Gull ,10,Charadriiformes,Laridae,Larus

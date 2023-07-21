@@ -91,15 +91,18 @@ col_dist <- brewer.pal(11, "RdGy")
 
 #df_small <- df[1000000: 1200000,]
 
+#pdf("plots/distance_to_coast_map.pdf", width = 10, height = 10)
+#png("plots/distance_to_coast_map.png")
 ggplot(df, aes(X, Y, fill = dist)) + #variables
   geom_tile()+ #geometry
   scale_fill_gradientn(colours = rev(col_dist))+ #colors for plotting the distance
   labs(fill = "Distance (km)")+ #legend name
   theme_void()+ #map theme
   theme(legend.position = "bottom") #legend position
+#dev.off()
 
 
-
+#########################################################################################
 ## Example from webpage
 library(rnaturalearth)
 library(sf)
