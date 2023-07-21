@@ -713,28 +713,30 @@ for (i in 1:4){
                              period = "seasonal",
                              resolution = "lr")
     this_rast <- project(x = this_rast, y = blank_3035, method = "near")
+    # Get rid of NA's:
+    this_rast <- replace(this_rast, is.na(this_rast), 0)
     if (nlyr(this_rast)==4){
       for (i in 1:4){
         if (species_factors$is_congregatory){
           cong_rast[, , i] <- cong_rast[, , i] + this_rast[, , i]
         }
         if (species_factors$is_migratory){
-          cong_rast[, , i] <- cong_rast[, , i] + this_rast[, , i]
+          mig_rast[, , i] <- mig_rast[, , i] + this_rast[, , i]
         }
-        cong_rast[, , i] <- species_factors$ForStrat.wataroundsurf * this_rast[, , i]
-        cong_rast[, , i] <- species_factors$ForStrat.watbelowsurf * this_rast[, , i]
+        around_surf_rast[, , i] <- around_surf_rast[, , i] + species_factors$ForStrat.wataroundsurf * this_rast[, , i]
+        below_surf_rast[, , i] <- below_surf_rast[, , i] + species_factors$ForStrat.watbelowsurf * this_rast[, , i]
       }
     }
     else if (nlyr(this_rast)==1){
       for (i in 1:4){
         if (species_factors$is_congregatory){
-          cong_rast[, , i] <- cong_rast[, , i] + this_rast
+          cong_rast[, , i] <- cong_rast[, , i] + this_rast[, , 1]
         }
         if (species_factors$is_migratory){
-          cong_rast[, , i] <- cong_rast[, , i] + this_rast
+          mig_rast[, , i] <- mig_rast[, , i] + this_rast[, , 1]
         }
-        cong_rast[, , i] <- species_factors$ForStrat.wataroundsurf * this_rast
-        cong_rast[, , i] <- species_factors$ForStrat.watbelowsurf * this_rast
+        around_surf_rast[, , i] <- around_surf_rast[, , i] + species_factors$ForStrat.wataroundsurf * this_rast[, , 1]
+        below_surf_rast[, , i] <- below_surf_rast[, , i] + species_factors$ForStrat.watbelowsurf * this_rast[, , 1]
       }
     }
     else{
