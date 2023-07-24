@@ -688,10 +688,35 @@ blank_3035 <- rast(crs=crs, extent=euro_ext, res=9042.959)
 # Foraging around water surface
 # Foraging >5cm below water surface
 # Phylogenetic distance to a confirmed host
-cong_rast <- rast(nlyrs=4, crs=crs, extent=euro_ext, res=9042.959)
-migr_rast <- rast(nlyrs=4, crs=crs, extent=euro_ext, res=9042.959)
-around_surf_rast <- rast(nlyrs=4, crs=crs, extent=euro_ext, res=9042.959)
-below_surf_rast <- rast(nlyrs=4, crs=crs, extent=euro_ext, res=9042.959)
+
+# Layer names to match eBird abundance data:
+lyr_names <- c(
+  "breeding",
+  "nonbreeding",
+  "prebreeding_migration",
+  "postbreeding_migration"
+)
+
+cong_rast <- rast(nlyrs=4,
+                  names=lyr_names,
+                  crs=crs,
+                  extent=euro_ext,
+                  res=9042.959)
+migr_rast <- rast(nlyrs=4,
+                  names=lyr_names,
+                  crs=crs,
+                  extent=euro_ext,
+                  res=9042.959)
+around_surf_rast <- rast(nlyrs=4,
+                         names=lyr_names,
+                         crs=crs,
+                         extent=euro_ext,
+                         res=9042.959)
+below_surf_rast <- rast(nlyrs=4,
+                        names=lyr_names,
+                        crs=crs,
+                        extent=euro_ext,
+                        res=9042.959)
 
 for (i in 1:4){
   cong_rast[, , i] <- 0
@@ -700,12 +725,17 @@ for (i in 1:4){
   below_surf_rast[, , i] <- 0
 }
 
-# Loop over other first 10 species:
+no_species <- 10
+set.seed(1)
+sample_idx <- sample(1:nrow(sp_df), no_species)
+
+# Loop over other first no_species species:
 {
   loop.start <- Sys.time()
-  for (i in 1:1) {
-    species_sel <- sp_df$species_code[i]
-    Avibase_ID <- sp_df$Avibase_ID[i]
+  for (i in 1:no_species) {
+    idx <- sample_idx[i]
+    species_sel <- sp_df$species_code[idx]
+    Avibase_ID <- sp_df$Avibase_ID[idx]
     species_factors <- matched_data[which(matched_data$Avibase_ID==Avibase_ID), ]
     path <- ebirdst_download(species = species_sel)
     this_rast <- load_raster(path = path,
@@ -715,43 +745,65 @@ for (i in 1:4){
     this_rast <- project(x = this_rast, y = blank_3035, method = "near")
     # Get rid of NA's:
     this_rast <- replace(this_rast, is.na(this_rast), 0)
-    if (nlyr(this_rast)==4){
-      for (i in 1:4){
-        if (species_factors$is_congregatory){
-          cong_rast[, , i] <- cong_rast[, , i] + this_rast[, , i]
-        }
-        if (species_factors$is_migratory){
-          mig_rast[, , i] <- mig_rast[, , i] + this_rast[, , i]
-        }
-        around_surf_rast[, , i] <- around_surf_rast[, , i] + species_factors$ForStrat.wataroundsurf * this_rast[, , i]
-        below_surf_rast[, , i] <- below_surf_rast[, , i] + species_factors$ForStrat.watbelowsurf * this_rast[, , i]
+    
+    # Fill in each field
+    if ("breeding" %in% names(this_rast)){
+      if (species_factors$is_congregatory){
+        cong_rast$breeding <- cong_rast$breeding + this_rast$breeding
       }
-    }
-    else if (nlyr(this_rast)==1){
-      for (i in 1:4){
-        if (species_factors$is_congregatory){
-          cong_rast[, , i] <- cong_rast[, , i] + this_rast[, , 1]
-        }
-        if (species_factors$is_migratory){
-          mig_rast[, , i] <- mig_rast[, , i] + this_rast[, , 1]
-        }
-        around_surf_rast[, , i] <- around_surf_rast[, , i] + species_factors$ForStrat.wataroundsurf * this_rast[, , 1]
-        below_surf_rast[, , i] <- below_surf_rast[, , i] + species_factors$ForStrat.watbelowsurf * this_rast[, , 1]
+      if (species_factors$is_congregatory){
+        migr_rast$breeding <- migr_rast$breeding + this_rast$breeding
       }
+      around_surf_rast$breeding <- around_surf_rast$breeding +
+        species_factors$ForStrat.wataroundsurf * this_rast$breeding
+      below_surf_rast$breeding <- below_surf_rast$breeding +
+        species_factors$ForStrat.watbelowsurf * this_rast$breeding
     }
-    else{
-      cat("Layer for",
-          species_factors$Scientific,
-          "has",
-          nlyr(this_rast),
-          "layers. Skipping this layer.\n")
+    if ("nonbreeding" %in% names(this_rast)){
+      if (species_factors$is_congregatory){
+        cong_rast$nonbreeding <- cong_rast$nonbreeding + this_rast$nonbreeding
+      }
+      if (species_factors$is_congregatory){
+        migr_rast$nonbreeding <- migr_rast$nonbreeding + this_rast$nonbreeding
+      }
+      around_surf_rast$nonbreeding <- around_surf_rast$nonbreeding +
+        species_factors$ForStrat.wataroundsurf * this_rast$nonbreeding
+      below_surf_rast$nonbreeding <- below_surf_rast$nonbreeding +
+        species_factors$ForStrat.watbelowsurf * this_rast$nonbreeding
     }
+    if ("prebreeding_migration" %in% names(this_rast)){
+      if (species_factors$is_congregatory){
+        cong_rast$prebreeding_migration <- cong_rast$prebreeding_migration + this_rast$prebreeding_migration
+      }
+      if (species_factors$is_congregatory){
+        migr_rast$prebreeding_migration <- migr_rast$prebreeding_migration + this_rast$prebreeding_migration
+      }
+      around_surf_rast$prebreeding_migration <- around_surf_rast$prebreeding_migration +
+        species_factors$ForStrat.wataroundsurf * this_rast$prebreeding_migration
+      below_surf_rast$prebreeding_migration <- below_surf_rast$prebreeding_migration +
+        species_factors$ForStrat.watbelowsurf * this_rast$prebreeding_migration
+    }
+    if ("postbreeding_migration" %in% names(this_rast)){
+      if (species_factors$is_congregatory){
+        cong_rast$postbreeding_migration <- cong_rast$postbreeding_migration + this_rast$postbreeding_migration
+      }
+      if (species_factors$is_congregatory){
+        migr_rast$postbreeding_migration <- migr_rast$postbreeding_migration + this_rast$postbreeding_migration
+      }
+      around_surf_rast$postbreeding_migration <- around_surf_rast$postbreeding_migration +
+        species_factors$ForStrat.wataroundsurf * this_rast$postbreeding_migration
+      below_surf_rast$postbreeding_migration <- below_surf_rast$postbreeding_migration +
+        species_factors$ForStrat.watbelowsurf * this_rast$postbreeding_migration
+    }
+    
     time.now <- Sys.time()
-    time_remaining <- (10 - i) * 
-      as.numeric(difftime(time.now, loop.start, units="mins"))/(i-1)
-    cat(time.now - loop.start,
+    time_remaining <- (1 / i) * (no_species - i) * 
+      as.numeric(difftime(time.now, loop.start, units="mins"))
+    cat(as.numeric(difftime(time.now, loop.start, units="mins")),
         " minutes elapsed since start, estimated ",
         time_remaining,
-        " remaining.\n")
+        " remaining.",
+        i,
+        "species processed.\n")
   }
 }
