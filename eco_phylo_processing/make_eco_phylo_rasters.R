@@ -689,6 +689,90 @@ blank_3035 <- rast(crs=crs, extent=euro_ext, res=9042.959)
 # Foraging >5cm below water surface
 # Phylogenetic distance to a confirmed host
 
+nlyrs <- 52
+
+cong_rast <- rast(nlyrs=nlyrs,
+                  crs=crs,
+                  extent=euro_ext,
+                  res=9042.959)
+migr_rast <- rast(nlyrs=nlyrs,
+                  crs=crs,
+                  extent=euro_ext,
+                  res=9042.959)
+around_surf_rast <- rast(nlyrs=nlyrs,
+                         crs=crs,
+                         extent=euro_ext,
+                         res=9042.959)
+below_surf_rast <- rast(nlyrs=nlyrs,
+                        crs=crs,
+                        extent=euro_ext,
+                        res=9042.959)
+
+for (i in 1:nlyrs){
+  cong_rast[, , i] <- 0
+  migr_rast[, , i] <- 0
+  around_surf_rast[, , i] <- 0
+  below_surf_rast[, , i] <- 0
+}
+
+no_species <- 10
+set.seed(1)
+sample_idx <- sample(1:nrow(sp_df), no_species)
+
+# Make sure timeout is set high enough so we can actually download the data
+# Ten minutes per dataset should be enough
+if (getOption('timeout') < 10 * 60 * no_species){
+  options(timeout = 10 * 60 * no_species)
+  cat("Setting timeout to",
+      (1 / 60) * getOption('timeout'),
+      "minutes.\n")
+}
+
+# Loop over other first no_species species:
+{
+  loop.start <- Sys.time()
+  for (i in 1:no_species) {
+    idx <- sample_idx[i]
+    species_sel <- sp_df$species_code[idx]
+    Avibase_ID <- sp_df$Avibase_ID[idx]
+    species_factors <- matched_data[which(matched_data$Avibase_ID==Avibase_ID), ]
+    path <- ebirdst_download(species = species_sel)
+    this_rast <- load_raster(path = path,
+                             product = "abundance",
+                             period = "weekly",
+                             resolution = "lr")
+    this_rast <- project(x = this_rast, y = blank_3035, method = "near")
+    # Get rid of NA's:
+    this_rast <- replace(this_rast, is.na(this_rast), 0)
+    
+    # Fill in each field
+    if (species_factors$is_congregatory){
+      cong_rast <- cong_rast + this_rast
+    }
+    if (species_factors$is_migratory){
+      migr_rast <- migr_rast + this_rast
+    }
+    around_surf_rast <- around_surf_rast +
+      species_factors$ForStrat.wataroundsurf * this_rast
+    below_surf_rast <- below_surf_rast +
+      species_factors$ForStrat.watbelowsurf * this_rast
+    
+    time.now <- Sys.time()
+    time_remaining <- (1 / i) * (no_species - i) * 
+      as.numeric(difftime(time.now, loop.start, units="mins"))
+    cat(as.numeric(difftime(time.now, loop.start, units="mins")),
+        " minutes elapsed since start, estimated ",
+        time_remaining,
+        " remaining.",
+        i,
+        "species processed.\n")
+  }
+}
+
+
+################################################################################
+# SEASONAL VERSION
+
 # Layer names to match eBird abundance data:
 lyr_names <- c(
   "breeding",
@@ -697,28 +781,30 @@ lyr_names <- c(
   "postbreeding_migration"
 )
 
-cong_rast <- rast(nlyrs=4,
+nlyrs <- length(lyr_names)
+
+cong_rast <- rast(nlyrs=nlyrs,
                   names=lyr_names,
                   crs=crs,
                   extent=euro_ext,
                   res=9042.959)
-migr_rast <- rast(nlyrs=4,
+migr_rast <- rast(nlyrs=nlyrs,
                   names=lyr_names,
                   crs=crs,
                   extent=euro_ext,
                   res=9042.959)
-around_surf_rast <- rast(nlyrs=4,
+around_surf_rast <- rast(nlyrs=nlyrs,
                          names=lyr_names,
                          crs=crs,
                          extent=euro_ext,
                          res=9042.959)
-below_surf_rast <- rast(nlyrs=4,
+below_surf_rast <- rast(nlyrs=nlyrs,
                         names=lyr_names,
                         crs=crs,
                         extent=euro_ext,
                         res=9042.959)
 
-for (i in 1:4){
+for (i in 1:nlyrs){
   cong_rast[, , i] <- 0
   migr_rast[, , i] <- 0
   around_surf_rast[, , i] <- 0
@@ -751,7 +837,7 @@ sample_idx <- sample(1:nrow(sp_df), no_species)
       if (species_factors$is_congregatory){
         cong_rast$breeding <- cong_rast$breeding + this_rast$breeding
       }
-      if (species_factors$is_congregatory){
+      if (species_factors$is_migratory){
         migr_rast$breeding <- migr_rast$breeding + this_rast$breeding
       }
       around_surf_rast$breeding <- around_surf_rast$breeding +
