@@ -715,9 +715,17 @@ for (i in 1:nlyrs){
   below_surf_rast[, , i] <- 0
 }
 
-no_species <- 10
-set.seed(1)
-sample_idx <- sample(1:nrow(sp_df), no_species)
+no_species <- nrow(matched_data)
+sample_idx <- 1:no_species
+
+# Remove unmatched species from sp_df
+sp_df <- sp_df[which(sp_df$Avibase_ID %in% matched_data$Avibase_ID), ]
+
+# set.seed(1)
+# sample_idx <- sample(1:nrow(sp_df), no_species)
+# 
+# # Sample which is already downloaded:
+# sample_idx <- c(443, 584, 357, 148, 354, 147, 589, 309, 164, 214)
 
 # Make sure timeout is set high enough so we can actually download the data
 # Ten minutes per dataset should be enough
@@ -728,6 +736,17 @@ if (getOption('timeout') < 10 * 60 * no_species){
       "minutes.\n")
 }
 
+# Get number of species already downloaded by searching for codes in ebirdst
+# data directory
+starting_dls <- ebirdst_data_dir() %>% 
+  paste("/2021", sep = "") %>% 
+  list.files()
+no_downloaded <- starting_dls %in% euro_bird_codes$code %>% 
+  which() %>%
+  length()
+total_to_download <- no_species - no_downloaded
+no_downloaded <- 0
+
 # Loop over other first no_species species:
 {
   loop.start <- Sys.time()
@@ -736,7 +755,33 @@ if (getOption('timeout') < 10 * 60 * no_species){
     species_sel <- sp_df$species_code[idx]
     Avibase_ID <- sp_df$Avibase_ID[idx]
     species_factors <- matched_data[which(matched_data$Avibase_ID==Avibase_ID), ]
-    path <- ebirdst_download(species = species_sel)
+    
+    if (!(species_sel %in% starting_dls)){
+      dl_flag <- TRUE
+      attempt_count <- 0
+      while (dl_flag){
+        attempt_count <- attempt_count + 1
+        cat("attempt = ", attempt_count, ".\n")
+        path <- try(ebirdst_download(species = species_sel))
+        if (!inherits(path, "try-error")){
+          dl_flag <- FALSE
+        }
+      }
+      no_downloaded <- no_downloaded + 1
+      time.now <- Sys.time()
+      time_remaining <- (1 / no_downloaded) * 
+        (total_to_download - no_downloaded) * 
+        as.numeric(difftime(time.now, loop.start, units="mins"))
+      cat(as.numeric(difftime(time.now, loop.start, units="mins")),
+          " minutes elapsed since start, estimated ",
+          time_remaining,
+          " remaining.",
+          no_downloaded,
+          "species downloaded\n")
+    }
+    else{
+      path <- ebirdst_download(species = species_sel)
+    }
     this_rast <- load_raster(path = path,
                              product = "abundance",
                              period = "weekly",
@@ -756,16 +801,6 @@ if (getOption('timeout') < 10 * 60 * no_species){
       species_factors$ForStrat.wataroundsurf * this_rast
     below_surf_rast <- below_surf_rast +
       species_factors$ForStrat.watbelowsurf * this_rast
-    
-    time.now <- Sys.time()
-    time_remaining <- (1 / i) * (no_species - i) * 
-      as.numeric(difftime(time.now, loop.start, units="mins"))
-    cat(as.numeric(difftime(time.now, loop.start, units="mins")),
-        " minutes elapsed since start, estimated ",
-        time_remaining,
-        " remaining.",
-        i,
-        "species processed.\n")
   }
 }
 
