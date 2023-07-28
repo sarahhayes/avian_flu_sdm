@@ -4,6 +4,7 @@
 
 PLOT <- FALSE
 
+library(av)
 require(ape)
 library(BART)
 library(DALEX)
@@ -723,6 +724,9 @@ sp_df$scientific_name <- sub("cyanopica cooki",
 matched_data$Scientific <- sub("parus lugubris",
                              "poecile lugubris",
                              matched_data$Scientific)
+matched_data$Scientific <- sub("hirundo daurica",
+                               "cecropis daurica",
+                               matched_data$Scientific)
 matched_data$Scientific <- sub("parus montanus",
                                "poecile montanus",
                                matched_data$Scientific)
@@ -746,6 +750,18 @@ sp_df$scientific_name <- sub("passer italiae",
                              sp_df$scientific_name)
 sp_df$scientific_name <- sub("motacilla tschutschensis",
                              "motacilla flava",
+                             sp_df$scientific_name)
+matched_data$Scientific <- sub("sturnus contra",
+                               "gracupica contra",
+                               matched_data$Scientific)
+sp_df$scientific_name <- sub("curruca crassirostris",
+                             "curruca hortensis",
+                             sp_df$scientific_name)
+sp_df$scientific_name <- sub("curruca subalpina",
+                             "curruca cantillans",
+                             sp_df$scientific_name)
+sp_df$scientific_name <- sub("curruca balearica",
+                             "curruca sarda",
                              sp_df$scientific_name)
 
 # The taxonomy of Curruca proves to be quite problematic - 25 species were moved
@@ -847,7 +863,7 @@ for (i in 1:nlyrs){
   below_surf_rast[, , i] <- 0
 }
 
-no_species <- nrow(matched_data)
+no_species <- nrow(sp_df)
 sample_idx <- 1:no_species
 
 # # Remove unmatched species from sp_df
@@ -870,20 +886,21 @@ if (getOption('timeout') < 10 * 60 * no_species){
 starting_dls <- ebirdst_data_dir() %>% 
   paste("/2021", sep = "") %>% 
   list.files()
-no_downloaded <- starting_dls %in% euro_bird_codes$code %>% 
+no_downloaded <- starting_dls %in% sp_df$species_code %>% 
   which() %>%
   length()
 total_to_download <- no_species - no_downloaded
 no_downloaded <- 0
 
-not_downloaded <- setdiff(sp_df$species_code, starting_dls)
+not_downloaded <- setdiff((sp_df$species_code),
+                          (data.frame(starting_dls)$starting_dls))
 idx_to_download <- which(sp_df$species_code %in% not_downloaded)
 
 # Loop over other first no_species species:
 {
   loop.start <- Sys.time()
   mean_dl_time <- 0
-  for (i in idx_to_download) {
+  for (i in 1:no_species) {
     idx <- sample_idx[i]
     species_sel <- sp_df$species_code[idx]
     Avibase_ID <- sp_df$Avibase_ID[idx]
@@ -915,6 +932,10 @@ idx_to_download <- which(sp_df$species_code %in% not_downloaded)
         path <- try(ebirdst_download(species = species_sel,
                                      pattern = "abundance_median_lr"))
         if (!inherits(path, "try-error")){
+          dl_flag <- FALSE
+        }
+        if (attempt_count>50){
+          print("Download failed")
           dl_flag <- FALSE
         }
       }
@@ -957,3 +978,16 @@ idx_to_download <- which(sp_df$species_code %in% not_downloaded)
       species_factors$ForStrat.watbelowsurf * this_rast
   }
 }
+
+av_capture_graphics(animate(cong_rast, n=1),
+                    framerate = 5.2,
+                    output = "cong_rast.mp4")
+av_capture_graphics(animate(migr_rast, n=1),
+                    framerate = 5.2,
+                    output = "migr_rast.mp4")
+av_capture_graphics(animate(around_surf_rast, n=1),
+                    framerate = 5.2,
+                    output = "around_surf_rast")
+av_capture_graphics(animate(below_surf_rast, n=1),
+                    framerate = 5.2,
+                    output = "below_surf_rast")
