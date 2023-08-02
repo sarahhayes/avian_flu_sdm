@@ -27,7 +27,6 @@ fao_data <- fao_data[which(fao_data$observation.date != ""),]
 # we only want to include wild birds
 table(fao_data$Species)
 
-
 unwanted_sp <- c("Unspecified Mammal", "Stone Marten", 
                  "South American Coati (Nasua Nasua):Procyonidae-Carnivora",
                  "Red Fox", "Polecat", "Polar Fox", "Nyctereutes Viverrinus (Japanese Racoon Dog)",
@@ -41,63 +40,6 @@ fao_data_trim <- dplyr::select(fao_data, all_of(c("Latitude", "Longitude", "obse
 fao_data_trim$source <- "fao"
 fao_data_trim$observation.date <- as.Date(fao_data_trim$observation.date, "%d/%m/%Y")
 
-## make the points into a raster. 
-## Using info from here: 
-## # https://gis.stackexchange.com/questions/458522/use-r-to-create-raster-from-data-frame-with-non-uniformly-gridded-points-and-cat
-
-library(sf)
-# change into sf object so can change projection of point. 
-# Assuming FAO are entered in standard lon/lat format
-
-point_data <- st_as_sf(x = fao_data_trim, 
-                        coords = c("Longitude", "Latitude"),
-                        crs = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0")
-class(point_data)
-# change the projections
-point_data <- sf::st_transform(point_data, 3035)
-plot(point_data)
-point_data
-# Now a spatial points object in the right projection
-
-points_sp <- sf::as_Spatial(point_data)
-
-points_vect <- terra::vect(points_sp)
-points_vect$flu <- 1 # Add a label to show these are +ve flu cases
-points_vect$source <- "fao"
-
-# make empty raster
-crs <- "epsg:3035"
-#euro_ext <- terra::ext(2000000, 6000000, 1000000, 5500000) # swap to base raster later
-euro_ext <- terra::ext(5000000, 5500000, 2500000, 3000000) # look at small area first
-
-blank_3035 <- terra::rast(crs=crs, extent=euro_ext, res = 1000)
-blank_3035
-
-points_rast <- terra::rasterize(points_vect, blank_3035,"flu")
-plot(points_rast)
-points_rast
-head(points_rast)
-
-# view map
-zipmap <- terra::vect(x = "data/gis_europe/CNTR_RG_03M_2020_4326.shp.zip",
-                      layer = "CNTR_RG_03M_2020_4326")
-plot(zipmap)
-# change projection and extent. 
-euro_map <- terra::project(x = zipmap, y = crs) 
-euro_map_crop <- terra::crop(euro_map, euro_ext)
-plot(euro_map_crop)
-plot(points_rast, add = T, axes = F, border = F)
-
-
-# Next, want to add zeros to all NA. Then use a mask to put NA for those that aren't land
-# Need to add all data and confirm exteny 
-###################################################################################
-### Looking at the distribution of cases outside of Europe but 
-### within bordering countries
-
-
-
-
 # WAHIS
 wahis <- read_excel("data/flu_data/raw_data/WOAH_july_2023.xlsx", sheet = 2)
 
@@ -109,8 +51,10 @@ inf_data <- wahis[which(wahis$disease_eng %in%
                             "Influenza A viruses of high pathogenicity (Inf. with) (non-poultry including wild birds) (2017-)")),]
 
 inf_a_hpai <- dplyr::filter(inf_data, disease_eng == "Influenza A viruses of high pathogenicity (Inf. with) (non-poultry including wild birds) (2017-)" )
+table(inf_a_hpai$region) # all regions represented
 
-#FAO 
+inf_a_hpai_trim <- dplyr::select(inf_a_hpai, all_of(c("Latitude", "Longitude", "Outbreak_start_date")))
+inf_a_hpai_trim$source <- "woah"
 
 
 # BVBRC
@@ -122,6 +66,7 @@ columns_needed <- c("Collection.Date", "Collection.Year", "Collection.Country",
                     "Subtype", "Strain")
 
 bvbrc_data_slim <- dplyr::select(bvbrc_data, all_of(columns_needed))
+table(bvbrc_data_slim$Collection.Country) # still contains global data as required
 
 bvbrc_data_slim <- filter(bvbrc_data_slim, Host.Natural.State == "Wild")
 
@@ -135,49 +80,125 @@ bvbrc_data_slim <- bvbrc_data_slim[which(bvbrc_data_slim$Host.Species != "Env"),
 pos_data <- filter(bvbrc_data_slim, Pathogen.Test.Result == "Positive")
 neg_data <- filter(bvbrc_data_slim, Pathogen.Test.Result == "Negative")
 
+bv_pos_data_trim <- dplyr::select(pos_data, all_of(c("Collection.Date", 
+                                                     "Collection.Latitude",
+                                                     "Collection.Longitude")))
 
-# Bring in the maps
+bv_pos_data_trim$source <- "bvbrc"
+bv_pos_data_trim$Collection.Date <- as.Date(bv_pos_data_trim$Collection.Date,
+                                            "%Y-%m-%d")
 
-library(terra)
-zipmap <- terra::vect(x = "data/gis_europe/CNTR_RG_03M_2020_4326.shp.zip",
-                      layer = "CNTR_RG_03M_2020_4326")
-plot(zipmap)
-crs <- "epsg:3035"
-euro_ext <- terra::ext(2000000, 10000000, 1000000, 10000000) 
 
-# change projection and extent. 
-# using quite a generous extent whilst plotting as looking at where to set the boundaries
-euro_map <- terra::project(x = zipmap, y = crs) 
-euro_map_crop <- terra::crop(euro_map, euro_ext)
+bv_neg_data_trim <- dplyr::select(neg_data, all_of(c("Collection.Date", 
+                                                     "Collection.Latitude",
+                                                     "Collection.Longitude")))
+bv_neg_data_trim$source <- "bvbrc"
+bv_neg_data_trim$Collection.Date <- as.Date(bv_neg_data_trim$Collection.Date,
+                                            "%Y-%m-%d")
+
+# We now have the trimmed data sets for all the sources. 
+# combine them and add a section for pos or neg
+
+# first need all the names to match so we can rbind
+
+colnames(fao_data_trim)
+colnames(inf_a_hpai_trim)
+colnames(bv_pos_data_trim)
+inf_a_hpai_trim <- rename(inf_a_hpai_trim, observation.date = Outbreak_start_date)
+bv_pos_data_trim <- rename(bv_pos_data_trim, Latitude = Collection.Latitude,
+                           Longitude = Collection.Longitude,
+                           observation.date = Collection.Date)
+
+bv_pos_data_trim <- dplyr::select(bv_pos_data_trim, c(Latitude, Longitude, observation.date, source))
+colnames(bv_pos_data_trim)
+
+all_ai_data <- rbind(fao_data_trim, inf_a_hpai_trim, bv_pos_data_trim)
+all_ai_data$flu <- 1 # denotes a positive
+
+## deal with the negatives
+
+bv_neg_data_trim <- rename(bv_neg_data_trim, Latitude = Collection.Latitude,
+                           Longitude = Collection.Longitude,
+                           observation.date = Collection.Date)
+
+bv_neg_data_trim <- dplyr::select(bv_neg_data_trim, c(Latitude, Longitude, observation.date, source))
+colnames(bv_neg_data_trim)
+bv_neg_data_trim$flu <- 0 # denotes negative test
+
+all_ai_data <- rbind(all_ai_data, bv_neg_data_trim)
+
+## check for any NA values
+sum(is.na(all_ai_data$Latitude))
+sum(is.na(all_ai_data$Longitude))
+
+# remove the rows that are NA for location 
+all_ai_data <- drop_na(all_ai_data, Latitude)
+sum(is.na(all_ai_data$Latitude))
+
+###################################################################################
+## make the points into a raster. 
+## Using info from here: 
+## # https://gis.stackexchange.com/questions/458522/use-r-to-create-raster-from-data-frame-with-non-uniformly-gridded-points-and-cat
+
+library(sf)
+# change into sf object so can change projection of point. 
+# Assuming FAO are entered in standard lon/lat format
+
+point_data <- st_as_sf(x = all_ai_data, 
+                        coords = c("Longitude", "Latitude"),
+                        crs = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0")
+class(point_data)
+# change the projections
+point_data <- sf::st_transform(point_data, 3035)
+#plot(point_data)
+point_data
+# Now a spatial points object in the right projection
+
+points_sp <- sf::as_Spatial(point_data)
+
+points_vect <- terra::vect(points_sp)
+
+#read in the raster we are using for the project
+euro_rast <- terra::rast("output/euro_rast.tif")
+euro_rast
+
+points_rast <- terra::rasterize(points_vect, euro_rast,"flu")
+plot(points_rast)
+points_rast
+head(points_rast)
+
+#read in the map
+euro_map <- terra::vect("output/euro_map.shp")
+
 plot(euro_map)
-plot(euro_map_crop)
+plot(points_rast, add = TRUE)
 
-# Transform the data to spatial points
-pts_woah <- terra::vect(inf_a_hpai, geom=c("Longitude", "Latitude"),
-                        crs =  "+proj=longlat +ellps=WGS84 +datum=WGS84")
-pts_woah <- terra::project(pts_woah,  "epsg:3035")
+table(values(points_rast))
 
-##
-pts_fao <- terra::vect(fao_data, geom=c("Longitude", "Latitude"),
-                       crs =  "+proj=longlat +ellps=WGS84 +datum=WGS84")
-pts_fao <- terra::project(pts_fao,  "epsg:3035")
+## Hard to see. Look at with larger raster
 
-## 
-pts_bvbrc_pos <- terra::vect(pos_data, geom=c("Collection.Longitude", "Collection.Latitude"),
-                             crs =  "+proj=longlat +ellps=WGS84 +datum=WGS84")
-pts_bvbrc_pos <- terra::project(pts_bvbrc_pos,  "epsg:3035")
+#read in the raster we are using for the project
+euro_rast_10k <- terra::rast("output/euro_rast_10k.tif")
+euro_rast_10k
 
-pts_bvbrc_neg <- terra::vect(neg_data, geom=c("Collection.Longitude", "Collection.Latitude"),
-                             crs =  "+proj=longlat +ellps=WGS84 +datum=WGS84")
-pts_bvbrc_neg <- terra::project(pts_bvbrc_pos,  "epsg:3035")
+points_rast_10k <- terra::rasterize(points_vect, euro_rast_10k,"flu")
+plot(points_rast_10k)
+points_rast_10k
+head(points_rast_10k)
+table(values(points_rast_10k))
+# Easier to visualise that it probably is working OK. 
+# I think the 1km are just too small to see. 
 
+#Perhaps just look at UK? 
+plot(euro_map)
+abline(h = 4100000, v = 3800000)
+abline(h = 3100000, v = 3300000)
 
-pdf("plots/alldata_pos_map.pdf", width = 5, height = 6)
-plot(euro_map_crop, col = "white", background = "azure2", main = "All positive")
-plot(pts_bvbrc_pos, add = T, col = "red", pch = 3)
-plot(pts_fao, add= T, col = 'blue', pch = 3)
-plot(pts_woah, add = T, col = "orange", pch = 3)
-abline( v = 8400000, h = 6400000)
-abline(h = 1550000, v = 2600000)
-dev.off()
+GB_ext <- terra::ext(3300000, 3800000, 3100000, 4100000)
+GB_crop <- terra::crop(euro_map, GB_ext)
+plot(GB_crop)
+
+GB_rast <- terra::crop(points_rast, GB_ext)
+plot(GB_crop)
+plot(GB_rast, add = T, axes = F)
 

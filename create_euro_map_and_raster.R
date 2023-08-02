@@ -35,3 +35,10 @@ eurorast <- rasterize(euro_map_crop_prj, blank_3035)
 plot(eurorast)
 
 #writeRaster(eurorast, "output/euro_rast.tif")
+
+## Also create a 10km raster in case want to look at it
+blank_10k <- terra::rast(crs=crs, extent=euro_ext, res = 10000)
+
+eurorast_10k <- rasterize(euro_map_crop_prj, blank_10k)
+plot(eurorast_10k)
+#writeRaster(eurorast_10k, "output/euro_rast_10k.tif")
