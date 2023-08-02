@@ -1,0 +1,37 @@
+# 02/08/2023
+# Creating the raster which will be used to 'mask' all the other layers
+# this will be of the extent that we have decided
+# but will only be the land
+
+rm(list = ls())
+
+library(tidyverse)
+library(terra)
+
+zipmap <- terra::vect(x = "data/gis_europe/CNTR_RG_03M_2020_4326.shp.zip",
+                      layer = "CNTR_RG_03M_2020_4326")
+plot(zipmap)
+
+# change projection and crop 
+crs <- "epsg:3035"
+euro_ext <- terra::ext(2600000, 7000000, 1550000, 6400000) 
+
+# using a blank raster doesn't seem to work with the vector so do step by step 
+euro_map_crop <- terra::project(x = zipmap, y = crs) 
+euro_map_crop_prj <- terra::crop(euro_map_crop, euro_ext) 
+euro_map_crop
+euro_map_crop_prj
+
+plot(euro_map_crop)
+plot(euro_map_crop_prj)
+
+# writeVector(euro_map_crop_prj, "output/euro_map.shp", overwrite=TRUE)
+
+# create the blank raster
+blank_3035 <- terra::rast(crs=crs, extent=euro_ext, res = 1000)
+blank_3035
+
+eurorast <- rasterize(euro_map_crop_prj, blank_3035)
+plot(eurorast)
+
+#writeRaster(eurorast, "output/euro_rast.tif")

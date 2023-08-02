@@ -5,36 +5,8 @@ rm(list = ls())
 
 library(terra)
 
-# I'm not familiar with adf files. It seems that I should be able to read them all in from the folder name
-# (according to stack_exhange) but I can't get this to work. 
-# However, if I read them all in separately it looks like they are the same..
-
-#glwd_rast <- rast("data/variables/lakes_and_wetlands/glwd_3.adf")
 
 glwd_rast <- rast("data/variables/lakes_and_wetlands/glwd_3/w001001x.adf")
-# glwd_rast2 <- rast("data/variables/lakes_and_wetlands/glwd_3/dblbnd.adf")
-# glwd_rast3 <- rast("data/variables/lakes_and_wetlands/glwd_3/hdr.adf")
-# glwd_rast4 <- rast("data/variables/lakes_and_wetlands/glwd_3/sta.adf")
-# glwd_rast5 <- rast("data/variables/lakes_and_wetlands/glwd_3/vat.adf")
-# glwd_rast6 <- rast("data/variables/lakes_and_wetlands/glwd_3/w001001.adf")
-# 
-# glwd_rast
-# glwd_rast2
-# glwd_rast3
-# glwd_rast4
-# glwd_rast5
-# glwd_rast6
-# 
-# plot(glwd_rast)
-# plot(glwd_rast2)
-# plot(glwd_rast3)
-# plot(glwd_rast4)
-# plot(glwd_rast5)
-# plot(glwd_rast6)
-# 
-# glwd_rast == glwd_rast2
-
-## As they appear the same, for now I'll use the glwd rast
 
 glwd_rast
 # resolution is supposed to be 30 arc seconds = 1km
@@ -43,8 +15,6 @@ glwd_rast
 # change projection and crop 
 crs <- "epsg:3035"
 euro_ext <- terra::ext(2000000, 6000000, 1000000, 5500000) 
-
-
 
 # Create a blank raster with appropriate projection and extent
 blank_raster <- rast(crs=crs, extent=euro_ext, res = 1000) # the unit for epsg is metres
@@ -86,7 +56,6 @@ glwd_crop_prj
 table(values(glwd_crop_prj))
 # This has some values of 9 in it. We don't want to include these as they are intermittent wetland
 # We just want to include permanent wetlands.
-
 
 glwd_crop_prj_combo <- terra::subst(glwd_crop_prj, 1:8, 99)
 table(values(glwd_crop_prj_combo))
@@ -138,7 +107,6 @@ p1 = p1[,1:2]
 p2 = as.data.frame(glwd_small, xy=TRUE)
 p2 = p2[!is.na(p2[,3]),1:2]
 
-  
 # plot(blank_small, col="grey")
 # plot(glwd_small, add=TRUE, col=c("white","black"),legend=FALSE)
 # points(p1$x, p1$y)
@@ -207,11 +175,11 @@ plot(blank_raster_km, breaks = c(0, bp_km_1200),
      col= c("white", viridis::magma(8)))
 #save this plot
 
-pdf("plots/distance_to_water.pdf", width = 7, height = 5)
+#pdf("plots/distance_to_water.pdf", width = 7, height = 5)
 plot(blank_raster_km, breaks = c(0, bp_km_1200), 
      plg = list(title = "Distance in km"),
      col= c("white", viridis::viridis(8)))
-dev.off()
+#dev.off()
 #table(values(blank_raster_km))
 
 #writeRaster(blank_raster, "output/distance_to_inland_water.tif", overwrite=TRUE)

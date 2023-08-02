@@ -171,7 +171,7 @@ zipmap <- terra::vect(x = "data/gis_europe/CNTR_RG_03M_2020_4326.shp.zip",
                       layer = "CNTR_RG_03M_2020_4326")
 plot(zipmap)
 crs <- "epsg:3035"
-euro_ext <- terra::ext(2000000, 8000000, 1000000, 5500000) 
+euro_ext <- terra::ext(2000000, 9000000, 1000000, 9000000)
 
 # change projection and extent. 
 # using quite a generous extent whilst plotting as looking at where to set the boundaries
@@ -191,10 +191,10 @@ pts_neg <- terra::project(pts_neg,  "epsg:3035")
 
 dev.off()
 
-pdf("plots/bvbrc_pos_neg_map.pdf", width = 10, height = 6)
+#pdf("plots/bvbrc_pos_neg_map.pdf", width = 10, height = 6)
 par(mfrow = c(1,2))
 plot(euro_map_crop, col = "white", background = "azure2", main = "BV-BRC positive")
 plot(pts_pos, add = T, col = "red", pch = 18)
 plot(euro_map_crop, col = "white", background = "azure2", main = "BV-BRC negative")
 plot(pts_neg, add = T, col = "blue", pch = 18)
-dev.off()
+#dev.off()

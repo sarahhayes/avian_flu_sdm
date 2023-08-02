@@ -21,9 +21,18 @@ species_raw <- as.data.frame(table(fao_data$Species))
 
 # From a manual look through this table we have:
 # Fox; Gray seal; Harbor Seal; Mink; Red fox; South American Coati; Stone Marten; Unspecified mammal
+# there are also lots listed as 'Domestic:...'
+
+# i think we want to remove these
+
+fao_data <- fao_data %>%
+  dplyr::filter(grepl("wild|Wild", Species))
+
 
 table(fao_data$Disease)
 table(fao_data$Diagnosis.source)
+
+
 
 # check if there are any NA values in the observation date. 
 
@@ -73,17 +82,16 @@ fao_data %>%
 
 ## plots of time series of the data
 ## plot a time series of the cases. 
-fao_data$date <- strptime(fao_data$Collection.Date,
-                          format = "%Y-%m-%d")
 
 fao_data$date <- as.Date(fao_data$observation.date, "%d/%m/%Y")
-
+head(fao_data$date)
 fao_data$month_year <- format(fao_data$date, format = "%m/%Y")
 fao_data$month <- format(fao_data$date, format = "%m")
 
 fao_counts <- fao_data %>% group_by(month_year) %>% count()
+head(fao_counts)
 fao_counts$date <- as.Date(zoo::as.yearmon(fao_counts$month_year, "%m/%Y"))
-
+range(fao_counts$date)
 
 range(fao_counts$month_year)
 ggplot(fao_counts, aes(x = date, y = n)) + 
@@ -116,7 +124,7 @@ zipmap <- terra::vect(x = "data/gis_europe/CNTR_RG_03M_2020_4326.shp.zip",
                       layer = "CNTR_RG_03M_2020_4326")
 plot(zipmap)
 crs <- "epsg:3035"
-euro_ext <- terra::ext(2000000, 8000000, 1000000, 5500000) 
+euro_ext <- terra::ext(2000000, 9000000, 1000000, 9000000) 
 
 # change projection and extent. 
 # using quite a generous extent whilst plotting as looking at where to set the boundaries
@@ -134,6 +142,7 @@ pts_pos <- terra::project(pts_pos,  "epsg:3035")
 #pdf("plots/fao_pos_map.pdf", width = 5, height = 6)
 plot(euro_map_crop, col = "white", background = "azure2", main = "FAO positive")
 plot(pts_pos, add = T, col = "red", pch = 18)
+abline(v = 8000000)
 #dev.off()
 
 ### Need to look at the species that are included in the data 
