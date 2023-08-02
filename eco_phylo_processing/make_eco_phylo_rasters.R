@@ -47,6 +47,9 @@ AVONET_df <- AVONET_df[,
 AVONET_df <- distinct(AVONET_df)
 AVONET_df[, 2:4] <- sapply(AVONET_df[, 2:4], tolower)
 
+# Control ambiguity by assigning only a single ID to each combination of names
+AVONET_df <- AVONET_df[!duplicated(AVONET_df[,2:4]), ]
+
 # ID functions for matching species between datasets:
 get_single_bird_id <- function(binomial_name, name_sources){
   
@@ -819,6 +822,54 @@ problem_species <- which(sapply(1:nrow(sp_df),
 cat("There are now", length(problem_species), "problem species.\n")
 
 ################################################################################
+# Load in population sizes
+pop_size_df <- read.csv("callaghan_pop_estimates.csv")
+pop_size_df$Scientific.name <- sapply(pop_size_df$Scientific.name, tolower)
+
+pop_size_ids <- get_bird_ids(pop_size_df$Scientific.name)
+
+# Check if all the species IDs from eBird are covered:
+cat(length(setdiff(sp_df$Avibase_ID, pop_size_ids)), "European species are not ID'd.")
+non_IDd_species <- sp_df$scientific_name[
+  which(eBird_IDs %in% setdiff(sp_df$Avibase_ID, pop_size_ids))]
+cat("Unidentified species are:",
+    non_IDd_species,
+    sep = "\n")
+
+# Can we match using scientific name?
+cat("The following un-ID'd species can not be identified by name:",
+    (setdiff(non_IDd_species,
+                   pop_size_df$Scientific.name)), sep = "\n")
+
+# Fix a typo
+pop_size_df$Scientific.name <- sub("microcarbo pygmeus",
+                                   "microcarbo pygmaeus",
+                                   pop_size_df$Scientific.name)
+
+# Change a name
+pop_size_df$Scientific.name <- sub("oreothlypis peregrina",
+                                   "leiothlypis peregrina",
+                                   pop_size_df$Scientific.name)
+
+pop_size_ids <- get_bird_ids(pop_size_df$Scientific.name)
+
+# Do checks again:
+cat(length(setdiff(sp_df$Avibase_ID, pop_size_ids)), "European species are not ID'd.")
+non_IDd_species <- sp_df$scientific_name[
+  which(eBird_IDs %in% setdiff(sp_df$Avibase_ID, pop_size_ids))]
+cat("Unidentified species are:",
+    non_IDd_species,
+    sep = "\n")
+cat("The following un-ID'd species can not be identified by name:",
+    (setdiff(non_IDd_species,
+             pop_size_df$Scientific.name)), sep = "\n")
+
+# Should find there are two species left. These do not appear in the population
+# size estimate data so we will leave them out of the raster calculations.
+
+sp_df$pop_size <- 
+
+################################################################################
 # Now get abundance rasters for species and convolute with eco/phylo factors
 
 # set the crs we want to use
@@ -920,6 +971,10 @@ idx_to_download <- which(sp_df$species_code %in% not_downloaded)
           sep = "\n")
       scientific_name <- sp_df$scientific_name[idx]
       species_factors <- matched_data[which(matched_data$Scientific==scientific_name), ]
+    }
+    
+    if (Avibase_ID %in% pop_size_ids){
+      pop_size_scaler <- pop_size_df$Abundance.estimate[which()]
     }
     
     if (!(species_sel %in% starting_dls)){

@@ -4,7 +4,7 @@
 # Some globals to decide if we want to do plots and full variable importance
 # experiments:
 PLOT <- TRUE
-VARIMPS <- TRUE
+VARIMPS <- FALSE
 
 require(ape)
 library(BART)
@@ -861,11 +861,13 @@ ytrain <- y[train]
 xtest <- x[-train, ]
 ytest <- y[-train]
 
-ntree <- 5000
+ntree <- 1000
 bartfit <- lbart(xtrain,
                  ytrain,
                  x.test = xtest,
-                 ntree = ntree)
+                 ntree = ntree,
+                 ndpost = 10000,
+                 nskip = 1000)
 
 # Use a majority judgement to decide whether to accept
 yhat.train <- plogis(bartfit$yhat.train - bartfit$binaryOffset)
@@ -1044,14 +1046,18 @@ bart_explainer <- explain.default(bartfit,
                       predict_function = predict_function,
                       residual_function = residual_function,
                       type = "classification")
-cat("AUC is", bart_performance$measures$auc, ".\n")
+
 bart_performance <- model_performance(bart_explainer)
+cat("AUC is", bart_performance$measures$auc, ".\n")
+
 nearest_host_profile <- model_profile(bart_explainer,
-                                     variables = "nearest_host_dist")
+                                     variables = "nearest_host_distance")
 anatidae_profile <- model_profile(bart_explainer,
-                                      variables = "anatidae_dist")
+                                      variables = "anatidae_distance")
 larus_profile <- model_profile(bart_explainer,
-                                       variables = "larus_dist")
+                                       variables = "larus_distance")
+seed_profile <- model_profile(bart_explainer,
+                               variables = "Diet.Seed")
 
 if (VARIMPS){
   # Do a more thorough variable importance
