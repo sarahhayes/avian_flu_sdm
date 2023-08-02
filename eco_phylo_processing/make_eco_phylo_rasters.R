@@ -4,6 +4,7 @@
 
 PLOT <- FALSE
 
+library(av)
 require(ape)
 library(BART)
 library(DALEX)
@@ -338,7 +339,7 @@ host_indicator = c(EltonTraits_df$Avibase_ID %in% host_species_IDs)
 matched_data <- data.frame(EltonTraits_df, host_indicator)
 
 # Now filter for species in Europe according to eBird:
-matched_data <- matched_data[which(EltonTraits_IDs %in% eBird_IDs), ]
+# matched_data <- matched_data[which(EltonTraits_IDs %in% eBird_IDs), ]
 
 # Remove fields we definitely won't want for fitting
 
@@ -606,7 +607,7 @@ cat("There are",
 
 # Zeros will be too informative since they immediately tell us where the host
 # species are, so we should really use the minimum non-zero value:
-nearest_host_distance <- apply(dmat_host_cols, 1, FUN = function(x) {min(x[x>0])})
+nearest_host_distance <- apply(dmat_host_cols, 1, FUN = function(x) {min(x)})
 for (i in 1:nrow(matched_data)){
   species_in_dmat <- which(
     names(nearest_host_distance)==matched_data$Avibase_ID[i])
@@ -671,6 +672,153 @@ if (PLOT){
 }
 
 ################################################################################
+# In this section we do some cleanup on genus/species names to make sure all our
+# abundance data corresponds to something in matched_data
+
+# Start by identifying all species that don't have either an unambiguous ID
+# match of an unambiguous name match
+problem_species <- which(sapply(1:nrow(sp_df),
+                                FUN = function(i){
+  (length(which(matched_data$Avibase_ID == sp_df$Avibase_ID[i]))!=1) &
+  (length(which(matched_data$Scientific == sp_df$scientific_name[i]))!=1)}))
+
+cat("The following are identified as problem species:",
+    array(sp_df$scientific_name[problem_species]),
+    sep = "\n"
+    )
+
+# Work through this list case-by-case
+sp_df$scientific_name <- sub("melanitta deglandi",
+                             "melanitta fusca",
+                             sp_df$scientific_name)
+sp_df$scientific_name <- sub("melanitta americana",
+                             "melanitta nigra",
+                             sp_df$scientific_name)
+sp_df$scientific_name <- sub("himantopus mexicanus",
+                             "himantopus himantopus",
+                             sp_df$scientific_name)
+sp_df$scientific_name <- sub("gallinago delicata",
+                             "gallinago gallinago",
+                             sp_df$scientific_name)
+matched_data$Scientific <- sub("sterna nilotica",
+                               "gelochelidon nilotica",
+                               matched_data$Scientific)
+matched_data$Scientific <- sub("sterna maxima",
+                               "thalasseus maximus",
+                               matched_data$Scientific)
+sp_df$scientific_name <- sub("ardea intermedia",
+                             "mesophoyx intermedia",
+                             sp_df$scientific_name)
+sp_df$scientific_name <- sub("circus hudsonius",
+                             "circus cyaneus",
+                             sp_df$scientific_name)
+sp_df$scientific_name <- sub("picus sharpei",
+                             "picus viridis",
+                             sp_df$scientific_name)
+sp_df$scientific_name <- sub("lanius borealis",
+                             "lanius excubitor",
+                             sp_df$scientific_name)
+sp_df$scientific_name <- sub("cyanopica cooki",
+                             "cyanopica cyanus",
+                             sp_df$scientific_name)
+matched_data$Scientific <- sub("parus lugubris",
+                             "poecile lugubris",
+                             matched_data$Scientific)
+matched_data$Scientific <- sub("hirundo daurica",
+                               "cecropis daurica",
+                               matched_data$Scientific)
+matched_data$Scientific <- sub("parus montanus",
+                               "poecile montanus",
+                               matched_data$Scientific)
+sp_df$scientific_name <- sub("phylloscopus examinandus",
+                             "phylloscopus borealis",
+                             sp_df$scientific_name)
+sp_df$scientific_name <- sub("saxicola rubicola",
+                             "saxicola torquatus",
+                             sp_df$scientific_name)
+sp_df$scientific_name <- sub("saxicola maurus",
+                             "saxicola torquatus",
+                             sp_df$scientific_name)
+sp_df$scientific_name <- sub("saxicola stejnegeri",
+                             "saxicola torquatus",
+                             sp_df$scientific_name)
+sp_df$scientific_name <- sub("oenanthe melanoleuca",
+                             "oenanthe hispanica",
+                             sp_df$scientific_name)
+sp_df$scientific_name <- sub("passer italiae",
+                             "passer domesticus",
+                             sp_df$scientific_name)
+sp_df$scientific_name <- sub("motacilla tschutschensis",
+                             "motacilla flava",
+                             sp_df$scientific_name)
+matched_data$Scientific <- sub("sturnus contra",
+                               "gracupica contra",
+                               matched_data$Scientific)
+sp_df$scientific_name <- sub("curruca crassirostris",
+                             "curruca hortensis",
+                             sp_df$scientific_name)
+sp_df$scientific_name <- sub("curruca subalpina",
+                             "curruca cantillans",
+                             sp_df$scientific_name)
+sp_df$scientific_name <- sub("curruca balearica",
+                             "curruca sarda",
+                             sp_df$scientific_name)
+
+# The taxonomy of Curruca proves to be quite problematic - 25 species were moved
+# from Sylvia to Curruca in 2011 so we change the names in matched_data to
+# reflect this
+
+# Get species names only:
+curruca_names <- sp_df$scientific_name %>%
+                  str_subset(pattern = "curruca") %>%
+                  sub(pattern = "curruca ", replacement = "")
+names_to_replace <- lapply(curruca_names,
+                           FUN = function(x){paste("sylvia ", x, sep = "")})
+matched_data$Scientific[which(matched_data$Scientific %in% names_to_replace)] <-
+  sub("sylvia",
+      "curruca",
+      matched_data$Scientific[
+        which(matched_data$Scientific %in% names_to_replace)])
+
+# Also need to change a few carduelis species to acanthis:
+acanthis_names <- sp_df$scientific_name %>%
+  str_subset(pattern = "acanthis") %>%
+  sub(pattern = "acanthis ", replacement = "")
+names_to_replace <- lapply(acanthis_names,
+                           FUN = function(x){paste("carduelis ", x, sep = "")})
+matched_data$Scientific[which(matched_data$Scientific %in% names_to_replace)] <-
+  sub("carduelis",
+      "acanthis",
+      matched_data$Scientific[
+        which(matched_data$Scientific %in% names_to_replace)])
+
+# eBird is the only source to include acanthis cabaret, which was formerly
+# considered a subspecies of acanthis flammea, so we treat counts of cabaret as
+# counts of flammea
+sp_df$scientific_name <- sub("acanthis cabaret",
+             "acanthis flammea",
+             sp_df$scientific_name)
+
+# Another species adjustment, this time for anas zonorhyncha and anas
+# poecilorhyncha
+sp_df$scientific_name <- sub("anas zonorhyncha",
+                             "anas poecilorhyncha",
+                             sp_df$scientific_name)
+
+
+# A genus name for American warblers was changed in early 2010a:
+matched_data$Scientific <- sub("dendroica",
+                               "setophaga",
+                               matched_data$Scientific)
+
+# See if any problem species remain:
+problem_species <- which(sapply(1:nrow(sp_df),
+                                FUN = function(i){
+    (length(which(matched_data$Avibase_ID == sp_df$Avibase_ID[i]))!=1) &
+      (length(which(matched_data$Scientific == sp_df$scientific_name[i]))!=1)}))
+cat("There are now", length(problem_species), "problem species.\n")
+
+################################################################################
 # Now get abundance rasters for species and convolute with eco/phylo factors
 
 # set the crs we want to use
@@ -688,70 +836,158 @@ blank_3035 <- rast(crs=crs, extent=euro_ext, res=9042.959)
 # Foraging around water surface
 # Foraging >5cm below water surface
 # Phylogenetic distance to a confirmed host
-cong_rast <- rast(nlyrs=4, crs=crs, extent=euro_ext, res=9042.959)
-migr_rast <- rast(nlyrs=4, crs=crs, extent=euro_ext, res=9042.959)
-around_surf_rast <- rast(nlyrs=4, crs=crs, extent=euro_ext, res=9042.959)
-below_surf_rast <- rast(nlyrs=4, crs=crs, extent=euro_ext, res=9042.959)
 
-for (i in 1:4){
+nlyrs <- 52
+
+cong_rast <- rast(nlyrs=nlyrs,
+                  crs=crs,
+                  extent=euro_ext,
+                  res=9042.959)
+migr_rast <- rast(nlyrs=nlyrs,
+                  crs=crs,
+                  extent=euro_ext,
+                  res=9042.959)
+around_surf_rast <- rast(nlyrs=nlyrs,
+                         crs=crs,
+                         extent=euro_ext,
+                         res=9042.959)
+below_surf_rast <- rast(nlyrs=nlyrs,
+                        crs=crs,
+                        extent=euro_ext,
+                        res=9042.959)
+
+for (i in 1:nlyrs){
   cong_rast[, , i] <- 0
   migr_rast[, , i] <- 0
   around_surf_rast[, , i] <- 0
   below_surf_rast[, , i] <- 0
 }
 
-# Loop over other first 10 species:
+no_species <- nrow(sp_df)
+sample_idx <- 1:no_species
+
+# # Remove unmatched species from sp_df
+# sp_df <- sp_df[which(sp_df$Avibase_ID %in% matched_data$Avibase_ID), ]
+
+# set.seed(1)
+# sample_idx <- sample(1:nrow(sp_df), no_species)
+
+# Make sure timeout is set high enough so we can actually download the data
+# Ten minutes per dataset should be enough
+if (getOption('timeout') < 10 * 60 * no_species){
+  options(timeout = 10 * 60 * no_species)
+  cat("Setting timeout to",
+      (1 / 60) * getOption('timeout'),
+      "minutes.\n")
+}
+
+# Get number of species already downloaded by searching for codes in ebirdst
+# data directory
+starting_dls <- ebirdst_data_dir() %>% 
+  paste("/2021", sep = "") %>% 
+  list.files()
+no_downloaded <- starting_dls %in% sp_df$species_code %>% 
+  which() %>%
+  length()
+total_to_download <- no_species - no_downloaded
+no_downloaded <- 0
+
+not_downloaded <- setdiff((sp_df$species_code),
+                          (data.frame(starting_dls)$starting_dls))
+idx_to_download <- which(sp_df$species_code %in% not_downloaded)
+
+# Loop over other first no_species species:
 {
   loop.start <- Sys.time()
-  for (i in 1:1) {
-    species_sel <- sp_df$species_code[i]
-    Avibase_ID <- sp_df$Avibase_ID[i]
+  mean_dl_time <- 0
+  for (i in 1:no_species) {
+    idx <- sample_idx[i]
+    species_sel <- sp_df$species_code[idx]
+    Avibase_ID <- sp_df$Avibase_ID[idx]
     species_factors <- matched_data[which(matched_data$Avibase_ID==Avibase_ID), ]
-    path <- ebirdst_download(species = species_sel)
+    if (nrow(species_factors)==0){
+      cat("Species ID for",
+          sp_df$scientific_name[idx],
+          "is not in matched_data. Using scientific name to match.\n",
+          sep = "\n")
+      scientific_name <- sp_df$scientific_name[idx]
+      species_factors <- matched_data[which(matched_data$Scientific==scientific_name), ]
+    }
+    if (nrow(species_factors)>1){
+      cat("Same species ID for",
+          species_factors$Scientific,
+          "Using scientific name to match.\n",
+          sep = "\n")
+      scientific_name <- sp_df$scientific_name[idx]
+      species_factors <- matched_data[which(matched_data$Scientific==scientific_name), ]
+    }
+    
+    if (!(species_sel %in% starting_dls)){
+      dl_start <- Sys.time()
+      dl_flag <- TRUE
+      attempt_count <- 0
+      while (dl_flag){
+        attempt_count <- attempt_count + 1
+        cat("attempt = ", attempt_count, ".\n")
+        path <- try(ebirdst_download(species = species_sel,
+                                     pattern = "abundance_median_lr"))
+        if (!inherits(path, "try-error")){
+          dl_flag <- FALSE
+        }
+        if (attempt_count>50){
+          print("Download failed")
+          dl_flag <- FALSE
+        }
+      }
+      no_downloaded <- no_downloaded + 1
+      time.now <- Sys.time()
+      elapsed <- as.numeric(difftime(time.now, dl_start, units = "mins"))
+      mean_dl_time <- mean_dl_time + (1 / no_downloaded) * elapsed
+      time_remaining <- (total_to_download - no_downloaded) * mean_dl_time
+      cat(as.numeric(difftime(time.now, loop.start, units="mins")),
+          " minutes elapsed since start, estimated ",
+          time_remaining,
+          " remaining.",
+          no_downloaded,
+          "of",
+          total_to_download,
+          "species downloaded\n")
+    }
+    else{
+      path <- ebirdst_download(species = species_sel,
+                               pattern = "abundance_median_lr")
+    }
     this_rast <- load_raster(path = path,
                              product = "abundance",
-                             period = "seasonal",
+                             period = "weekly",
                              resolution = "lr")
     this_rast <- project(x = this_rast, y = blank_3035, method = "near")
     # Get rid of NA's:
     this_rast <- replace(this_rast, is.na(this_rast), 0)
-    if (nlyr(this_rast)==4){
-      for (i in 1:4){
-        if (species_factors$is_congregatory){
-          cong_rast[, , i] <- cong_rast[, , i] + this_rast[, , i]
-        }
-        if (species_factors$is_migratory){
-          mig_rast[, , i] <- mig_rast[, , i] + this_rast[, , i]
-        }
-        around_surf_rast[, , i] <- around_surf_rast[, , i] + species_factors$ForStrat.wataroundsurf * this_rast[, , i]
-        below_surf_rast[, , i] <- below_surf_rast[, , i] + species_factors$ForStrat.watbelowsurf * this_rast[, , i]
-      }
+    
+    # Fill in each field
+    if (species_factors$is_congregatory){
+      cong_rast <- cong_rast + this_rast
     }
-    else if (nlyr(this_rast)==1){
-      for (i in 1:4){
-        if (species_factors$is_congregatory){
-          cong_rast[, , i] <- cong_rast[, , i] + this_rast[, , 1]
-        }
-        if (species_factors$is_migratory){
-          mig_rast[, , i] <- mig_rast[, , i] + this_rast[, , 1]
-        }
-        around_surf_rast[, , i] <- around_surf_rast[, , i] + species_factors$ForStrat.wataroundsurf * this_rast[, , 1]
-        below_surf_rast[, , i] <- below_surf_rast[, , i] + species_factors$ForStrat.watbelowsurf * this_rast[, , 1]
-      }
+    if (species_factors$is_migratory){
+      migr_rast <- migr_rast + this_rast
     }
-    else{
-      cat("Layer for",
-          species_factors$Scientific,
-          "has",
-          nlyr(this_rast),
-          "layers. Skipping this layer.\n")
-    }
-    time.now <- Sys.time()
-    time_remaining <- (10 - i) * 
-      as.numeric(difftime(time.now, loop.start, units="mins"))/(i-1)
-    cat(time.now - loop.start,
-        " minutes elapsed since start, estimated ",
-        time_remaining,
-        " remaining.\n")
+    around_surf_rast <- around_surf_rast +
+      species_factors$ForStrat.wataroundsurf * this_rast
+    below_surf_rast <- below_surf_rast +
+      species_factors$ForStrat.watbelowsurf * this_rast
   }
 }
+
+av_capture_graphics(animate(cong_rast, n=1),
+                    framerate = 5.2,
+                    output = "cong_rast.mp4")
+av_capture_graphics(animate(migr_rast, n=1),
+                    framerate = 5.2,
+                    output = "migr_rast.mp4")
+av_capture_graphics(animate(around_surf_rast, n=1),
+                    framerate = 5.2,
+                    output = "around_surf_rast.mp4")
+av_capture_graphics(animate(below_surf_rast, n=1),
+                    framerate = 5.2,
+                    output = "below_surf_rast.mp4")

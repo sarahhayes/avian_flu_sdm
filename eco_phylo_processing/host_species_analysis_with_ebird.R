@@ -1044,8 +1044,14 @@ bart_explainer <- explain.default(bartfit,
                       predict_function = predict_function,
                       residual_function = residual_function,
                       type = "classification")
-bart_performance <- model_performance(bart_explainer)
 cat("AUC is", bart_performance$measures$auc, ".\n")
+bart_performance <- model_performance(bart_explainer)
+nearest_host_profile <- model_profile(bart_explainer,
+                                     variables = "nearest_host_dist")
+anatidae_profile <- model_profile(bart_explainer,
+                                      variables = "anatidae_dist")
+larus_profile <- model_profile(bart_explainer,
+                                       variables = "larus_dist")
 
 if (VARIMPS){
   # Do a more thorough variable importance
