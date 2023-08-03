@@ -5,7 +5,6 @@ rm(list = ls())
 
 library(terra)
 
-
 glwd_rast <- rast("data/variables/lakes_and_wetlands/glwd_3/w001001x.adf")
 
 glwd_rast
@@ -14,12 +13,19 @@ glwd_rast
 
 # change projection and crop 
 crs <- "epsg:3035"
-euro_ext <- terra::ext(2000000, 6000000, 1000000, 5500000) 
+# euro_ext <- terra::ext(2000000, 6000000, 1000000, 5500000) 
+# 
+# # Create a blank raster with appropriate projection and extent
+# blank_raster <- rast(crs=crs, extent=euro_ext, res = 1000) # the unit for epsg is metres
+# # thus I'm hoping that this makes it 1km res
+# blank_raster
 
-# Create a blank raster with appropriate projection and extent
-blank_raster <- rast(crs=crs, extent=euro_ext, res = 1000) # the unit for epsg is metres
-# thus I'm hoping that this makes it 1km res
-blank_raster
+blank_3035 <- terra::rast("output/euro_rast.tif")
+blank_3035
+terra::xyFromCell(blank_3035, 1) # coordinates of the centre of the first cell
+
+plot(blank_3035)
+
 
 glwd_crop_prj <- terra::project(x = glwd_rast, y = blank_raster, method = "near") 
 glwd_crop_prj # we can see that this keeps the crs of the blank raster

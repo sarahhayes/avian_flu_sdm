@@ -13,11 +13,16 @@ prec_q1 # using this to check extent, resolution etc.
 
 plot(prec_q1)
 
-## make the blank raster
-crs <- "epsg:3035"
-euro_ext <- terra::ext(2000000, 6000000, 1000000, 5500000) # swap to base raster later
-blank_3035 <- rast(crs=crs, extent=euro_ext, res = 1000)
-blank_3035
+# ## make the blank raster
+# crs <- "epsg:3035"
+# euro_ext <- terra::ext(2000000, 6000000, 1000000, 5500000) # swap to base raster later
+# blank_3035 <- rast(crs=crs, extent=euro_ext, res = 1000)
+# blank_3035
+
+blank_3035 <- terra::rast("output/euro_rast.tif")
+plot(blank_3035)
+head(blank_3035)
+blank_3035[2000:2050]
 
 # now we want to make a points object using the centre of each pixel.
 points_3035 <- terra::as.points(blank_3035)
@@ -26,6 +31,13 @@ points_3035
 tictoc::tic()
 rast_res <- terra::extract(prec_q1, points_3035, method = "simple", xy = T)
 tictoc::toc()
+# in the description of the extract function it says:
+# method: character. method for extracting values with points ("simple" or "bilinear").
+# With "simple" values for the cell a point falls in are returned.
+# with "bilinear" the returned values are interpolated from the values of the four
+# nearest raster cells
+
+# we want the cell that it falls into
 
 # Took 1 min to do
 
@@ -61,7 +73,9 @@ tictoc::toc()
 
 head(climate_res)
 
-write.csv(climate_res, "variable_manipulation/variable_outputs/climate_output.csv")
+# write.csv(climate_res, "variable_manipulation/variable_outputs/climate_output.csv")
+
+#######################################################################################
 
 # # do with a small one first
 # small_ext <- terra::ext(2000000, 2005000, 1000000, 1005000) # swap to base raster later

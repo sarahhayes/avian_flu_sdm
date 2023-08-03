@@ -43,6 +43,8 @@ blank_3035 <- terra::rast("output/euro_rast.tif")
 blank_3035
 terra::xyFromCell(blank_3035, 1) # coordinates of the centre of the first cell
 
+plot(blank_3035)
+
 climate_mean_fun <- function(data_list, blank_raster, name_to_save){
   multi_layer_file <- terra::rast(data_list)
   mean_multi_layer <- terra::app(multi_layer_file, mean)
@@ -185,6 +187,7 @@ jan_diffs
 diff_temps_1_prj
 values(jan_diffs)[1070:1080]
 values(diff_temps_1_prj)[1070:1080]
+plot(jan_diffs)
 
 # Now generate the diff rasters for all the months 
 feb_diffs <- diff_fun("data/variables/climate/climate_raw/wc2.1_2.5m_tmin_2018-02.tif",
