@@ -14,7 +14,7 @@ plot(zipmap)
 
 # change projection and crop 
 crs <- "epsg:3035"
-euro_ext <- terra::ext(2600000, 7000000, 1550000, 6400000) 
+euro_ext <- terra::ext(2600000, 7000000, 1500000, 6400000) 
 
 # using a blank raster doesn't seem to work with the vector so do step by step 
 euro_map_crop <- terra::project(x = zipmap, y = crs) 
@@ -34,11 +34,11 @@ blank_3035
 eurorast <- rasterize(euro_map_crop_prj, blank_3035)
 plot(eurorast)
 
-#writeRaster(eurorast, "output/euro_rast.tif")
+# writeRaster(eurorast, "output/euro_rast.tif", overwrite = TRUE)
 
 ## Also create a 10km raster in case want to look at it
 blank_10k <- terra::rast(crs=crs, extent=euro_ext, res = 10000)
 
 eurorast_10k <- rasterize(euro_map_crop_prj, blank_10k)
 plot(eurorast_10k)
-#writeRaster(eurorast_10k, "output/euro_rast_10k.tif")
+# writeRaster(eurorast_10k, "output/euro_rast_10k.tif", overwrite = T)

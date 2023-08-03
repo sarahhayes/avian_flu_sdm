@@ -28,59 +28,20 @@ mean_tmin_first_quart <- terra::app(multi_layer_tmin_first_quart, mean)
 mean_tmin_first_quart
 
 # now change projection and crop 
-crs <- "epsg:3035"
-euro_ext <- terra::ext(2000000, 6000000, 1000000, 5500000) # swap to base raster later
+# crs <- "epsg:3035"
+
+#euro_ext <- terra::ext(2000000, 6000000, 1000000, 5500000) # swap to base raster later
 
 # Create a blank raster with appropriate projection and extent
 #blank_3035 <- rast(crs=crs, extent=euro_ext)
 #blank_3035_1km <- rast(crs=crs, extent=euro_ext, res = 1000)
 
-blank_3035 <- rast(crs=crs, extent=euro_ext, res = 1000)
+#blank_3035 <- rast(crs=crs, extent=euro_ext, res = 1000)
+#blank_3035
+
+blank_3035 <- terra::rast("output/euro_rast.tif")
 blank_3035
-
-# The method below is very slow and throws lots of errors
-# mean_tmin_first_quart_crs <- terra::project(x = mean_tmin_first_quart, y = crs, method = "near") 
-# mean_tmin_first_quart_crs_crop <- crop(x = mean_tmin_first_quart_crs, y = euro_ext )
-
-# crop and project simultaneously using the blank raster
-# mean_tmin_first_quart_raster_crop <- terra::project(x = mean_tmin_first_quart, y = blank_3035,
-#                                                    method = "near") 
-# mean_tmin_first_quart_raster_crop # this is a different resolution to the original
-
-# try it with the 1km res raster
-# tictoc::tic()
-# mean_tmin_first_quart_raster_crop_1km <- terra::project(x = mean_tmin_first_quart, y = blank_3035_1km,
-#                                                     method = "near") 
-# tictoc::toc()
-# mean_tmin_first_quart_raster_crop_1km # this is a different resolution to the original
-
-# plot(mean_tmin_first_quart_crs_crop)
-# plot(mean_tmin_first_quart_raster_crop)
-# plot(mean_tmin_first_quart_raster_crop_1km)
-
-# mean_tmin_first_quart_crs_crop
-# mean_tmin_first_quart_raster_crop
-
-#terra::writeRaster(mean_tmin_first_quart_crs_crop, 
-#                   "data/variables/climate/climate_prepped/mean_tmin_first_quart.tif",
-#                   overwrite = T) 
-
-#check_rast <- terra::rast("data/variables/climate/climate_prepped/mean_tmin_first_quart.tif")
-
-## check that match pre- and post-save
-# mean_tmin_first_quart_crs_crop
-# check_rast
-## make a function to do this for efficiency
-
-# climate_mean_fun <- function(data_list, set_crs, set_extent, name_to_save){
-#   multi_layer_file <- terra::rast(data_list)
-#   mean_multi_layer <- terra::app(multi_layer_file, mean)
-#   mean_multi_layer_crs <- terra::project(x = mean_multi_layer, y = set_crs, method = "near")
-#   mean_multi_layer_crs_crop <- crop(x = mean_multi_layer_crs, y = set_extent )
-#   terra::writeRaster(mean_multi_layer_crs_crop, paste("data/variables/climate/climate_prepped/",
-#                                                       name_to_save, ".tif", sep = ""), overwrite = T)
-# 
-# }
+terra::xyFromCell(blank_3035, 1) # coordinates of the centre of the first cell
 
 climate_mean_fun <- function(data_list, blank_raster, name_to_save){
   multi_layer_file <- terra::rast(data_list)
@@ -386,3 +347,46 @@ plot(mean_prec_third_quart, range = c(0,400),
      main = "Third quarter", cex.main = 0.8)
 dev.off()
 
+
+#################################################################################
+
+### Code below was used as a trial to ensure working
+# crop and project simultaneously using the blank raster
+# mean_tmin_first_quart_raster_crop <- terra::project(x = mean_tmin_first_quart, y = blank_3035,
+#                                                    method = "near") 
+# mean_tmin_first_quart_raster_crop # this is a different resolution to the original
+
+# try it with the 1km res raster
+# tictoc::tic()
+# mean_tmin_first_quart_raster_crop_1km <- terra::project(x = mean_tmin_first_quart, y = blank_3035_1km,
+#                                                     method = "near") 
+# tictoc::toc()
+# mean_tmin_first_quart_raster_crop_1km # this is a different resolution to the original
+
+# plot(mean_tmin_first_quart_crs_crop)
+# plot(mean_tmin_first_quart_raster_crop)
+# plot(mean_tmin_first_quart_raster_crop_1km)
+
+# mean_tmin_first_quart_crs_crop
+# mean_tmin_first_quart_raster_crop
+
+#terra::writeRaster(mean_tmin_first_quart_crs_crop, 
+#                   "data/variables/climate/climate_prepped/mean_tmin_first_quart.tif",
+#                   overwrite = T) 
+
+#check_rast <- terra::rast("data/variables/climate/climate_prepped/mean_tmin_first_quart.tif")
+
+## check that match pre- and post-save
+# mean_tmin_first_quart_crs_crop
+# check_rast
+## make a function to do this for efficiency
+
+# climate_mean_fun <- function(data_list, set_crs, set_extent, name_to_save){
+#   multi_layer_file <- terra::rast(data_list)
+#   mean_multi_layer <- terra::app(multi_layer_file, mean)
+#   mean_multi_layer_crs <- terra::project(x = mean_multi_layer, y = set_crs, method = "near")
+#   mean_multi_layer_crs_crop <- crop(x = mean_multi_layer_crs, y = set_extent )
+#   terra::writeRaster(mean_multi_layer_crs_crop, paste("data/variables/climate/climate_prepped/",
+#                                                       name_to_save, ".tif", sep = ""), overwrite = T)
+# 
+# }

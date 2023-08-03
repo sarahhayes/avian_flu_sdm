@@ -190,10 +190,6 @@ table(values(points_rast_10k))
 # I think the 1km are just too small to see. 
 
 #Perhaps just look at UK? 
-plot(euro_map)
-abline(h = 4100000, v = 3800000)
-abline(h = 3100000, v = 3300000)
-
 GB_ext <- terra::ext(3300000, 3800000, 3100000, 4100000)
 GB_crop <- terra::crop(euro_map, GB_ext)
 plot(GB_crop)
@@ -202,3 +198,21 @@ GB_rast <- terra::crop(points_rast, GB_ext)
 plot(GB_crop)
 plot(GB_rast, add = T, axes = F)
 
+###
+# Create the csv file for avian flu cases
+# make a points object using the centre of each pixel from the ref raster
+points_euro_rast <- terra::as.points(euro_rast)
+points_euro_rast
+
+tictoc::tic()
+flu_res <- terra::extract(points_rast, points_euro_rast, method = "simple", xy = T)
+tictoc::toc()
+
+table(flu_res$last)
+table(values(points_euro_rast))
+table(values(points_rast))
+euro_rast
+nrow(flu_res)
+points_rast
+
+# why have we got fewer values in the results table rather than the raster? 
