@@ -55,8 +55,17 @@ plot(med_vect,
 idx <- which(med_vect>0)
 ratio <- int_width[idx] / med_vect[idx]
 hist(ratio,
-     breaks = as.integer(max(int_width[idx] / med_vect[idx])),
+     breaks = as.integer(max(ratio)),
      xlab = "Width of CI / median",
+     main = paste("Mean=",
+                  mean(ratio),
+                  ", std=",
+                  sd(ratio)))
+
+ratio <- u95_vect[idx] / med_vect[idx]
+hist(ratio,
+     breaks = as.integer(max(ratio)),
+     xlab = "u95 / median",
      main = paste("Mean=",
                   mean(ratio),
                   ", std=",

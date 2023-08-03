@@ -25,18 +25,64 @@ library(sf)
 library(stringr)
 library(terra)
 
+# First get list of birds which appear in Europewith eBird species codes, along
+# with estimates of global population sizes.
+
 # Get ebird species table
 sp_df <- ebirdst_runs
-sp_df$scientific_name <- sapply(sp_df$scientific_name, tolower)
+sp_df$scientific_name <- sapply(sp_df$scientific_name,
+                                tolower,
+                                USE.NAMES = FALSE)
 
 # Get codes for species in Europe
 euro_bird_codes <- read.csv("ebird/codes_for_europe_clean.csv")
 
+no_euro_birds <- nrow(euro_bird_codes)
+
 #Restrict to species in Europe list
 sp_df <- sp_df[which(sp_df$species_code %in% euro_bird_codes$code), ]
 
-# Use the AVONET data to create a mapping between names and alphanumeric
-# identifiers
+# Load in population sizes
+pop_size_df <- read.csv("callaghan_pop_estimates.csv")
+pop_size_df$Scientific.name <- sapply(pop_size_df$Scientific.name, tolower)
+
+# Try to match up
+cat(length(setdiff(sp_df$scientific_name, pop_size_df$Scientific.name)),
+    "binomial names are missing from the population size list.")
+cat(length(setdiff(sp_df$common_name, pop_size_df$Common.name)),
+    "common names are missing from the population size list.")
+sci_mismatch <- which(!(sp_df$scientific_name %in% pop_size_df$Scientific.name))
+com_mismatch <- which(!(sp_df$common_name %in% pop_size_df$Common.name))
+full_mismatch <- intersect(sci_mismatch, com_mismatch)
+cat(length(full_mismatch),
+  "species are missing binomial AND common names in the population size list.")
+cat("Missing species common names are:",
+    sp_df$common_name[full_mismatch],
+    "scientific names are",
+    sp_df$scientific_name[full_mismatch],
+    sep = "\n")
+
+# Also need to check matches are 1-1, i.e. when we have a match for both names
+# they point us to the same place
+eBird_to_pop_by_sci <- sapply(sp_df$scientific_name,
+                              FUN = function(x){
+                                which(pop_size_df$Scientific.name==x)})
+eBird_to_pop_by_comm <- sapply(sp_df$common_name,
+                              FUN = function(x){
+                                which(pop_size_df$Common.name==x)})
+consistent_matches <- lapply(
+  1:no_euro_birds,
+  FUN = function(i){
+    identical(eBird_to_pop_by_sci$Value[i], eBird_to_pop_by_comm$Value[i]) |
+      !(sp_df$scientific_name[i] %in% pop_size_df$Scientific.name) |
+      !(sp_df$common_name[i] %in% pop_size_df$Common.name)
+  }
+)
+cat("There are",
+    length(which(consistent_matches==FALSE)),
+    "common-scientific mismatches.")
+
+# Bring in AVONET to see if we can fix the missing species using AVONET IDs
 AVONET_df <- read_excel("data/AVONETSupplementarydataset1.xlsx",
                         sheet = "AVONET_Raw_Data")
 AVONET_df <- AVONET_df[,
@@ -47,8 +93,116 @@ AVONET_df <- AVONET_df[,
 AVONET_df <- distinct(AVONET_df)
 AVONET_df[, 2:4] <- sapply(AVONET_df[, 2:4], tolower)
 
+missing_species_in_AVONET <- which(
+  AVONET_df$Species2_eBird %in% sp_df$scientific_name[full_mismatch])
+
+# Look at what AVONET has to say about missing species:
+missing_species_df <- AVONET_df[missing_species_in_AVONET, ]
+print(missing_species_df)
+
+# See which alternative names show up in the population size data:
+alts_from_BirdLife <- intersect(pop_size_df$Scientific.name,
+                                missing_species_df$Species1_BirdLife)
+alts_from_BirdTree <- intersect(pop_size_df$Scientific.name,
+                                missing_species_df$Species3_BirdTree)
+
+sub_strs <- sapply(union(alts_from_BirdLife, alts_from_BirdTree),
+                   FUN = function(x){
+                     paste(
+                       missing_species_df$Species2_eBird[
+                         which(missing_species_df$Species3_BirdTree==x)],
+                       x,
+                       sep = " -> ")
+                   })
+cat("The following substitutions are possible but need sense-checking:",
+    sub_strs,
+    sep = "\n"
+    )
+
+# Saxicola stejnegeri (Amur stonechat) is a vagrant species only rarely found in
+# Europe, so we remove it from consideration
+euro_bird_codes <- euro_bird_codes[
+  !grepl("Amur Stonechat", euro_bird_codes$species), ]
+sp_df <- sp_df[!grepl("saxicola stejnegeri", sp_df$scientific_name), ]
+
+# Oenanthe melanoleuca (Eastern Black-eared Wheatear) is considered a subspecies
+# of Oenanthe hispanica (Western Black-eared Wheatear). The two datasets
+# conflict in their subspecies assignment so we remove both from consideration
+euro_bird_codes <- euro_bird_codes[
+  !grepl("Eastern Black-eared Wheatear", euro_bird_codes$species), ]
+sp_df <- sp_df[!grepl("oenanthe melanoleuca", sp_df$scientific_name), ]
+euro_bird_codes <- euro_bird_codes[
+  !grepl("Western Black-eared Wheatear", euro_bird_codes$species), ]
+sp_df <- sp_df[!grepl("oenanthe hispanica", sp_df$scientific_name), ]
+
+# The classification of the entire Curruca genus is problematic, so we remove it
+curruca_common_names <- sp_df$common_name[
+  grepl("curruca",sp_df$scientific_name)]
+for (name in curruca_common_names){
+  euro_bird_codes <- euro_bird_codes[
+    !grepl(name, euro_bird_codes$species), ]
+}
+sp_df <- sp_df[!grepl("curruca", sp_df$scientific_name), ]
+
+# Remove both European green woodpecker and Iberian green woodpecker due to
+# inconsistent subspecies assignment:
+euro_bird_codes <- euro_bird_codes[
+  !grepl("Iberian Green Woodpecker", euro_bird_codes$species), ]
+sp_df <- sp_df[!grepl("picus sharpei", sp_df$scientific_name), ]
+euro_bird_codes <- euro_bird_codes[
+  !grepl("Eurasian Green Woodpecker", euro_bird_codes$species), ]
+sp_df <- sp_df[!grepl("picus viridis", sp_df$scientific_name), ]
+
+# The following species have no clear substitute:
+true_missing <- missing_species_df$Species2_eBird[
+  -which(
+    (missing_species_df$Species3_BirdTree %in% pop_size_df$Scientific.name)|
+        (missing_species_df$Species3_BirdTree %in% pop_size_df$Scientific.name))
+    ]
+cat("Can not identify matches for the following in AVONET:",
+    true_missing,
+    sep = "\n"
+    )
+
+# These two species appear to be missing with no obvious substitution so we
+# remove them from the data
+# Note that we need to use code in euro_bird_codes because the name has problem
+# characters
+euro_bird_codes <- euro_bird_codes[
+  !grepl("krunut1", euro_bird_codes$code), ]
+sp_df <- sp_df[!grepl("sitta krueperi", sp_df$scientific_name), ]
+euro_bird_codes <- euro_bird_codes[
+  !grepl("Northern Hawk Owl", euro_bird_codes$species), ]
+sp_df <- sp_df[!grepl("surnia ulula", sp_df$scientific_name), ]
+
+# Should now find that all species from eBird have population sizes:
+cat(length(setdiff(sp_df$scientific_name, pop_size_df$Scientific.name)),
+    "binomial names are missing from the population size list.")
+cat(length(setdiff(sp_df$common_name, pop_size_df$Common.name)),
+    "common names are missing from the population size list.")
+sci_mismatch <- which(!(sp_df$scientific_name %in% pop_size_df$Scientific.name))
+com_mismatch <- which(!(sp_df$common_name %in% pop_size_df$Common.name))
+full_mismatch <- intersect(sci_mismatch, com_mismatch)
+cat(length(full_mismatch),
+    "species are missing binomial AND common names in the population size list.")
+
+# Add pop sizes to species data:
+no_euro_birds <- nrow(euro_bird_codes)
+sp_df$pop_sizes <- 0
+sp_df$pop_sizes <- sapply(1:no_euro_birds,
+                          FUN = function(i){
+                            if (i %in% sci_mismatch){
+                              return(pop_size_df$Abundance.estimate[which(pop_size_df$Common.name==sp_df$common_name[i])])
+                            }
+                            else{
+                              return(pop_size_df$Abundance.estimate[which(pop_size_df$Scientific.name==sp_df$scientific_name[i])])
+                            }
+                          })
+
+################################################################################
+
 # Control ambiguity by assigning only a single ID to each combination of names
-AVONET_df <- AVONET_df[!duplicated(AVONET_df[,2:4]), ]
+# AVONET_df <- AVONET_df[!duplicated(AVONET_df[,2:4]), ]
 
 # ID functions for matching species between datasets:
 get_single_bird_id <- function(binomial_name, name_sources){
@@ -97,28 +251,29 @@ get_single_bird_id <- function(binomial_name, name_sources){
     return("-100")
   }
   else{
-    # Construct consensus distribution of candidate names
-    unique_candidates <- unique(ID_candidates)
-    if (length(unique_candidates)==1){
-      # cat("Number of unique candidates is", length(unique_candidates), "\n")
-      # cat(unique_candidates, "\n")
-      return(unique_candidates)
-    }
-    candidate_dist <- c()
-    for (i in 1:length(unique_candidates)){
-      # cat("i=", i, "\n")
-      candidate_dist <- append(candidate_dist,
-                               sum(ID_weightings[
-                                 which(ID_candidates==unique_candidates[i])]))
-    }
-    # cat(unique_candidates, "\n", ID_candidates, "\n", candidate_dist, "\n", ID_weightings, "\n")
-    if (length(which(candidate_dist==max(candidate_dist)))==1){
-      return(unique_candidates[which(candidate_dist==max(candidate_dist))])
-    }
-    else{
-      # cat("Multiple consensus options for species", binomial_name,"\n")
-      return(sample(unique_candidates[which(candidate_dist==max(candidate_dist))], 1))
-    }
+    return(unique(ID_candidates))
+    # # Construct consensus distribution of candidate names
+    # unique_candidates <- unique(ID_candidates)
+    # if (length(unique_candidates)==1){
+    #   # cat("Number of unique candidates is", length(unique_candidates), "\n")
+    #   # cat(unique_candidates, "\n")
+    #   return(unique_candidates)
+    # }
+    # candidate_dist <- c()
+    # for (i in 1:length(unique_candidates)){
+    #   # cat("i=", i, "\n")
+    #   candidate_dist <- append(candidate_dist,
+    #                            sum(ID_weightings[
+    #                              which(ID_candidates==unique_candidates[i])]))
+    # }
+    # # cat(unique_candidates, "\n", ID_candidates, "\n", candidate_dist, "\n", ID_weightings, "\n")
+    # if (length(which(candidate_dist==max(candidate_dist)))==1){
+    #   return(unique_candidates[which(candidate_dist==max(candidate_dist))])
+    # }
+    # else{
+    #   # cat("Multiple consensus options for species", binomial_name,"\n")
+    #   return(sample(unique_candidates[which(candidate_dist==max(candidate_dist))], 1))
+    # }
   }
 }
 
@@ -128,19 +283,45 @@ get_bird_ids <- function(name_vect, name_sources){
                      "eBird",
                      "BirdTree")
   }
-  id_vect <- vector(length = length(name_vect))
+  
+  cols_needed <- 0
+  # Check max number of options we will need
+  if ("BirdLife" %in% name_sources){
+    names_in_source <- AVONET_df$Species1_BirdLife[
+      which(AVONET_df$Species1_BirdLife %in% name_vect)]
+    if (max(table(names_in_source)) > cols_needed){
+      cols_needed <- max(table(names_in_source))
+    }
+  }
+  if ("eBird" %in% name_sources){
+    names_in_source <- AVONET_df$Species2_eBird[
+      which(AVONET_df$Species2_eBird %in% name_vect)]
+    if (max(table(names_in_source)) > cols_needed){
+      cols_needed <- max(table(names_in_source))
+    }
+  }
+  if ("BirdTree" %in% name_sources){
+    names_in_source <- AVONET_df$Species3_BirdTree[
+      which(AVONET_df$Species3_BirdTree %in% name_vect)]
+    if (max(table(names_in_source)) > cols_needed){
+      cols_needed <- max(table(names_in_source))
+    }
+  }
+  id_df <- data.frame(matrix(nrow = length(name_vect), ncol = (cols_needed+1)))
+  id_df[, 1] <- name_vect
   for (n in 1:length(name_vect)){
     # cat("n=",n,"\n")
-    id_vect[n] <- get_single_bird_id(name_vect[n], name_sources)
+    id_vect <- get_single_bird_id(name_vect[n], name_sources)
+    id_df[n, 2:(length(id_vect)+1)] <- id_vect
   }
-  return(id_vect)
+  return(id_df)
 }
 
 # Find IDs for species in eBird
 eBird_IDs <- get_bird_ids(sp_df$scientific_name)
 # Check we got everything:
-cat(length(which(eBird_IDs=="-100")), "species were not ID'd.")
-non_IDd_species <- sp_df$scientific_name[which(eBird_IDs=="-100")]
+cat(length(which(eBird_IDs[, 2]=="-100")), "species were not ID'd.")
+non_IDd_species <- sp_df$scientific_name[which(eBird_IDs[, 2]=="-100")]
 cat("Unidentified species are:",
     non_IDd_species,
     sep = "\n")
@@ -148,7 +329,9 @@ cat("Unidentified species are:",
 # Porphyrio Poliocephalus doesn't have an obvious match in AVONET and is only
 # found in small numbers at the very edge of the EPSG:3035 range so we just
 # remove it from the list
-sp_df <- sp_df[which(sp_df$scientific_name!="porphyrio poliocephalus"), ]
+euro_bird_codes <- euro_bird_codes[
+  !grepl("Gray-headed Swamphen", euro_bird_codes$species), ]
+sp_df <- sp_df[!grepl("porphyrio poliocephalus", sp_df$scientific_name), ]
 
 # This is a simple alternative name:
 sp_df$scientific_name[which(sp_df$scientific_name=="daptrius chimachima")] <- 
@@ -158,9 +341,10 @@ sp_df$scientific_name[which(sp_df$scientific_name=="daptrius chimachima")] <-
 # Find IDs for species in eBird
 eBird_IDs <- get_bird_ids(sp_df$scientific_name)
 # Check we got everything:
-cat(length(which(eBird_IDs=="-100")), "species were not ID'd.")
+cat(length(which(eBird_IDs[, 2]=="-100")), "species were not ID'd.")
 
-sp_df$Avibase_ID <- eBird_IDs
+# Add ID options to species dataframe
+sp_df$Avibase_ID <- eBird_IDs[, 2:ncol(eBird_IDs)]
 
 ################################################################################
 # Now introduce CLOVER database and identify all avian species known to be hosts
@@ -169,7 +353,8 @@ sp_df$Avibase_ID <- eBird_IDs
 setwd("../clover")
 
 # Load data
-CLOVER_df <- read.csv("clover/clover_1.0_allpathogens/CLOVER_1.0_Viruses_AssociationsFlatFile.csv")
+CLOVER_df <- read.csv(
+  "clover/clover_1.0_allpathogens/CLOVER_1.0_Viruses_AssociationsFlatFile.csv")
 # Restrict attention to samples from birds
 CLOVER_df <- CLOVER_df[which(CLOVER_df$HostClass == "aves"), ]
 # All pathogen species names are in lower case. Filtering for rows where this
@@ -820,54 +1005,6 @@ problem_species <- which(sapply(1:nrow(sp_df),
     (length(which(matched_data$Avibase_ID == sp_df$Avibase_ID[i]))!=1) &
       (length(which(matched_data$Scientific == sp_df$scientific_name[i]))!=1)}))
 cat("There are now", length(problem_species), "problem species.\n")
-
-################################################################################
-# Load in population sizes
-pop_size_df <- read.csv("callaghan_pop_estimates.csv")
-pop_size_df$Scientific.name <- sapply(pop_size_df$Scientific.name, tolower)
-
-pop_size_ids <- get_bird_ids(pop_size_df$Scientific.name)
-
-# Check if all the species IDs from eBird are covered:
-cat(length(setdiff(sp_df$Avibase_ID, pop_size_ids)), "European species are not ID'd.")
-non_IDd_species <- sp_df$scientific_name[
-  which(eBird_IDs %in% setdiff(sp_df$Avibase_ID, pop_size_ids))]
-cat("Unidentified species are:",
-    non_IDd_species,
-    sep = "\n")
-
-# Can we match using scientific name?
-cat("The following un-ID'd species can not be identified by name:",
-    (setdiff(non_IDd_species,
-                   pop_size_df$Scientific.name)), sep = "\n")
-
-# Fix a typo
-pop_size_df$Scientific.name <- sub("microcarbo pygmeus",
-                                   "microcarbo pygmaeus",
-                                   pop_size_df$Scientific.name)
-
-# Change a name
-pop_size_df$Scientific.name <- sub("oreothlypis peregrina",
-                                   "leiothlypis peregrina",
-                                   pop_size_df$Scientific.name)
-
-pop_size_ids <- get_bird_ids(pop_size_df$Scientific.name)
-
-# Do checks again:
-cat(length(setdiff(sp_df$Avibase_ID, pop_size_ids)), "European species are not ID'd.")
-non_IDd_species <- sp_df$scientific_name[
-  which(eBird_IDs %in% setdiff(sp_df$Avibase_ID, pop_size_ids))]
-cat("Unidentified species are:",
-    non_IDd_species,
-    sep = "\n")
-cat("The following un-ID'd species can not be identified by name:",
-    (setdiff(non_IDd_species,
-             pop_size_df$Scientific.name)), sep = "\n")
-
-# Should find there are two species left. These do not appear in the population
-# size estimate data so we will leave them out of the raster calculations.
-
-sp_df$pop_size <- 
 
 ################################################################################
 # Now get abundance rasters for species and convolute with eco/phylo factors
