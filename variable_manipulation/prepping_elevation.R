@@ -10,18 +10,71 @@ library(tidyverse)
 library(geodata)
 library(terra)
 
-global_elev <- elevation_global(res = 0.5, path = "data/variables")
+global_elev_5 <- elevation_global(res = 5, path = "data/variables/elevation/geodata_global_res5")
+global_elev_5
+# global raster in standard long/lat. Resolution is 0.083. This is in degrees. 
+# This is 5 arc minutes which is approx 10km
 
-# make blank raster
-crs <- "epsg:3035"
-euro_ext <- terra::ext(2000000, 6000000, 1000000, 5500000) # swap to base raster later
+# read in reference raster
+euro_rast_10 <- terra::rast("output/euro_rast_10k.tif") # first look on larger scale
 
-blank_raster <- rast(crs=crs, extent=euro_ext, res = 1000)
+elev_euro_5_10 <- terra::project(x = global_elev, y = euro_rast_10, method = "mode") #
+# for now using mode whilst working it out. 
+elev_euro_5_10
+plot(elev_euro_5_10)
 
-elev_euro <- terra::project(x = global_elev, y = blank_raster, method = "near")
-elev_euro
+### That seems reasonable and quick. 
+### Now let's look at a smaller res for both parts
 
-plot(elev_euro)
+euro_rast <- terra::rast("output/euro_rast.tif")
+
+global_elev_0.5 <- elevation_global(res = 0.5, path = "data/variables/elevation/geodata_global_res0.5")
+global_elev_0.5 # 0.00833 degrees.  from this webpage: https://longlovemyu.com/metrics_gis/
+## this is about 928m at the equator. 
+
+elev_euro_0.5_max <- terra::project(x = global_elev_0.5, y = euro_rast, method = "max") #
+# first_looking at max. 
+elev_euro_0.5_max
+plot(elev_euro_0.5_max)
+
+elev_euro_0.5_min <- terra::project(x = global_elev_0.5, y = euro_rast, method = "min") #
+# first_looking at max. 
+elev_euro_0.5_min
+plot(elev_euro_0.5_min)
+
+elev_euro_0.5_diff <- elev_euro_0.5_max - elev_euro_0.5_min
+elev_euro_0.5_diff # diff of 2 km in places! 
+plot(elev_euro_0.5_diff)
+
+### extract the data we want at the centre points of our grid
+# make a points object using the centre of each pixel from the blank raster
+points_3035 <- terra::as.points(euro_rast)
+points_3035
+
+tictoc::tic()
+elev_res_max <- terra::extract(elev_euro_0.5_max, points_3035, method = "simple", xy = T)
+tictoc::toc()
+head(elev_res_max)
+elev_res_max <- rename(elev_res_max, "elev_max" = "wc2.1_30s_elev")
+
+elev_res_min <- terra::extract(elev_euro_0.5_min, points_3035, method = "simple", xy = T)
+head(elev_res_min)
+elev_res_min <- rename(elev_res_min, "elev_min" = "wc2.1_30s_elev")
+
+
+elev_res_diff <- terra::extract(elev_euro_0.5_diff, points_3035, method = "simple", xy = T)
+head(elev_res_diff)
+elev_res_diff <- rename(elev_res_diff, "elev_diff" = "wc2.1_30s_elev")
+
+elev_res_all <- full_join(elev_res_min, elev_res_max,  by = c("ID", "x","y" )) %>%
+  full_join(elev_res_diff)
+head(elev_res_all)
+
+elev_res_all <- dplyr::select(elev_res_all, all_of(c("ID", "x", "y", "elev_min",
+                                                      "elev_max", "elev_diff")))
+
+
+# write.csv(elev_res_all, "variable_manipulation/variable_outputs/elevation_outputs.csv")
 
 ###------------------------------------------------------------------
 ### Alternative using elevatr package
