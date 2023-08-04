@@ -122,10 +122,8 @@ get_bird_ids <- function(name_vect, name_sources){
 # Now introduce CLOVER database and identify all avian species known to be hosts
 # of influenza A.
 
-setwd("../clover")
-
 # Load data
-CLOVER_df <- read.csv("clover/clover_1.0_allpathogens/CLOVER_1.0_Viruses_AssociationsFlatFile.csv")
+CLOVER_df <- read.csv("data/CLOVER_1.0_Viruses_AssociationsFlatFile.csv")
 # Restrict attention to samples from birds
 CLOVER_df <- CLOVER_df[which(CLOVER_df$HostClass == "aves"), ]
 # All pathogen species names are in lower case. Filtering for rows where this
@@ -238,8 +236,6 @@ no_host_species <- length(host_species_IDs)
 
 ################################################################################
 # Now introduce eBird data
-
-setwd('../avian_flu_sdm')
 
 # Read in codes
 eBird_names <- read.csv("eBird/eBird_species_europe_copy.csv", header = F)
