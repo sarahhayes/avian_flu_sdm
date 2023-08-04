@@ -8,7 +8,10 @@ library(terra)
 library(sf)
 
 #euromap <- terra::vect("output/euro_map.shp")
-euromap <- st_read("output/euro_map.shp")
+# euromap <- st_read("output/euro_map.shp")
+## need a bigger map to avoid the boundary being classified as the sea
+
+euromap <- st_read("output/large_map.shp")
 
 # look at one/two countries only whilst working it out
 # euromap <- euromap[which(euromap$NAME_ENGL %in% c("France", "Spain")),]
@@ -35,7 +38,7 @@ grid_centers # the extent is different to our raster but the XY look like they a
 ## at this more closely and ensure that our grid will be the same as the blank raster 
 ## we are using
 plot(euromap, max.plot = 1)
-plot(grid_centers, add = T)
+#plot(grid_centers, add = T) # don't run this! If want to check, look at subsection of area.
 
 # below is incredibly slow
 #tictoc::tic()
@@ -67,7 +70,7 @@ tictoc::toc()
 #plot(g3, col = "green")
 
 g4 <- grid_centers[eurogrid]
-plot(g4, col = "pink")
+#plot(g4, col = "pink")
 
 #calculation of the distance between the coast and our points
 tictoc::tic()
@@ -91,15 +94,52 @@ col_dist <- brewer.pal(11, "RdGy")
 
 #df_small <- df[1000000: 1200000,]
 
-#pdf("plots/distance_to_coast_map.pdf", width = 10, height = 10)
-#png("plots/distance_to_coast_map.png")
+# The larger map
 ggplot(df, aes(X, Y, fill = dist)) + #variables
   geom_tile()+ #geometry
   scale_fill_gradientn(colours = rev(col_dist))+ #colors for plotting the distance
   labs(fill = "Distance (km)")+ #legend name
   theme_void()+ #map theme
   theme(legend.position = "bottom") #legend position
-#dev.off()
+
+# save one that is only shown to the size we want
+png("plots/distance_to_coast_map.png")
+ggplot(df, aes(X, Y, fill = dist)) + #variables
+  geom_tile()+ #geometry
+  scale_fill_gradientn(colours = rev(col_dist))+ #colors for plotting the distance
+  labs(fill = "Distance (km)")+ #legend name
+  theme_void()+ #map theme
+  xlim(2600000, 7000000) +
+  ylim(1500000, 6400000) +
+  theme(legend.position = "bottom") #legend position
+dev.off()  
+  
+
+#save some of these files as it takes a long time to run
+
+# write.csv(df, "variable_manipulation/variable_outputs/interim_dist_to_coast.csv")
+
+# now we want to extract the points we need
+
+head(df) # we can use these XY coords to do the extraction
+
+# read in the reference raster
+shp_for_points <- terra::rast("output/euro_rast.tif")
+shp_for_points # shows us the extent of our reference area.
+
+res_dist_to_coast <- df %>%
+  dplyr::filter(X > 2600000 & X < 7000000) %>%
+  dplyr::filter(Y >1500000 & Y < 6400000)
+
+# The results are the same size as the results dfs from the other variables
+
+head(res_dist_to_coast)
+
+res_dist_to_coast <- rename(res_dist_to_coast, "dist_to_coast_km" = "dist")
+range(res_dist_to_coast$dist_to_coast)
+
+# write.csv(res_dist_to_coast, "variable_manipulation/variable_outputs/dist_to_coast_output.csv")
+
 
 
 #########################################################################################

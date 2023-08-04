@@ -20,12 +20,10 @@ crs <- "epsg:3035"
 # # thus I'm hoping that this makes it 1km res
 # blank_raster
 
-blank_3035 <- terra::rast("output/euro_rast.tif")
-blank_3035
+blank_raster <- terra::rast("output/euro_rast.tif")
+blank_raster
 terra::xyFromCell(blank_3035, 1) # coordinates of the centre of the first cell
-
-plot(blank_3035)
-
+plot(blank_raster)
 
 glwd_crop_prj <- terra::project(x = glwd_rast, y = blank_raster, method = "near") 
 glwd_crop_prj # we can see that this keeps the crs of the blank raster
@@ -63,23 +61,25 @@ table(values(glwd_crop_prj))
 # This has some values of 9 in it. We don't want to include these as they are intermittent wetland
 # We just want to include permanent wetlands.
 
-glwd_crop_prj_combo <- terra::subst(glwd_crop_prj, 1:8, 99)
+glwd_crop_prj_combo <- terra::subst(glwd_crop_prj, from = c(1:8), to = c(rep(99,8)),
+                                    others = NA)
 table(values(glwd_crop_prj_combo))
-glwd_crop_prj_combo2 <- terra::subst(glwd_crop_prj_combo, 9, NA)
-table(values(glwd_crop_prj_combo2))
+sum(table(values(glwd_crop_prj_combo)))
+sum(table(values(glwd_crop_prj)))
+# diff of 9185 between these as there should be
 
-glwd_crop_prj_combo
-
-plot(glwd_crop_prj_combo, col = "blue")
-plot(glwd_crop_prj_combo2, col = "red", add = T)
+plot(glwd_crop_prj)
+plot(glwd_crop_prj_combo, col = "white", add = T)
+# this shows that the level 9 are NA in the new raster as you can still see the 
+# green dots from the original before we changed it
 
 plot(euromap)
-plot(glwd_crop_prj_combo2, add = T, axes = F, col = "blue", legend = F)
+plot(glwd_crop_prj_combo, add = T, axes = F, col = "blue", legend = F)
 
 # save a copy of this plot
 #pdf("plots/inland_water.pdf", height = 5, width = 7)
 #plot(euromap)
-#plot(glwd_crop_prj_combo2, add = T, axes = F, col = "blue", legend = F)
+#plot(glwd_crop_prj_combo, add = T, axes = F, col = "blue", legend = F)
 #dev.off()
 
 ## Next step is to try and work out distance to nearest water for each cell of the blank raster. 
@@ -94,7 +94,8 @@ blank_small <- rast(crs=crs, extent=small_extent, res = 1000) # the unit for eps
 glwd_small <- terra::project(x = glwd_rast, y = blank_small, method = "near") 
 glwd_small # we can see that this keeps the crs of the blank raster
 plot(glwd_small) 
-glwd_small <- terra::subst(glwd_small, 1:8, 99)
+glwd_small <- terra::subst(glwd_small, from = c(1:8), to = c(rep(99,8)),
+                           others = NA)
 plot(glwd_small, col = "blue")
 
 
@@ -141,25 +142,67 @@ values(blank_raster) <- 1
 p1 = as.data.frame(blank_raster,xy=TRUE)
 p1 = p1[,1:2]
 
-p2 = as.data.frame(glwd_crop_prj_combo2, xy=TRUE)
+p2 = as.data.frame(glwd_crop_prj_combo, xy=TRUE)
 p2 = p2[!is.na(p2[,3]),1:2]
 
 # Now we are set up for knnx.dist.
-
 dnear = FNN::knnx.dist(p2, p1, k=1)
 
 blank_raster[] = dnear[,1] # assigning the distances to the raster
 #blank_raster[] = dnear[,1]/1000 # assigning the distances to the raster as km
 
 # And plot:
-
 plot(blank_raster) # shows the distances. This is harder to see if correct. 
 # Think we want to plot 0 as a particular colour 
-points(p2$x, p2$y, pch=3) # add the points from the glwd raster that were non NA values
-## this seems to work! 
-plot(glwd_small, add = T, col = "blue")
-
+# points(p2$x, p2$y, pch=3) # add the points from the glwd raster that were non NA values
 max(dnear)
+
+# Because this method uses all NA cells in the GLWD data, it includes all the oceans etc
+# read in the ref raster again, but with a different name
+
+euro_rast <- terra::rast("output/euro_rast.tif")
+blank_raster
+euro_rast
+
+masked <- terra::mask(blank_raster, euro_rast )
+plot(masked)
+
+bp_500 <- c(1000,5000, 10000, 15000, 20000, 25000, 30000, 40000, 50000, 
+            100000, 200000, 500000, 1000000)
+plot(masked, breaks = c(0, bp_500), 
+     plg = list(title = "Distance in m"),
+     col= c("white", viridis::viridis(14)), background = "light blue")
+
+# ideally re-do this in km. 
+pdf("plots/distance_to_water_masked.pdf", width = 7, height = 5)
+plot(masked, breaks = c(0, bp_500), 
+     plg = list(title = "Distance in m"),
+     pax=list(side=1:2, cex.axis = 0.8),
+     col= c("white", viridis::viridis(14)), background = "grey")
+dev.off()
+
+### Extracting the values 
+# make a points object using the centre of each pixel from the reference raster
+points_3035 <- terra::as.points(euro_rast)
+points_3035
+
+tictoc::tic()
+dist_to_inland_water_res <- terra::extract(masked, points_3035, method = "simple", xy = T)
+tictoc::toc()
+
+
+head(dist_to_inland_water_res)
+range(dist_to_inland_water_res$layer)
+
+dist_to_inland_water_res <- rename(dist_to_inland_water_res, "dist_to_water" = "layer")
+head(dist_to_inland_water_res)
+
+# write.csv(dist_to_inland_water_res,
+#          "variable_manipulation/variable_outputs/dist_to_water_output.csv",
+#          row.names = F)
+
+
+## looking at how best to plot and exploring options
 
 plot(blank_raster,  col= c("white", grDevices::rainbow(50)))
 # try and plot so only zeros are show in white. 

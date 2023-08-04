@@ -115,6 +115,7 @@ colnames(bv_pos_data_trim)
 all_ai_data <- rbind(fao_data_trim, inf_a_hpai_trim, bv_pos_data_trim)
 all_ai_data$flu <- 1 # denotes a positive
 
+
 ## deal with the negatives
 
 bv_neg_data_trim <- rename(bv_neg_data_trim, Latitude = Collection.Latitude,
@@ -148,15 +149,42 @@ point_data <- st_as_sf(x = all_ai_data,
                         coords = c("Longitude", "Latitude"),
                         crs = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0")
 class(point_data)
-# change the projections
-point_data <- sf::st_transform(point_data, 3035)
-#plot(point_data)
-point_data
-# Now a spatial points object in the right projection
 
+# change the projections
+proj_crs <- 3035
+point_data <- sf::st_transform(point_data, proj_crs)
+#plot(point_data)
+point_data # Now a spatial points object in the right projection
+class(point_data)
+head(point_data)
+
+point_data_df <- point_data %>%
+  dplyr::mutate(X = sf::st_coordinates(.)[,1],
+                     Y = sf::st_coordinates(.)[,2])
+head(point_data_df)
+st_geometry(point_data)
+range(point_data_df$X)
+range(point_data_df$Y) # this confirms that we have labelled the columns correctly
+
+## Now select only those rows which are in the area that we want
+
+pos_ai_data_prj_area <- point_data_df %>%
+  dplyr::filter(X >= 2600000 & X <= 7000000) %>%
+  dplyr::filter(Y >= 1500000 & Y <= 6400000)
+
+# remove rows where duplicates of coordinates 
+
+pos_ai_data_prj_area_unique <- pos_ai_data_prj_area %>%
+  distinct(X, Y, observation.date, .keep_all = TRUE)
+# this is very slow!!!
+
+
+# Other manipulations needed to rasterize
 points_sp <- sf::as_Spatial(point_data)
+head(points_sp)
 
 points_vect <- terra::vect(points_sp)
+head(points_vect)
 
 #read in the raster we are using for the project
 euro_rast <- terra::rast("output/euro_rast.tif")

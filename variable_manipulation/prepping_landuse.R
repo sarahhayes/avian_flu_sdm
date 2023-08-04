@@ -29,9 +29,8 @@ MODIStsp_get_prodlayers("MCD12Q1")
 # library(rgeoboundaries)
 library(sf)
 
-# Downloading the country boundary of Zimbabwe
+# Downloading the country boundary of France
 #map_boundary <- geoboundaries("France")
-#map_boundary
 
 #map_boundary <- terra::vect("output/euro_map.shp")
 map_boundary <- st_read("output/euro_map.shp")
@@ -40,19 +39,15 @@ plot(map_boundary)
 eurounion <- st_union(map_boundary)
 plot(eurounion)
 eurounion
-# 
-# euroline <- st_cast(eurounion, "MULTILINESTRING")
-# euroline
-# plot(euroline)
 
-#plot(map_boundary)
-  
+map_boundary_euro <- eurounion
+
+
 # Defining filepath to save downloaded spatial file
-#spatial_filepath <- "data/landcover_data/france.shp"
-spatial_filepath <- "output/euro_map.shp"
-
+spatial_filepath <- "LandCoverData/euro.shp"
 # Saving downloaded spatial file on to our computer
-st_write(map_boundary, paste0(spatial_filepath))
+st_write(map_boundary_euro, paste0(spatial_filepath))
+
 
 library(MODIStsp)
 tictoc::tic()
