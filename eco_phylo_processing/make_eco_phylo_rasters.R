@@ -33,6 +33,11 @@ sp_df <- ebirdst_runs
 sp_df$scientific_name <- sapply(sp_df$scientific_name,
                                 tolower,
                                 USE.NAMES = FALSE)
+sp_df <- sp_df[, c(
+  "species_code",
+  "scientific_name",
+  "common_name"
+)]
 
 # Get codes for species in Europe
 euro_bird_codes <- read.csv("ebird/codes_for_europe_clean.csv")
@@ -43,7 +48,7 @@ no_euro_birds <- nrow(euro_bird_codes)
 sp_df <- sp_df[which(sp_df$species_code %in% euro_bird_codes$code), ]
 
 # Load in population sizes
-pop_size_df <- read.csv("callaghan_pop_estimates.csv")
+pop_size_df <- read.csv("data/eco_phylo_data/callaghan_pop_estimates.csv")
 pop_size_df$Scientific.name <- sapply(pop_size_df$Scientific.name, tolower)
 
 # Try to match up
@@ -83,7 +88,7 @@ cat("There are",
     "common-scientific mismatches.")
 
 # Bring in AVONET to see if we can fix the missing species using AVONET IDs
-AVONET_df <- read_excel("data/AVONETSupplementarydataset1.xlsx",
+AVONET_df <- read_excel("data/eco_phylo_data/AVONETSupplementarydataset1.xlsx",
                         sheet = "AVONET_Raw_Data")
 AVONET_df <- AVONET_df[,
                        c("Avibase.ID",
@@ -213,68 +218,42 @@ get_single_bird_id <- function(binomial_name, name_sources){
   }
   # Find IDs from each list and keep track of which species list they came from.
   ID_candidates <- c()
-  ID_weightings <- c()
-  ID_sources <- c()
+  synonyms <- c(binomial_name)
   if (("BirdLife" %in% name_sources) & 
       (binomial_name %in% AVONET_df$Species1_BirdLife)){
     ID_candidates <- append(ID_candidates, AVONET_df$Avibase.ID[
       which(AVONET_df$Species1_BirdLife==binomial_name)])
-    no_matches <- length(which(AVONET_df$Species1_BirdLife==binomial_name))
-    for (i in 1:no_matches){
-      ID_weightings <- append(ID_weightings, 1/no_matches)
-      ID_sources <- append(ID_sources, "BirdLife")
-    }
+    synonyms <- append(synonyms, AVONET_df$Species2_eBird[
+      which(AVONET_df$Species1_BirdLife==binomial_name)])
+    synonyms <- append(synonyms, AVONET_df$Species3_BirdTree[
+      which(AVONET_df$Species1_BirdLife==binomial_name)])
   }
   if (("eBird" %in% name_sources) & 
       (binomial_name %in% AVONET_df$Species2_eBird)){
     ID_candidates <- append(ID_candidates, AVONET_df$Avibase.ID[
       which(AVONET_df$Species2_eBird==binomial_name)])
-    no_matches <- length(which(AVONET_df$Species2_eBird==binomial_name))
-    for (i in 1:no_matches){
-      ID_weightings <- append(ID_weightings, 1/no_matches)
-      ID_sources <- append(ID_sources, "eBird")
-    }
+    synonyms <- append(synonyms, AVONET_df$Species1_BirdLife[
+      which(AVONET_df$Species2_eBird==binomial_name)])
+    synonyms <- append(synonyms, AVONET_df$Species3_BirdTree[
+      which(AVONET_df$Species2_eBird==binomial_name)])
   }
   if (("BirdTree" %in% name_sources) & 
       (binomial_name %in% AVONET_df$Species3_BirdTree)){
     ID_candidates <- append(ID_candidates, AVONET_df$Avibase.ID[
       which(AVONET_df$Species3_BirdTree==binomial_name)])
-    no_matches <- length(which(AVONET_df$Species3_BirdTree==binomial_name))
-    for (i in 1:no_matches){
-      ID_weightings <- append(ID_weightings, 1/no_matches)
-      ID_sources <- append(ID_sources, "BirdTree")
-    }
+    synonyms <- append(synonyms, AVONET_df$Species1_BirdLife[
+      which(AVONET_df$Species3_BirdTree==binomial_name)])
+    synonyms <- append(synonyms, AVONET_df$Species2_eBird[
+      which(AVONET_df$Species3_BirdTree==binomial_name)])
   }
   # How we work out the consensus depends on how many candidates are identified
   if (length(ID_candidates)==0){
     # If ID doesn't appear in any list, return -100
-    return("-100")
+    ID_candidates <- c("-100")
   }
-  else{
-    return(unique(ID_candidates))
-    # # Construct consensus distribution of candidate names
-    # unique_candidates <- unique(ID_candidates)
-    # if (length(unique_candidates)==1){
-    #   # cat("Number of unique candidates is", length(unique_candidates), "\n")
-    #   # cat(unique_candidates, "\n")
-    #   return(unique_candidates)
-    # }
-    # candidate_dist <- c()
-    # for (i in 1:length(unique_candidates)){
-    #   # cat("i=", i, "\n")
-    #   candidate_dist <- append(candidate_dist,
-    #                            sum(ID_weightings[
-    #                              which(ID_candidates==unique_candidates[i])]))
-    # }
-    # # cat(unique_candidates, "\n", ID_candidates, "\n", candidate_dist, "\n", ID_weightings, "\n")
-    # if (length(which(candidate_dist==max(candidate_dist)))==1){
-    #   return(unique_candidates[which(candidate_dist==max(candidate_dist))])
-    # }
-    # else{
-    #   # cat("Multiple consensus options for species", binomial_name,"\n")
-    #   return(sample(unique_candidates[which(candidate_dist==max(candidate_dist))], 1))
-    # }
-  }
+  # Remove NA's from synonyms
+  synonyms <- synonyms[which(synonyms!="na")]
+  return(list(ID = unique(ID_candidates), syn = unique(synonyms)))
 }
 
 get_bird_ids <- function(name_vect, name_sources){
@@ -309,16 +288,20 @@ get_bird_ids <- function(name_vect, name_sources){
   }
   id_df <- data.frame(matrix(nrow = length(name_vect), ncol = (cols_needed+1)))
   id_df[, 1] <- name_vect
+  syn_df <- data.frame(matrix(nrow = length(name_vect), ncol = (cols_needed+1)))
   for (n in 1:length(name_vect)){
     # cat("n=",n,"\n")
-    id_vect <- get_single_bird_id(name_vect[n], name_sources)
-    id_df[n, 2:(length(id_vect)+1)] <- id_vect
+    vect_list <- get_single_bird_id(name_vect[n], name_sources)
+    id_df[n, 2:(length(vect_list$ID)+1)] <- vect_list$ID
+    syn_df[n, 1:length(vect_list$syn)] <- vect_list$syn
   }
-  return(id_df)
+  return(list(id_df, syn_df))
 }
 
 # Find IDs for species in eBird
-eBird_IDs <- get_bird_ids(sp_df$scientific_name)
+id_and_syn <- get_bird_ids(sp_df$scientific_name, name_sources = "eBird")
+eBird_IDs <- id_and_syn[[1]]
+eBird_syns <- id_and_syn[[2]]
 # Check we got everything:
 cat(length(which(eBird_IDs[, 2]=="-100")), "species were not ID'd.")
 non_IDd_species <- sp_df$scientific_name[which(eBird_IDs[, 2]=="-100")]
@@ -339,22 +322,23 @@ sp_df$scientific_name[which(sp_df$scientific_name=="daptrius chimachima")] <-
 
 # Try getting IDs again:
 # Find IDs for species in eBird
-eBird_IDs <- get_bird_ids(sp_df$scientific_name)
+id_and_syn <- get_bird_ids(sp_df$scientific_name, name_sources = "eBird")
+eBird_IDs <- id_and_syn[[1]]
+eBird_syns <- id_and_syn[[2]]
 # Check we got everything:
 cat(length(which(eBird_IDs[, 2]=="-100")), "species were not ID'd.")
 
 # Add ID options to species dataframe
 sp_df$Avibase_ID <- eBird_IDs[, 2:ncol(eBird_IDs)]
+sp_df$synonyms <- eBird_syns
 
 ################################################################################
 # Now introduce CLOVER database and identify all avian species known to be hosts
 # of influenza A.
 
-setwd("../clover")
-
 # Load data
 CLOVER_df <- read.csv(
-  "clover/clover_1.0_allpathogens/CLOVER_1.0_Viruses_AssociationsFlatFile.csv")
+  "data/eco_phylo_data/CLOVER_1.0_Viruses_AssociationsFlatFile.csv")
 # Restrict attention to samples from birds
 CLOVER_df <- CLOVER_df[which(CLOVER_df$HostClass == "aves"), ]
 # All pathogen species names are in lower case. Filtering for rows where this
@@ -440,12 +424,12 @@ if (PLOT){
 }
 
 # Get species ID's of species in CLOVER
-host_species_IDs <- get_bird_ids(species_list)
+host_species_IDs <- get_bird_ids(species_list)[[1]]
 
 # See if any species were not successfully ID'd
-cat(length(which(host_species_IDs=="-100")), "species were not ID'd.")
+cat(length(which(host_species_IDs[, 2]=="-100")), "species were not ID'd.")
 cat("Unidentified species are:",
-    species_list[which(host_species_IDs=="-100")],
+    species_list[which(host_species_IDs[, 2]=="-100")],
     sep = "\n")
 
 # We manually replace these three species names with names found in AVONET.
@@ -456,7 +440,7 @@ species_list[which(species_list=="larus mongolicus")] <- "larus cachinnans"
 species_list[which(species_list=="piaya minuta")] <- "coccycua minuta"
 
 # Try again with ID's
-host_species_IDs <- get_bird_ids(species_list)
+host_species_IDs <- get_bird_ids(species_list)[[1]]
 
 # We now shouldn't see any failed ID's
 cat(length(which(host_species_IDs=="-100")), "species were not ID'd.")
@@ -465,10 +449,15 @@ cat(length(which(host_species_IDs=="-100")), "species were not ID'd.")
 host_species_IDs <- unique(host_species_IDs)
 no_host_species <- length(host_species_IDs)
 
+host_indicator <- sapply(1:nrow(sp_df),
+               FUN = function(i){
+                 (length(intersect(sp_df$synonyms[i, ], CLOVER_df$Host)) + 
+                 length(intersect(sp_df$Avibase_ID[i, ], host_species_IDs))) > 0
+                 })
+sp_df$host_indicator <- host_indicator
+
 ################################################################################
 # Now introduce trait data
-
-setwd('../avian_flu_sdm')
 
 # Load in from file
 EltonTraits_df <- 
@@ -480,12 +469,53 @@ EltonTraits_df <-
 EltonTraits_df <- EltonTraits_df[1:9993, ]
 EltonTraits_df$Scientific <- tolower(EltonTraits_df$Scientific)
 
+# Remove unnecessary fields:
+fields_to_drop <- c("SpecID",
+                    "BLFamilyEnglish",
+                    "BLFamSequID",
+                    "Taxo",
+                    "English",
+                    "Diet.Source",
+                    "Diet.EnteredBy",
+                    "ForStrat.Source",
+                    "ForStrat.EnteredBy",
+                    "BodyMass.Source",
+                    "BodyMass.Comment",
+                    "Record.Comment")
+EltonTraits_df <- EltonTraits_df[, !(names(EltonTraits_df) %in% fields_to_drop)]
+
+# Some of the ecological data is expressed as percentages which add up to 100.
+# This makes them colinear and so to avoid this we will remove some of the
+# percentage fields, specifically the ones that have the highest average value
+# within their set of fields.
+
+diet_data <- EltonTraits_df[, c("Diet.Inv",
+                              "Diet.Vend",
+                              "Diet.Vect",
+                              "Diet.Vfish",
+                              "Diet.Vunk",
+                              "Diet.Scav",
+                              "Diet.Nect",
+                              "Diet.Fruit",
+                              "Diet.Seed",
+                              "Diet.PlantO")]
+max_diet_comp <- names(diet_data)[which.max(colMeans(diet_data))]
+
+forstrat_data <- EltonTraits_df[, c("ForStrat.watbelowsurf",
+                                  "ForStrat.wataroundsurf",
+                                  "ForStrat.aerial",
+                                  "ForStrat.canopy",
+                                  "ForStrat.ground",
+                                  "ForStrat.understory",
+                                  "ForStrat.midhigh")]
+max_forstrat_comp <- names(forstrat_data)[which.max(colMeans(forstrat_data))]
+
 # Search for IDs
-EltonTraits_IDs <- get_bird_ids(EltonTraits_df$Scientific)
+EltonTraits_IDs <- get_bird_ids(EltonTraits_df$Scientific)[[1]]
 
 # Check we got everything:
-cat(length(which(EltonTraits_IDs=="-100")), "species were not ID'd.")
-non_IDd_species <- EltonTraits_df$Scientific[which(EltonTraits_IDs=="-100")]
+cat(length(which(EltonTraits_IDs[, 2]=="-100")), "species were not ID'd.")
+non_IDd_species <- EltonTraits_df$Scientific[which(EltonTraits_IDs[, 2]=="-100")]
 cat("Unidentified species are:",
     non_IDd_species,
     sep = "\n")
@@ -510,171 +540,78 @@ EltonTraits_df$Scientific[
 ] <- "lophura edwardsi"
 
 # Try again:
-EltonTraits_IDs <- get_bird_ids(EltonTraits_df$Scientific)
-cat(length(which(EltonTraits_IDs=="-100")), "species were not ID'd.")
-EltonTraits_df$Avibase_ID <- c(EltonTraits_IDs)
+EltonTraits_IDs <- get_bird_ids(EltonTraits_df$Scientific)[[1]]
+cat(length(which(EltonTraits_IDs[, 2]=="-100")), "species were not ID'd.")
 
-# Identify species that appear in CLOVER
-host_IDs_in_elton <- unique(EltonTraits_IDs[which(EltonTraits_IDs %in% host_species_IDs)])
+# Check that we can make at least one assignment for all species in eBird:
+has_eco_data <- sapply(1:nrow(sp_df),
+           FUN = function(i){
+             (length(intersect(sp_df$synonyms[i, ], EltonTraits_df$Scientific))) > 0
+           })
+cat("Elton traits can not be matched to",
+    length(which(!has_eco_data)),
+    "species in eBird using names only.")
+# Should find there are no missing species!
 
-# Check if number of species left in trait database matches number from CLOVER:
-length(host_IDs_in_elton)==no_host_species
+# See which (if any) have ambiguous matches:
+multiple_Elton_matches <- sapply(1:nrow(sp_df),
+                       FUN = function(i){
+                         (length(intersect(sp_df$synonyms[i, ], EltonTraits_df$Scientific))>1)
+                       })
+cat("There are multiple matches for",
+    length(which(multiple_Elton_matches)),
+    "species in eBird.")
+cat("Ambiguous species are:",
+    sp_df$scientific_name[which(multiple_Elton_matches)],
+    sep = "\n")
 
-# Create column indicating whether species is a host
-host_indicator = c(EltonTraits_df$Avibase_ID %in% host_species_IDs)
-
-# Append it to trait database
-matched_data <- data.frame(EltonTraits_df, host_indicator)
-
-# Now filter for species in Europe according to eBird:
-# matched_data <- matched_data[which(EltonTraits_IDs %in% eBird_IDs), ]
-
-# Remove fields we definitely won't want for fitting
-
-# This line might be helpful if you want to print out all the variables in a
-# clean format:
-for (name in names(matched_data)){
-  cat('"', name, '",\n', sep="")
+for (idx in which(multiple_Elton_matches)){
+  cat("eBird name is ",
+      sp_df$scientific_name[idx],
+      ", Elton traits matches are ",
+      sep = "")
+  cat(EltonTraits_df$Scientific[which(EltonTraits_df$Scientific %in% sp_df$synonyms[idx, ])], sep = ", ")
+  cat("\n")
 }
+# Should find for most problem species one of the synonyms is just the name
+# from eBird. Only real problem species is Yellow Warbler, which we fix below:
+EltonTraits_df$Scientific[
+  which(EltonTraits_df$Scientific=="dendroica petechia")
+] <- "setophaga petechia"
 
-fields_to_drop <- c("SpecID",
-                    "BLFamilyEnglish",
-                    "BLFamSequID",
-                    "Taxo",
-                    "English",
-                    "Diet.Source",
-                    "Diet.EnteredBy",
-                    "ForStrat.Source",
-                    "ForStrat.EnteredBy",
-                    "BodyMass.Source",
-                    "BodyMass.Comment",
-                    "Record.Comment")
-matched_data <- matched_data[, !(names(matched_data) %in% fields_to_drop)]
+# Find position of each species from eBird in EltonTraits:
+position_in_EltonTraits <- sapply(
+  1:nrow(sp_df),
+  FUN = function(i){
+    if (sp_df$scientific_name[i] %in% EltonTraits_df$Scientific){
+      return(which(EltonTraits_df$Scientific == sp_df$scientific_name[i]))
+    }
+    else{
+      return(which(EltonTraits_df$Scientific %in% sp_df$synonyms[i, ]))
+    }
+  }
+)
 
-# Create a version filtered for certainty
-certain_data <- matched_data
-certain_data <- certain_data[
-  which(certain_data$Diet.Certainty %in% c("A", "B")),
-]
-certain_data <- certain_data[
-  which(certain_data$ForStrat.SpecLevel==1),
-]
-certain_data <- certain_data[
-  which(certain_data$BodyMass.SpecLevel==1),
-]
+# Check to make sure name matching is correct:
+names_in_Elton <- EltonTraits_df$Scientific[position_in_EltonTraits]
+matched_locs <- sapply(1:nrow(sp_df),
+                       FUN = function(i){
+                         (names_in_Elton[i] %in% sp_df$synonyms[i, ])
+                       })
+cat("Name matching fails at", length(which(!matched_locs)), "locations.")
 
-# Check proportion of species with a good level of certainty
-cat(100 * nrow(certain_data) / nrow(matched_data),
-    "% of species in Europe remain if we filter for certainty.\n")
+traits_by_eBird_species <- EltonTraits_df[position_in_EltonTraits, ]
+sp_df$EltonTraits <- traits_by_eBird_species
 
-# Check what this is in terms of number of species:
-cat(sum(certain_data$host_indicator),
-    "of",
-    sum(certain_data$host_indicator),
-    "host species remain if we filter for certainty.\n")
-
-# Some of the ecological data is expressed as percentages which add up to 100.
-# This makes them colinear and so to avoid this we will remove some of the
-# percentage fields, specifically the ones that have the highest average value
-# within their set of fields.
-
-diet_data <- matched_data[, c("Diet.Inv",
-                              "Diet.Vend",
-                              "Diet.Vect",
-                              "Diet.Vfish",
-                              "Diet.Vunk",
-                              "Diet.Scav",
-                              "Diet.Nect",
-                              "Diet.Fruit",
-                              "Diet.Seed",
-                              "Diet.PlantO")]
-max_diet_comp <- names(diet_data)[which.max(colMeans(diet_data))]
-
-forstrat_data <- matched_data[, c("ForStrat.watbelowsurf",
-                                  "ForStrat.wataroundsurf",
-                                  "ForStrat.aerial",
-                                  "ForStrat.canopy",
-                                  "ForStrat.ground",
-                                  "ForStrat.understory",
-                                  "ForStrat.midhigh")]
-max_forstrat_comp <- names(forstrat_data)[which.max(colMeans(forstrat_data))]
 
 ################################################################################
 # Incorporate additional ecological data from IUCN
 
 IUCN_df <- rbind(
-  read.csv("eco_phylo_processing/iucn-data-vol1/all_other_fields.csv"),
-  read.csv("eco_phylo_processing/iucn-data-vol2/all_other_fields.csv"))
-synonym_df <- rbind(
-  read.csv("eco_phylo_processing/iucn-data-vol1/synonyms.csv"),
-  read.csv("eco_phylo_processing/iucn-data-vol2/synonyms.csv"))
-# IUCN_df <- IUCN_df[, c("scientificName",
-#                        "Congregatory.value",
-#                        "MovementPatterns.pattern")]
-# There is lots of redundancy in this dataset because of the way we collated it:
+  read.csv("data/eco_phylo_data/iucn-data-vol1/all_other_fields.csv"),
+  read.csv("data/eco_phylo_data/iucn-data-vol2/all_other_fields.csv"))
 IUCN_df <- distinct(IUCN_df)
 IUCN_df$scientificName <- sapply(IUCN_df$scientificName, tolower)
-synonym_df$scientificName <- sapply(synonym_df$scientificName, tolower)
-IUCN_df$Avibase_ID <- get_bird_ids(IUCN_df$scientificName)
-unmatched_names <- IUCN_df$scientificName[which(IUCN_df$Avibase_ID=="-100")]
-cat("A total of", length(unmatched_names), "species where not ID'd.\n")
-
-# Try using synonyms. First reduce synonyms to ones connected to species which
-# were not ID'd.
-synonym_df <- synonym_df[which(synonym_df$scientificName %in% unmatched_names), ]
-# Convert synonyms to lower case and first two words only
-synonym_df$name <- sapply(synonym_df$name, tolower)
-synonym_df$name <- sapply(synonym_df$name, FUN = function(x) {str_extract(x, "[^ ]+ [^ ]+")})
-
-# Find out which synonyms appear in AVONET and can be renamed
-in_avonet <- sapply(synonym_df$name,
-                    FUN = function(x) {(x %in% AVONET_df$Species1_BirdLife)|
-                        (x %in% AVONET_df$Species2_eBird)|
-                        (x %in% AVONET_df$Species3_BirdTree)})
-species_in_avonet <- synonym_df$scientificName[which(in_avonet)]
-cat("Of the",
-    length(unmatched_names),
-    "species which were not ID'd, a total of",
-    length(unique(species_in_avonet)),
-    "have a synonym which appears in AVONET.\n")
-
-for (i in 1:length(which(in_avonet))){
-  syn <- synonym_df$name[which(in_avonet)[i]]
-  sp <- species_in_avonet[i]
-  IUCN_df$scientificName[which(IUCN_df$scientificName==sp)] <- syn
-}
-IUCN_df$Avibase_ID <- get_bird_ids(IUCN_df$scientificName)
-unmatched_names <- IUCN_df$scientificName[which(IUCN_df$Avibase_ID=="-100")]
-cat("After relabelling with synonyms a total of",
-    length(unmatched_names),
-    "species where not ID'd.\n")
-
-# Check if any of the remaining unmatched species are in the eBird list:
-matched_IDs_not_in_IUCN <- setdiff(matched_data$Avibase_ID, IUCN_df$Avibase_ID)
-cat("The following species of interest are not assigned ID's in the IUCN data:",
-    matched_data$Scientific[
-      which(matched_data$Avibase_ID %in% matched_IDs_not_in_IUCN)],
-    sep="\n")
-
-# Should find problem species are carduelis flammea/hornemanni and himantopus
-# mexicanus
-# We can fix the issue with carduelis flammea by renaming in the original IUCN
-# data:
-IUCN_df$scientificName[which(IUCN_df$scientificName=="acanthis flammea")] <-
-  "carduelis flammea"
-
-# himantopus mexicanus is a vagrant and should have very low numbers in Europe,
-# so we remove it from the matched data:
-matched_data <- matched_data[
-  -which(matched_data$Scientific=="himantopus mexicanus"),
-]
-
-# Now try again
-IUCN_df$Avibase_ID <- get_bird_ids(IUCN_df$scientificName)
-matched_IDs_not_in_IUCN <- setdiff(matched_data$Avibase_ID, IUCN_df$Avibase_ID)
-cat("There are now",
-    length(matched_IDs_not_in_IUCN),
-    "species of interest are not assigned ID's in the IUCN data.\n")
 
 # Inspect coding of congregatory and migratory behaviours: 
 cong_vals <- unique(IUCN_df$Congregatory.value)
@@ -693,21 +630,59 @@ IUCN_df$is_congregatory <- (IUCN_df$Congregatory.value != "")
 IUCN_df$is_migratory <- (IUCN_df$MovementPatterns.pattern == "Full Migrant") |
   (IUCN_df$MovementPatterns.pattern == "Unknown")
 
-# Attach migratory/congregatory indicators to matched_data
-# Use any function so that if IUCN has multiple species for an ID we count it as
-# congregatory/migatory if any of the matching species are.
-# Set congregatory indicator to true if dispersive or year-round:
-matched_data$is_congregatory <- sapply(matched_data$Avibase_ID,
-                                       FUN = function(x){
-                                         any(IUCN_df$Congregatory.value[which(IUCN_df$Avibase_ID==x)] != "")
-                                       })
-# Set migratory indicator to true if recorded as full:
-matched_data$is_migratory <- sapply(matched_data$Avibase_ID,
-                                    FUN = function(x){
-                                      any(IUCN_df$MovementPatterns.pattern[
-                                        which(IUCN_df$Avibase_ID==x)
-                                      ] == "Full Migrant")
-                                    })
+IUCN_df <- IUCN_df[, c("scientificName",
+                       "is_congregatory",
+                       "is_migratory")]
+
+# Consolidate lines that differ only in fields we don't care about:
+IUCN_df <- distinct(IUCN_df)
+
+# Check if we can do IUCN to eBird matches by binomial name:
+has_IUCN_data <- sapply(1:nrow(sp_df),
+                       FUN = function(i){
+                         (length(intersect(sp_df$synonyms[i, ], IUCN_df$scientificName))) > 0
+                       })
+cat("There are",
+    length(which(!has_IUCN_data)),
+    "species in eBird which can not be matched to the IUCN data.")
+# This is an easy fix:
+IUCN_df$scientificName[
+  which(IUCN_df$scientificName=="suthora webbiana")
+] <- "sinosuthora webbiana"
+
+multiple_IUCN_matches <- sapply(1:nrow(sp_df),
+                        FUN = function(i){
+                          (length(intersect(sp_df$synonyms[i, ], IUCN_df$scientificName))) > 1
+                        })
+cat("There are",
+    length(which(multiple_IUCN_matches)),
+    "species in eBird with multiple matches in the IUCN data.")
+
+# Reduce to cases where we can't let binomial name take priority:
+problem_cases <- sapply(1:nrow(sp_df),
+                                FUN = function(i){
+                                  (!(sp_df$scientific_name[i] %in% IUCN_df$scientificName)) &
+                                  ((length(intersect(sp_df$synonyms[i, ], IUCN_df$scientificName))) > 1)
+                                })
+cat("There are",
+    length(which(problem_cases)),
+    "ambiguous cases which can not be resolved with default name.")
+
+# Find position of each species from eBird in IUCN data:
+position_in_IUCN <- sapply(
+  1:nrow(sp_df),
+  FUN = function(i){
+    if (sp_df$scientific_name[i] %in% IUCN_df$scientificName){
+      return(which(IUCN_df$scientificName == sp_df$scientific_name[i]))
+    }
+    else{
+      return(which(IUCN_df$scientificName %in% sp_df$synonyms[i, ]))
+    }
+  }
+)
+
+IUCN_by_eBird_species <- IUCN_df[position_in_IUCN, ]
+sp_df$IUCN <- IUCN_by_eBird_species
 
 ################################################################################
 # Bring in phylogenetic data
@@ -716,9 +691,9 @@ matched_data$is_migratory <- sapply(matched_data$Avibase_ID,
 # distances across ABC samples.
 
 {
-  if (!file.exists("eco_phylo_processing/mean_phylo_distances.rds")){
+  if (!file.exists("data/eco_phylo_data/mean_phylo_distances.rds")){
     # Attempt to load in BirdTree data
-    bird_tree <- read.tree("eco_phylo_processing/BirdzillaHackett10.tre")
+    bird_tree <- read.tree("data/eco_phylo_data/BirdzillaHackett10.tre")
     
     for (i in seq_along(bird_tree)){
       bird_tree[[i]]$tip.label <- tolower(bird_tree[[i]]$tip.label)
@@ -738,273 +713,75 @@ matched_data$is_migratory <- sapply(matched_data$Avibase_ID,
     rownames(dmat_mean) <- gsub("_", " ", rownames(dmat_mean))
     colnames(dmat_mean) <- gsub("_", " ", colnames(dmat_mean))
     
-    saveRDS(dmat_mean, "eco_phylo_processing/mean_phylo_distances.rds")
+    saveRDS(dmat_mean, "data/eco_phylo_data/mean_phylo_distances.rds")
   }
   else{
-    dmat_mean <- readRDS("eco_phylo_processing/mean_phylo_distances.rds")
+    dmat_mean <- readRDS("data/eco_phylo_data/mean_phylo_distances.rds")
   }
 }
 
-dmat_ids <- get_bird_ids(rownames(dmat_mean))
+phylo_sp <- rownames(dmat_mean)
+phylo_syns_and_IDs <- get_bird_ids(phylo_sp)
+phylo_IDs <- phylo_syns_and_IDs[[1]]
+phylo_syns <- phylo_syns_and_IDs[[2]]
 
-# See if any species were not successfully ID'd
-cat("There are",
-    length(setdiff(unique(EltonTraits_df$Scientific),
-                   unique(rownames(dmat_mean)))),
-    "species names in EltonTraits missing from the phylogeny and",
-    length(setdiff(unique(rownames(dmat_mean)),
-                   unique(EltonTraits_df$Scientific))),
-    "species in the phylogeny missing from EltonTraits.\n"
-)
-# Should find that the phylogeny contains exactly the same species with the same
-# names as EltonTraits, so we pass in the IDs from EltonTraits
-for (i in 1:nrow(dmat_mean)){
-  rownames(dmat_mean)[i] <- EltonTraits_df$Avibase_ID[which(EltonTraits_df$Scientific==rownames(dmat_mean)[i])[1]]
-  colnames(dmat_mean)[i] <- EltonTraits_df$Avibase_ID[which(EltonTraits_df$Scientific==colnames(dmat_mean)[i])[1]]
-}
+# Identify host species in phylo data:
+hosts_in_phylo <- sapply(1:length(phylo_sp),
+                         FUN = function(i){
+                           (length(intersect(phylo_syns[i, ], CLOVER_df$Host)) + 
+                              length(intersect(phylo_IDs[i, ], host_species_IDs))) > 0
+                         })
 
-dmat_host_cols <- dmat_mean[, which(dmat_ids %in% host_species_IDs)]
+dmat_host_cols <- dmat_mean[, which(hosts_in_phylo)]
 nearest_host_distance <- apply(dmat_host_cols, 1, min)
-for (i in 1:nrow(matched_data)){
-  species_in_dmat <- which(
-    names(nearest_host_distance)==matched_data$Avibase_ID[i])
-  if (length(species_in_dmat)==1){
-    matched_data$nearest_host_distance[i] <- nearest_host_distance[species_in_dmat]
+nearest_host_df <- data.frame(phylo_sp, nearest_host_distance)
+
+# Now try to match up with eBird:
+
+# Check that we can make at least one assignment for all species in eBird:
+has_phylo_data <- sapply(1:nrow(sp_df),
+                       FUN = function(i){
+                         (length(intersect(sp_df$synonyms[i, ], nearest_host_df$phylo_sp))) > 0
+                       })
+cat("Phylogeny can not be matched to",
+    length(which(!has_phylo_data)),
+    "species in eBird using names only.")
+# Should find there are no missing species!
+
+# See which (if any) have ambiguous matches:
+multiple_phylo_matches <- sapply(1:nrow(sp_df),
+                                 FUN = function(i){
+                                   (length(intersect(sp_df$synonyms[i, ], nearest_host_df$phylo_sp))>1)
+                                 })
+cat("There are multiple matches for",
+    length(which(multiple_phylo_matches)),
+    "species in eBird.")
+cat("Ambiguous species are:",
+    sp_df$scientific_name[which(multiple_phylo_matches)],
+    sep = "\n")
+
+# Should find it's the same problem species as for EltonTraits
+identical(multiple_Elton_matches, multiple_phylo_matches)
+
+nearest_host_df$phylo_sp[
+  which(nearest_host_df$phylo_sp=="dendroica petechia")
+] <- "setophaga petechia"
+
+# Find position of each species from eBird in phylo data:
+position_in_phylo <- sapply(
+  1:nrow(sp_df),
+  FUN = function(i){
+    if (sp_df$scientific_name[i] %in% nearest_host_df$phylo_sp){
+      return(which(nearest_host_df$phylo_sp == sp_df$scientific_name[i]))
+    }
+    else{
+      return(which(nearest_host_df$phylo_sp %in% sp_df$synonyms[i, ]))
+    }
   }
-  else if (length(species_in_dmat)==0){
-    matched_data$nearest_host_distance[i] <- 1000
-  }
-  else{
-    matched_data$nearest_host_distance[i] <- min(
-      nearest_host_distance[species_in_dmat])
-  }
-}
+)
 
-# Do a quick check to make sure all host species have distance zero and all
-# non-host species have nonzero distance
-cat("Maximum distance for host species is",
-    max(matched_data$nearest_host_distance[which(matched_data$host_indicator)]),
-    ".\n")
-cat("Minimum distance for non-host species is",
-    min(matched_data$nearest_host_distance[which(!matched_data$host_indicator)]),
-    ".\n")
-# Check every species has had a valid distance assigned (i.e. not 1000))
-cat("There are",
-    length(which(matched_data$nearest_host_distance==1000)),
-    "species without distances assigned.\n")
-
-# Zeros will be too informative since they immediately tell us where the host
-# species are, so we should really use the minimum non-zero value:
-nearest_host_distance <- apply(dmat_host_cols, 1, FUN = function(x) {min(x)})
-for (i in 1:nrow(matched_data)){
-  species_in_dmat <- which(
-    names(nearest_host_distance)==matched_data$Avibase_ID[i])
-  if (length(species_in_dmat)==1){
-    matched_data$nearest_host_distance[i] <- nearest_host_distance[species_in_dmat]
-  }
-  else if (length(species_in_dmat)==0){
-    matched_data$nearest_host_distance[i] <- 1000
-  }
-  else{
-    matched_data$nearest_host_distance[i] <- min(
-      nearest_host_distance[species_in_dmat])
-  }
-}
-
-cat("Mean distance to nearest confirmed host for confirmed hosts is",
-    mean(matched_data$nearest_host_distance[which(matched_data$host_indicator)]),
-    "and",
-    mean(matched_data$nearest_host_distance[-which(matched_data$host_indicator)]),
-    "for other species.\n")
-cat("Median distance to nearest confirmed host for confirmed hosts is",
-    median(matched_data$nearest_host_distance[which(matched_data$host_indicator)]),
-    "and",
-    median(matched_data$nearest_host_distance[-which(matched_data$host_indicator)]),
-    "for other species.\n")
-
-# Do a quick plot to see if there's an obvious difference in the distances for
-# confirmed hosts:
-if (PLOT){
-  bin_size <- 10
-  
-  plot_ulim <- bin_size * ceiling(max(matched_data$nearest_host_distance) / bin_size)
-  
-  host_dhist <- hist(matched_data$nearest_host_distance[which(matched_data$host_indicator)],
-                     breaks = seq(0, plot_ulim, by=bin_size),
-                     plot = FALSE)
-  nonhost_dhist <- hist(matched_data$nearest_host_distance[-which(matched_data$host_indicator)],
-                        breaks = seq(0, plot_ulim, by=bin_size),
-                        plot = FALSE)
-  pal <- brewer.pal(6, "Dark2")
-  plot(seq(0, plot_ulim-bin_size, by=bin_size),
-       host_dhist$density,
-       type = "l",
-       lwd = 2,
-       col = pal[1],
-       xlab = "Distance to nearest\n confirmed host species",
-       ylab = "Density")
-  lines(seq(0, plot_ulim-bin_size, by=bin_size),
-        nonhost_dhist$density,
-        type = "l",
-        lwd = 2,
-        col = pal[2])
-  legend("topright",
-         inset=c(.025,0),
-         legend = c("Confirmed hosts", "Other species"),
-         col = pal,
-         bty = "n",
-         pch = 20,
-         pt.cex = 2,
-         cex = 0.8,
-         xpd = TRUE)
-}
-
-################################################################################
-# In this section we do some cleanup on genus/species names to make sure all our
-# abundance data corresponds to something in matched_data
-
-# Start by identifying all species that don't have either an unambiguous ID
-# match of an unambiguous name match
-problem_species <- which(sapply(1:nrow(sp_df),
-                                FUN = function(i){
-  (length(which(matched_data$Avibase_ID == sp_df$Avibase_ID[i]))!=1) &
-  (length(which(matched_data$Scientific == sp_df$scientific_name[i]))!=1)}))
-
-cat("The following are identified as problem species:",
-    array(sp_df$scientific_name[problem_species]),
-    sep = "\n"
-    )
-
-# Work through this list case-by-case
-sp_df$scientific_name <- sub("melanitta deglandi",
-                             "melanitta fusca",
-                             sp_df$scientific_name)
-sp_df$scientific_name <- sub("melanitta americana",
-                             "melanitta nigra",
-                             sp_df$scientific_name)
-sp_df$scientific_name <- sub("himantopus mexicanus",
-                             "himantopus himantopus",
-                             sp_df$scientific_name)
-sp_df$scientific_name <- sub("gallinago delicata",
-                             "gallinago gallinago",
-                             sp_df$scientific_name)
-matched_data$Scientific <- sub("sterna nilotica",
-                               "gelochelidon nilotica",
-                               matched_data$Scientific)
-matched_data$Scientific <- sub("sterna maxima",
-                               "thalasseus maximus",
-                               matched_data$Scientific)
-sp_df$scientific_name <- sub("ardea intermedia",
-                             "mesophoyx intermedia",
-                             sp_df$scientific_name)
-sp_df$scientific_name <- sub("circus hudsonius",
-                             "circus cyaneus",
-                             sp_df$scientific_name)
-sp_df$scientific_name <- sub("picus sharpei",
-                             "picus viridis",
-                             sp_df$scientific_name)
-sp_df$scientific_name <- sub("lanius borealis",
-                             "lanius excubitor",
-                             sp_df$scientific_name)
-sp_df$scientific_name <- sub("cyanopica cooki",
-                             "cyanopica cyanus",
-                             sp_df$scientific_name)
-matched_data$Scientific <- sub("parus lugubris",
-                             "poecile lugubris",
-                             matched_data$Scientific)
-matched_data$Scientific <- sub("hirundo daurica",
-                               "cecropis daurica",
-                               matched_data$Scientific)
-matched_data$Scientific <- sub("parus montanus",
-                               "poecile montanus",
-                               matched_data$Scientific)
-sp_df$scientific_name <- sub("phylloscopus examinandus",
-                             "phylloscopus borealis",
-                             sp_df$scientific_name)
-sp_df$scientific_name <- sub("saxicola rubicola",
-                             "saxicola torquatus",
-                             sp_df$scientific_name)
-sp_df$scientific_name <- sub("saxicola maurus",
-                             "saxicola torquatus",
-                             sp_df$scientific_name)
-sp_df$scientific_name <- sub("saxicola stejnegeri",
-                             "saxicola torquatus",
-                             sp_df$scientific_name)
-sp_df$scientific_name <- sub("oenanthe melanoleuca",
-                             "oenanthe hispanica",
-                             sp_df$scientific_name)
-sp_df$scientific_name <- sub("passer italiae",
-                             "passer domesticus",
-                             sp_df$scientific_name)
-sp_df$scientific_name <- sub("motacilla tschutschensis",
-                             "motacilla flava",
-                             sp_df$scientific_name)
-matched_data$Scientific <- sub("sturnus contra",
-                               "gracupica contra",
-                               matched_data$Scientific)
-sp_df$scientific_name <- sub("curruca crassirostris",
-                             "curruca hortensis",
-                             sp_df$scientific_name)
-sp_df$scientific_name <- sub("curruca subalpina",
-                             "curruca cantillans",
-                             sp_df$scientific_name)
-sp_df$scientific_name <- sub("curruca balearica",
-                             "curruca sarda",
-                             sp_df$scientific_name)
-
-# The taxonomy of Curruca proves to be quite problematic - 25 species were moved
-# from Sylvia to Curruca in 2011 so we change the names in matched_data to
-# reflect this
-
-# Get species names only:
-curruca_names <- sp_df$scientific_name %>%
-                  str_subset(pattern = "curruca") %>%
-                  sub(pattern = "curruca ", replacement = "")
-names_to_replace <- lapply(curruca_names,
-                           FUN = function(x){paste("sylvia ", x, sep = "")})
-matched_data$Scientific[which(matched_data$Scientific %in% names_to_replace)] <-
-  sub("sylvia",
-      "curruca",
-      matched_data$Scientific[
-        which(matched_data$Scientific %in% names_to_replace)])
-
-# Also need to change a few carduelis species to acanthis:
-acanthis_names <- sp_df$scientific_name %>%
-  str_subset(pattern = "acanthis") %>%
-  sub(pattern = "acanthis ", replacement = "")
-names_to_replace <- lapply(acanthis_names,
-                           FUN = function(x){paste("carduelis ", x, sep = "")})
-matched_data$Scientific[which(matched_data$Scientific %in% names_to_replace)] <-
-  sub("carduelis",
-      "acanthis",
-      matched_data$Scientific[
-        which(matched_data$Scientific %in% names_to_replace)])
-
-# eBird is the only source to include acanthis cabaret, which was formerly
-# considered a subspecies of acanthis flammea, so we treat counts of cabaret as
-# counts of flammea
-sp_df$scientific_name <- sub("acanthis cabaret",
-             "acanthis flammea",
-             sp_df$scientific_name)
-
-# Another species adjustment, this time for anas zonorhyncha and anas
-# poecilorhyncha
-sp_df$scientific_name <- sub("anas zonorhyncha",
-                             "anas poecilorhyncha",
-                             sp_df$scientific_name)
-
-
-# A genus name for American warblers was changed in early 2010a:
-matched_data$Scientific <- sub("dendroica",
-                               "setophaga",
-                               matched_data$Scientific)
-
-# See if any problem species remain:
-problem_species <- which(sapply(1:nrow(sp_df),
-                                FUN = function(i){
-    (length(which(matched_data$Avibase_ID == sp_df$Avibase_ID[i]))!=1) &
-      (length(which(matched_data$Scientific == sp_df$scientific_name[i]))!=1)}))
-cat("There are now", length(problem_species), "problem species.\n")
+phylo_dist_by_eBird_species <- nearest_host_df[position_in_phylo, ]
+sp_df$nearest_host_distance <- phylo_dist_by_eBird_species
 
 ################################################################################
 # Now get abundance rasters for species and convolute with eco/phylo factors
@@ -1089,30 +866,10 @@ idx_to_download <- which(sp_df$species_code %in% not_downloaded)
   loop.start <- Sys.time()
   mean_dl_time <- 0
   for (i in 1:no_species) {
+    
     idx <- sample_idx[i]
     species_sel <- sp_df$species_code[idx]
-    Avibase_ID <- sp_df$Avibase_ID[idx]
-    species_factors <- matched_data[which(matched_data$Avibase_ID==Avibase_ID), ]
-    if (nrow(species_factors)==0){
-      cat("Species ID for",
-          sp_df$scientific_name[idx],
-          "is not in matched_data. Using scientific name to match.\n",
-          sep = "\n")
-      scientific_name <- sp_df$scientific_name[idx]
-      species_factors <- matched_data[which(matched_data$Scientific==scientific_name), ]
-    }
-    if (nrow(species_factors)>1){
-      cat("Same species ID for",
-          species_factors$Scientific,
-          "Using scientific name to match.\n",
-          sep = "\n")
-      scientific_name <- sp_df$scientific_name[idx]
-      species_factors <- matched_data[which(matched_data$Scientific==scientific_name), ]
-    }
-    
-    if (Avibase_ID %in% pop_size_ids){
-      pop_size_scaler <- pop_size_df$Abundance.estimate[which()]
-    }
+    species_factors <- sp_df[idx, ]
     
     if (!(species_sel %in% starting_dls)){
       dl_start <- Sys.time()
@@ -1122,7 +879,7 @@ idx_to_download <- which(sp_df$species_code %in% not_downloaded)
         attempt_count <- attempt_count + 1
         cat("attempt = ", attempt_count, ".\n")
         path <- try(ebirdst_download(species = species_sel,
-                                     pattern = "abundance_median_lr"))
+                                     pattern = "_lr_"))
         if (!inherits(path, "try-error")){
           dl_flag <- FALSE
         }
@@ -1147,27 +904,29 @@ idx_to_download <- which(sp_df$species_code %in% not_downloaded)
     }
     else{
       path <- ebirdst_download(species = species_sel,
-                               pattern = "abundance_median_lr")
+                               pattern = "_lr_")
     }
+    
     this_rast <- load_raster(path = path,
-                             product = "abundance",
+                             product = "percent-population",
                              period = "weekly",
                              resolution = "lr")
     this_rast <- project(x = this_rast, y = blank_3035, method = "near")
+    
     # Get rid of NA's:
     this_rast <- replace(this_rast, is.na(this_rast), 0)
     
     # Fill in each field
-    if (species_factors$is_congregatory){
-      cong_rast <- cong_rast + this_rast
+    if (species_factors$IUCN$is_congregatory){
+      cong_rast <- cong_rast + (species_factors$pop_sizes * this_rast)
     }
-    if (species_factors$is_migratory){
-      migr_rast <- migr_rast + this_rast
+    if (species_factors$IUCN$is_migratory){
+      migr_rast <- migr_rast + (species_factors$pop_sizes * this_rast)
     }
     around_surf_rast <- around_surf_rast +
-      species_factors$ForStrat.wataroundsurf * this_rast
+      species_factors$EltonTraits$ForStrat.wataroundsurf * (species_factors$pop_sizes * this_rast)
     below_surf_rast <- below_surf_rast +
-      species_factors$ForStrat.watbelowsurf * this_rast
+      species_factors$EltonTraits$ForStrat.watbelowsurf * (species_factors$pop_sizes * this_rast)
   }
 }
 
