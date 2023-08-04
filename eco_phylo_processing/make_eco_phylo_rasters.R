@@ -48,7 +48,7 @@ no_euro_birds <- nrow(euro_bird_codes)
 sp_df <- sp_df[which(sp_df$species_code %in% euro_bird_codes$code), ]
 
 # Load in population sizes
-pop_size_df <- read.csv("callaghan_pop_estimates.csv")
+pop_size_df <- read.csv("data/eco_phylo_data/callaghan_pop_estimates.csv")
 pop_size_df$Scientific.name <- sapply(pop_size_df$Scientific.name, tolower)
 
 # Try to match up
@@ -88,7 +88,7 @@ cat("There are",
     "common-scientific mismatches.")
 
 # Bring in AVONET to see if we can fix the missing species using AVONET IDs
-AVONET_df <- read_excel("data/AVONETSupplementarydataset1.xlsx",
+AVONET_df <- read_excel("data/eco_phylo_data/AVONETSupplementarydataset1.xlsx",
                         sheet = "AVONET_Raw_Data")
 AVONET_df <- AVONET_df[,
                        c("Avibase.ID",
@@ -338,7 +338,7 @@ sp_df$synonyms <- eBird_syns
 
 # Load data
 CLOVER_df <- read.csv(
-  "data/CLOVER_1.0_Viruses_AssociationsFlatFile.csv")
+  "data/eco_phylo_data/CLOVER_1.0_Viruses_AssociationsFlatFile.csv")
 # Restrict attention to samples from birds
 CLOVER_df <- CLOVER_df[which(CLOVER_df$HostClass == "aves"), ]
 # All pathogen species names are in lower case. Filtering for rows where this
@@ -608,8 +608,8 @@ sp_df$EltonTraits <- traits_by_eBird_species
 # Incorporate additional ecological data from IUCN
 
 IUCN_df <- rbind(
-  read.csv("eco_phylo_processing/iucn-data-vol1/all_other_fields.csv"),
-  read.csv("eco_phylo_processing/iucn-data-vol2/all_other_fields.csv"))
+  read.csv("data/eco_phylo_data/iucn-data-vol1/all_other_fields.csv"),
+  read.csv("data/eco_phylo_data/iucn-data-vol2/all_other_fields.csv"))
 IUCN_df <- distinct(IUCN_df)
 IUCN_df$scientificName <- sapply(IUCN_df$scientificName, tolower)
 
@@ -691,9 +691,9 @@ sp_df$IUCN <- IUCN_by_eBird_species
 # distances across ABC samples.
 
 {
-  if (!file.exists("eco_phylo_processing/mean_phylo_distances.rds")){
+  if (!file.exists("data/eco_phylo_data/mean_phylo_distances.rds")){
     # Attempt to load in BirdTree data
-    bird_tree <- read.tree("eco_phylo_processing/BirdzillaHackett10.tre")
+    bird_tree <- read.tree("data/eco_phylo_data/BirdzillaHackett10.tre")
     
     for (i in seq_along(bird_tree)){
       bird_tree[[i]]$tip.label <- tolower(bird_tree[[i]]$tip.label)
@@ -713,10 +713,10 @@ sp_df$IUCN <- IUCN_by_eBird_species
     rownames(dmat_mean) <- gsub("_", " ", rownames(dmat_mean))
     colnames(dmat_mean) <- gsub("_", " ", colnames(dmat_mean))
     
-    saveRDS(dmat_mean, "eco_phylo_processing/mean_phylo_distances.rds")
+    saveRDS(dmat_mean, "data/eco_phylo_data/mean_phylo_distances.rds")
   }
   else{
-    dmat_mean <- readRDS("eco_phylo_processing/mean_phylo_distances.rds")
+    dmat_mean <- readRDS("data/eco_phylo_data/mean_phylo_distances.rds")
   }
 }
 
