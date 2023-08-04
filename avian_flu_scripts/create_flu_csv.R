@@ -4,6 +4,7 @@ rm(list = ls())
 
 library(readxl)
 library(tidyverse)
+library(terra)
 
 ## bring in the different data sets and combine to one large data set. 
 
@@ -168,65 +169,79 @@ range(point_data_df$Y) # this confirms that we have labelled the columns correct
 
 ## Now select only those rows which are in the area that we want
 
-pos_ai_data_prj_area <- point_data_df %>%
+ai_data_prj_area <- point_data_df %>%
   dplyr::filter(X >= 2600000 & X <= 7000000) %>%
   dplyr::filter(Y >= 1500000 & Y <= 6400000)
 
+# separate pos and neg
+
+pos_ai_data_prj_area <- ai_data_prj_area %>%
+  filter(flu == 1)
+
+neg_ai_data_prj_area <- ai_data_prj_area %>%
+  filter(flu == 0)
+
+nrow(pos_ai_data_prj_area) + nrow(neg_ai_data_prj_area)
+nrow(ai_data_prj_area)
+
+#save these
+#write.csv(pos_ai_data_prj_area, "output/avian_flu/pos_points_proj_area_all_sources.csv" )
+#write.csv(neg_ai_data_prj_area, "output/avian_flu/neg_points_proj_area_all_sources.csv" )
+
 # remove rows where duplicates of coordinates 
+library(data.table)
+dt_pos <- data.table(pos_ai_data_prj_area)
+#Remove duplicates on specific column
+tictoc::tic()
+dt_pos <- unique(dt_pos, by = c("X", "Y", "observation.date"))
+tictoc::toc()
+head(dt_pos)
+table(dt_pos$flu)
 
-pos_ai_data_prj_area_unique <- pos_ai_data_prj_area %>%
-  distinct(X, Y, observation.date, .keep_all = TRUE)
-# this is very slow!!!
+# repeat for negative
+dt_neg <- unique(neg_ai_data_prj_area, by = c("X", "Y", "observation.date"))
+head(dt_neg)
+table(dt_neg$flu)
 
+#write.csv(dt_pos, "output/avian_flu/pos_points_proj_area_all_sources_duplicates_removed.csv" )
+#write.csv(dt_neg, "output/avian_flu/neg_points_proj_area_all_sources_duplicates_removed.csv" )
+
+############################# MAKE RASTER  ############################
 
 # Other manipulations needed to rasterize
+table(point_data$flu) # this is pos and neg data
+
 points_sp <- sf::as_Spatial(point_data)
 head(points_sp)
 
 points_vect <- terra::vect(points_sp)
 head(points_vect)
+plot(points_vect) # this is also still the global data set
 
 #read in the raster we are using for the project
 euro_rast <- terra::rast("output/euro_rast.tif")
+euro_rast <- terra::rast("output/euro_rast_plus.tif")
+
 euro_rast
 
-points_rast <- terra::rasterize(points_vect, euro_rast,"flu")
+## use the vector within rasterize
+points_rast <- terra::rasterize(points_vect, euro_rast, field = "flu", fun = "max")
+# using max because if it has a positive in the cell (1) and a negative (0) we want
+# the cell to be classes as a negative
 plot(points_rast)
 points_rast
 head(points_rast)
+
 
 #read in the map
 euro_map <- terra::vect("output/euro_map.shp")
 
 plot(euro_map)
-plot(points_rast, add = TRUE)
+plot(points_rast, add = TRUE, col = "red")
 
-table(values(points_rast))
+table(terra::values(points_rast))
 
-## Hard to see. Look at with larger raster
 
-#read in the raster we are using for the project
-euro_rast_10k <- terra::rast("output/euro_rast_10k.tif")
-euro_rast_10k
-
-points_rast_10k <- terra::rasterize(points_vect, euro_rast_10k,"flu")
-plot(points_rast_10k)
-points_rast_10k
-head(points_rast_10k)
-table(values(points_rast_10k))
-# Easier to visualise that it probably is working OK. 
-# I think the 1km are just too small to see. 
-
-#Perhaps just look at UK? 
-GB_ext <- terra::ext(3300000, 3800000, 3100000, 4100000)
-GB_crop <- terra::crop(euro_map, GB_ext)
-plot(GB_crop)
-
-GB_rast <- terra::crop(points_rast, GB_ext)
-plot(GB_crop)
-plot(GB_rast, add = T, axes = F)
-
-###
 # Create the csv file for avian flu cases
 # make a points object using the centre of each pixel from the ref raster
 points_euro_rast <- terra::as.points(euro_rast)
@@ -236,11 +251,107 @@ tictoc::tic()
 flu_res <- terra::extract(points_rast, points_euro_rast, method = "simple", xy = T)
 tictoc::toc()
 
-table(flu_res$last)
-table(values(points_euro_rast))
+table(flu_res$max)
 table(values(points_rast))
 euro_rast
 nrow(flu_res)
 points_rast
 
 # why have we got fewer values in the results table rather than the raster? 
+# Looked at it with the 10km raster and wonder if some of them are in the sea/on land too small to be 
+# noted on our raster?? 
+
+points_rast
+euro_rast
+table(values(points_rast))
+# we have the higher number in the points raster
+
+points_euro_rast # the points are all within the boundaries of the euro-raster.
+# so that's not the issue
+
+# so I think the issue is somewhere in extract or if there were NAs in the euroraster that
+# are not in the case data.
+
+euro_nonNA_coords <- as.data.frame(terra::crds(euro_rast, na.rm = T))
+cases_nonNA_coords <- as.data.frame(terra::crds(points_rast, na.rm = T))
+sum(table(values(points_rast))) - sum(table(flu_res$max))
+diff_nas <- setdiff( cases_nonNA_coords, euro_nonNA_coords) # this is the same number
+# as are missing between the datasets
+
+# let's turn these into spatial points and plot them 
+missing_points <- st_as_sf(x = diff_nas, 
+                       coords = c("x", "y"),
+                       crs = "3035")
+plot(euro_map)
+plot(missing_points, add = T, col = "red", pch = 18)
+
+
+
+
+
+dev.off()
+plot(euro_map)
+plot(points_rast, xlim= c(4000000, 5000000), ylim = c(3000000, 4000000), 
+     col = "hot pink")#, background = "blue")
+plot(points_rast, col = "red")
+plot(points_rast, col = "red", add = T, axes = F)
+plot(euro_rast, col = "White", add = T, axes = F)
+#plot(euro_map, add = T, axes = F)
+
+euro_rast
+points_rast
+euro_rast[1000:2000] # we can see that there are NAs
+points_rast[1:100]
+
+# we want to know which points have NA in euro_rast that aren't NA in points rast. 
+# if it's a NA in the euro_rast but has a value in the points rast that might explain it
+
+################################################################
+## Some trials to aid understanding/visualisation
+
+## Hard to see. Look at with larger raster
+
+#read in the raster we are using for the project
+euro_rast_10k <- terra::rast("output/euro_rast_10k.tif")
+euro_rast_10k
+
+points_rast_10k <- terra::rasterize(points_vect, euro_rast_10k,"flu", fun = max)
+plot(points_rast_10k)
+points_rast_10k
+head(points_rast_10k)
+table(values(points_rast_10k))
+# Easier to visualise that it probably is working OK. 
+# I think the 1km are just too small to see. 
+
+dev.off()
+plot(euro_map)
+plot(points_rast_10k, col = "red")
+plot(euro_rast_10k, col = "White", add = T, axes = F)
+
+
+
+# Create the csv file for avian flu cases
+# make a points object using the centre of each pixel from the ref raster
+points_euro_rast_10k <- terra::as.points(euro_rast_10k)
+points_euro_rast_10k
+
+flu_res_10k <- terra::extract(points_rast_10k, points_euro_rast_10k,
+                              method = "simple", xy = T)
+
+table(flu_res_10k$max)
+table(values(points_rast_10k))
+
+dev.off()
+plot(points_rast_10k, col = "red")
+plot(euro_map, add = T, axes = F)
+
+
+
+#Perhaps just look at UK? 
+GB_ext <- terra::ext(3300000, 3800000, 3100000, 4100000)
+GB_crop <- terra::crop(euro_map, GB_ext)
+plot(GB_crop)
+
+GB_rast <- terra::crop(points_rast, GB_ext)
+plot(GB_crop)
+plot(GB_rast, add = T, axes = F)

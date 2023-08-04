@@ -34,8 +34,16 @@ blank_3035
 
 eurorast <- rasterize(euro_map_crop_prj, blank_3035)
 plot(eurorast)
+table(values(eurorast))
+
+eurorast_plus <- rasterize(euro_map_crop_prj, blank_3035, touches = T, cover = T)
+eurorast_plus # shows that it includes cells with a very small proportion
+plot(eurorast_plus)
+table(values(eurorast_plus)) # This includes extra cells. Presumably the coastal ones that 
+# only some of the vector is in.
 
 # writeRaster(eurorast, "output/euro_rast.tif", overwrite = TRUE)
+# writeRaster(eurorast_plus, "output/euro_rast_plus.tif")
 
 ## Also create a 10km raster in case want to look at it
 blank_10k <- terra::rast(crs=crs, extent=euro_ext, res = 10000)
