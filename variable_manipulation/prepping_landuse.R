@@ -1,150 +1,142 @@
-### Prepping landuse data
-### 27th July 2023
+### 09/08/2023
+### Looking at ways to get the land cover data
+## thi script is based on this webpage https://rspatial.org/modis/2-download.html
 
-### There are 2 options for this:
-### 1) Use the USGS Earth explorer to download the MODIS dat and process manually
-### 2) Use geoData package to download landuse. This has fewer categories 
+#install.packages("remotes")
+#remotes::install_github("rspatial/luna")
 
-rm(list =ls())
-# library(tidyverse)
-# library(geodata)
-# library(terra)
-# 
-# land_cover <- landcover(var = "trees", path = "data/variables")
-# plot(land_cover)
-# land_cover
-## for this you have to call in each of the landcover types separately. 
-## It then tells you what proportion of that landcover type is in each cell
-## this is an option, but look at an alternative too
-
-
-### using MODIS. F
-### info found here: https://rspatialdata.github.io/land_cover.html
-
-library(MODIStsp)
-MODIStsp_get_prodlayers("MCD12Q1")
-
-# remotes::install_github("wmgeolab/rgeoboundaries")
-# install.packages("sf")
-# library(rgeoboundaries)
+library(terra)
+library(luna)
 library(sf)
 
-# Downloading the country boundary of France
-#map_boundary <- geoboundaries("France")
 
-#map_boundary <- terra::vect("output/euro_map.shp")
-map_boundary <- st_read("output/euro_map.shp")
-plot(map_boundary)
+# lists all products that are currently searchable
+prod <- getProducts()
+head(prod)
 
-eurounion <- st_union(map_boundary)
-plot(eurounion)
-eurounion
+modis <- getProducts("^MOD|^MYD|^MCD")
+head(modis)
 
-map_boundary_euro <- eurounion
+product <- "MCD12Q1"
+# product <- "MOD09A1"
+# To learn more about a specific product you can launch a webpage
+productInfo(product)
+
+# Once we finalize the product we want to use, 
+# we define some parameters for the data we want: 
+# product name, start and end date, and area of interest.
+
+start <- "2020-01-01"
+end <- "2020-12-31"
+
+# To define the area of interest, we can define a spatial extent,
+# or use an object that has an extent. 
+
+# map_boundary <- st_read("output/euro_map.shp")
+# map_boundary <- terra::vect("output/euro_map.shp")
+# eurounion <- st_union(map_boundary)
+# plot(eurounion)
+# eurounion
+# 
+# map_boundary_euro <- eurounion
+# plot(map_boundary_euro)
+
+# we need to extent of the area we are interested in in long/lat. 
+map_rast <- terra::rast("output/euro_rast.tif")
+map_rast_lonlat <- terra::project(map_rast, "epsg:4326")
+map_rast_lonlat
+
+# Let’s now find out what MODIS data is available for this area. 
+# We can search the data available from a NASA server
+
+mf <- luna::getModis(product, start, end, aoi=map_rast_lonlat, 
+                     download = FALSE, version = "061")
+mf
 
 
-# Defining filepath to save downloaded spatial file
-spatial_filepath <- "LandCoverData/euro.shp"
-# Saving downloaded spatial file on to our computer
-st_write(map_boundary_euro, paste0(spatial_filepath))
+ #To download the tiles, usually you would download them to a folder 
+# where you save the data for your project. 
+
+datadir <- file.path("data/landcover_data/euro")
+dir.create(datadir, showWarnings=FALSE)
+
+lc_data <- luna::getModis(product, start, end, aoi=map_rast_lonlat, download=TRUE,
+                     path=datadir, version = "061",
+                     username="sarahhayes", password="NASATigtogs43!")
 
 
-library(MODIStsp)
+# Now that we have downloaded some MODIS data, we can explore and visualize it.
+# First create a SpatRaster object from the file created on the previous page.
+
+# this is looking at just one tile
+lc_path <- file.path(datadir, "MCD12Q1.A2020001.h15v03.061.2022171190052.hdf")
+#library(terra)
+r <- terra::rast(lc_path[1])
+r
+plot(r)
+plot(r$LC_Type1)
+r$LC_Type1
+
+# I want all the tiles and just the first layer from each of the files in the hdf folder
+files <- dir("data/landcover_data/euro", pattern = ".hdf")
+files_vect <- paste("data/landcover_data/euro/", files, sep = "")
+
+for (i in 1:length(files_vect)) {
+  rr <- terra::rast(files_vect[[i]], lyrs = "LC_Type1")
+  terra::writeRaster(rr, paste("data/landcover_data/landcover_LC_Type1/",i, ".tif", sep ="" ),
+                     overwrite = T)
+}
+
+## combine them into a single raster
+vrt(
+  x = list.files(path = "data/landcover_data/landcover_LC_Type1",
+                 pattern = "*.tif$", full.names = TRUE), 
+  filename = "dem.vrt", overwrite = T
+)
+
+# afterwards read it as if it was a normal raster:
+dem <- rast("dem.vrt")
+dem
+plot(dem)
+
+## save this raster
+# terra::writeRaster(dem, "data/landcover_data/landcover_type1_full_raster.tif")
+
+## Now we need to change projection and crop
+
+lc1_rast <- terra::project(dem, map_rast)
+lc1_rast
+plot(lc1_rast)
+
+masked <- terra::mask(lc1_rast, map_rast)
+plot(masked)
+table(values(masked))
+
+masked_int <- terra::as.int(masked)
+masked_int
+plot(masked_int)
+head(masked_int)
+table(values(masked_int))
+
+names(masked_int)
+values(masked_int)
+
+masked_factor <- terra::as.factor(masked)
+masked_factor
+plot(masked_factor)
+
+names(masked_factor) <- "landcover" 
+names(masked_factor)
+
+# make a points object using the centre of each pixel from the blank raster
+points_3035 <- terra::as.points(map_rast)
+points_3035
+
 tictoc::tic()
-MODIStsp(gui             = FALSE,
-         out_folder      = "data/landcover_data",
-         out_folder_mod  = "data/landcover_data",
-         selprod         = "LandCover_Type_Yearly_500m (MCD12Q1)",
-         bandsel         = "LC1", 
-         user            = "sarahhayes" ,
-         password        = "NASATigtogs43!",
-         start_date      = "2019.01.01", 
-         end_date        = "2019.12.31", 
-         verbose         = FALSE,
-         spatmeth        = "file",
-         spafile         = spatial_filepath,
-         out_format      = "GTiff")
+lc_res <- terra::extract(masked_factor, points_3035, method = "simple", xy = T)
 tictoc::toc()
 
-# library(MODIStsp)
-# MODIStsp(gui             = FALSE,
-#          out_folder      = "data/temp",
-#          out_folder_mod  = "data/temp",
-#          selprod         = "LandCover_Type_Yearly_500m (MCD12Q1)",
-#          bandsel         = "LC1", 
-#          user            = "sarahhayes" ,
-#          password        = "NASATigtogs43!",
-#          start_date      = "2019.01.01", 
-#          end_date        = "2019.12.31", 
-#          verbose         = FALSE,
-#          spatmeth        = "file",
-#          spafile         = spatial_filepath,
-#          out_format      = "GTiff")
-# 
-
-
-# remotes::install_github("wmgeolab/rgeoboundaries")
-library(raster)
-library(here)
-library(ggplot2)
-library(viridis)
-library(dplyr)
-
-# Downloading the boundary of Zimbabwe
-#map_boundary <- geoboundaries("Zimbabwe")
-
-# Reading in the downloaded landcover raster data
-IGBP_raster <- raster(here::here("data/landcover_data/euro_map/LandCover_Type_Yearly_500m_v6/LC1/MCD12Q1_LC1_2019_001.tif"))
-
-# Transforming data
-IGBP_raster <- projectRaster(IGBP_raster, crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
-
-# Cropping data
-IGBP_raster <- raster::mask(IGBP_raster, as_Spatial(map_boundary))
-
-# Converting the raster object into a dataframe and converting the IGBP classification into a factor
-IGBP_df <- as.data.frame(IGBP_raster, xy = TRUE, na.rm = TRUE) %>%
-  mutate(MCD12Q1_LC1_2019_001 = as.factor(round(MCD12Q1_LC1_2019_001)))
-rownames(IGBP_df) <- c()
-# Renaming IGBP classification levels
-levels(IGBP_df$MCD12Q1_LC1_2019_001) <- c( "Evergreen needleleaf forests",
-                                           "Evergreen broadleaf forests",
-                                           "Deciduous needleleaf forests",
-                                           "Deciduous broadleaf forests",
-                                           "Mixed forests",
-                                           "Closed shrublands",
-                                           "Open shrublands",
-                                           "Woody savannas",
-                                           "Savannas",
-                                           "Grasslands",
-                                           "Permanent wetlands",
-                                           "Croplands",
-                                           "Urban and built-up lands",
-                                           "Cropland/natural vegetation mosaics",
-                                           "Snow and ice",
-                                           "Barren",
-                                           "Water bodies")
-# Visualising using ggplot2
-ggplot() + 
-  geom_raster(data = IGBP_df,
-              aes(x = x, y = y, fill = MCD12Q1_LC1_2019_001)) +
-  geom_sf(data = map_boundary, inherit.aes = FALSE, fill = NA) +
-  scale_fill_viridis(name = "Land Cover Type", discrete = TRUE) +
-  labs(title = "Land Cover classification in Zimbabwe",
-       subtitle = "01-01-2019 - 31-12-2019",
-       x = "Longitude",
-       y = "Latitude") +
-  theme_minimal()
-
-
-
-# make blank raster
-crs <- "epsg:3035"
-euro_ext <- terra::ext(2000000, 6000000, 1000000, 5500000) # swap to base raster later
-
-blank_raster <- rast(crs=crs, extent=euro_ext, res = 1000)
-
-elev_euro <- terra::project(x = global_elev, y = blank_raster, method = "near")
-elev_euro
-
-plot(elev_euro)
+ # write.csv(lc_res,
+ #          "variable_manipulation/variable_outputs/landcover_output.csv",
+ #          row.names = F)
+ # 
