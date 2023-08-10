@@ -36,7 +36,12 @@ sp_df$scientific_name <- sapply(sp_df$scientific_name,
 sp_df <- sp_df[, c(
   "species_code",
   "scientific_name",
-  "common_name"
+  "common_name",
+  "breeding_quality",
+  "nonbreeding_quality",
+  "postbreeding_migration_quality",
+  "prebreeding_migration_quality",
+  "resident_quality"
 )]
 
 # Get codes for species in Europe
@@ -784,6 +789,23 @@ phylo_dist_by_eBird_species <- nearest_host_df[position_in_phylo, ]
 sp_df$nearest_host_distance <- phylo_dist_by_eBird_species
 
 ################################################################################
+# Filter for eBird data quality
+
+min_quality <- sapply(1:nrow(sp_df),
+                      FUN = function(i){
+                        min_qual <- sp_df[i,
+                                        c("breeding_quality",
+                                          "nonbreeding_quality",
+                                          "postbreeding_migration_quality",
+                                          "prebreeding_migration_quality",
+                                          "resident_quality")] %>%
+                          as.numeric %>%
+                          min(na.rm = TRUE)
+                        return(min_qual)
+                      })
+quality_data <- sp_df[which(min_quality>1), ]
+
+################################################################################
 # Now get abundance rasters for species and convolute with eco/phylo factors
 
 # set the crs we want to use
@@ -930,15 +952,46 @@ idx_to_download <- which(sp_df$species_code %in% not_downloaded)
   }
 }
 
-av_capture_graphics(animate(cong_rast, n=1),
+# Need to correct for abundance being percentage:
+cong_rast <- 1e-2 * cong_rast
+migr_rast <- 1e-2 * migr_rast
+around_surf_rast <- 1e-2 * around_surf_rast
+below_surf_rast <- 1e-2 * below_surf_rast
+
+av_capture_graphics(animate(clamp(cong_rast, upper = 5e4), n=1),
                     framerate = 5.2,
                     output = "cong_rast.mp4")
-av_capture_graphics(animate(migr_rast, n=1),
+av_capture_graphics(animate(clamp(migr_rast, upper = 5e4), n=1),
                     framerate = 5.2,
                     output = "migr_rast.mp4")
-av_capture_graphics(animate(around_surf_rast, n=1),
+av_capture_graphics(animate(clamp(around_surf_rast, upper = 5e6), n=1),
                     framerate = 5.2,
                     output = "around_surf_rast.mp4")
-av_capture_graphics(animate(below_surf_rast, n=1),
+av_capture_graphics(animate(clamp(below_surf_rast, upper = 5e6), n=1),
                     framerate = 5.2,
                     output = "below_surf_rast.mp4")
+
+log_cong_rast <- (cong_rast + 1e-6) %>%
+                 log(base = 10) %>%
+                 clamp(lower = 0)
+log_migr_rast <- (migr_rast + 1e-6) %>%
+                 log(base = 10) %>%
+                 clamp(lower = 0)
+log_around_surf_rast <- (around_surf_rast + 1e-6) %>%
+                        log(base = 10) %>%
+                        clamp(lower = 0)
+log_below_surf_rast <- (below_surf_rast + 1e-6) %>%
+                       log(base = 10) %>%
+                       clamp(lower = 0)
+av_capture_graphics(animate(log_cong_rast, n=1),
+                    framerate = 5.2,
+                    output = "log_cong_rast.mp4")
+av_capture_graphics(animate(log_migr_rast, n=1),
+                    framerate = 5.2,
+                    output = "log_migr_rast.mp4")
+av_capture_graphics(animate(log_around_surf_rast, n=1),
+                    framerate = 5.2,
+                    output = "log_around_surf_rast.mp4")
+av_capture_graphics(animate(log_below_surf_rast, n=1),
+                    framerate = 5.2,
+                    output = "log_below_surf_rast.mp4")
