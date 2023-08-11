@@ -22,7 +22,7 @@ require(TreeTools)
 
 # First use the AVONET data to create a mapping between names and alphanumeric
 # identifiers
-AVONET_df <- read_excel("data/AVONETSupplementarydataset1.xlsx",
+AVONET_df <- read_excel("data/eco_phylo_data/AVONETSupplementarydataset1.xlsx",
                         sheet = "AVONET_Raw_Data")
 AVONET_df <- AVONET_df[,
                         c("Avibase.ID",
@@ -123,7 +123,7 @@ get_bird_ids <- function(name_vect, name_sources){
 # of influenza A.
 
 # Load data
-CLOVER_df <- read.csv("data/CLOVER_1.0_Viruses_AssociationsFlatFile.csv")
+CLOVER_df <- read.csv("data/eco_phylo_data/CLOVER_1.0_Viruses_AssociationsFlatFile.csv")
 # Restrict attention to samples from birds
 CLOVER_df <- CLOVER_df[which(CLOVER_df$HostClass == "aves"), ]
 # All pathogen species names are in lower case. Filtering for rows where this
@@ -466,11 +466,11 @@ max_forstrat_comp <- names(forstrat_data)[which.max(colMeans(forstrat_data))]
 # Incorporate additional ecological data from IUCN
 
 IUCN_df <- rbind(
-  read.csv("eco_phylo_processing/iucn-data-vol1/all_other_fields.csv"),
-  read.csv("eco_phylo_processing/iucn-data-vol2/all_other_fields.csv"))
+  read.csv("data/eco_phylo_data/iucn-data-vol1/all_other_fields.csv"),
+  read.csv("data/eco_phylo_data/iucn-data-vol2/all_other_fields.csv"))
 synonym_df <- rbind(
-  read.csv("eco_phylo_processing/iucn-data-vol1/synonyms.csv"),
-  read.csv("eco_phylo_processing/iucn-data-vol2/synonyms.csv"))
+  read.csv("data/eco_phylo_data/iucn-data-vol1/synonyms.csv"),
+  read.csv("data/eco_phylo_data/iucn-data-vol2/synonyms.csv"))
 # IUCN_df <- IUCN_df[, c("scientificName",
 #                        "Congregatory.value",
 #                        "MovementPatterns.pattern")]
@@ -579,9 +579,9 @@ matched_data$is_migratory <- sapply(matched_data$Avibase_ID,
 # distances across ABC samples.
 
 {
-  if (!file.exists("eco_phylo_processing/mean_phylo_distances.rds")){
+  if (!file.exists("data/eco_phylo_data/mean_phylo_distances.rds")){
     # Attempt to load in BirdTree data
-    bird_tree <- read.tree("eco_phylo_processing/BirdzillaHackett10.tre")
+    bird_tree <- read.tree("data/eco_phylo_data/BirdzillaHackett10.tre")
     
     for (i in seq_along(bird_tree)){
       bird_tree[[i]]$tip.label <- tolower(bird_tree[[i]]$tip.label)
@@ -601,10 +601,10 @@ matched_data$is_migratory <- sapply(matched_data$Avibase_ID,
     rownames(dmat_mean) <- gsub("_", " ", rownames(dmat_mean))
     colnames(dmat_mean) <- gsub("_", " ", colnames(dmat_mean))
     
-    saveRDS(dmat_mean, "eco_phylo_processing/mean_phylo_distances.rds")
+    saveRDS(dmat_mean, "data/eco_phylo_data/mean_phylo_distances.rds")
   }
   else{
-    dmat_mean <- readRDS("eco_phylo_processing/mean_phylo_distances.rds")
+    dmat_mean <- readRDS("data/eco_phylo_data/mean_phylo_distances.rds")
   }
 }
 
