@@ -722,6 +722,99 @@ if (PLOT){
          xpd = TRUE)
 }
 
+# Repeat for foraging strategies
+if (PLOT){
+  bin_size <- 10.
+  
+  plot_ulim <- 100.
+  
+  host_dhist <- hist(matched_data$ForStrat.watbelowsurf[which(matched_data$host_indicator)],
+                     breaks = seq(0, plot_ulim, by=bin_size),
+                     plot = FALSE)
+  nonhost_dhist <- hist(matched_data$ForStrat.watbelowsurf[-which(matched_data$host_indicator)],
+                        breaks = seq(0, plot_ulim, by=bin_size),
+                        plot = FALSE)
+  pal <- brewer.pal(6, "Dark2")
+  plot(seq(0, plot_ulim-bin_size, by=bin_size),
+       nonhost_dhist$density,
+       type = "l",
+       lwd = 2,
+       col = pal[2],
+       xlab = "% of foraging time spent\n >5cm below water surface",
+       ylab = "Density")
+  lines(seq(0, plot_ulim-bin_size, by=bin_size),
+        host_dhist$density,
+        type = "l",
+        lwd = 2,
+        col = pal[1])
+  legend("topright",
+         inset=c(.025,0),
+         legend = c("Confirmed hosts", "Other species"),
+         col = pal,
+         bty = "n",
+         pch = 20,
+         pt.cex = 2,
+         cex = 0.8,
+         xpd = TRUE)
+}
+if (PLOT){
+  bin_size <- 10.
+  
+  plot_ulim <- 100.
+  
+  host_dhist <- hist(matched_data$ForStrat.wataroundsurf[which(matched_data$host_indicator)],
+                     breaks = seq(0, plot_ulim, by=bin_size),
+                     plot = FALSE)
+  nonhost_dhist <- hist(matched_data$ForStrat.wataroundsurf[-which(matched_data$host_indicator)],
+                        breaks = seq(0, plot_ulim, by=bin_size),
+                        plot = FALSE)
+  pal <- brewer.pal(6, "Dark2")
+  plot(seq(0, plot_ulim-bin_size, by=bin_size),
+       nonhost_dhist$density,
+       type = "l",
+       lwd = 2,
+       col = pal[2],
+       xlab = "% of foraging time spent\n around below water surface",
+       ylab = "Density")
+  lines(seq(0, plot_ulim-bin_size, by=bin_size),
+        host_dhist$density,
+        type = "l",
+        lwd = 2,
+        col = pal[1])
+  legend("topright",
+         inset=c(.025,0),
+         legend = c("Confirmed hosts", "Other species"),
+         col = pal,
+         bty = "n",
+         pch = 20,
+         pt.cex = 2,
+         cex = 0.8,
+         xpd = TRUE)
+}
+
+cong_by_host <- table(matched_data$is_congregatory,
+                      matched_data$host_indicator,
+                      dnn = c("Congregative", "Host")) %>%
+                      addmargins()
+mig_by_host <- table(matched_data$is_migratory,
+                      matched_data$host_indicator,
+                      dnn = c("Migratory", "Host")) %>%
+                      addmargins()
+
+png("cong_table.png")
+p <- tableGrob(cong_by_host,
+               rows = c("Not congregative", "Congregative", "Total"),
+               cols = c("Not confirmed", "Confirmed host", "Total"))
+grid.arrange(p)
+dev.off()
+
+png("mig_table.png")
+p <- tableGrob(mig_by_host,
+               rows = c("Not migratory", "Migratory", "Total"),
+               cols = c("Not confirmed", "Confirmed host", "Total"))
+grid.arrange(p)
+dev.off()
+
 ################################################################################
 # One thing we might be interested in is distance to relevant taxa. We now try
 # to identify taxa of interest:
