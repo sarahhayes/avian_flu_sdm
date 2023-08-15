@@ -36,7 +36,12 @@ sp_df$scientific_name <- sapply(sp_df$scientific_name,
 sp_df <- sp_df[, c(
   "species_code",
   "scientific_name",
-  "common_name"
+  "common_name",
+  "breeding_quality",
+  "nonbreeding_quality",
+  "postbreeding_migration_quality",
+  "prebreeding_migration_quality",
+  "resident_quality"
 )]
 
 # Get codes for species in Europe
@@ -781,7 +786,26 @@ position_in_phylo <- sapply(
 )
 
 phylo_dist_by_eBird_species <- nearest_host_df[position_in_phylo, ]
-sp_df$nearest_host_distance <- phylo_dist_by_eBird_species
+sp_df$nearest_host_distance <- phylo_dist_by_eBird_species$nearest_host_distance
+
+# Set threshold to use for deciding a species is a risk factor
+nhost_thresh <- 50.
+
+################################################################################
+# Filter for eBird data quality
+
+sp_df$min_quality <- sapply(1:nrow(sp_df),
+                      FUN = function(i){
+                        min_qual <- sp_df[i,
+                                        c("breeding_quality",
+                                          "nonbreeding_quality",
+                                          "postbreeding_migration_quality",
+                                          "prebreeding_migration_quality",
+                                          "resident_quality")] %>%
+                          as.numeric %>%
+                          min(na.rm = TRUE)
+                        return(min_qual)
+                      })
 
 ################################################################################
 # Now get abundance rasters for species and convolute with eco/phylo factors
@@ -820,13 +844,24 @@ below_surf_rast <- rast(nlyrs=nlyrs,
                         crs=crs,
                         extent=euro_ext,
                         res=9042.959)
+hostdist_rast <- rast(nlyrs=nlyrs,
+                        crs=crs,
+                        extent=euro_ext,
+                        res=9042.959)
 
 for (i in 1:nlyrs){
   cong_rast[, , i] <- 0
   migr_rast[, , i] <- 0
   around_surf_rast[, , i] <- 0
   below_surf_rast[, , i] <- 0
+  hostdist_rast[, , i] <- 0
 }
+
+hq_cong_rast <- cong_rast
+hq_migr_rast <- migr_rast
+hq_around_surf_rast <- around_surf_rast
+hq_below_surf_rast <- below_surf_rast
+hq_hostdist_rast <- hostdist_rast
 
 no_species <- nrow(sp_df)
 sample_idx <- 1:no_species
@@ -851,10 +886,11 @@ if (getOption('timeout') < 10 * 60 * no_species){
 starting_dls <- ebirdst_data_dir() %>% 
   paste("/2021", sep = "") %>% 
   list.files()
-no_downloaded <- starting_dls %in% sp_df$species_code %>% 
+total_to_load <- starting_dls %in% sp_df$species_code %>% 
   which() %>%
   length()
-total_to_download <- no_species - no_downloaded
+no_loaded <- 0
+total_to_download <- no_species - total_to_load
 no_downloaded <- 0
 
 not_downloaded <- setdiff((sp_df$species_code),
@@ -865,6 +901,9 @@ idx_to_download <- which(sp_df$species_code %in% not_downloaded)
 {
   loop.start <- Sys.time()
   mean_dl_time <- 0
+  mean_load_time <- 0
+  mean_process_time <- 0
+  no_processed <- 0
   for (i in 1:no_species) {
     
     idx <- sample_idx[i]
@@ -891,21 +930,21 @@ idx_to_download <- which(sp_df$species_code %in% not_downloaded)
       no_downloaded <- no_downloaded + 1
       time.now <- Sys.time()
       elapsed <- as.numeric(difftime(time.now, dl_start, units = "mins"))
-      mean_dl_time <- mean_dl_time + (1 / no_downloaded) * elapsed
-      time_remaining <- (total_to_download - no_downloaded) * mean_dl_time
-      cat(as.numeric(difftime(time.now, loop.start, units="mins")),
-          " minutes elapsed since start, estimated ",
-          time_remaining,
-          " remaining.",
-          no_downloaded,
-          "of",
-          total_to_download,
-          "species downloaded\n")
+      mean_dl_time <- (1 / no_downloaded) * 
+        ((no_downloaded - 1) * mean_dl_time + elapsed)
     }
     else{
+      load_start <- Sys.time()
       path <- ebirdst_download(species = species_sel,
                                pattern = "_lr_")
+      no_loaded <- no_loaded + 1
+      time.now <- Sys.time()
+      elapsed <- as.numeric(difftime(time.now, load_start, units = "mins"))
+      mean_load_time <- (1 / no_loaded) * 
+        ((no_loaded - 1) * mean_load_time + elapsed)
     }
+    
+    process_start <- Sys.time()
     
     this_rast <- load_raster(path = path,
                              product = "percent-population",
@@ -923,22 +962,156 @@ idx_to_download <- which(sp_df$species_code %in% not_downloaded)
     if (species_factors$IUCN$is_migratory){
       migr_rast <- migr_rast + (species_factors$pop_sizes * this_rast)
     }
+    if (species_factors$nearest_host_distance < nhost_thresh){
+      hostdist_rast <- hostdist_rast + (species_factors$pop_sizes * this_rast)
+    }
     around_surf_rast <- around_surf_rast +
       species_factors$EltonTraits$ForStrat.wataroundsurf * (species_factors$pop_sizes * this_rast)
     below_surf_rast <- below_surf_rast +
       species_factors$EltonTraits$ForStrat.watbelowsurf * (species_factors$pop_sizes * this_rast)
+    
+    # Add abundances to quality version if quality is above 1:
+    if (species_factors$min_quality > 1){
+      if (species_factors$IUCN$is_congregatory){
+        hq_cong_rast <- hq_cong_rast + (species_factors$pop_sizes * this_rast)
+      }
+      if (species_factors$IUCN$is_migratory){
+        hq_migr_rast <- hq_migr_rast + (species_factors$pop_sizes * this_rast)
+      }
+      if (species_factors$nearest_host_distance < nhost_thresh){
+        hq_hostdist_rast <- hq_hostdist_rast + (species_factors$pop_sizes * this_rast)
+      }
+      hq_around_surf_rast <- hq_around_surf_rast +
+        species_factors$EltonTraits$ForStrat.wataroundsurf * (species_factors$pop_sizes * this_rast)
+      hq_below_surf_rast <- hq_below_surf_rast +
+        species_factors$EltonTraits$ForStrat.watbelowsurf * (species_factors$pop_sizes * this_rast)
+    }
+    
+    no_processed <- no_processed + 1
+    
+    time.now <- Sys.time()
+    elapsed <- as.numeric(difftime(time.now, process_start, units = "mins"))
+    mean_process_time <- (1 / no_processed) * 
+      ((no_processed - 1) * mean_process_time + elapsed)
+    time_remaining <- (total_to_download - no_downloaded) * mean_dl_time +
+      (total_to_load - no_loaded) * mean_load_time +
+      (no_species - i) * mean_process_time
+    cat(as.numeric(difftime(time.now, loop.start, units="mins")),
+        " minutes elapsed since start, estimated ",
+        time_remaining,
+        " remaining.",
+        i,
+        "of",
+        no_species,
+        "species processed.\n")
   }
 }
 
-av_capture_graphics(animate(cong_rast, n=1),
+# Need to correct for abundance being percentage:
+cong_rast <- 1e-2 * cong_rast
+migr_rast <- 1e-2 * migr_rast
+around_surf_rast <- 1e-2 * around_surf_rast
+below_surf_rast <- 1e-2 * below_surf_rast
+hostdist_rast <- 1e-2 * hostdist_rast
+
+hq_cong_rast <- 1e-2 * hq_cong_rast
+hq_migr_rast <- 1e-2 * hq_migr_rast
+hq_around_surf_rast <- 1e-2 * hq_around_surf_rast
+hq_below_surf_rast <- 1e-2 * hq_below_surf_rast
+hq_hostdist_rast <- 1e-2 * hq_hostdist_rast
+
+av_capture_graphics(animate(clamp(cong_rast, upper = 5e4), n=1),
                     framerate = 5.2,
                     output = "cong_rast.mp4")
-av_capture_graphics(animate(migr_rast, n=1),
+av_capture_graphics(animate(clamp(migr_rast, upper = 5e4), n=1),
                     framerate = 5.2,
                     output = "migr_rast.mp4")
-av_capture_graphics(animate(around_surf_rast, n=1),
+av_capture_graphics(animate(clamp(around_surf_rast, upper = 5e6), n=1),
                     framerate = 5.2,
                     output = "around_surf_rast.mp4")
-av_capture_graphics(animate(below_surf_rast, n=1),
+av_capture_graphics(animate(clamp(below_surf_rast, upper = 5e6), n=1),
                     framerate = 5.2,
                     output = "below_surf_rast.mp4")
+av_capture_graphics(animate(clamp(hostdist_rast, upper = 5e6), n=1),
+                    framerate = 5.2,
+                    output = "hostdist_rast.mp4")
+
+av_capture_graphics(animate(clamp(hq_cong_rast, upper = 5e4), n=1),
+                    framerate = 5.2,
+                    output = "hq_cong_rast.mp4")
+av_capture_graphics(animate(clamp(hq_migr_rast, upper = 5e4), n=1),
+                    framerate = 5.2,
+                    output = "hq_migr_rast.mp4")
+av_capture_graphics(animate(clamp(hq_around_surf_rast, upper = 5e6), n=1),
+                    framerate = 5.2,
+                    output = "hq_around_surf_rast.mp4")
+av_capture_graphics(animate(clamp(hq_below_surf_rast, upper = 5e6), n=1),
+                    framerate = 5.2,
+                    output = "hq_below_surf_rast.mp4")
+av_capture_graphics(animate(clamp(hq_hostdist_rast, upper = 5e6), n=1),
+                    framerate = 5.2,
+                    output = "hq_hostdist_rast.mp4")
+
+log_cong_rast <- (cong_rast + 1e-6) %>%
+                 log(base = 10) %>%
+                 clamp(lower = 0)
+log_migr_rast <- (migr_rast + 1e-6) %>%
+                 log(base = 10) %>%
+                 clamp(lower = 0)
+log_around_surf_rast <- (around_surf_rast + 1e-6) %>%
+                        log(base = 10) %>%
+                        clamp(lower = 0)
+log_below_surf_rast <- (below_surf_rast + 1e-6) %>%
+                       log(base = 10) %>%
+                       clamp(lower = 0)
+log_hostdist_rast <- (hostdist_rast + 1e-6) %>%
+                     log(base = 10) %>%
+                     clamp(lower = 0)
+
+hq_log_cong_rast <- (hq_cong_rast + 1e-6) %>%
+  log(base = 10) %>%
+  clamp(lower = 0)
+hq_log_migr_rast <- (hq_migr_rast + 1e-6) %>%
+  log(base = 10) %>%
+  clamp(lower = 0)
+hq_log_around_surf_rast <- (hq_around_surf_rast + 1e-6) %>%
+  log(base = 10) %>%
+  clamp(lower = 0)
+hq_log_below_surf_rast <- (hq_below_surf_rast + 1e-6) %>%
+  log(base = 10) %>%
+  clamp(lower = 0)
+hq_log_hostdist_rast <- (hq_hostdist_rast + 1e-6) %>%
+  log(base = 10) %>%
+  clamp(lower = 0)
+
+av_capture_graphics(animate(log_cong_rast, n=1),
+                    framerate = 5.2,
+                    output = "log_cong_rast.mp4")
+av_capture_graphics(animate(log_migr_rast, n=1),
+                    framerate = 5.2,
+                    output = "log_migr_rast.mp4")
+av_capture_graphics(animate(log_around_surf_rast, n=1),
+                    framerate = 5.2,
+                    output = "log_around_surf_rast.mp4")
+av_capture_graphics(animate(log_below_surf_rast, n=1),
+                    framerate = 5.2,
+                    output = "log_below_surf_rast.mp4")
+av_capture_graphics(animate(log_hostdist_rast, n=1),
+                    framerate = 5.2,
+                    output = "log_hostdist_rast.mp4")
+
+av_capture_graphics(animate(hq_log_cong_rast, n=1),
+                    framerate = 5.2,
+                    output = "hq_log_cong_rast.mp4")
+av_capture_graphics(animate(hq_log_migr_rast, n=1),
+                    framerate = 5.2,
+                    output = "hq_log_migr_rast.mp4")
+av_capture_graphics(animate(hq_log_around_surf_rast, n=1),
+                    framerate = 5.2,
+                    output = "hq_og_around_surf_rast.mp4")
+av_capture_graphics(animate(hq_log_below_surf_rast, n=1),
+                    framerate = 5.2,
+                    output = "hq_log_below_surf_rast.mp4")
+av_capture_graphics(animate(hq_log_hostdist_rast, n=1),
+                    framerate = 5.2,
+                    output = "hq_log_hostdist_rast.mp4")

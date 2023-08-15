@@ -22,7 +22,7 @@ require(TreeTools)
 
 # First use the AVONET data to create a mapping between names and alphanumeric
 # identifiers
-AVONET_df <- read_excel("data/AVONETSupplementarydataset1.xlsx",
+AVONET_df <- read_excel("data/eco_phylo_data/AVONETSupplementarydataset1.xlsx",
                         sheet = "AVONET_Raw_Data")
 AVONET_df <- AVONET_df[,
                         c("Avibase.ID",
@@ -123,7 +123,7 @@ get_bird_ids <- function(name_vect, name_sources){
 # of influenza A.
 
 # Load data
-CLOVER_df <- read.csv("data/CLOVER_1.0_Viruses_AssociationsFlatFile.csv")
+CLOVER_df <- read.csv("data/eco_phylo_data/CLOVER_1.0_Viruses_AssociationsFlatFile.csv")
 # Restrict attention to samples from birds
 CLOVER_df <- CLOVER_df[which(CLOVER_df$HostClass == "aves"), ]
 # All pathogen species names are in lower case. Filtering for rows where this
@@ -466,11 +466,11 @@ max_forstrat_comp <- names(forstrat_data)[which.max(colMeans(forstrat_data))]
 # Incorporate additional ecological data from IUCN
 
 IUCN_df <- rbind(
-  read.csv("eco_phylo_processing/iucn-data-vol1/all_other_fields.csv"),
-  read.csv("eco_phylo_processing/iucn-data-vol2/all_other_fields.csv"))
+  read.csv("data/eco_phylo_data/iucn-data-vol1/all_other_fields.csv"),
+  read.csv("data/eco_phylo_data/iucn-data-vol2/all_other_fields.csv"))
 synonym_df <- rbind(
-  read.csv("eco_phylo_processing/iucn-data-vol1/synonyms.csv"),
-  read.csv("eco_phylo_processing/iucn-data-vol2/synonyms.csv"))
+  read.csv("data/eco_phylo_data/iucn-data-vol1/synonyms.csv"),
+  read.csv("data/eco_phylo_data/iucn-data-vol2/synonyms.csv"))
 # IUCN_df <- IUCN_df[, c("scientificName",
 #                        "Congregatory.value",
 #                        "MovementPatterns.pattern")]
@@ -579,9 +579,9 @@ matched_data$is_migratory <- sapply(matched_data$Avibase_ID,
 # distances across ABC samples.
 
 {
-  if (!file.exists("eco_phylo_processing/mean_phylo_distances.rds")){
+  if (!file.exists("data/eco_phylo_data/mean_phylo_distances.rds")){
     # Attempt to load in BirdTree data
-    bird_tree <- read.tree("eco_phylo_processing/BirdzillaHackett10.tre")
+    bird_tree <- read.tree("data/eco_phylo_data/BirdzillaHackett10.tre")
     
     for (i in seq_along(bird_tree)){
       bird_tree[[i]]$tip.label <- tolower(bird_tree[[i]]$tip.label)
@@ -601,10 +601,10 @@ matched_data$is_migratory <- sapply(matched_data$Avibase_ID,
     rownames(dmat_mean) <- gsub("_", " ", rownames(dmat_mean))
     colnames(dmat_mean) <- gsub("_", " ", colnames(dmat_mean))
     
-    saveRDS(dmat_mean, "eco_phylo_processing/mean_phylo_distances.rds")
+    saveRDS(dmat_mean, "data/eco_phylo_data/mean_phylo_distances.rds")
   }
   else{
-    dmat_mean <- readRDS("eco_phylo_processing/mean_phylo_distances.rds")
+    dmat_mean <- readRDS("data/eco_phylo_data/mean_phylo_distances.rds")
   }
 }
 
@@ -721,6 +721,99 @@ if (PLOT){
          cex = 0.8,
          xpd = TRUE)
 }
+
+# Repeat for foraging strategies
+if (PLOT){
+  bin_size <- 10.
+  
+  plot_ulim <- 100.
+  
+  host_dhist <- hist(matched_data$ForStrat.watbelowsurf[which(matched_data$host_indicator)],
+                     breaks = seq(0, plot_ulim, by=bin_size),
+                     plot = FALSE)
+  nonhost_dhist <- hist(matched_data$ForStrat.watbelowsurf[-which(matched_data$host_indicator)],
+                        breaks = seq(0, plot_ulim, by=bin_size),
+                        plot = FALSE)
+  pal <- brewer.pal(6, "Dark2")
+  plot(seq(0, plot_ulim-bin_size, by=bin_size),
+       nonhost_dhist$density,
+       type = "l",
+       lwd = 2,
+       col = pal[2],
+       xlab = "% of foraging time spent\n >5cm below water surface",
+       ylab = "Density")
+  lines(seq(0, plot_ulim-bin_size, by=bin_size),
+        host_dhist$density,
+        type = "l",
+        lwd = 2,
+        col = pal[1])
+  legend("topright",
+         inset=c(.025,0),
+         legend = c("Confirmed hosts", "Other species"),
+         col = pal,
+         bty = "n",
+         pch = 20,
+         pt.cex = 2,
+         cex = 0.8,
+         xpd = TRUE)
+}
+if (PLOT){
+  bin_size <- 10.
+  
+  plot_ulim <- 100.
+  
+  host_dhist <- hist(matched_data$ForStrat.wataroundsurf[which(matched_data$host_indicator)],
+                     breaks = seq(0, plot_ulim, by=bin_size),
+                     plot = FALSE)
+  nonhost_dhist <- hist(matched_data$ForStrat.wataroundsurf[-which(matched_data$host_indicator)],
+                        breaks = seq(0, plot_ulim, by=bin_size),
+                        plot = FALSE)
+  pal <- brewer.pal(6, "Dark2")
+  plot(seq(0, plot_ulim-bin_size, by=bin_size),
+       nonhost_dhist$density,
+       type = "l",
+       lwd = 2,
+       col = pal[2],
+       xlab = "% of foraging time spent\n around below water surface",
+       ylab = "Density")
+  lines(seq(0, plot_ulim-bin_size, by=bin_size),
+        host_dhist$density,
+        type = "l",
+        lwd = 2,
+        col = pal[1])
+  legend("topright",
+         inset=c(.025,0),
+         legend = c("Confirmed hosts", "Other species"),
+         col = pal,
+         bty = "n",
+         pch = 20,
+         pt.cex = 2,
+         cex = 0.8,
+         xpd = TRUE)
+}
+
+cong_by_host <- table(matched_data$is_congregatory,
+                      matched_data$host_indicator,
+                      dnn = c("Congregative", "Host")) %>%
+                      addmargins()
+mig_by_host <- table(matched_data$is_migratory,
+                      matched_data$host_indicator,
+                      dnn = c("Migratory", "Host")) %>%
+                      addmargins()
+
+png("cong_table.png")
+p <- tableGrob(cong_by_host,
+               rows = c("Not congregative", "Congregative", "Total"),
+               cols = c("Not confirmed", "Confirmed host", "Total"))
+grid.arrange(p)
+dev.off()
+
+png("mig_table.png")
+p <- tableGrob(mig_by_host,
+               rows = c("Not migratory", "Migratory", "Total"),
+               cols = c("Not confirmed", "Confirmed host", "Total"))
+grid.arrange(p)
+dev.off()
 
 ################################################################################
 # One thing we might be interested in is distance to relevant taxa. We now try
