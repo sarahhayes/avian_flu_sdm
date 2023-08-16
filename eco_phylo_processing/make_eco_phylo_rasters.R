@@ -2,9 +2,10 @@
 # ecological and phylogenetic factors to create rasters encoding the abundance
 # of birds with different qualities.
 
-PLOT <- TRUE
-HQ_ONLY <- TRUE
-SAVE_RAST <- TRUE
+PLOT <- FALSE # Make plots/animations
+HQ_ONLY <- TRUE # Determines whether to use only species with high-quality abundance data in eBird
+QUARTERLY <- TRUE # Generate quarterly (weeks 1-13 etc) rasters, otherwise do weekly
+SAVE_RAST <- TRUE # Save output rasters
 
 library(av)
 require(ape)
@@ -371,7 +372,7 @@ no_host_species <- length(species_list)
 # Alternatively, we could count the number of times each species appears if we
 # want to restrict to species with incidence above a certain window:
 
-species_counts <- CLOVER_df %>% count(Host, sort = TRUE)
+species_counts <- CLOVER_df %>% dplyr::count(Host, sort = TRUE)
 
 if (PLOT){
   # Plot species counts:
@@ -390,9 +391,9 @@ if (PLOT){
 
 # Do the same for higher taxonomic levels; this will be useful for identifying
 # taxa of interest.
-order_case_counts <- CLOVER_df %>% count(HostOrder, sort = TRUE)
-family_case_counts <- CLOVER_df %>% count(HostFamily, sort = TRUE)
-genus_case_counts <- CLOVER_df %>% count(HostGenus, sort = TRUE)
+order_case_counts <- CLOVER_df %>% dplyr::count(HostOrder, sort = TRUE)
+family_case_counts <- CLOVER_df %>% dplyr::count(HostFamily, sort = TRUE)
+genus_case_counts <- CLOVER_df %>% dplyr::count(HostGenus, sort = TRUE)
 
 if (PLOT){
   # Plot order counts:
@@ -819,10 +820,9 @@ if (HQ_ONLY){
 # set the crs we want to use
 crs <- "epsg:3035"
 
-euro_ext <- terra::ext(2000000, 6000000, 1000000, 5500000) # swap to base raster later
-
 # Create a blank raster with appropriate projection and extent
-blank_3035 <- rast(crs=crs, extent=euro_ext, res=9042.959)
+blank_3035 <- terra::rast("output/euro_rast_10k.tif")
+euro_ext <- ext(blank_3035)
 
 # Create blank rasters for each of our quantities
 # We will create rasters corresponding to the following traits:
@@ -832,35 +832,40 @@ blank_3035 <- rast(crs=crs, extent=euro_ext, res=9042.959)
 # Foraging >5cm below water surface
 # Phylogenetic distance to a confirmed host
 
-nlyrs <- 52
+if (QUARTERLY){
+  nlyrs <- 4
+  qrtr_bds <- c(0, 13, 26, 39, 52)
+}else{
+  nlyrs <- 52
+}
 
 cong_rast <- rast(nlyrs=nlyrs,
                   crs=crs,
                   extent=euro_ext,
-                  res=9042.959)
+                  res=res(blank_3035))
 migr_rast <- rast(nlyrs=nlyrs,
                   crs=crs,
                   extent=euro_ext,
-                  res=9042.959)
+                  res=res(blank_3035))
 around_surf_rast <- rast(nlyrs=nlyrs,
                          crs=crs,
                          extent=euro_ext,
-                         res=9042.959)
+                         res=res(blank_3035))
 below_surf_rast <- rast(nlyrs=nlyrs,
                         crs=crs,
                         extent=euro_ext,
-                        res=9042.959)
+                        res=res(blank_3035))
 host_dist_rast <- rast(nlyrs=nlyrs,
                         crs=crs,
                         extent=euro_ext,
-                        res=9042.959)
+                       res=res(blank_3035))
 
 for (i in 1:nlyrs){
-  cong_rast[, , i] <- 0
-  migr_rast[, , i] <- 0
-  around_surf_rast[, , i] <- 0
-  below_surf_rast[, , i] <- 0
-  host_dist_rast[, , i] <- 0
+  cong_rast[[i]] <- 0
+  migr_rast[[i]] <- 0
+  around_surf_rast[[i]] <- 0
+  below_surf_rast[[i]] <- 0
+  host_dist_rast[[i]] <- 0
 }
 
 no_species <- nrow(sp_df)
@@ -932,8 +937,7 @@ idx_to_download <- which(sp_df$species_code %in% not_downloaded)
       elapsed <- as.numeric(difftime(time.now, dl_start, units = "mins"))
       mean_dl_time <- (1 / no_downloaded) * 
         ((no_downloaded - 1) * mean_dl_time + elapsed)
-    }
-    else{
+    }else{
       load_start <- Sys.time()
       path <- ebirdst_download(species = species_sel,
                                pattern = "_lr_")
@@ -954,6 +958,15 @@ idx_to_download <- which(sp_df$species_code %in% not_downloaded)
     
     # Get rid of NA's:
     this_rast <- replace(this_rast, is.na(this_rast), 0)
+    
+    if (QUARTERLY){
+      this_rast <- lapply(1:nlyrs,
+                          FUN = function(i){
+                            app(this_rast[[qrtr_bds[i]:qrtr_bds[i+1]]], mean)}
+                          ) %>%
+                    rast
+      set.names(this_rast, c("Qrt1", "Qrt2", "Qrt3", "Qrt4"))
+    }
     
     # Fill in each field
     if (species_factors$IUCN$is_congregatory){
