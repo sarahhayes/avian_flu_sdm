@@ -2,7 +2,10 @@
 # ecological and phylogenetic factors to create rasters encoding the abundance
 # of birds with different qualities.
 
-PLOT <- FALSE
+PLOT <- FALSE # Make plots/animations
+HQ_ONLY <- TRUE # Determines whether to use only species with high-quality abundance data in eBird
+QUARTERLY <- TRUE # Generate quarterly (weeks 1-13 etc) rasters, otherwise do weekly
+SAVE_RAST <- TRUE # Save output rasters
 
 library(av)
 require(ape)
@@ -369,7 +372,7 @@ no_host_species <- length(species_list)
 # Alternatively, we could count the number of times each species appears if we
 # want to restrict to species with incidence above a certain window:
 
-species_counts <- CLOVER_df %>% count(Host, sort = TRUE)
+species_counts <- CLOVER_df %>% dplyr::count(Host, sort = TRUE)
 
 if (PLOT){
   # Plot species counts:
@@ -388,9 +391,9 @@ if (PLOT){
 
 # Do the same for higher taxonomic levels; this will be useful for identifying
 # taxa of interest.
-order_case_counts <- CLOVER_df %>% count(HostOrder, sort = TRUE)
-family_case_counts <- CLOVER_df %>% count(HostFamily, sort = TRUE)
-genus_case_counts <- CLOVER_df %>% count(HostGenus, sort = TRUE)
+order_case_counts <- CLOVER_df %>% dplyr::count(HostOrder, sort = TRUE)
+family_case_counts <- CLOVER_df %>% dplyr::count(HostFamily, sort = TRUE)
+genus_case_counts <- CLOVER_df %>% dplyr::count(HostGenus, sort = TRUE)
 
 if (PLOT){
   # Plot order counts:
@@ -807,16 +810,19 @@ sp_df$min_quality <- sapply(1:nrow(sp_df),
                         return(min_qual)
                       })
 
+if (HQ_ONLY){
+  sp_df <- sp_df[which(sp_df$min_quality > 1), ]
+}
+
 ################################################################################
 # Now get abundance rasters for species and convolute with eco/phylo factors
 
 # set the crs we want to use
 crs <- "epsg:3035"
 
-euro_ext <- terra::ext(2000000, 6000000, 1000000, 5500000) # swap to base raster later
-
 # Create a blank raster with appropriate projection and extent
-blank_3035 <- rast(crs=crs, extent=euro_ext, res=9042.959)
+blank_3035 <- terra::rast("output/euro_rast_10k.tif")
+euro_ext <- ext(blank_3035)
 
 # Create blank rasters for each of our quantities
 # We will create rasters corresponding to the following traits:
@@ -826,42 +832,41 @@ blank_3035 <- rast(crs=crs, extent=euro_ext, res=9042.959)
 # Foraging >5cm below water surface
 # Phylogenetic distance to a confirmed host
 
-nlyrs <- 52
+if (QUARTERLY){
+  nlyrs <- 4
+  qrtr_bds <- c(0, 13, 26, 39, 52)
+}else{
+  nlyrs <- 52
+}
 
 cong_rast <- rast(nlyrs=nlyrs,
                   crs=crs,
                   extent=euro_ext,
-                  res=9042.959)
+                  res=res(blank_3035))
 migr_rast <- rast(nlyrs=nlyrs,
                   crs=crs,
                   extent=euro_ext,
-                  res=9042.959)
+                  res=res(blank_3035))
 around_surf_rast <- rast(nlyrs=nlyrs,
                          crs=crs,
                          extent=euro_ext,
-                         res=9042.959)
+                         res=res(blank_3035))
 below_surf_rast <- rast(nlyrs=nlyrs,
                         crs=crs,
                         extent=euro_ext,
-                        res=9042.959)
-hostdist_rast <- rast(nlyrs=nlyrs,
+                        res=res(blank_3035))
+host_dist_rast <- rast(nlyrs=nlyrs,
                         crs=crs,
                         extent=euro_ext,
-                        res=9042.959)
+                       res=res(blank_3035))
 
 for (i in 1:nlyrs){
-  cong_rast[, , i] <- 0
-  migr_rast[, , i] <- 0
-  around_surf_rast[, , i] <- 0
-  below_surf_rast[, , i] <- 0
-  hostdist_rast[, , i] <- 0
+  cong_rast[[i]] <- 0
+  migr_rast[[i]] <- 0
+  around_surf_rast[[i]] <- 0
+  below_surf_rast[[i]] <- 0
+  host_dist_rast[[i]] <- 0
 }
-
-hq_cong_rast <- cong_rast
-hq_migr_rast <- migr_rast
-hq_around_surf_rast <- around_surf_rast
-hq_below_surf_rast <- below_surf_rast
-hq_hostdist_rast <- hostdist_rast
 
 no_species <- nrow(sp_df)
 sample_idx <- 1:no_species
@@ -932,8 +937,7 @@ idx_to_download <- which(sp_df$species_code %in% not_downloaded)
       elapsed <- as.numeric(difftime(time.now, dl_start, units = "mins"))
       mean_dl_time <- (1 / no_downloaded) * 
         ((no_downloaded - 1) * mean_dl_time + elapsed)
-    }
-    else{
+    }else{
       load_start <- Sys.time()
       path <- ebirdst_download(species = species_sel,
                                pattern = "_lr_")
@@ -955,6 +959,15 @@ idx_to_download <- which(sp_df$species_code %in% not_downloaded)
     # Get rid of NA's:
     this_rast <- replace(this_rast, is.na(this_rast), 0)
     
+    if (QUARTERLY){
+      this_rast <- lapply(1:nlyrs,
+                          FUN = function(i){
+                            app(this_rast[[qrtr_bds[i]:qrtr_bds[i+1]]], mean)}
+                          ) %>%
+                    rast
+      set.names(this_rast, c("Qrt1", "Qrt2", "Qrt3", "Qrt4"))
+    }
+    
     # Fill in each field
     if (species_factors$IUCN$is_congregatory){
       cong_rast <- cong_rast + (species_factors$pop_sizes * this_rast)
@@ -963,29 +976,12 @@ idx_to_download <- which(sp_df$species_code %in% not_downloaded)
       migr_rast <- migr_rast + (species_factors$pop_sizes * this_rast)
     }
     if (species_factors$nearest_host_distance < nhost_thresh){
-      hostdist_rast <- hostdist_rast + (species_factors$pop_sizes * this_rast)
+      host_dist_rast <- host_dist_rast + (species_factors$pop_sizes * this_rast)
     }
     around_surf_rast <- around_surf_rast +
       species_factors$EltonTraits$ForStrat.wataroundsurf * (species_factors$pop_sizes * this_rast)
     below_surf_rast <- below_surf_rast +
       species_factors$EltonTraits$ForStrat.watbelowsurf * (species_factors$pop_sizes * this_rast)
-    
-    # Add abundances to quality version if quality is above 1:
-    if (species_factors$min_quality > 1){
-      if (species_factors$IUCN$is_congregatory){
-        hq_cong_rast <- hq_cong_rast + (species_factors$pop_sizes * this_rast)
-      }
-      if (species_factors$IUCN$is_migratory){
-        hq_migr_rast <- hq_migr_rast + (species_factors$pop_sizes * this_rast)
-      }
-      if (species_factors$nearest_host_distance < nhost_thresh){
-        hq_hostdist_rast <- hq_hostdist_rast + (species_factors$pop_sizes * this_rast)
-      }
-      hq_around_surf_rast <- hq_around_surf_rast +
-        species_factors$EltonTraits$ForStrat.wataroundsurf * (species_factors$pop_sizes * this_rast)
-      hq_below_surf_rast <- hq_below_surf_rast +
-        species_factors$EltonTraits$ForStrat.watbelowsurf * (species_factors$pop_sizes * this_rast)
-    }
     
     no_processed <- no_processed + 1
     
@@ -1012,45 +1008,33 @@ cong_rast <- 1e-2 * cong_rast
 migr_rast <- 1e-2 * migr_rast
 around_surf_rast <- 1e-2 * around_surf_rast
 below_surf_rast <- 1e-2 * below_surf_rast
-hostdist_rast <- 1e-2 * hostdist_rast
+host_dist_rast <- 1e-2 * host_dist_rast
 
-hq_cong_rast <- 1e-2 * hq_cong_rast
-hq_migr_rast <- 1e-2 * hq_migr_rast
-hq_around_surf_rast <- 1e-2 * hq_around_surf_rast
-hq_below_surf_rast <- 1e-2 * hq_below_surf_rast
-hq_hostdist_rast <- 1e-2 * hq_hostdist_rast
+if (SAVE_RAST){
+  writeRaster(cong_rast, "output/cong_rast.tif", overwrite=TRUE)
+  writeRaster(migr_rast, "output/migr_rast.tif", overwrite=TRUE)
+  writeRaster(around_surf_rast, "output/around_surf_rast.tif", overwrite=TRUE)
+  writeRaster(below_surf_rast, "output/below_surf_rast.tif", overwrite=TRUE)
+  writeRaster(host_dist_rast, "output/host_dist_rast.tif", overwrite=TRUE)
+}
 
-av_capture_graphics(animate(clamp(cong_rast, upper = 5e4), n=1),
-                    framerate = 5.2,
-                    output = "cong_rast.mp4")
-av_capture_graphics(animate(clamp(migr_rast, upper = 5e4), n=1),
-                    framerate = 5.2,
-                    output = "migr_rast.mp4")
-av_capture_graphics(animate(clamp(around_surf_rast, upper = 5e6), n=1),
-                    framerate = 5.2,
-                    output = "around_surf_rast.mp4")
-av_capture_graphics(animate(clamp(below_surf_rast, upper = 5e6), n=1),
-                    framerate = 5.2,
-                    output = "below_surf_rast.mp4")
-av_capture_graphics(animate(clamp(hostdist_rast, upper = 5e6), n=1),
-                    framerate = 5.2,
-                    output = "hostdist_rast.mp4")
-
-av_capture_graphics(animate(clamp(hq_cong_rast, upper = 5e4), n=1),
-                    framerate = 5.2,
-                    output = "hq_cong_rast.mp4")
-av_capture_graphics(animate(clamp(hq_migr_rast, upper = 5e4), n=1),
-                    framerate = 5.2,
-                    output = "hq_migr_rast.mp4")
-av_capture_graphics(animate(clamp(hq_around_surf_rast, upper = 5e6), n=1),
-                    framerate = 5.2,
-                    output = "hq_around_surf_rast.mp4")
-av_capture_graphics(animate(clamp(hq_below_surf_rast, upper = 5e6), n=1),
-                    framerate = 5.2,
-                    output = "hq_below_surf_rast.mp4")
-av_capture_graphics(animate(clamp(hq_hostdist_rast, upper = 5e6), n=1),
-                    framerate = 5.2,
-                    output = "hq_hostdist_rast.mp4")
+if (PLOT){
+  av_capture_graphics(animate(clamp(cong_rast, upper = 5e4), n=1),
+                      framerate = 5.2,
+                      output = "cong_rast.mp4")
+  av_capture_graphics(animate(clamp(migr_rast, upper = 5e4), n=1),
+                      framerate = 5.2,
+                      output = "migr_rast.mp4")
+  av_capture_graphics(animate(clamp(around_surf_rast, upper = 5e6), n=1),
+                      framerate = 5.2,
+                      output = "around_surf_rast.mp4")
+  av_capture_graphics(animate(clamp(below_surf_rast, upper = 5e6), n=1),
+                      framerate = 5.2,
+                      output = "below_surf_rast.mp4")
+  av_capture_graphics(animate(clamp(host_dist_rast, upper = 5e6), n=1),
+                      framerate = 5.2,
+                      output = "host_dist_rast.mp4")
+}
 
 log_cong_rast <- (cong_rast + 1e-6) %>%
                  log(base = 10) %>%
@@ -1064,54 +1048,24 @@ log_around_surf_rast <- (around_surf_rast + 1e-6) %>%
 log_below_surf_rast <- (below_surf_rast + 1e-6) %>%
                        log(base = 10) %>%
                        clamp(lower = 0)
-log_hostdist_rast <- (hostdist_rast + 1e-6) %>%
+log_host_dist_rast <- (host_dist_rast + 1e-6) %>%
                      log(base = 10) %>%
                      clamp(lower = 0)
 
-hq_log_cong_rast <- (hq_cong_rast + 1e-6) %>%
-  log(base = 10) %>%
-  clamp(lower = 0)
-hq_log_migr_rast <- (hq_migr_rast + 1e-6) %>%
-  log(base = 10) %>%
-  clamp(lower = 0)
-hq_log_around_surf_rast <- (hq_around_surf_rast + 1e-6) %>%
-  log(base = 10) %>%
-  clamp(lower = 0)
-hq_log_below_surf_rast <- (hq_below_surf_rast + 1e-6) %>%
-  log(base = 10) %>%
-  clamp(lower = 0)
-hq_log_hostdist_rast <- (hq_hostdist_rast + 1e-6) %>%
-  log(base = 10) %>%
-  clamp(lower = 0)
-
-av_capture_graphics(animate(log_cong_rast, n=1),
-                    framerate = 5.2,
-                    output = "log_cong_rast.mp4")
-av_capture_graphics(animate(log_migr_rast, n=1),
-                    framerate = 5.2,
-                    output = "log_migr_rast.mp4")
-av_capture_graphics(animate(log_around_surf_rast, n=1),
-                    framerate = 5.2,
-                    output = "log_around_surf_rast.mp4")
-av_capture_graphics(animate(log_below_surf_rast, n=1),
-                    framerate = 5.2,
-                    output = "log_below_surf_rast.mp4")
-av_capture_graphics(animate(log_hostdist_rast, n=1),
-                    framerate = 5.2,
-                    output = "log_hostdist_rast.mp4")
-
-av_capture_graphics(animate(hq_log_cong_rast, n=1),
-                    framerate = 5.2,
-                    output = "hq_log_cong_rast.mp4")
-av_capture_graphics(animate(hq_log_migr_rast, n=1),
-                    framerate = 5.2,
-                    output = "hq_log_migr_rast.mp4")
-av_capture_graphics(animate(hq_log_around_surf_rast, n=1),
-                    framerate = 5.2,
-                    output = "hq_og_around_surf_rast.mp4")
-av_capture_graphics(animate(hq_log_below_surf_rast, n=1),
-                    framerate = 5.2,
-                    output = "hq_log_below_surf_rast.mp4")
-av_capture_graphics(animate(hq_log_hostdist_rast, n=1),
-                    framerate = 5.2,
-                    output = "hq_log_hostdist_rast.mp4")
+if (PLOT){
+  av_capture_graphics(animate(log_cong_rast, n=1),
+                      framerate = 5.2,
+                      output = "log_cong_rast.mp4")
+  av_capture_graphics(animate(log_migr_rast, n=1),
+                      framerate = 5.2,
+                      output = "log_migr_rast.mp4")
+  av_capture_graphics(animate(log_around_surf_rast, n=1),
+                      framerate = 5.2,
+                      output = "log_around_surf_rast.mp4")
+  av_capture_graphics(animate(log_below_surf_rast, n=1),
+                      framerate = 5.2,
+                      output = "log_below_surf_rast.mp4")
+  av_capture_graphics(animate(log_host_dist_rast, n=1),
+                      framerate = 5.2,
+                      output = "log_host_dist_rast.mp4")
+}
