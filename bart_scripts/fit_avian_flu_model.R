@@ -43,7 +43,7 @@ env_lyrnames <- env_paths %>%
 env_layers <- rast(lapply(env_paths, rast))
 names(env_layers) <- gsub("6_Ch_2015_Aw", "chicken_density", names(env_layers))
 names(env_layers) <- gsub("6_Dk_2015_Aw", "duck_density", names(env_layers))
-names(env_layers) <- gsub("mean", "ndvi_second_quart", names(env_layers))
+names(env_layers) <- gsub("^mean$", "ndvi_second_quart", names(env_layers))
 
 cov_coast <- read.csv("../../../OneDrive - The University of Liverpool/AI_S2_SDM_storage/Environmental variable csvs/dist_to_coast_output.csv") %>%
   rename(x = X, y = Y) %>%
@@ -59,18 +59,17 @@ cov_alt <- read.csv("../../../OneDrive - The University of Liverpool/AI_S2_SDM_s
   relocate(x,y) %>%
   rast(type = "xyz", crs = "epsg:3035")
 
-landcover_rast <- rast("../../../OneDrive - The University of Liverpool/AI_S2_SDM_storage/Environmental rasters/landcover_type1_full_raster.tif") %>%
-                  resample(env_layers)
-crs(landcover_rast) <- crs
+# landcover_rast <- rast("../../../OneDrive - The University of Liverpool/AI_S2_SDM_storage/Environmental rasters/landcover_type1_full_raster.tif")
+# crs(landcover_rast) <- crs
 
 second_quart_covs <- c(resample(eco_layers, env_layers),
-                       landcover_rast,
+                       # landcover_rast,
                        env_layers,
                        cov_coast,
                        cov_water,
                        cov_alt)
 rm(eco_layers,
-   landcover_rast,
+   # landcover_rast,
    env_layers,
    cov_coast,
    cov_water,
@@ -84,11 +83,52 @@ training_coords <- readRDS("training_sets/training_coords_Q2.RDS")
 cov_df <- raster::extract(second_quart_covs, training_coords[, 1:2])
 cov_df <- cov_df[, -1]
 
+training <- sample(1:nrow(cov_df), 1600)
+xtrain <- cov_df[training, ]
+ytrain <- training_coords$pos[training]
+xtest <- cov_df[-training, ]
+ytest <- training_coords$pos[-training]
+
 # Initialise model
-basic_model <- bart(cov_df,
-                    training_coords$pos,
-                    xtest,
+basic_model <- bart(xtrain,
+                    ytrain,
+                    x.test = xtest,
                     keeptrees = TRUE)
+summary(basic_model)
+
+# Check performance manually:
+ytrain_pos <- ytrain[which(complete.cases(xtrain))] == 1
+yhat.train <- plogis(basic_model$yhat.train)
+yhat.maj <- colSums(yhat.train) >= .36*nrow(yhat.train)
+false_neg_rate <- length(which((!yhat.maj)&ytrain_pos))/length(which(ytrain_pos))
+false_pos_rate <- length(which(yhat.maj&!ytrain_pos))/length(which(!ytrain_pos))
+misclass_rate <- (length(which((!yhat.maj)&ytrain_pos)) +
+                    length(which(yhat.maj&!ytrain_pos))) / length(ytrain_pos)
+cat("Train false negative rate is",
+    false_neg_rate,
+    ".\n Train false positive rate is",
+    false_pos_rate,
+    ".\n Train misclassification rate is",
+    misclass_rate,
+    ".\n")
+
+# And for test data:
+ytest_pos <- ytest[which(complete.cases(xtest))] == 1
+yhat.test <- plogis(basic_model$yhat.test)
+yhat.maj <- colSums(yhat.test) >= .4*nrow(yhat.test)
+
+# Calculate error rates
+false_neg_rate <- length(which((!yhat.maj)&ytest_pos))/length(which(ytest_pos))
+false_pos_rate <- length(which(yhat.maj&!ytest_pos))/length(which(!ytest_pos))
+misclass_rate <- (length(which((!yhat.maj)&ytest_pos)) +
+                    length(which(yhat.maj&!ytest_pos))) / length(ytest_pos)
+cat("Test false negative rate is",
+    false_neg_rate,
+    ".\n Test false positive rate is",
+    false_pos_rate,
+    ".\n Test misclassification rate is",
+    misclass_rate,
+    ".\n")
 
 sdm <- bart.step(x.data = cov_df,
                  y.data = training_coords$pos,
@@ -118,3 +158,8 @@ plot(pred_layer[[3]]>0.4,
      box = FALSE,
      axes = FALSE,
      main = '97.5% posterior bound')
+
+plot(pred_layer[[1]],
+     box = FALSE,
+     axes = FALSE,
+     main = 'Avian flu risk')
