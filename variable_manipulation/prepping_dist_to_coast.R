@@ -119,6 +119,7 @@ dev.off()
 
 # write.csv(df, "variable_manipulation/variable_outputs/interim_dist_to_coast.csv")
 
+
 # now we want to extract the points we need
 
 head(df) # we can use these XY coords to do the extraction

@@ -151,6 +151,19 @@ second_stack_prj <- second_stack_prj/10000
 third_stack_prj <- third_stack_prj/10000
 fourth_stack_prj <- fourth_stack_prj/10000
 
+plot(fourth_stack_prj)
+
+# save the rasters
+# terra::writeRaster(first_stack_prj, 
+#                    "variable_manipulation/variable_outputs/ndvi_first_quart.tif")
+# terra::writeRaster(second_stack_prj, 
+#                    "variable_manipulation/variable_outputs/ndvi_second_quart.tif")
+# terra::writeRaster(third_stack_prj, 
+#                    "variable_manipulation/variable_outputs/ndvi_third_quart.tif")
+# terra::writeRaster(fourth_stack_prj, 
+#                    "variable_manipulation/variable_outputs/ndvi_fourth_quart.tif")
+
+
 ## extract the data 
 points_3035 <- terra::as.points(blank_3035)
 points_3035

@@ -5,6 +5,8 @@
 #install.packages("remotes")
 #remotes::install_github("rspatial/luna")
 
+rm(list = ls())
+
 library(terra)
 library(luna)
 library(sf)
@@ -20,7 +22,7 @@ head(modis)
 product <- "MCD12Q1"
 # product <- "MOD09A1"
 # To learn more about a specific product you can launch a webpage
-productInfo(product)
+# productInfo(product)
 
 # Once we finalize the product we want to use, 
 # we define some parameters for the data we want: 
@@ -101,13 +103,37 @@ plot(dem)
 
 ## save this raster
 # terra::writeRaster(dem, "data/landcover_data/landcover_type1_full_raster.tif")
-
+dem <- terra::rast("data/landcover_data/landcover_type1_full_raster.tif")
+plot(dem)
 ## Now we need to change projection and crop
 
 lc1_rast <- terra::project(dem, map_rast)
 lc1_rast
 plot(lc1_rast)
 
+lc1_factor <- terra::as.factor(lc1_rast)
+plot(lc1_factor)
+lc1_factor
+
+# save this raster 
+#writeRaster(lc1_factor, "variable_manipulation/variable_outputs/landcover_output_full.tif")
+
+# make a points object using the centre of each pixel from the blank raster
+points_3035 <- terra::as.points(map_rast)
+points_3035
+
+tictoc::tic()
+lc_res_full_fact <- terra::extract(lc1_factor, points_3035, method = "simple", xy = T)
+tictoc::toc()
+summary(lc_res_full_fact[is.na(lc_res_full_fact)])
+
+# write.csv(lc_res_full_fact,
+#           "variable_manipulation/variable_outputs/landcover_output_full_factor.csv",
+#           row.names = F)
+#  
+
+
+####
 masked <- terra::mask(lc1_rast, map_rast)
 plot(masked)
 table(values(masked))

@@ -46,6 +46,15 @@ elev_euro_0.5_diff <- elev_euro_0.5_max - elev_euro_0.5_min
 elev_euro_0.5_diff # diff of 2 km in places! 
 plot(elev_euro_0.5_diff)
 
+#save these rasters
+# terra::writeRaster(elev_euro_0.5_min, 
+#                    "variable_manipulation/variable_outputs/elevation_min.tif")
+# terra::writeRaster(elev_euro_0.5_max, 
+#                    "variable_manipulation/variable_outputs/elevation_max.tif")
+# terra::writeRaster(elev_euro_0.5_diff, 
+#                    "variable_manipulation/variable_outputs/elevation_diff.tif")
+
+
 ### extract the data we want at the centre points of our grid
 # make a points object using the centre of each pixel from the blank raster
 points_3035 <- terra::as.points(euro_rast)
