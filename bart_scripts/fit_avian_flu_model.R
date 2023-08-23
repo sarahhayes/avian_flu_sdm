@@ -1,9 +1,9 @@
  # In this script we train a BART model to classify sites for avian flu
 # presence/absence based on environmental and species abundance factors
 
-SAVE_FITS <- FALSE
-SAVE_PLOTS <- FALSE
-BUILD_COVS <- FALSE
+SAVE_FITS <- TRUE
+SAVE_PLOTS <- TRUE
+BUILD_COVS <- TRUE
 
 library(embarcadero)
 library(raster)
@@ -155,7 +155,7 @@ xtest <- cov_df[-training, ]
 ytest <- training_coords$pos[-training]
 
 if (SAVE_FITS){
-  save(xtrain, ytrain, xtest, ytest, "q1_train_test_data.rds")
+  save(xtrain, ytrain, xtest, ytest, file = "q1_train_test_data.rds")
 }
 
 # Initialise model
@@ -167,7 +167,7 @@ summary(basic_model)
 
 if (SAVE_FITS){
   save(basic_model,
-       file = "../../fitted-BART-models/basic_model_Q1.rds")
+       file = "output/fitted-BART-models/basic_model_Q1.rds")
 }
 
 sdm <- bart.step(x.data = xtrain,
@@ -177,7 +177,7 @@ sdm <- bart.step(x.data = xtrain,
 summary(sdm)
 if (SAVE_FITS){
   save(sdm,
-       file = "../../fitted-BART-models/sdm_Q1.rds")
+       file = "output/fitted-BART-models/sdm_Q1.rds")
 }
 
 covstack_lores <- aggregate(covstack, fact = 10)
@@ -190,7 +190,7 @@ pred_layer <- predict(object = sdm,
                       )
 if (SAVE_FITS){
   save(pred_layer,
-       file = "../../fitted-BART-models/prediction_Q1.rds")
+       file = "output/fitted-BART-models/prediction_Q1.rds")
 }
 
 if (SAVE_PLOTS){
@@ -245,6 +245,10 @@ ytrain <- training_coords$pos[training]
 xtest <- cov_df[-training, ]
 ytest <- training_coords$pos[-training]
 
+if (SAVE_FITS){
+  save(xtrain, ytrain, xtest, ytest, file = "q2_train_test_data.rds")
+}
+
 # Initialise model
 basic_model <- bart(xtrain,
                     ytrain,
@@ -254,57 +258,20 @@ summary(basic_model)
 
 if (SAVE_FITS){
   save(basic_model,
-       file = "../../fitted-BART-models/basic_model_Q2.rds")
+       file = "output/fitted-BART-models/basic_model_Q2.rds")
 }
 
-cutoff <- get_threshold(basic_model)
-
-# Check performance manually:
-ytrain_pos <- ytrain[which(complete.cases(xtrain))] == 1
-yhat.train <- plogis(basic_model$yhat.train)
-yhat.maj <- colSums(yhat.train) >= cutoff*nrow(yhat.train)
-false_neg_rate <- length(which((!yhat.maj)&ytrain_pos))/length(which(ytrain_pos))
-false_pos_rate <- length(which(yhat.maj&!ytrain_pos))/length(which(!ytrain_pos))
-misclass_rate <- (length(which((!yhat.maj)&ytrain_pos)) +
-                    length(which(yhat.maj&!ytrain_pos))) / length(ytrain_pos)
-cat("Train false negative rate is",
-    false_neg_rate,
-    ".\n Train false positive rate is",
-    false_pos_rate,
-    ".\n Train misclassification rate is",
-    misclass_rate,
-    ".\n")
-
-# And for test data:
-ytest_pos <- ytest[which(complete.cases(xtest))] == 1
-yhat.test <- plogis(basic_model$yhat.test)
-yhat.maj <- colSums(yhat.test) >= cutoff*nrow(yhat.test)
-
-# Calculate error rates
-false_neg_rate <- length(which((!yhat.maj)&ytest_pos))/length(which(ytest_pos))
-false_pos_rate <- length(which(yhat.maj&!ytest_pos))/length(which(!ytest_pos))
-misclass_rate <- (length(which((!yhat.maj)&ytest_pos)) +
-                    length(which(yhat.maj&!ytest_pos))) / length(ytest_pos)
-cat("Test false negative rate is",
-    false_neg_rate,
-    ".\n Test false positive rate is",
-    false_pos_rate,
-    ".\n Test misclassification rate is",
-    misclass_rate,
-    ".\n")
-
-covstack_lores <- aggregate(covstack, fact = 10)
-
-sdm <- bart.step(x.data = cov_df,
-                 y.data = training_coords$pos,
+sdm <- bart.step(x.data = xtrain,
+                 y.data = ytrain,
                  full = TRUE,
                  quiet = TRUE)
+summary(sdm)
 if (SAVE_FITS){
   save(sdm,
-       file = "../../fitted-BART-models/sdm_Q2.rds")
+       file = "output/fitted-BART-models/sdm_Q2.rds")
 }
 
-cutoff <- get_threshold(basic_model)
+covstack_lores <- aggregate(covstack, fact = 10)
 
 # Generate risk map
 pred_layer <- predict(object = sdm,
@@ -314,17 +281,17 @@ pred_layer <- predict(object = sdm,
 )
 if (SAVE_FITS){
   save(pred_layer,
-       file = "../../fitted-BART-models/prediction_Q2.rds")
+       file = "output/fitted-BART-models/prediction_Q2.rds")
 }
 
 if (SAVE_PLOTS){
-  png(filename = "../../bartfit-plots/q2_class_map.png")
+  png(filename = "../../bartfit-plots/q2_map.png")
 }
 # Plot map
-plot(pred_layer[[1]]>cutoff,
+plot(pred_layer[[1]],
      box = FALSE,
      axes = FALSE,
-     main = 'Avian flu risk, Q2')
+     main = 'Mean prediction, Q2')
 if (SAVE_PLOTS){
   dev.off()
 }
@@ -332,7 +299,7 @@ if (SAVE_PLOTS){
 if (SAVE_PLOTS){
   png(filename = "../../bartfit-plots/q2_lbound.png")
 }
-plot(pred_layer[[2]]>cutoff,
+plot(pred_layer[[2]],
      box = FALSE,
      axes = FALSE,
      main = '2.5% posterior bound, Q2')
@@ -343,49 +310,13 @@ if (SAVE_PLOTS){
 if (SAVE_PLOTS){
   png(filename = "../../bartfit-plots/q2_ubound.png")
 }
-plot(pred_layer[[3]]>cutoff,
+plot(pred_layer[[3]],
      box = FALSE,
      axes = FALSE,
      main = '97.5% posterior bound, Q2')
 if (SAVE_PLOTS){
   dev.off()
 }
-
-if (SAVE_PLOTS){
-  png(filename = "../../bartfit-plots/q2_post_map.png")
-}
-plot(pred_layer[[1]],
-     box = FALSE,
-     axes = FALSE,
-     main = 'Avian flu risk, Q2')
-if (SAVE_PLOTS){
-  dev.off()
-}
-
-# # Extract names of variables in optimised model:
-# sdm_vars <- dimnames(sdm$fit$data@x)[[2]]
-# 
-# layers_for_spartial <- grep("lc_",
-#                             sdm_vars,
-#                             value = TRUE,
-#                             invert = TRUE)
-# 
-# pd_maps <- spartial(sdm,
-#                     covstack_lores,
-#                     layers_for_spartial)
-# if (SAVE_FITS){
-#   save(pred_layer,
-#        file = "../../fitted-BART-models/spartial_Q2.rds")
-# }
-# 
-# if (SAVE_PLOTS){
-#   png(filename = "../../bartfit-plots/q2_spartial.png")
-# }
-# plot(pd_maps)
-# if (SAVE_PLOTS){
-#   dev.off()
-# }
-
 
 ################################################################################
 # Do the Q3 analysis
@@ -405,6 +336,10 @@ ytrain <- training_coords$pos[training]
 xtest <- cov_df[-training, ]
 ytest <- training_coords$pos[-training]
 
+if (SAVE_FITS){
+  save(xtrain, ytrain, xtest, ytest, file = "q3_train_test_data.rds")
+}
+
 # Initialise model
 basic_model <- bart(xtrain,
                     ytrain,
@@ -414,58 +349,20 @@ summary(basic_model)
 
 if (SAVE_FITS){
   save(basic_model,
-       file = "../../fitted-BART-models/basic_model_Q3.rds")
+       file = "output/fitted-BART-models/basic_model_Q3.rds")
 }
 
-cutoff <- get_threshold(basic_model)
-
-# Check performance manually:
-ytrain_pos <- ytrain[which(complete.cases(xtrain))] == 1
-yhat.train <- plogis(basic_model$yhat.train)
-yhat.maj <- colSums(yhat.train) >= cutoff*nrow(yhat.train)
-false_neg_rate <- length(which((!yhat.maj)&ytrain_pos))/length(which(ytrain_pos))
-false_pos_rate <- length(which(yhat.maj&!ytrain_pos))/length(which(!ytrain_pos))
-misclass_rate <- (length(which((!yhat.maj)&ytrain_pos)) +
-                    length(which(yhat.maj&!ytrain_pos))) / length(ytrain_pos)
-cat("Train false negative rate is",
-    false_neg_rate,
-    ".\n Train false positive rate is",
-    false_pos_rate,
-    ".\n Train misclassification rate is",
-    misclass_rate,
-    ".\n")
-
-# And for test data:
-ytest_pos <- ytest[which(complete.cases(xtest))] == 1
-yhat.test <- plogis(basic_model$yhat.test)
-yhat.maj <- colSums(yhat.test) >= cutoff*nrow(yhat.test)
-
-# Calculate error rates
-false_neg_rate <- length(which((!yhat.maj)&ytest_pos))/length(which(ytest_pos))
-false_pos_rate <- length(which(yhat.maj&!ytest_pos))/length(which(!ytest_pos))
-misclass_rate <- (length(which((!yhat.maj)&ytest_pos)) +
-                    length(which(yhat.maj&!ytest_pos))) / length(ytest_pos)
-cat("Test false negative rate is",
-    false_neg_rate,
-    ".\n Test false positive rate is",
-    false_pos_rate,
-    ".\n Test misclassification rate is",
-    misclass_rate,
-    ".\n")
-
-covstack_lores <- aggregate(covstack, fact = 10)
-
-
-sdm <- bart.step(x.data = cov_df,
-                 y.data = training_coords$pos,
+sdm <- bart.step(x.data = xtrain,
+                 y.data = ytrain,
                  full = TRUE,
                  quiet = TRUE)
+summary(sdm)
 if (SAVE_FITS){
   save(sdm,
-       file = "../../fitted-BART-models/sdm_Q3.rds")
+       file = "output/fitted-BART-models/sdm_Q3.rds")
 }
 
-cutoff <- get_threshold(basic_model)
+covstack_lores <- aggregate(covstack, fact = 10)
 
 # Generate risk map
 pred_layer <- predict(object = sdm,
@@ -475,17 +372,17 @@ pred_layer <- predict(object = sdm,
 )
 if (SAVE_FITS){
   save(pred_layer,
-       file = "../../fitted-BART-models/prediction_Q3.rds")
+       file = "output/fitted-BART-models/prediction_Q3.rds")
 }
 
 if (SAVE_PLOTS){
-  png(filename = "../../bartfit-plots/q3_class_map.png")
+  png(filename = "../../bartfit-plots/q3_map.png")
 }
 # Plot map
-plot(pred_layer[[1]]>cutoff,
+plot(pred_layer[[1]],
      box = FALSE,
      axes = FALSE,
-     main = 'Avian flu risk, Q3')
+     main = 'Mean prediction, Q3')
 if (SAVE_PLOTS){
   dev.off()
 }
@@ -493,7 +390,7 @@ if (SAVE_PLOTS){
 if (SAVE_PLOTS){
   png(filename = "../../bartfit-plots/q3_lbound.png")
 }
-plot(pred_layer[[2]]>cutoff,
+plot(pred_layer[[2]],
      box = FALSE,
      axes = FALSE,
      main = '2.5% posterior bound, Q3')
@@ -504,49 +401,13 @@ if (SAVE_PLOTS){
 if (SAVE_PLOTS){
   png(filename = "../../bartfit-plots/q3_ubound.png")
 }
-plot(pred_layer[[3]]>cutoff,
+plot(pred_layer[[3]],
      box = FALSE,
      axes = FALSE,
      main = '97.5% posterior bound, Q3')
 if (SAVE_PLOTS){
   dev.off()
 }
-
-if (SAVE_PLOTS){
-  png(filename = "../../bartfit-plots/q3_post_map.png")
-}
-plot(pred_layer[[1]],
-     box = FALSE,
-     axes = FALSE,
-     main = 'Avian flu risk, Q3')
-if (SAVE_PLOTS){
-  dev.off()
-}
-
-# # Extract names of variables in optimised model:
-# sdm_vars <- dimnames(sdm$fit$data@x)[[2]]
-# 
-# layers_for_spartial <- grep("lc_",
-#                             sdm_vars,
-#                             value = TRUE,
-#                             invert = TRUE)
-# 
-# pd_maps <- spartial(sdm,
-#                     covstack_lores,
-#                     layers_for_spartial)
-# if (SAVE_FITS){
-#   save(pred_layer,
-#        file = "../../fitted-BART-models/spartial_Q3.rds")
-# }
-# 
-# if (SAVE_PLOTS){
-#   png(filename = "../../bartfit-plots/q3_spartial.png")
-# }
-# plot(pd_maps)
-# if (SAVE_PLOTS){
-#   dev.off()
-# }
-
 
 ################################################################################
 # Do the Q4 analysis
@@ -566,6 +427,10 @@ ytrain <- training_coords$pos[training]
 xtest <- cov_df[-training, ]
 ytest <- training_coords$pos[-training]
 
+if (SAVE_FITS){
+  save(xtrain, ytrain, xtest, ytest, file = "q4_train_test_data.rds")
+}
+
 # Initialise model
 basic_model <- bart(xtrain,
                     ytrain,
@@ -575,57 +440,20 @@ summary(basic_model)
 
 if (SAVE_FITS){
   save(basic_model,
-       file = "../../fitted-BART-models/basic_model_Q4.rds")
+       file = "output/fitted-BART-models/basic_model_Q4.rds")
 }
 
-cutoff <- get_threshold(basic_model)
-
-# Check performance manually:
-ytrain_pos <- ytrain[which(complete.cases(xtrain))] == 1
-yhat.train <- plogis(basic_model$yhat.train)
-yhat.maj <- colSums(yhat.train) >= cutoff*nrow(yhat.train)
-false_neg_rate <- length(which((!yhat.maj)&ytrain_pos))/length(which(ytrain_pos))
-false_pos_rate <- length(which(yhat.maj&!ytrain_pos))/length(which(!ytrain_pos))
-misclass_rate <- (length(which((!yhat.maj)&ytrain_pos)) +
-                    length(which(yhat.maj&!ytrain_pos))) / length(ytrain_pos)
-cat("Train false negative rate is",
-    false_neg_rate,
-    ".\n Train false positive rate is",
-    false_pos_rate,
-    ".\n Train misclassification rate is",
-    misclass_rate,
-    ".\n")
-
-# And for test data:
-ytest_pos <- ytest[which(complete.cases(xtest))] == 1
-yhat.test <- plogis(basic_model$yhat.test)
-yhat.maj <- colSums(yhat.test) >= cutoff*nrow(yhat.test)
-
-# Calculate error rates
-false_neg_rate <- length(which((!yhat.maj)&ytest_pos))/length(which(ytest_pos))
-false_pos_rate <- length(which(yhat.maj&!ytest_pos))/length(which(!ytest_pos))
-misclass_rate <- (length(which((!yhat.maj)&ytest_pos)) +
-                    length(which(yhat.maj&!ytest_pos))) / length(ytest_pos)
-cat("Test false negative rate is",
-    false_neg_rate,
-    ".\n Test false positive rate is",
-    false_pos_rate,
-    ".\n Test misclassification rate is",
-    misclass_rate,
-    ".\n")
-
-covstack_lores <- aggregate(covstack, fact = 10)
-
-sdm <- bart.step(x.data = cov_df,
-                 y.data = training_coords$pos,
+sdm <- bart.step(x.data = xtrain,
+                 y.data = ytrain,
                  full = TRUE,
                  quiet = TRUE)
+summary(sdm)
 if (SAVE_FITS){
   save(sdm,
-       file = "../../fitted-BART-models/sdm_Q4.rds")
+       file = "output/fitted-BART-models/sdm_Q4.rds")
 }
 
-cutoff <- get_threshold(basic_model)
+covstack_lores <- aggregate(covstack, fact = 10)
 
 # Generate risk map
 pred_layer <- predict(object = sdm,
@@ -635,17 +463,17 @@ pred_layer <- predict(object = sdm,
 )
 if (SAVE_FITS){
   save(pred_layer,
-       file = "../../fitted-BART-models/prediction_Q4.rds")
+       file = "output/fitted-BART-models/prediction_Q4.rds")
 }
 
 if (SAVE_PLOTS){
-  png(filename = "../../bartfit-plots/q4_class_map.png")
+  png(filename = "../../bartfit-plots/q4_map.png")
 }
 # Plot map
-plot(pred_layer[[1]]>cutoff,
+plot(pred_layer[[1]],
      box = FALSE,
      axes = FALSE,
-     main = 'Avian flu risk, Q4')
+     main = 'Mean prediction, Q4')
 if (SAVE_PLOTS){
   dev.off()
 }
@@ -653,7 +481,7 @@ if (SAVE_PLOTS){
 if (SAVE_PLOTS){
   png(filename = "../../bartfit-plots/q4_lbound.png")
 }
-plot(pred_layer[[2]]>cutoff,
+plot(pred_layer[[2]],
      box = FALSE,
      axes = FALSE,
      main = '2.5% posterior bound, Q4')
@@ -664,45 +492,10 @@ if (SAVE_PLOTS){
 if (SAVE_PLOTS){
   png(filename = "../../bartfit-plots/q4_ubound.png")
 }
-plot(pred_layer[[3]]>cutoff,
+plot(pred_layer[[3]],
      box = FALSE,
      axes = FALSE,
      main = '97.5% posterior bound, Q4')
 if (SAVE_PLOTS){
   dev.off()
 }
-
-if (SAVE_PLOTS){
-  png(filename = "../../bartfit-plots/q4_post_map.png")
-}
-plot(pred_layer[[1]],
-     box = FALSE,
-     axes = FALSE,
-     main = 'Avian flu risk, Q4')
-if (SAVE_PLOTS){
-  dev.off()
-}
-
-# # Extract names of variables in optimised model:
-# sdm_vars <- dimnames(sdm$fit$data@x)[[2]]
-# 
-# layers_for_spartial <- grep("lc_",
-#                             sdm_vars,
-#                             value = TRUE,
-#                             invert = TRUE)
-# 
-# pd_maps <- spartial(sdm,
-#                     covstack_lores,
-#                     layers_for_spartial)
-# if (SAVE_FITS){
-#   save(pred_layer,
-#        file = "../../fitted-BART-models/spartial_Q4.rds")
-# }
-# 
-# if (SAVE_PLOTS){
-#   png(filename = "../../bartfit-plots/q4_spartial.png")
-# }
-# plot(pd_maps)
-# if (SAVE_PLOTS){
-#   dev.off()
-# }
