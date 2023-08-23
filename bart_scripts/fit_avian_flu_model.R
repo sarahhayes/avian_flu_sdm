@@ -1,7 +1,8 @@
  # In this script we train a BART model to classify sites for avian flu
 # presence/absence based on environmental and species abundance factors
 
-SAVE_FITS <- FALSE
+SAVE_FITS <- TRUE
+SAVE_PLOTS <- TRUE
 BUILD_COVS <- TRUE
 
 library(embarcadero)
@@ -93,10 +94,16 @@ if (BUILD_COVS){
   
   landcover_rast <- rast("../../../OneDrive - The University of Liverpool/AI_S2_SDM_storage/Environmental rasters/landcover_output_full.tif")
   n_landtypes <- 17
-  landcover_layers <- lapply(1:17, FUN = function(i){landcover_rast == i}) %>%
-    rast()
-  names(landcover_layers) <- lapply(1:17,
-                                    FUN = function(i){paste("lc_", i, sep = "")})
+  landcover_layers <- lapply(1:n_landtypes,
+                             FUN = function(i){landcover_rast == i}) %>%
+                      rast()
+  names(landcover_layers) <- lapply(1:n_landtypes,
+                                  FUN = function(i){paste("lc_", i, sep = "")})
+  # Remove layers that are either all True or all False:
+  hom_layers <- sapply(1:n_landtypes,
+                FUN = function(i){diff(minmax(landcover_layers[[i]]))==0}) %>%
+                which()
+  landcover_layers <- landcover_layers[[-hom_layers]]
   
   q1_covs <- c(resample(q1_eco_layers, env_layers),
                          q1_env_layers,
@@ -125,8 +132,8 @@ if (BUILD_COVS){
   
   writeRaster(q1_covs, "../../../OneDrive - The University of Liverpool/AI_S2_SDM_storage/quarterly_covariates/q1_covs.tif", overwrite = TRUE)
   writeRaster(q2_covs, "../../../OneDrive - The University of Liverpool/AI_S2_SDM_storage/quarterly_covariates/q2_covs.tif", overwrite = TRUE)
-  writeRaster(q3_covs, "../../../OneDrive - The University of Liverpool/AI_S2_SDM_storage/quarterly_covariates/q2_covs.tif", overwrite = TRUE)
-  writeRaster(q4_covs, "../../../OneDrive - The University of Liverpool/AI_S2_SDM_storage/quarterly_covariates/q2_covs.tif", overwrite = TRUE)
+  writeRaster(q3_covs, "../../../OneDrive - The University of Liverpool/AI_S2_SDM_storage/quarterly_covariates/q3_covs.tif", overwrite = TRUE)
+  writeRaster(q4_covs, "../../../OneDrive - The University of Liverpool/AI_S2_SDM_storage/quarterly_covariates/q4_covs.tif", overwrite = TRUE)
 }
 
 ################################################################################
@@ -220,41 +227,74 @@ if (SAVE_FITS){
        file = "../../fitted-BART-models/prediction_Q1.rds")
 }
 
+if (SAVE_PLOTS){
+  png(filename = "../../bartfit-plots/q1_class_map.png")
+}
 # Plot map
 plot(pred_layer[[1]]>cutoff,
      box = FALSE,
      axes = FALSE,
      main = 'Avian flu risk, Q1')
+if (SAVE_PLOTS){
+  dev.off()
+}
+
+if (SAVE_PLOTS){
+  png(filename = "../../bartfit-plots/q1_lbound.png")
+}
 plot(pred_layer[[2]]>cutoff,
      box = FALSE,
      axes = FALSE,
      main = '2.5% posterior bound, Q1')
+if (SAVE_PLOTS){
+  dev.off()
+}
+
+if (SAVE_PLOTS){
+  png(filename = "../../bartfit-plots/q1_ubound.png")
+}
 plot(pred_layer[[3]]>cutoff,
      box = FALSE,
      axes = FALSE,
      main = '97.5% posterior bound, Q1')
+if (SAVE_PLOTS){
+  dev.off()
+}
 
+if (SAVE_PLOTS){
+  png(filename = "../../bartfit-plots/q1_post_map.png")
+}
 plot(pred_layer[[1]],
      box = FALSE,
      axes = FALSE,
      main = 'Avian flu risk, Q1')
-
-# Extract names of variables in optimised model:
-sdm_vars <- dimnames(sdm$fit$data@x)[[2]]
-
-layers_for_spartial <- grep("lc_",
-                            sdm_vars,
-                            value = TRUE,
-                            invert = TRUE)
-
-pd_maps <- spartial(sdm,
-               covstack_lores,
-               layers_for_spartial)
-if (SAVE_FITS){
-  save(pred_layer,
-       file = "../../fitted-BART-models/spartial_Q1.rds")
+if (SAVE_PLOTS){
+  dev.off()
 }
-plot(pd_maps)
+# 
+# # Extract names of variables in optimised model:
+# sdm_vars <- dimnames(sdm$fit$data@x)[[2]]
+# 
+# layers_for_spartial <- grep("lc_",
+#                             sdm_vars,
+#                             value = TRUE,
+#                             invert = TRUE)
+# 
+# pd_maps <- spartial(sdm,
+#                covstack_lores,
+#                layers_for_spartial)
+# if (SAVE_FITS){
+#   save(pred_layer,
+#        file = "../../fitted-BART-models/spartial_Q1.rds")
+# }
+# 
+# if (SAVE_PLOTS){
+#   png(filename = "../../bartfit-plots/q1_spartial")
+# }
+# plot(pd_maps)
+# if (SAVE_PLOTS){
+#   dev.off()
+# }
 
 ################################################################################
 # Do the Q2 analysis
@@ -346,41 +386,74 @@ if (SAVE_FITS){
        file = "../../fitted-BART-models/prediction_Q2.rds")
 }
 
+if (SAVE_PLOTS){
+  png(filename = "../../bartfit-plots/q2_class_map.png")
+}
 # Plot map
 plot(pred_layer[[1]]>cutoff,
      box = FALSE,
      axes = FALSE,
      main = 'Avian flu risk, Q2')
+if (SAVE_PLOTS){
+  dev.off()
+}
+
+if (SAVE_PLOTS){
+  png(filename = "../../bartfit-plots/q2_lbound.png")
+}
 plot(pred_layer[[2]]>cutoff,
      box = FALSE,
      axes = FALSE,
      main = '2.5% posterior bound, Q2')
+if (SAVE_PLOTS){
+  dev.off()
+}
+
+if (SAVE_PLOTS){
+  png(filename = "../../bartfit-plots/q2_ubound.png")
+}
 plot(pred_layer[[3]]>cutoff,
      box = FALSE,
      axes = FALSE,
      main = '97.5% posterior bound, Q2')
+if (SAVE_PLOTS){
+  dev.off()
+}
 
+if (SAVE_PLOTS){
+  png(filename = "../../bartfit-plots/q2_post_map.png")
+}
 plot(pred_layer[[1]],
      box = FALSE,
      axes = FALSE,
      main = 'Avian flu risk, Q2')
-
-# Extract names of variables in optimised model:
-sdm_vars <- dimnames(sdm$fit$data@x)[[2]]
-
-layers_for_spartial <- grep("lc_",
-                            sdm_vars,
-                            value = TRUE,
-                            invert = TRUE)
-
-pd_maps <- spartial(sdm,
-                    covstack_lores,
-                    layers_for_spartial)
-if (SAVE_FITS){
-  save(pred_layer,
-       file = "../../fitted-BART-models/spartial_Q2.rds")
+if (SAVE_PLOTS){
+  dev.off()
 }
-plot(pd_maps)
+
+# # Extract names of variables in optimised model:
+# sdm_vars <- dimnames(sdm$fit$data@x)[[2]]
+# 
+# layers_for_spartial <- grep("lc_",
+#                             sdm_vars,
+#                             value = TRUE,
+#                             invert = TRUE)
+# 
+# pd_maps <- spartial(sdm,
+#                     covstack_lores,
+#                     layers_for_spartial)
+# if (SAVE_FITS){
+#   save(pred_layer,
+#        file = "../../fitted-BART-models/spartial_Q2.rds")
+# }
+# 
+# if (SAVE_PLOTS){
+#   png(filename = "../../bartfit-plots/q2_spartial.png")
+# }
+# plot(pd_maps)
+# if (SAVE_PLOTS){
+#   dev.off()
+# }
 
 
 ################################################################################
@@ -474,41 +547,74 @@ if (SAVE_FITS){
        file = "../../fitted-BART-models/prediction_Q3.rds")
 }
 
+if (SAVE_PLOTS){
+  png(filename = "../../bartfit-plots/q3_class_map.png")
+}
 # Plot map
 plot(pred_layer[[1]]>cutoff,
      box = FALSE,
      axes = FALSE,
      main = 'Avian flu risk, Q3')
+if (SAVE_PLOTS){
+  dev.off()
+}
+
+if (SAVE_PLOTS){
+  png(filename = "../../bartfit-plots/q3_lbound.png")
+}
 plot(pred_layer[[2]]>cutoff,
      box = FALSE,
      axes = FALSE,
      main = '2.5% posterior bound, Q3')
+if (SAVE_PLOTS){
+  dev.off()
+}
+
+if (SAVE_PLOTS){
+  png(filename = "../../bartfit-plots/q3_ubound.png")
+}
 plot(pred_layer[[3]]>cutoff,
      box = FALSE,
      axes = FALSE,
      main = '97.5% posterior bound, Q3')
+if (SAVE_PLOTS){
+  dev.off()
+}
 
+if (SAVE_PLOTS){
+  png(filename = "../../bartfit-plots/q3_post_map.png")
+}
 plot(pred_layer[[1]],
      box = FALSE,
      axes = FALSE,
      main = 'Avian flu risk, Q3')
-
-# Extract names of variables in optimised model:
-sdm_vars <- dimnames(sdm$fit$data@x)[[2]]
-
-layers_for_spartial <- grep("lc_",
-                            sdm_vars,
-                            value = TRUE,
-                            invert = TRUE)
-
-pd_maps <- spartial(sdm,
-                    covstack_lores,
-                    layers_for_spartial)
-if (SAVE_FITS){
-  save(pred_layer,
-       file = "../../fitted-BART-models/spartial_Q3.rds")
+if (SAVE_PLOTS){
+  dev.off()
 }
-plot(pd_maps)
+
+# # Extract names of variables in optimised model:
+# sdm_vars <- dimnames(sdm$fit$data@x)[[2]]
+# 
+# layers_for_spartial <- grep("lc_",
+#                             sdm_vars,
+#                             value = TRUE,
+#                             invert = TRUE)
+# 
+# pd_maps <- spartial(sdm,
+#                     covstack_lores,
+#                     layers_for_spartial)
+# if (SAVE_FITS){
+#   save(pred_layer,
+#        file = "../../fitted-BART-models/spartial_Q3.rds")
+# }
+# 
+# if (SAVE_PLOTS){
+#   png(filename = "../../bartfit-plots/q3_spartial.png")
+# }
+# plot(pd_maps)
+# if (SAVE_PLOTS){
+#   dev.off()
+# }
 
 
 ################################################################################
@@ -601,38 +707,71 @@ if (SAVE_FITS){
        file = "../../fitted-BART-models/prediction_Q4.rds")
 }
 
+if (SAVE_PLOTS){
+  png(filename = "../../bartfit-plots/q4_class_map.png")
+}
 # Plot map
 plot(pred_layer[[1]]>cutoff,
      box = FALSE,
      axes = FALSE,
      main = 'Avian flu risk, Q4')
+if (SAVE_PLOTS){
+  dev.off()
+}
+
+if (SAVE_PLOTS){
+  png(filename = "../../bartfit-plots/q4_lbound.png")
+}
 plot(pred_layer[[2]]>cutoff,
      box = FALSE,
      axes = FALSE,
      main = '2.5% posterior bound, Q4')
+if (SAVE_PLOTS){
+  dev.off()
+}
+
+if (SAVE_PLOTS){
+  png(filename = "../../bartfit-plots/q4_ubound.png")
+}
 plot(pred_layer[[3]]>cutoff,
      box = FALSE,
      axes = FALSE,
      main = '97.5% posterior bound, Q4')
+if (SAVE_PLOTS){
+  dev.off()
+}
 
+if (SAVE_PLOTS){
+  png(filename = "../../bartfit-plots/q4_post_map.png")
+}
 plot(pred_layer[[1]],
      box = FALSE,
      axes = FALSE,
      main = 'Avian flu risk, Q4')
-
-# Extract names of variables in optimised model:
-sdm_vars <- dimnames(sdm$fit$data@x)[[2]]
-
-layers_for_spartial <- grep("lc_",
-                            sdm_vars,
-                            value = TRUE,
-                            invert = TRUE)
-
-pd_maps <- spartial(sdm,
-                    covstack_lores,
-                    layers_for_spartial)
-if (SAVE_FITS){
-  save(pred_layer,
-       file = "../../fitted-BART-models/spartial_Q4.rds")
+if (SAVE_PLOTS){
+  dev.off()
 }
-plot(pd_maps)
+
+# # Extract names of variables in optimised model:
+# sdm_vars <- dimnames(sdm$fit$data@x)[[2]]
+# 
+# layers_for_spartial <- grep("lc_",
+#                             sdm_vars,
+#                             value = TRUE,
+#                             invert = TRUE)
+# 
+# pd_maps <- spartial(sdm,
+#                     covstack_lores,
+#                     layers_for_spartial)
+# if (SAVE_FITS){
+#   save(pred_layer,
+#        file = "../../fitted-BART-models/spartial_Q4.rds")
+# }
+# 
+# if (SAVE_PLOTS){
+#   png(filename = "../../bartfit-plots/q4_spartial.png")
+# }
+# plot(pd_maps)
+# if (SAVE_PLOTS){
+#   dev.off()
+# }
