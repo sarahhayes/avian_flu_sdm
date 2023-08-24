@@ -275,6 +275,7 @@ basic_model <- bart(xtrain,
                     ytrain,
                     x.test = xtest,
                     keeptrees = TRUE)
+invisible(basic_model$fit$state)
 summary(basic_model)
 
 if (SAVE_FITS){
@@ -286,6 +287,7 @@ sdm <- bart.step(x.data = xtrain,
                  y.data = ytrain,
                  full = TRUE,
                  quiet = TRUE)
+invisible(sdm$fit$state)
 summary(sdm)
 if (SAVE_FITS){
   save(sdm,
@@ -366,6 +368,7 @@ basic_model <- bart(xtrain,
                     ytrain,
                     x.test = xtest,
                     keeptrees = TRUE)
+invisible(basic_model$fit$state)
 summary(basic_model)
 
 if (SAVE_FITS){
@@ -377,6 +380,7 @@ sdm <- bart.step(x.data = xtrain,
                  y.data = ytrain,
                  full = TRUE,
                  quiet = TRUE)
+invisible(sdm$fit$state)
 summary(sdm)
 if (SAVE_FITS){
   save(sdm,
@@ -457,6 +461,7 @@ basic_model <- bart(xtrain,
                     ytrain,
                     x.test = xtest,
                     keeptrees = TRUE)
+invisible(basic_model$fit$state)
 summary(basic_model)
 
 if (SAVE_FITS){
@@ -468,6 +473,7 @@ sdm <- bart.step(x.data = xtrain,
                  y.data = ytrain,
                  full = TRUE,
                  quiet = TRUE)
+invisible(sdm$fit$state)
 summary(sdm)
 if (SAVE_FITS){
   save(sdm,
