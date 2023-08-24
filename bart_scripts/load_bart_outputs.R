@@ -21,6 +21,26 @@ get_threshold <- function(object){
 }
 
 ################################################################################
+# Lookup table for renaming landcover layers
+lc_lookup <- pairlist("lc_1" = "Water_bodies",
+                      "lc_2" = "Evergreen_Needleleaf_Forests",
+                      "lc_3" = "Evergreen_Broadleaf_Forests",
+                      "lc_4" = "Deciduous_Needleleaf_Forests",
+                      "lc_5" = "Deciduous_Broadleaf_Forests",
+                      "lc_6" = "Mixed_Forests",
+                      "lc_7" = "Closed_Shrublands",
+                      "lc_8" = "Open_Shrublands",
+                      "lc_9" = "Woody_Savannas",
+                      "lc_10" = "Savannas",
+                      "lc_11" = "Grasslands",
+                      "lc_12" = "Permanent_Wetlands",
+                      "lc_13" = "Croplands",
+                      "lc_14" = "Urband_and_Built-up_Lands",
+                      "lc_15" = "Cropland/Natural_Vegetation_Mosaics",
+                      "lc_16" = "Non-Vegetated_Lands",
+                      "lc_17" = "Unclassified")
+
+################################################################################
 # Example: load in Q1 stuff
 
 # If you want to get covariates as a raster, run this with the appropriate address:
@@ -29,6 +49,12 @@ get_threshold <- function(object){
 # Load fitted and optimised model:
 load("output/fitted-BART-models/sdm_Q1.rds")
 xtrain <- sdm$fit$data@x
+colnames(xtrain) <- lapply(colnames(xtrain),
+                                  FUN = function(n){
+                                    if (n %in% names(lc_lookup)){
+                                      n <- lc_lookup[[n]]}else{
+                                        n <- n}
+                                      })
 ytrain <- sdm$fit$data@y
 xtest <- sdm$fit$data@x.test
 
