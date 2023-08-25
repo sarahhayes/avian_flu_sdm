@@ -25,10 +25,12 @@ for(i in 1:4){
 }  
 
 
+pal <- c("#2271B2",
+         "#F748A5",
+         "#359B73",
+         "#e69f00")
 
-
-
-g <- varimp_summ %>% 
+df <- varimp_summ %>% 
   bind_rows %>%
   mutate(var = gsub("_first_quart$|_second_quart$|_third_quart$|_fourth_quart$", "", var),  # determine plot labels
          var = case_when(var == "around_surf" ~ "abundance: surface-feeders", 
@@ -99,20 +101,26 @@ g <- varimp_summ %>%
                                   "non-vegetated lands",
                                   "unclassified land"
          )),
-         upper = mean + sd, lower = mean - sd) %>%
-  ggplot(aes(x = var, y = mean, ymin = lower, ymax = upper, color = Q)) + 
+         upper = mean + sd, lower = mean - sd)
+  g <- ggplot(df, aes(x = var, y = mean, ymin = lower, ymax = upper, color = Q)) + 
   geom_errorbar(width=0, position=position_dodge(0.6)) + 
   geom_point(position=position_dodge(0.6)) +
+    geom_vline(xintercept=seq(1.5, nrow(df)-0.5, 1), 
+               lwd=.5, colour="grey75") + 
+  scale_colour_manual("",
+                      breaks = c("Q1", "Q2", "Q3", "Q4"),
+                      values = pal) +
   theme_bw(base_size = 16) +
   theme(axis.text.x=element_text(angle = 35, hjust = 1), 
-        legend.position=c(0.95, 0.8),
+        legend.position="top",
         legend.title=element_blank(),
         legend.key.size=unit(0.8, "lines"),
         legend.box.margin = margin(0, 0, 0, 0),
         legend.box.background = element_rect(colour = "grey50"),
         axis.title.x=element_blank(),
-        plot.margin = margin(10, 3, 3, 80)) +
+        plot.margin = margin(10, 3, 3, 80),
+        panel.grid.major.x = element_blank()) +
   ylab("Relative variable importance")
 
-ggsave("plots\\variable_importance_quarterly.png", plot = g, width = 10, height = 4.5)
+ggsave("plots/variable_importance_quarterly.png", plot = g, width = 10, height = 4.5)
 
