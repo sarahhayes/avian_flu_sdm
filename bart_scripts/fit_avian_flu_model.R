@@ -3,7 +3,7 @@
 
 SAVE_FITS <- TRUE
 SAVE_PLOTS <- TRUE
-BUILD_COVS <- TRUE
+BUILD_COVS <- FALSE
 
 library(embarcadero)
 library(raster)
@@ -160,6 +160,10 @@ if (BUILD_COVS){
 
 covstack <- raster::stack("../../../OneDrive - The University of Liverpool/AI_S2_SDM_storage/quarterly_covariates/q1_covs.tif")
 
+# Drop unclassified land layer
+covstack <- dropLayer(covstack, "lc_17")
+
+
 # Load training data
 training_coords <- readRDS("training_sets/training_coords_Q1.RDS")
 cov_df <- data.frame(raster::extract(covstack, training_coords[, 1:2]))
@@ -252,6 +256,9 @@ if (SAVE_PLOTS){
 # Do the Q2 analysis
 
 covstack <- raster::stack("../../../OneDrive - The University of Liverpool/AI_S2_SDM_storage/quarterly_covariates/q2_covs.tif")
+
+# Drop unclassified land layer
+covstack <- dropLayer(covstack, "lc_17")
 
 # Load training data
 training_coords <- readRDS("training_sets/training_coords_Q2.RDS")
@@ -346,6 +353,9 @@ if (SAVE_PLOTS){
 
 covstack <- raster::stack("../../../OneDrive - The University of Liverpool/AI_S2_SDM_storage/quarterly_covariates/q3_covs.tif")
 
+# Drop unclassified land layer
+covstack <- dropLayer(covstack, "lc_17")
+
 # Load training data
 training_coords <- readRDS("training_sets/training_coords_Q3.RDS")
 cov_df <- data.frame(raster::extract(covstack, training_coords[, 1:2]))
@@ -438,6 +448,9 @@ if (SAVE_PLOTS){
 # Do the Q4 analysis
 
 covstack <- raster::stack("../../../OneDrive - The University of Liverpool/AI_S2_SDM_storage/quarterly_covariates/q4_covs.tif")
+
+# Drop unclassified land layer
+covstack <- dropLayer(covstack, "lc_17")
 
 # Load training data
 training_coords <- readRDS("training_sets/training_coords_Q4.RDS")
