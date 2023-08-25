@@ -50,11 +50,11 @@ lc_lookup <- pairlist("lc_1" = "Water_bodies",
 load("output/fitted-BART-models/sdm_Q1.rds")
 xtrain <- sdm$fit$data@x
 colnames(xtrain) <- lapply(colnames(xtrain),
-                                  FUN = function(n){
-                                    if (n %in% names(lc_lookup)){
-                                      n <- lc_lookup[[n]]}else{
-                                        n <- n}
-                                      })
+                           FUN = function(n){
+                             if (n %in% names(lc_lookup)){
+                               n <- lc_lookup[[n]]}else{
+                                 n <- n}
+                           })
 ytrain <- sdm$fit$data@y
 xtest <- sdm$fit$data@x.test
 
@@ -84,3 +84,27 @@ plot(pred_layer[[3]],
      box = FALSE,
      axes = FALSE,
      main = '97.5th percentile, Q1')
+
+# All-in-one
+for(i in 1:4){
+  assign(paste0("pred_layer_Q",i), 
+         get(load(paste0("output/fitted-BART-models/prediction_Q",i,".rds"))))
+}
+
+par(mfrow=c(2,2), mai = c(0.1, 0.1, 0.1, 0.1))
+plot(pred_layer_Q1[[1]],
+     box = FALSE,
+     axes = FALSE,
+     main = 'Mean prediction, Q1')
+plot(pred_layer_Q2[[1]],
+     box = FALSE,
+     axes = FALSE,
+     main = 'Mean prediction, Q2')
+plot(pred_layer_Q3[[1]],
+     box = FALSE,
+     axes = FALSE,
+     main = 'Mean prediction, Q3')
+plot(pred_layer_Q4[[1]],
+     box = FALSE,
+     axes = FALSE,
+     main = 'Mean prediction, Q4')

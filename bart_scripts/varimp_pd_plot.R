@@ -37,6 +37,7 @@ df <- varimp_summ %>%
                          var == "below_surf" ~ "abundance: sub-surface feeders", 
                          var == "host_dist" ~ "avg. phylo dist to host", 
                          var == "migr" ~ "abundance: migratory", 
+                         var == "cong" ~ "abundance: congregatory", 
                          var == "chicken_density" ~ "chicken density", 
                          var == "duck_density_2010" ~ "duck density", 
                          var == "mean_diff" ~ "temperature range", 
@@ -70,6 +71,7 @@ df <- varimp_summ %>%
          var = fct_relevel(var, c("abundance: surface-feeders",         # determine plot order
                                   "abundance: sub-surface feeders", 
                                   "abundance: migratory",
+                                  "abundance: congregatory",
                                   "avg. phylo dist to host", 
                                   "chicken density", 
                                   "duck density", 
@@ -90,7 +92,7 @@ df <- varimp_summ %>%
                                   "deciduous broadleaf forests",
                                   "mixed forests",
                                   "closed shrublands",
-                                  "open_shrublands",
+                                  "open shrublands",
                                   "woody savannas",
                                   "savannas",
                                   "grasslands",
@@ -102,11 +104,11 @@ df <- varimp_summ %>%
                                   "unclassified land"
          )),
          upper = mean + sd, lower = mean - sd)
-  g <- ggplot(df, aes(x = var, y = mean, ymin = lower, ymax = upper, color = Q)) + 
+fig_varimp <- ggplot(df, aes(x = var, y = mean, ymin = lower, ymax = upper, color = Q)) + 
   geom_errorbar(width=0, position=position_dodge(0.6)) + 
   geom_point(position=position_dodge(0.6)) +
-    geom_vline(xintercept=seq(1.5, nrow(df)-0.5, 1), 
-               lwd=.5, colour="grey75") + 
+  geom_vline(xintercept=seq(1.5, nrow(df)-0.5, 1), 
+             lwd=.5, colour="grey75") + 
   scale_colour_manual("",
                       breaks = c("Q1", "Q2", "Q3", "Q4"),
                       values = pal) +
@@ -122,5 +124,113 @@ df <- varimp_summ %>%
         panel.grid.major.x = element_blank()) +
   ylab("Relative variable importance")
 
-ggsave("plots/variable_importance_quarterly.png", plot = g, width = 10, height = 4.5)
+ggsave("plots/variable_importance_quarterly.png", plot = fig_varimp, width = 10, height = 4.5)
 
+
+# Rank variables by variable importance (sum; those important in more models will rank higher)
+varimp_rank <- varimp_summ %>%
+  bind_rows %>%
+  mutate(var = gsub("_first_quart$|_second_quart$|_third_quart$|_fourth_quart$", "", var)) %>%
+  group_by(var) %>% 
+  summarise(rank = sum(mean)) %>%
+  arrange(-rank)
+
+# # Calc and bind pd across all quarters for four most important variables by varimp
+# # TO DO: line up variable names with _first_quart etc as in the below
+#
+# pd_summ <- replicate(4, vector("list", 4), simplify = FALSE) # initialise empty lists
+# 
+# for(i in 1:4){
+#   
+#   load(paste0("output/fitted-BART-models/sdm_Q",i,".rds"))
+#   
+#   for(j in 1:4){
+#     
+#     # Adapted from embarcadero::partial
+#     raw <- sdm$fit$data@x[, varimp_rank$var[j]]
+#     lev <- list(seq(min(raw), max(raw), ((max(raw) - min(raw))/15)))
+#     pd <- pdbart(sdm, xind = varimp_rank$var[j], levs = lev, pl = FALSE)
+#     
+#     pd_summ[[i]][[j]] <- data.frame(var = varimp_rank$var[j], 
+#                                     x = unlist(lev), 
+#                                     y = pd$fd[[1]] %>% apply(., 2, median),
+#                                     upper = pd$fd[[1]] %>% apply(.,  2, quantile, probs = 0.025),
+#                                     lower = pd$fd[[1]] %>% apply(.,  2, quantile, probs = 0.975),
+#                                     Q = paste0("Q",i))
+#   }  
+# }
+# 
+# 
+# fig_pd_best <- pd_summ %>% 
+#   bind_rows %>%
+#   mutate(var = gsub("_first_quart$|_second_quart$|_third_quart$|_fourth_quart$", "", var)) +
+#   ggplot(aes(x = x, y = y, ymin = lower, ymax = upper, fill = Q, color = Q)) +
+#   geom_ribbon(alpha = 0.15, colour = NA) +
+#   geom_line(lwd = 1.5, alpha = 0.6) +
+#   scale_x_continuous(expand = c(0, 0)) +
+#   scale_colour_manual("",
+#                       breaks = c("Q1", "Q2", "Q3", "Q4"),
+#                       values = pal) +
+#   scale_fill_manual("",
+#                     breaks = c("Q1", "Q2", "Q3", "Q4"),
+#                     values = pal) +
+#   ylab("Probability") +
+#   theme_bw() + 
+#   theme(axis.title.x=element_blank()) +
+#   facet_wrap(~ var, scales = "free_x")
+# 
+# 
+# ggsave("plots/partial_dependence_quarterly.png", plot = fig_pd_best, width = 10, height = 4.5)
+
+# Calc and bind pd across all quarters for given variables by name
+# TO DO: catch cases where variable not present in every quarter, catch cases where variables are binary (land cover)
+
+vars <- c("mean_tmax","below_surf")
+
+pd_summ <- replicate(4, vector("list", length(vars)), simplify = FALSE) # initialise empty lists
+
+for(i in 1:4){
+  
+  load(paste0("output/fitted-BART-models/sdm_Q",i,".rds"))
+  
+  for(j in 1:length(vars)){
+    
+    # Adapted from embarcadero::partial
+    fullvarname <- sdm$fit$data@x %>% as.data.frame %>% select(matches(vars[j])) %>% names
+    raw <- sdm$fit$data@x[, fullvarname]
+    lev <- list(seq(min(raw), max(raw), ((max(raw) - min(raw))/15)))
+    pd <- pdbart(sdm, xind = fullvarname, levs = lev, pl = FALSE)
+    
+    pd_summ[[i]][[j]] <- data.frame(var = vars[j], 
+                                    x = unlist(lev), 
+                                    y = pd$fd[[1]] %>% apply(., 2, median) %>% pnorm,
+                                    upper = pd$fd[[1]] %>% apply(.,  2, quantile, probs = 0.025) %>% pnorm,
+                                    lower = pd$fd[[1]] %>% apply(.,  2, quantile, probs = 0.975) %>% pnorm,
+                                    Q = paste0("Q",i))
+  }  
+}
+
+
+fig_pd_chosen <- pd_summ %>%
+  bind_rows %>%
+  mutate(var = gsub("_first_quart$|_second_quart$|_third_quart$|_fourth_quart$", "", var),
+         var = case_when(var == "below_surf" ~ "abundance: sub-surface feeders", 
+                         var == "mean_tmax" ~ "max temperature (Celsius)"),
+  ) %>%
+  ggplot(aes(x = x, y = y, ymin = lower, ymax = upper, fill = Q, color = Q)) +
+  geom_ribbon(alpha = 0.08, colour = NA) +
+  geom_line(lwd = 0.8, alpha = 0.4) +
+  scale_x_continuous(expand = c(0, 0)) +
+  scale_colour_manual("",
+                      breaks = c("Q1", "Q2", "Q3", "Q4"),
+                      values = pal) +
+  scale_fill_manual("",
+                    breaks = c("Q1", "Q2", "Q3", "Q4"),
+                    values = pal) +
+  ylab("Probability") +
+  theme_bw() +
+  theme(axis.title.x=element_blank()) +
+  facet_wrap(~ var, scales = "free_x")
+
+
+ggsave("plots/partial_dependence_poster.png", plot = fig_pd_chosen, width = 6, height = 3)
