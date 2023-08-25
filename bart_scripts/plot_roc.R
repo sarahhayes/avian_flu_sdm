@@ -78,25 +78,26 @@ q4_xtest <- xtest
 q4_ytest <- ytest
 rm(xtrain, ytrain, xtest, ytest)
 
-get_sens_and_spec <- function(sdm, xtest, ytest){
+get_sens_and_spec <- function(sdm, xtest, ytest, cutoff){
   pred <- xtest[which(complete.cases(xtest)), ] %>%
-    stats::predict(object=sdm) %>%
+    stats::predict(object=sdm, type = "bart") %>%
     pnorm() %>%
     colMeans() %>%
     prediction(labels = ytest[which(complete.cases(xtest))])
   perf <-  performance(pred, measure = "sens", x.measure = "spec")
   tss_list <- (perf@x.values[[1]] + perf@y.values[[1]] - 1)
   tss_df <- data.frame(alpha=perf@alpha.values[[1]],tss=tss_list)
-  cutoff <- min(tss_df$alpha[which(tss_df$tss==max(tss_df$tss))])
-  sens <- perf@x.values[[1]][which(perf@alpha.values[[1]]==cutoff)]
-  spec <- perf@y.values[[1]][which(perf@alpha.values[[1]]==cutoff)]
-  tss <- tss_df[which(tss_df$alpha==cutoff),'tss']
+  # cutoff <- min(tss_df$alpha[which(tss_df$tss==max(tss_df$tss))])
+  sens <- perf@x.values[[1]][which.min(abs(perf@alpha.values[[1]]-cutoff))]
+  spec <- perf@y.values[[1]][which.min(abs(perf@alpha.values[[1]]-cutoff))]
+  tss <- tss_df[which.min(abs(tss_df$alpha-cutoff)),'tss']
+  auc <- performance(pred,"auc")@y.values[[1]]
   return(pairlist("pred"=pred,
                   "perf"=perf,
                   "sens"=sens,
                   "spec"=spec,
                   "tss"=tss,
-                  "cutoff"=cutoff))
+                  "auc"=auc))
 }
 
 # Try getting sensitivity and specificity:
@@ -105,38 +106,46 @@ q2_cutoff <- get_threshold(q2_sdm)
 q3_cutoff <- get_threshold(q3_sdm)
 q4_cutoff <- get_threshold(q4_sdm)
 
-q1_sens_spec <- get_sens_and_spec(q1_sdm, q1_xtest, q1_ytest)
-q2_sens_spec <- get_sens_and_spec(q2_sdm, q2_xtest, q2_ytest)
-q3_sens_spec <- get_sens_and_spec(q3_sdm, q3_xtest, q3_ytest)
-q4_sens_spec <- get_sens_and_spec(q4_sdm, q4_xtest, q4_ytest)
+q1_sens_spec <- get_sens_and_spec(q1_sdm, q1_xtest, q1_ytest, q1_cutoff)
+q2_sens_spec <- get_sens_and_spec(q2_sdm, q2_xtest, q2_ytest, q2_cutoff)
+q3_sens_spec <- get_sens_and_spec(q3_sdm, q3_xtest, q3_ytest, q3_cutoff)
+q4_sens_spec <- get_sens_and_spec(q4_sdm, q4_xtest, q4_ytest, q4_cutoff)
 
 cat("Q1 sensitivity =",
     q1_sens_spec$sens,
     ", specificity =",
     q1_sens_spec$spec,
     ", TSS =",
-    q1_sens_spec$tss
+    q1_sens_spec$tss,
+    ", AUC=",
+    q1_sens_spec$auc
     )
 cat("Q2 sensitivity =",
     q2_sens_spec$sens,
     ", specificity =",
     q2_sens_spec$spec,
     ", TSS =",
-    q2_sens_spec$tss
+    q2_sens_spec$tss,
+    ", AUC=",
+    q2_sens_spec$auc
 )
 cat("Q3 sensitivity =",
     q3_sens_spec$sens,
     ", specificity =",
     q3_sens_spec$spec,
     ", TSS =",
-    q3_sens_spec$tss
+    q3_sens_spec$tss,
+    ", AUC=",
+    q3_sens_spec$auc
 )
 cat("Q4 sensitivity =",
     q4_sens_spec$sens,
     ", specificity =",
     q4_sens_spec$spec,
     ", TSS =",
-    q4_sens_spec$tss
+    q4_sens_spec$tss,
+    ", AUC=",
+    q4_sens_spec$auc
 )
 
 q1_x <- performance(q1_sens_spec$pred, "tpr", "fpr")
