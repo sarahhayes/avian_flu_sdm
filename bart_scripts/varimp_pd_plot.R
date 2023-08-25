@@ -183,7 +183,7 @@ varimp_rank <- varimp_summ %>%
 # ggsave("plots/partial_dependence_quarterly.png", plot = fig_pd_best, width = 10, height = 4.5)
 
 # Calc and bind pd across all quarters for given variables by name
-# TO DO: catch cases where variable not present in every quarter, catch cases where variables are binary (land cover)
+# TO DO: catch cases where variables are binary (land cover)
 
 vars <- c("mean_tmax","below_surf")
 
@@ -197,6 +197,7 @@ for(i in 1:4){
     
     # Adapted from embarcadero::partial
     fullvarname <- sdm$fit$data@x %>% as.data.frame %>% select(matches(vars[j])) %>% names
+    if (length(fullvarname) == 1) {
     raw <- sdm$fit$data@x[, fullvarname]
     lev <- list(seq(min(raw), max(raw), ((max(raw) - min(raw))/15)))
     pd <- pdbart(sdm, xind = fullvarname, levs = lev, pl = FALSE)
@@ -207,6 +208,7 @@ for(i in 1:4){
                                     upper = pd$fd[[1]] %>% apply(.,  2, quantile, probs = 0.025) %>% pnorm,
                                     lower = pd$fd[[1]] %>% apply(.,  2, quantile, probs = 0.975) %>% pnorm,
                                     Q = paste0("Q",i))
+    }
   }  
 }
 
