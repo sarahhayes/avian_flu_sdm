@@ -14,6 +14,8 @@ for (idx in 1:4){
                     sep = ""))
        png(filename = paste("plots/q", idx, "_poster.png", sep = ""))
   plot(pred_layer[[1]],
+       box = FALSE,
+       axes = FALSE,
        col = viridis_pal()(100),
        main = paste("Q", idx, sep = ""),
        legend.args = list(text = "Probability", side = 2))
