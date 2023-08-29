@@ -2,7 +2,8 @@
 
 rm(list = ls())
 
-library(embarcadero)
+library(tidyverse)
+library(dbarts)
 
 varimp_summ <- list()
 
@@ -185,7 +186,7 @@ varimp_rank <- varimp_summ %>%
 # Calc and bind pd across all quarters for given variables by name
 # TO DO: catch cases where variables are binary (land cover)
 
-vars <- c("mean_tmax","below_surf")
+vars <- c("elev_min","below_surf")
 
 pd_summ <- replicate(4, vector("list", length(vars)), simplify = FALSE) # initialise empty lists
 
@@ -212,12 +213,11 @@ for(i in 1:4){
   }  
 }
 
-
 fig_pd_chosen <- pd_summ %>%
   bind_rows %>%
   mutate(var = gsub("_first_quart$|_second_quart$|_third_quart$|_fourth_quart$", "", var),
-         var = case_when(var == "below_surf" ~ "abundance: sub-surface feeders", 
-                         var == "mean_tmax" ~ "max temperature (Celsius)"),
+         var = case_when(var == "below_surf" ~ "abundance: sub-surface feeders",
+                         var == "elev_min" ~ "min altitude (m)"),
   ) %>%
   ggplot(aes(x = x, y = y, ymin = lower, ymax = upper, fill = Q, color = Q)) +
   geom_ribbon(alpha = 0.08, colour = NA) +
