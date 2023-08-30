@@ -38,7 +38,7 @@ df <- varimp_summ %>%
                          var == "below_surf" ~ "abundance: sub-surface feeders", 
                          var == "host_dist" ~ "avg. phylo dist to host", 
                          var == "migr" ~ "abundance: migratory", 
-                         var == "cong" ~ "abundance: congregatory", 
+                         var == "cong" ~ "abundance: congregative", 
                          var == "chicken_density" ~ "chicken density", 
                          var == "duck_density_2010" ~ "duck density", 
                          var == "mean_diff" ~ "temperature range", 
@@ -68,43 +68,11 @@ df <- varimp_summ %>%
                          var == "lc_15" ~ "cropland/natural vegetation mosaics",
                          var == "lc_16" ~ "non-vegetated lands",
                          var == "lc_17" ~ "unclassified land"
-         ),
-         var = fct_relevel(var, c("abundance: surface-feeders",         # determine plot order
-                                  "abundance: sub-surface feeders", 
-                                  "abundance: migratory",
-                                  "abundance: congregatory",
-                                  "avg. phylo dist to host", 
-                                  "chicken density", 
-                                  "duck density", 
-                                  "temperature range", 
-                                  "max temperature", 
-                                  "min temperature", 
-                                  "total rainfall", 
-                                  "dist. to coast", 
-                                  "dist. to inland water", 
-                                  "min altitude", 
-                                  "max altitude",
-                                  "altitude range",
-                                  "vegetation index", 
-                                  "water bodies",
-                                  "evergreen needleleaf forests",
-                                  "evergreen broadleaf forests",
-                                  "deciduous needleleaf forests",
-                                  "deciduous broadleaf forests",
-                                  "mixed forests",
-                                  "closed shrublands",
-                                  "open shrublands",
-                                  "woody savannas",
-                                  "savannas",
-                                  "grasslands",
-                                  "permanent wetlands",
-                                  "croplands",
-                                  "urband and built-up lands",
-                                  "cropland/natural vegetation mosaics",
-                                  "non-vegetated lands",
-                                  "unclassified land"
-         )),
+         ))
+ordered_var <- unique(as.character(df$var[order(df$mean, decreasing = TRUE)]))
+df <- df %>% mutate(var = fct_relevel(var, ordered_var),
          upper = mean + sd, lower = mean - sd)
+
 fig_varimp <- ggplot(df, aes(x = var, y = mean, ymin = lower, ymax = upper, color = Q)) + 
   geom_errorbar(width=0, position=position_dodge(0.6)) + 
   geom_point(position=position_dodge(0.6)) +
@@ -125,7 +93,7 @@ fig_varimp <- ggplot(df, aes(x = var, y = mean, ymin = lower, ymax = upper, colo
         panel.grid.major.x = element_blank()) +
   ylab("Relative variable importance")
 
-ggsave("plots/variable_importance_quarterly.png", plot = fig_varimp, width = 10, height = 4.5)
+ggsave("plots/variable_importance_quarterly_reorder.png", plot = fig_varimp, width = 10, height = 4.5)
 
 
 # Rank variables by variable importance (sum; those important in more models will rank higher)
