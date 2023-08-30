@@ -56,5 +56,34 @@ spplot(stack(preds[[1]][[2]],
 grid::grid.text("Probability", x=grid::unit(0.98, "npc"), y=grid::unit(0.50, "npc"), rot=-90)
 dev.off()
 
+################################################################################
+# Plot case data
 
+pos_data <- read.csv("../../../OneDrive - The University of Liverpool/AI_S2_SDM_storage/Avian flu data/pos_points_proj_area_all_sources_duplicates_removed.csv")
 
+zipmap <- terra::vect(x = "data/gis_europe/CNTR_RG_03M_2020_4326.shp.zip",
+                      layer = "CNTR_RG_03M_2020_4326")
+crs <- "epsg:3035"
+euro_ext <- extent(preds[[1]])
+
+# change projection and extent. 
+# using quite a generous extent whilst plotting as looking at where to set the boundaries
+euro_map <- terra::project(x = zipmap, y = crs) 
+euro_map_crop <- terra::crop(euro_map, euro_ext)
+
+pts_pos <- terra::vect(pos_data, geom=c("X", "Y"),
+                       crs =  "+proj=longlat +ellps=WGS84 +datum=WGS84")
+
+w <- 7
+h <- w * (euro_ext@ymax - euro_ext@ymin)/(euro_ext@xmax - euro_ext@xmin)
+png("plots/poster_positives.png", width = w, height = h,
+    units = "in", res = 330)
+plot(euro_map_crop,
+     col = "white",
+     background = "azure2",
+     axes = FALSE,
+     buffer = FALSE,
+     xmin = euro_ext@xmin,
+     mar = c(0, 0, 0, 0))
+plot(pts_pos, add = T, col = "red", pch = 16, cex = .3)
+dev.off()
