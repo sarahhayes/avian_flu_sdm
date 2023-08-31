@@ -24,15 +24,13 @@ species_raw <- as.data.frame(table(fao_data$Species))
 # there are also lots listed as 'Domestic:...'
 
 # i think we want to remove these
-
-fao_data <- fao_data %>%
-  dplyr::filter(grepl("wild|Wild", Species))
+# 
+# fao_data <- fao_data %>%
+#   dplyr::filter(grepl("wild|Wild", Species))
 
 
 table(fao_data$Disease)
 table(fao_data$Diagnosis.source)
-
-
 
 # check if there are any NA values in the observation date. 
 
