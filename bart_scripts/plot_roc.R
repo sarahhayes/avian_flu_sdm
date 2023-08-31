@@ -172,7 +172,7 @@ roc_plot <- ggplot() +
   scale_colour_manual("",
                       breaks = c("Q1", "Q2", "Q3", "Q4"),
                       values = pal) +
-  ggtitle('Receiver-operator curve') + 
+  ggtitle('Receiver-operating characteristic') + 
   xlab('False positive rate') + 
   ylab('True positive rate') + 
   geom_abline(intercept=0,slope=1,col='black')
