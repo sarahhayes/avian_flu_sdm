@@ -5,6 +5,8 @@ SAVE_FITS <- TRUE
 SAVE_PLOTS <- TRUE
 BUILD_COVS <- FALSE
 
+PATH_TO_DATA <- "../../../OneDrive - The University of Liverpool/"
+
 library(embarcadero)
 library(raster)
 library(terra)
@@ -31,11 +33,11 @@ if (BUILD_COVS){
   
   euro_ext <- terra::ext(2000000, 6000000, 1000000, 5500000) # swap to base raster later
   
-  eco_paths <- list.files("../../../OneDrive - The University of Liverpool/AI_S2_SDM_storage/Eco-Rasters",
+  eco_paths <- list.files(paste(PATH_TO_DATA, "AI_S2_SDM_storage/Eco-Rasters", sep = ""),
                               pattern = "*.tif",
                               full.names = TRUE)
   eco_lyrnames <- eco_paths %>%
-                  sub(pattern = "../../../OneDrive - The University of Liverpool/AI_S2_SDM_storage/Eco-Rasters/",
+                  sub(pattern = paste(PATH_TO_DATA, "AI_S2_SDM_storage/Eco-Rasters/", sep = ""),
                       replacement = "") %>%
                   sub(pattern = "_rast.tif",
                       replacement = "")
@@ -53,13 +55,13 @@ if (BUILD_COVS){
   set.names(q4_eco_layers, eco_lyrnames)
   
   # Now do environmental:
-  env_paths <- list.files("../../../OneDrive - The University of Liverpool/AI_S2_SDM_storage/Environmental rasters/",
+  env_paths <- list.files(paste(PATH_TO_DATA, "AI_S2_SDM_storage/Environmental rasters/", sep = ""),
                           pattern = "*.tif",
                           full.names = TRUE)
   env_paths <- env_paths[-grep("landcover_output_full", env_paths)]
   env_paths <- env_paths[-grep("duck_density_2015", env_paths)]
   env_lyrnames <- env_paths %>%
-    sub(pattern = "../../../OneDrive - The University of Liverpool/AI_S2_SDM_storage/Environmental rasters//",
+    sub(pattern = paste(PATH_TO_DATA, "AI_S2_SDM_storage/Environmental rasters/", sep = ""),
         replacement = "") %>%
     sub(pattern = ".tif",
         replacement = "")
@@ -78,21 +80,21 @@ if (BUILD_COVS){
   q3_env_layers <- subset(env_layers, setdiff(env_lyrnames, q3_excludes))
   q4_env_layers <- subset(env_layers, setdiff(env_lyrnames, q4_excludes))
   
-  cov_coast <- read.csv("../../../OneDrive - The University of Liverpool/AI_S2_SDM_storage/Environmental variable csvs/dist_to_coast_output.csv") %>%
+  cov_coast <- read.csv(paste(PATH_TO_DATA, "AI_S2_SDM_storage/Environmental variable csvs/dist_to_coast_output.csv", sep = "")) %>%
     rename(x = X, y = Y) %>%
     select(-X.1) %>% 
     relocate(x,y) %>%
     rast(type = "xyz", crs = "epsg:3035")
-  cov_water <- read.csv("../../../OneDrive - The University of Liverpool/AI_S2_SDM_storage/Environmental variable csvs/dist_to_water_output.csv") %>%
+  cov_water <- read.csv(paste(PATH_TO_DATA, "AI_S2_SDM_storage/Environmental variable csvs/dist_to_water_output.csv", sep = "")) %>%
     select(-ID) %>% 
     relocate(x,y) %>%
     rast(type = "xyz", crs = "epsg:3035")
-  cov_alt <- read.csv("../../../OneDrive - The University of Liverpool/AI_S2_SDM_storage/Environmental variable csvs/elevation_outputs.csv") %>%
+  cov_alt <- read.csv(paste(PATH_TO_DATA, "AI_S2_SDM_storage/Environmental variable csvs/elevation_outputs.csv", sep = "")) %>%
     select(-ID, -X) %>% 
     relocate(x,y) %>%
     rast(type = "xyz", crs = "epsg:3035")
   
-  landcover_rast <- rast("../../../OneDrive - The University of Liverpool/AI_S2_SDM_storage/Environmental rasters/landcover_output_full.tif")
+  landcover_rast <- rast(paste(PATH_TO_DATA, "AI_S2_SDM_storage/Environmental rasters/landcover_output_full.tif", sep = ""))
   n_landtypes <- 17
   landcover_layers <- lapply(1:n_landtypes,
                              FUN = function(i){landcover_rast == i}) %>%
@@ -122,7 +124,9 @@ if (BUILD_COVS){
   hom_layers <- sapply(1:n_landtypes,
                 FUN = function(i){diff(minmax(landcover_layers[[i]]))==0}) %>%
                 which()
-  landcover_layers <- landcover_layers[[-hom_layers]]
+  if (length(hom_layers)>0){
+    landcover_layers <- landcover_layers[[-hom_layers]]
+  }
   
   q1_covs <- c(resample(q1_eco_layers, env_layers),
                          q1_env_layers,
@@ -149,16 +153,16 @@ if (BUILD_COVS){
                          cov_water,
                          cov_alt)
   
-  writeRaster(q1_covs, "../../../OneDrive - The University of Liverpool/AI_S2_SDM_storage/quarterly_covariates/q1_covs.tif", overwrite = TRUE)
-  writeRaster(q2_covs, "../../../OneDrive - The University of Liverpool/AI_S2_SDM_storage/quarterly_covariates/q2_covs.tif", overwrite = TRUE)
-  writeRaster(q3_covs, "../../../OneDrive - The University of Liverpool/AI_S2_SDM_storage/quarterly_covariates/q3_covs.tif", overwrite = TRUE)
-  writeRaster(q4_covs, "../../../OneDrive - The University of Liverpool/AI_S2_SDM_storage/quarterly_covariates/q4_covs.tif", overwrite = TRUE)
+  writeRaster(q1_covs, paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covariates/q1_covs.tif", sep = ""), overwrite = TRUE)
+  writeRaster(q2_covs, paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covariates/q2_covs.tif", sep = ""), overwrite = TRUE)
+  writeRaster(q3_covs, paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covariates/q3_covs.tif", sep = ""), overwrite = TRUE)
+  writeRaster(q4_covs, paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covariates/q4_covs.tif", sep = ""), overwrite = TRUE)
 }
 
 ################################################################################
 # Do the Q1 analysis
 
-covstack <- raster::stack("../../../OneDrive - The University of Liverpool/AI_S2_SDM_storage/quarterly_covariates/q1_covs.tif")
+covstack <- raster::stack(paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covariates/q1_covs.tif", sep = ""))
 
 # Drop unclassified land layer
 covstack <- dropLayer(covstack, "lc_17")
@@ -255,7 +259,7 @@ if (SAVE_PLOTS){
 ################################################################################
 # Do the Q2 analysis
 
-covstack <- raster::stack("../../../OneDrive - The University of Liverpool/AI_S2_SDM_storage/quarterly_covariates/q2_covs.tif")
+covstack <- raster::stack(paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covariates/q2_covs.tif", sep = ""))
 
 # Drop unclassified land layer
 covstack <- dropLayer(covstack, "lc_17")
@@ -351,7 +355,7 @@ if (SAVE_PLOTS){
 ################################################################################
 # Do the Q3 analysis
 
-covstack <- raster::stack("../../../OneDrive - The University of Liverpool/AI_S2_SDM_storage/quarterly_covariates/q3_covs.tif")
+covstack <- raster::stack(paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covariates/q3_covs.tif", sep = ""))
 
 # Drop unclassified land layer
 covstack <- dropLayer(covstack, "lc_17")
@@ -447,7 +451,7 @@ if (SAVE_PLOTS){
 ################################################################################
 # Do the Q4 analysis
 
-covstack <- raster::stack("../../../OneDrive - The University of Liverpool/AI_S2_SDM_storage/quarterly_covariates/q4_covs.tif")
+covstack <- raster::stack(paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covariates/q4_covs.tif", sep = ""))
 
 # Drop unclassified land layer
 covstack <- dropLayer(covstack, "lc_17")
