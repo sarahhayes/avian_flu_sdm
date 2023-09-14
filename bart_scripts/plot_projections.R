@@ -3,6 +3,8 @@
 
 rm(list = ls())
 
+PATH_TO_DATA <- "../../../OneDrive - The University of Liverpool/"
+
 library(embarcadero)
 library(raster)
 library(terra)
@@ -13,7 +15,8 @@ preds <- list()
 
 
 for (idx in 1:4){
-  load(file = paste("output/fitted-BART-models/prediction_Q",
+  load(file = paste(PATH_TO_DATA,
+                    "AI_S2_SDM_storage/fitted-BART-models/prediction_Q",
                     idx,
                     ".rds",
                     sep = ""))
@@ -59,7 +62,9 @@ dev.off()
 ################################################################################
 # Plot case data
 
-pos_data <- read.csv("../../../OneDrive - The University of Liverpool/AI_S2_SDM_storage/Avian flu data/pos_points_proj_area_all_sources_duplicates_removed.csv")
+pos_data <- read.csv(paste(PATH_TO_DATA,
+                           "AI_S2_SDM_storage/Avian flu data/pos_points_proj_area_all_sources_duplicates_removed.csv",
+                           sep = ""))
 
 zipmap <- terra::vect(x = "data/gis_europe/CNTR_RG_03M_2020_4326.shp.zip",
                       layer = "CNTR_RG_03M_2020_4326")

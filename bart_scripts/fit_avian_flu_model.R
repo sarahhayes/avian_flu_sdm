@@ -5,27 +5,13 @@ SAVE_FITS <- TRUE
 SAVE_PLOTS <- TRUE
 BUILD_COVS <- FALSE
 
+# Set path to folder containing data, and where output will be stored
 PATH_TO_DATA <- "../../../OneDrive - The University of Liverpool/"
 
 library(embarcadero)
 library(raster)
 library(terra)
 set.seed(12345)
-
-# Function for directly getting optimal cutoff
-get_threshold <- function(object){
-  fitobj <- object$fit
-  
-  true.vector <- fitobj$data@y 
-  
-  pred <- prediction(colMeans(pnorm(object$yhat.train)), true.vector)
-  
-  perf.tss <- performance(pred,"sens","spec")
-  tss.list <- (perf.tss@x.values[[1]] + perf.tss@y.values[[1]] - 1)
-  tss.df <- data.frame(alpha=perf.tss@alpha.values[[1]],tss=tss.list)
-  thresh <- min(tss.df$alpha[which(tss.df$tss==max(tss.df$tss))])
-  return(thresh)
-}
 
 if (BUILD_COVS){
   # set the crs we want to use
@@ -114,7 +100,7 @@ if (BUILD_COVS){
                         "lc_11" = "Grasslands",
                         "lc_12" = "Permanent_Wetlands",
                         "lc_13" = "Croplands",
-                        "lc_14" = "Urband_and_Built-up_Lands",
+                        "lc_14" = "Urban_and_Built-up_Lands",
                         "lc_15" = "Cropland/Natural_Vegetation_Mosaics",
                         "lc_16" = "Non-Vegetated_Lands",
                         "lc_17" = "Unclassified")
@@ -128,25 +114,25 @@ if (BUILD_COVS){
     landcover_layers <- landcover_layers[[-hom_layers]]
   }
   
-  q1_covs <- c(resample(q1_eco_layers, env_layers),
+  q1_covs <- c(resample(q1_eco_layers, env_layers, method = "near"),
                          q1_env_layers,
                          landcover_layers,
                          cov_coast,
                          cov_water,
                          cov_alt)
-  q2_covs <- c(resample(q2_eco_layers, env_layers),
+  q2_covs <- c(resample(q2_eco_layers, env_layers, method = "near"),
                          q2_env_layers,
                          landcover_layers,
                          cov_coast,
                          cov_water,
                          cov_alt)
-  q3_covs <- c(resample(q3_eco_layers, env_layers),
+  q3_covs <- c(resample(q3_eco_layers, env_layers, method = "near"),
                         q3_env_layers,
                         landcover_layers,
                         cov_coast,
                         cov_water,
                         cov_alt)
-  q4_covs <- c(resample(q4_eco_layers, env_layers),
+  q4_covs <- c(resample(q4_eco_layers, env_layers, method = "near"),
                          q4_env_layers,
                          landcover_layers,
                          cov_coast,
@@ -182,7 +168,7 @@ xtest <- cov_df[-training, ]
 ytest <- training_coords$pos[-training]
 
 if (SAVE_FITS){
-  save(xtrain, ytrain, xtest, ytest, file = "q1_train_test_data.rds")
+  save(xtrain, ytrain, xtest, ytest, file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/q1_train_test_data.rds", sep = ""))
 }
 
 # Initialise model
@@ -195,7 +181,7 @@ summary(basic_model)
 
 if (SAVE_FITS){
   save(basic_model,
-       file = "output/fitted-BART-models/basic_model_Q1.rds")
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/basic_model_Q1.rds", sep = ""))
 }
 
 sdm <- bart.step(x.data = xtrain,
@@ -206,7 +192,7 @@ invisible(sdm$fit$state)
 summary(sdm)
 if (SAVE_FITS){
   save(sdm,
-       file = "output/fitted-BART-models/sdm_Q1.rds")
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/sdm_Q1.rds", sep = ""))
 }
 
 covstack_lores <- aggregate(covstack, fact = 10)
@@ -219,7 +205,7 @@ pred_layer <- predict(object = sdm,
                       )
 if (SAVE_FITS){
   save(pred_layer,
-       file = "output/fitted-BART-models/prediction_Q1.rds")
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/prediction_Q1.rds", sep = ""))
 }
 
 if (SAVE_PLOTS){
@@ -278,7 +264,7 @@ xtest <- cov_df[-training, ]
 ytest <- training_coords$pos[-training]
 
 if (SAVE_FITS){
-  save(xtrain, ytrain, xtest, ytest, file = "q2_train_test_data.rds")
+  save(xtrain, ytrain, xtest, ytest, file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/q2_train_test_data.rds", sep = ""))
 }
 
 # Initialise model
@@ -291,7 +277,7 @@ summary(basic_model)
 
 if (SAVE_FITS){
   save(basic_model,
-       file = "output/fitted-BART-models/basic_model_Q2.rds")
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/basic_model_Q2.rds", sep = ""))
 }
 
 sdm <- bart.step(x.data = xtrain,
@@ -302,7 +288,7 @@ invisible(sdm$fit$state)
 summary(sdm)
 if (SAVE_FITS){
   save(sdm,
-       file = "output/fitted-BART-models/sdm_Q2.rds")
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/sdm_Q2.rds", sep = ""))
 }
 
 covstack_lores <- aggregate(covstack, fact = 10)
@@ -315,7 +301,7 @@ pred_layer <- predict(object = sdm,
 )
 if (SAVE_FITS){
   save(pred_layer,
-       file = "output/fitted-BART-models/prediction_Q2.rds")
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/prediction_Q2.rds", sep = ""))
 }
 
 if (SAVE_PLOTS){
@@ -374,7 +360,7 @@ xtest <- cov_df[-training, ]
 ytest <- training_coords$pos[-training]
 
 if (SAVE_FITS){
-  save(xtrain, ytrain, xtest, ytest, file = "q3_train_test_data.rds")
+  save(xtrain, ytrain, xtest, ytest, file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/q3_train_test_data.rds", sep = ""))
 }
 
 # Initialise model
@@ -387,7 +373,7 @@ summary(basic_model)
 
 if (SAVE_FITS){
   save(basic_model,
-       file = "output/fitted-BART-models/basic_model_Q3.rds")
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/basic_model_Q3.rds", sep = ""))
 }
 
 sdm <- bart.step(x.data = xtrain,
@@ -398,7 +384,7 @@ invisible(sdm$fit$state)
 summary(sdm)
 if (SAVE_FITS){
   save(sdm,
-       file = "output/fitted-BART-models/sdm_Q3.rds")
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/sdm_Q3.rds", sep = ""))
 }
 
 covstack_lores <- aggregate(covstack, fact = 10)
@@ -411,7 +397,7 @@ pred_layer <- predict(object = sdm,
 )
 if (SAVE_FITS){
   save(pred_layer,
-       file = "output/fitted-BART-models/prediction_Q3.rds")
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/prediction_Q3.rds", sep = ""))
 }
 
 if (SAVE_PLOTS){
@@ -470,7 +456,7 @@ xtest <- cov_df[-training, ]
 ytest <- training_coords$pos[-training]
 
 if (SAVE_FITS){
-  save(xtrain, ytrain, xtest, ytest, file = "q4_train_test_data.rds")
+  save(xtrain, ytrain, xtest, ytest, file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/q4_train_test_data.rds", sep = ""))
 }
 
 # Initialise model
@@ -483,7 +469,7 @@ summary(basic_model)
 
 if (SAVE_FITS){
   save(basic_model,
-       file = "output/fitted-BART-models/basic_model_Q4.rds")
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/basic_model_Q4.rds", sep = ""))
 }
 
 sdm <- bart.step(x.data = xtrain,
@@ -494,7 +480,7 @@ invisible(sdm$fit$state)
 summary(sdm)
 if (SAVE_FITS){
   save(sdm,
-       file = "output/fitted-BART-models/sdm_Q4.rds")
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/sdm_Q4.rds", sep = ""))
 }
 
 covstack_lores <- aggregate(covstack, fact = 10)
@@ -507,7 +493,7 @@ pred_layer <- predict(object = sdm,
 )
 if (SAVE_FITS){
   save(pred_layer,
-       file = "output/fitted-BART-models/prediction_Q4.rds")
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/prediction_Q4.rds", sep = ""))
 }
 
 if (SAVE_PLOTS){

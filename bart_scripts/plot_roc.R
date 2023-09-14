@@ -1,5 +1,7 @@
 # In this script we load in the outputs from fit_avian_flu_model.R.
 
+PATH_TO_DATA <- "../../../OneDrive - The University of Liverpool/"
+
 library(embarcadero)
 library(ggplot2)
 library(raster)
@@ -37,7 +39,7 @@ lc_lookup <- pairlist("lc_1" = "Water_bodies",
                       "lc_11" = "Grasslands",
                       "lc_12" = "Permanent_Wetlands",
                       "lc_13" = "Croplands",
-                      "lc_14" = "Urband_and_Built-up_Lands",
+                      "lc_14" = "Urban_and_Built-up_Lands",
                       "lc_15" = "Cropland/Natural_Vegetation_Mosaics",
                       "lc_16" = "Non-Vegetated_Lands",
                       "lc_17" = "Unclassified")
@@ -46,32 +48,32 @@ lc_lookup <- pairlist("lc_1" = "Water_bodies",
 # Make AUC plot and getting numbers for table
 
 # Load models:
-load("output/fitted-BART-models/sdm_Q1.rds")
+load(file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/sdm_Q1.rds", sep = ""))
 q1_sdm <- sdm
-load("output/fitted-BART-models/sdm_Q2.rds")
+load(file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/sdm_Q2.rds", sep = ""))
 q2_sdm <- sdm
-load("output/fitted-BART-models/sdm_Q3.rds")
+load(file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/sdm_Q3.rds", sep = ""))
 q3_sdm <- sdm
-load("output/fitted-BART-models/sdm_Q4.rds")
+load(file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/sdm_Q4.rds", sep = ""))
 q4_sdm <- sdm
 rm(sdm)
 
-load(file = "q1_train_test_data.rds")
+load(file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/q1_train_test_data.rds", sep = ""))
 q1_xtrain <- xtrain
 q1_ytrain <- ytrain
 q1_xtest <- xtest
 q1_ytest <- ytest
-load(file = "q2_train_test_data.rds")
+load(file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/q2_train_test_data.rds", sep = ""))
 q2_xtrain <- xtrain
 q2_ytrain <- ytrain
 q2_xtest <- xtest
 q2_ytest <- ytest
-load(file = "q3_train_test_data.rds")
+load(file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/q3_train_test_data.rds", sep = ""))
 q3_xtrain <- xtrain
 q3_ytrain <- ytrain
 q3_xtest <- xtest
 q3_ytest <- ytest
-load(file = "q4_train_test_data.rds")
+load(file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/q4_train_test_data.rds", sep = ""))
 q4_xtrain <- xtrain
 q4_ytrain <- ytrain
 q4_xtest <- xtest

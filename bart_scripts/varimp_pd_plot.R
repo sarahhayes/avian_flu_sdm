@@ -2,6 +2,8 @@
 
 rm(list = ls())
 
+PATH_TO_DATA <- "../../../OneDrive - The University of Liverpool/"
+
 library(tidyverse)
 library(dbarts)
 
@@ -9,7 +11,11 @@ varimp_summ <- list()
 
 for(i in 1:4){
   
-  load(paste0("output/fitted-BART-models/sdm_Q",i,".rds"))
+  load(file = paste(PATH_TO_DATA,
+                    "AI_S2_SDM_storage/fitted-BART-models/sdm_Q",
+                    i,
+                    ".rds",
+                    sep = ""))
   
   varimp_raw <- sdm$varcount %>% 
     as.data.frame %>%
@@ -160,7 +166,16 @@ pd_summ <- replicate(4, vector("list", length(vars)), simplify = FALSE) # initia
 
 for(i in 1:4){
   
-  load(paste0("output/fitted-BART-models/sdm_Q",i,".rds"))
+  load(file = paste(PATH_TO_DATA,
+                    "AI_S2_SDM_storage/fitted-BART-models/sdm_Q",
+                    i,
+                    ".rds",
+                    sep = ""))
+  
+  varimp_raw <- sdm$varcount %>% 
+    as.data.frame %>%
+    mutate(./rowSums(.)) %>%
+    mutate(./max(.))
   
   for(j in 1:length(vars)){
     
