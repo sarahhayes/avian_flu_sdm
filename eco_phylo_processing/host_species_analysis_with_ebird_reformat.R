@@ -13,6 +13,7 @@ library(DALEX)
 library(data.table)
 library(dplyr)
 library(ebirdst)
+library(embarcadero)
 library(fields)
 library(ggplot2)
 library(ggfortify)
@@ -336,8 +337,8 @@ no_host_species <- length(host_species_IDs)
 
 host_indicator <- sapply(1:nrow(sp_df),
                          FUN = function(i){
-                           (length(intersect(sp_df$synonyms[i, ], CLOVER_df$Host)) + 
-                              length(intersect(sp_df$Avibase_ID[i, ], host_species_IDs))) > 0
+                           (length(base::intersect(sp_df$synonyms[i, ], CLOVER_df$Host)) + 
+                              length(base::intersect(sp_df$Avibase_ID[i, ], host_species_IDs))) > 0
                          })
 sp_df$host_indicator <- host_indicator
 
@@ -431,7 +432,7 @@ cat(length(which(EltonTraits_IDs[, 2]=="-100")), "species were not ID'd.")
 # Check that we can make at least one assignment for all species in eBird:
 has_eco_data <- sapply(1:nrow(sp_df),
                        FUN = function(i){
-                         (length(intersect(sp_df$synonyms[i, ], EltonTraits_df$Scientific))) > 0
+                         (length(base::intersect(sp_df$synonyms[i, ], EltonTraits_df$Scientific))) > 0
                        })
 cat("Elton traits can not be matched to",
     length(which(!has_eco_data)),
@@ -441,7 +442,7 @@ cat("Elton traits can not be matched to",
 # See which (if any) have ambiguous matches:
 multiple_Elton_matches <- sapply(1:nrow(sp_df),
                                  FUN = function(i){
-                                   (length(intersect(sp_df$synonyms[i, ], EltonTraits_df$Scientific))>1)
+                                   (length(base::intersect(sp_df$synonyms[i, ], EltonTraits_df$Scientific))>1)
                                  })
 cat("There are multiple matches for",
     length(which(multiple_Elton_matches)),
@@ -509,7 +510,7 @@ matched_locs <- sapply(1:nrow(sp_df),
 cat("Name matching fails at", length(which(!matched_locs)), "locations.")
 
 traits_by_eBird_species <- EltonTraits_df[position_in_EltonTraits, ]
-sp_df$EltonTraits <- traits_by_eBird_species
+sp_df <- cbind(sp_df, traits_by_eBird_species)
 
 ################################################################################
 # Incorporate additional ecological data from IUCN
@@ -547,7 +548,7 @@ IUCN_df <- distinct(IUCN_df)
 # Check if we can do IUCN to eBird matches by binomial name:
 has_IUCN_data <- sapply(1:nrow(sp_df),
                         FUN = function(i){
-                          (length(intersect(sp_df$synonyms[i, ], IUCN_df$scientificName))) > 0
+                          (length(base::intersect(sp_df$synonyms[i, ], IUCN_df$scientificName))) > 0
                         })
 cat("There are",
     length(which(!has_IUCN_data)),
@@ -569,7 +570,7 @@ sp_df$synonyms$X4[which(sp_df$scientific_name=="saucerottia hoffmanni")] <-
 
 multiple_IUCN_matches <- sapply(1:nrow(sp_df),
                                 FUN = function(i){
-                                  (length(intersect(sp_df$synonyms[i, ], IUCN_df$scientificName))) > 1
+                                  (length(base::intersect(sp_df$synonyms[i, ], IUCN_df$scientificName))) > 1
                                 })
 cat("There are",
     length(which(multiple_IUCN_matches)),
@@ -579,7 +580,7 @@ cat("There are",
 problem_cases <- sapply(1:nrow(sp_df),
                         FUN = function(i){
                           (!(sp_df$scientific_name[i] %in% IUCN_df$scientificName)) &
-                            ((length(intersect(sp_df$synonyms[i, ], IUCN_df$scientificName))) > 1)
+                            ((length(base::intersect(sp_df$synonyms[i, ], IUCN_df$scientificName))) > 1)
                         })
 cat("There are",
     length(which(problem_cases)),
@@ -608,7 +609,7 @@ position_in_IUCN <- sapply(
 ) %>% unlist()
 
 IUCN_by_eBird_species <- IUCN_df[position_in_IUCN, ]
-sp_df$IUCN <- IUCN_by_eBird_species
+sp_df <- cbind(sp_df, IUCN_by_eBird_species)
 
 ################################################################################
 # Bring in phylogenetic data
@@ -654,8 +655,8 @@ phylo_syns <- phylo_syns_and_IDs[[2]]
 # Identify host species in phylo data:
 hosts_in_phylo <- sapply(1:length(phylo_sp),
                          FUN = function(i){
-                           (length(intersect(phylo_syns[i, ], CLOVER_df$Host)) + 
-                              length(intersect(phylo_IDs[i, ], host_species_IDs))) > 0
+                           (length(base::intersect(phylo_syns[i, ], CLOVER_df$Host)) + 
+                              length(base::intersect(phylo_IDs[i, ], host_species_IDs))) > 0
                          })
 
 dmat_host_cols <- dmat_mean[, which(hosts_in_phylo)]
@@ -669,7 +670,7 @@ nearest_host_df <- data.frame(phylo_sp, nearest_host_distance)
 # Check that we can make at least one assignment for all species in eBird:
 has_phylo_data <- sapply(1:nrow(sp_df),
                          FUN = function(i){
-                           (length(intersect(sp_df$synonyms[i, ], nearest_host_df$phylo_sp))) > 0
+                           (length(base::intersect(sp_df$synonyms[i, ], nearest_host_df$phylo_sp))) > 0
                          })
 cat("Phylogeny can not be matched to",
     length(which(!has_phylo_data)),
@@ -679,7 +680,7 @@ cat("Phylogeny can not be matched to",
 # See which (if any) have ambiguous matches:
 multiple_phylo_matches <- sapply(1:nrow(sp_df),
                                  FUN = function(i){
-                                   (length(intersect(sp_df$synonyms[i, ], nearest_host_df$phylo_sp))>1)
+                                   (length(base::intersect(sp_df$synonyms[i, ], nearest_host_df$phylo_sp))>1)
                                  })
 cat("There are multiple matches for",
     length(which(multiple_phylo_matches)),
@@ -765,10 +766,10 @@ if (PLOT){
   
   plot_ulim <- 100.
   
-  host_dhist <- hist(sp_df$EltonTraits$ForStrat.watbelowsurf[which(sp_df$host_indicator)],
+  host_dhist <- hist(sp_df$ForStrat.watbelowsurf[which(sp_df$host_indicator)],
                      breaks = seq(0, plot_ulim, by=bin_size),
                      plot = FALSE)
-  nonhost_dhist <- hist(sp_df$EltonTraits$ForStrat.watbelowsurf[-which(sp_df$host_indicator)],
+  nonhost_dhist <- hist(sp_df$ForStrat.watbelowsurf[-which(sp_df$host_indicator)],
                         breaks = seq(0, plot_ulim, by=bin_size),
                         plot = FALSE)
   pal <- brewer.pal(6, "Dark2")
@@ -799,10 +800,10 @@ if (PLOT){
   
   plot_ulim <- 100.
   
-  host_dhist <- hist(sp_df$EltonTraits$ForStrat.wataroundsurf[which(sp_df$host_indicator)],
+  host_dhist <- hist(sp_df$ForStrat.wataroundsurf[which(sp_df$host_indicator)],
                      breaks = seq(0, plot_ulim, by=bin_size),
                      plot = FALSE)
-  nonhost_dhist <- hist(sp_df$EltonTraits$ForStrat.wataroundsurf[-which(sp_df$host_indicator)],
+  nonhost_dhist <- hist(sp_df$ForStrat.wataroundsurf[-which(sp_df$host_indicator)],
                         breaks = seq(0, plot_ulim, by=bin_size),
                         plot = FALSE)
   pal <- brewer.pal(6, "Dark2")
@@ -830,11 +831,11 @@ if (PLOT){
 }
 
 if (PLOT){
-  cong_by_host <- table(sp_df$IUCN$is_congregatory,
+  cong_by_host <- table(sp_df$is_congregatory,
                         sp_df$host_indicator,
                         dnn = c("Congregative", "Host")) %>%
     addmargins()
-  mig_by_host <- table(sp_df$IUCN$is_migratory,
+  mig_by_host <- table(sp_df$is_migratory,
                        sp_df$host_indicator,
                        dnn = c("Migratory", "Host")) %>%
     addmargins()
@@ -941,10 +942,8 @@ expand_names <- function(name_list){
 ################################################################################
 # Now train BART
 
-train <- sample(1:nrow(sp_df), .75*nrow(sp_df))
-
 # Remove non-numerical data as well as stuff we don't want to fit
-x <- sp_df[, c("species_code",
+x <- sp_df[, -which(names(sp_df) %in% c("species_code",
                 "scientific_name",
                 "common_name",
                 "breeding_quality",
@@ -955,24 +954,37 @@ x <- sp_df[, c("species_code",
                 "Avibase_ID",
                 "synonyms",
                "host_indicator",
-               "EltonTraits$PassNonPass",
-               "EltonTraits$IOCOrder",
-               "EltonTraits$BLFamilyLatin",
-               "EltonTraits$Scientific",
-               "EltonTraits$Diet.5Cat",
-               "EltonTraits$Diet.Certainty",
-               "EltonTraits$PelagicSpecialist",
-               "EltonTraits$ForStrat.SpecLevel",
-               "EltonTraits$Nocturnal",
-               "EltonTraits$BodyMass.Value",
-               "EltonTraits$BodyMass.SpecLevel",
-               "IUCN$scientificName"
-               )]
-y <- matched_data[, "host_indicator"]
-xtrain <- x[train, ]
-ytrain <- y[train]
-xtest <- x[-train, ]
-ytest <- y[-train]
+               "PassNonPass",
+               "IOCOrder",
+               "BLFamilyLatin",
+               "Scientific",
+               "Diet.5Cat",
+               "Diet.Certainty",
+               "PelagicSpecialist",
+               "ForStrat.SpecLevel",
+               "Nocturnal",
+               "BodyMass.Value",
+               "BodyMass.SpecLevel",
+               "scientificName"))]
+y <- as.numeric(sp_df$"host_indicator")
+
+n_pts <- nrow(sp_df)
+n_training <- round(.75 * n_pts)
+
+training <- sample(1:nrow(x), n_training)
+xtrain <- x[training, ]
+ytrain <- y[training]
+xtest <- x[-training, ]
+ytest <- y[-training]
+
+basic_model <- bart(xtrain,
+                    ytrain,
+                    x.test = xtest,
+                    keeptrees = TRUE)
+varselect <- bart.step(x.data = xtrain,
+                 y.data = ytrain,
+                 full = TRUE,
+                 quiet = TRUE)
 
 ntree <- 1000
 bartfit <- lbart(xtrain,
@@ -981,6 +993,8 @@ bartfit <- lbart(xtrain,
                  ntree = ntree,
                  ndpost = 10000,
                  nskip = 1000)
+
+p <- stats::predict(object = bartfit, xtest)
 
 # Use a majority judgement to decide whether to accept
 yhat.train <- plogis(bartfit$yhat.train - bartfit$binaryOffset)
