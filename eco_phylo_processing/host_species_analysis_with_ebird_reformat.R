@@ -965,7 +965,9 @@ x <- sp_df[, -which(names(sp_df) %in% c("species_code",
                "Nocturnal",
                "BodyMass.Value",
                "BodyMass.SpecLevel",
-               "scientificName"))]
+               "scientificName",
+               max_diet_comp,
+               max_forstrat_comp))]
 y <- as.numeric(sp_df$"host_indicator")
 
 n_pts <- nrow(sp_df)
@@ -986,254 +988,321 @@ varselect <- bart.step(x.data = xtrain,
                  full = TRUE,
                  quiet = TRUE)
 
-ntree <- 1000
-bartfit <- lbart(xtrain,
-                 ytrain,
-                 x.test = xtest,
-                 ntree = ntree,
-                 ndpost = 10000,
-                 nskip = 1000)
+varimp_raw <- varselect$varcount %>% 
+  as.data.frame %>%
+  mutate(./rowSums(.)) %>%
+  mutate(./max(.))
 
-p <- stats::predict(object = bartfit, xtest)
+varimp_summ <-  bind_rows(varimp_raw %>% summarise(across(everything(), mean)),
+                               varimp_raw %>% summarise(across(everything(), sd))) %>%
+  t() %>%
+  data.frame(var = row.names(.)) %>%
+  relocate(var) %>%
+  rename("mean" = "X1", "sd" = "X2")
 
-# Use a majority judgement to decide whether to accept
-yhat.train <- plogis(bartfit$yhat.train - bartfit$binaryOffset)
-yhat.maj <- colSums(yhat.train) >= .5*nrow(yhat.train)
+ordered_var <- varimp_summ$var[order(varimp_summ$mean, decreasing = TRUE)]
+varimp_summ <- varimp_summ %>% mutate(var = fct_relevel(var, ordered_var),
+                    upper = mean + sd, lower = mean - sd)
 
-# Calculate error rates
-false_neg_rate <- length(which((!yhat.maj)&ytrain))/length(which(ytrain))
-false_pos_rate <- length(which(yhat.maj&!ytrain))/length(which(!ytrain))
-misclass_rate <- (length(which((!yhat.maj)&ytrain)) +
-                    length(which(yhat.maj&!ytrain))) / length(ytrain)
-cat("Training false negative rate is",
-    false_neg_rate,
-    ".\n Training false positive rate is",
-    false_pos_rate,
-    ".\n Training misclassification rate is",
-    misclass_rate,
-    ".\n")
+fig_varimp <- ggplot(varimp_summ, aes(x = var, y = mean, ymin = lower, ymax = upper)) + 
+  geom_errorbar(width=0, position=position_dodge(0.6)) + 
+  geom_point(position=position_dodge(0.6)) +
+  geom_vline(xintercept=seq(1.5, nrow(varimp_summ)-0.5, 1), 
+             lwd=.5, colour="grey75") + 
+  theme_bw(base_size = 16) +
+  theme(axis.text.x=element_text(angle = 35, hjust = 1), 
+        legend.position="top",
+        legend.title=element_blank(),
+        legend.key.size=unit(0.8, "lines"),
+        legend.box.margin = margin(0, 0, 0, 0),
+        legend.box.background = element_rect(colour = "grey50"),
+        axis.title.x=element_blank(),
+        plot.margin = margin(10, 3, 3, 80),
+        panel.grid.major.x = element_blank()) +
+  ylab("Relative variable importance")
 
-# And for test data:
-yhat.test <- plogis(bartfit$yhat.test - bartfit$binaryOffset)
-yhat.maj <- colSums(yhat.test) >= .5*nrow(yhat.test)
+vars <- as.character(varimp_summ$var)
+pd_summ <- vector("list", length(vars))
 
-# Calculate error rates
-false_neg_rate <- length(which((!yhat.maj)&ytest))/length(which(ytest))
-false_pos_rate <- length(which(yhat.maj&!ytest))/length(which(!ytest))
-misclass_rate <- (length(which((!yhat.maj)&ytest)) +
-                    length(which(yhat.maj&!ytest))) / length(ytest)
-cat("Test false negative rate is",
-    false_neg_rate,
-    ".\n Test false positive rate is",
-    false_pos_rate,
-    ".\n Test misclassification rate is",
-    misclass_rate,
-    ".\n")
-
-# Explore impact of classification threshold on error rate:
-threshold_vals <- seq(0.001, 1., 0.001)
-yhat_vals <- sapply(threshold_vals,
-                    FUN = function(x) {colSums(yhat.test) >= x*nrow(yhat.test)})
-false_neg_vals <- apply(yhat_vals,
-                        2,
-                        FUN = function(x) {
-                          length(which((!x)&ytest))/length(which(ytest))})
-false_pos_vals <- apply(yhat_vals,
-                        2,
-                        FUN = function(x) {
-                          length(which((x)&!ytest))/length(which(!ytest))})
-misclass_vals <- apply(yhat_vals,
-                        2,
-                        FUN = function(x) {(length(which((!x)&ytest)) +
-                          length(which((x)&!ytest)))/length(ytest)})
-
-true_pos_vals <- apply(yhat_vals,
-                        2,
-                        FUN = function(x) {
-                          length(which((x)&ytest))/length(which(ytest))})
-L <- length(threshold_vals)
-xvals <- order(false_pos_vals)
-xvals1 <- xvals[1:L-1]
-xvals2 <- xvals[2:L]
-AUC <- sum(0.5*(true_pos_vals[xvals1] + true_pos_vals[xvals2]) *
-  (false_pos_vals[xvals2] - false_pos_vals[xvals1]))
-cat("My estimate of AUC is", AUC, ".\n")
-if (PLOT){
-  par(mar= c(5, 5, 1, 8))
-  pal <- brewer.pal(3, "Dark2")
-  auc_plot <- plot(false_pos_vals,
-       true_pos_vals,
-       xlab = "False positive rate",
-       ylab = "True positive rate",
-       type = "l",
-       col = pal[1],
-       lwd = 5)
-  lines(seq(0., 1.),
-       seq(0., 1.),
-       lty = "dashed",
-       col = pal[2],
-       lwd = 2.5)
-  legend("topright",
-         inset=c(-0.15,0),
-         legend = c("ROC", "Uninformative\n classifier"),
-         col = pal,
-         bty = "n",
-         pch = 20,
-         pt.cex = 2,
-         cex = 0.8,
-         xpd = TRUE)
-}
-
-if (PLOT){
-  par(mar= c(5, 5, 1, 8))
-  pal <- brewer.pal(3, "Dark2")
-  misclass_plot <- plot(threshold_vals,
-                        false_neg_vals,
-                        xlab = "Threshold",
-                        ylab = "Rate",
-                        type = "l",
-                        col = pal[1],
-                        lwd = 5)
-  lines(x = threshold_vals,
-        y = false_pos_vals,
-        col = pal[2],
-        lwd = 5)
-  lines(x = threshold_vals,
-        y = misclass_vals,
-        col = pal[3],
-        lwd = 5)
-  legend("topright",
-         inset=c(-0.2,0),
-         legend = c("False negative", "False positive", "Misclassification"),
-         col = pal,
-         bty = "n",
-         pch = 20,
-         pt.cex = 2,
-         cex = 0.8,
-         xpd = TRUE)
-}
-
-# Should find that a threshold of about 50% looks optimal!
-cat("Difference between error rates is minimised when threshold is",
-    threshold_vals[which.min(abs(false_neg_vals-false_pos_vals))],
-    ".\n")
-
-# How many times to variables appear?
-ord <- order(bartfit$varcount.mean, decreasing = T)
-varcount_df <- data.frame((1/ntree) * bartfit$varcount.mean)
-
-if (PLOT){
-  par(mar= c(14, 5, 1, 8))
-  varimp_ord <- data.frame(varcount_df[ord, ])
-  rownames(varimp_ord) <- rownames(varcount_df)[ord]
-  short_varnames <- expand_names(rownames(varimp_ord))
-  diet_vars <- which(rownames(varimp_ord) %like% "Diet.")
-  forstrat_vars <- which(rownames(varimp_ord) %like% "ForStrat.")
-  other_vars <- 1:ncol(x)
-  other_vars <- other_vars[-which(other_vars %in% diet_vars)]
-  other_vars <- other_vars[-which(other_vars %in% forstrat_vars)]
-  bar_cols <- vector(length = ncol(x))
-  pal <- brewer.pal(3, "Dark2")
-  bar_cols[diet_vars] <- pal[1]
-  bar_cols[forstrat_vars] <- pal[2]
-  bar_cols[other_vars] <- pal[3]
-  varimp_bars <- barplot(varimp_ord[, 1],
-                         border = F,
-                         las = 2,
-                         names.arg = short_varnames,
-                         col = bar_cols,
-                         ylab = "Mean appearances\n per tree")
-  legend("topright",
-         inset=c(-0.225,0),
-         legend = c("Dietary (% of calories)", "Foraging (% strategy)", "Other"),
-         col = pal,
-         bty = "n",
-         pch = 20,
-         pt.cex = 2,
-         cex = 0.8,
-         xpd = TRUE)
-}
-
-predict_function <- function(model, data){
-  yhat.test <- plogis(predict(model, data)$yhat.test - model$binaryOffset)
-  yhat.maj <- colSums(yhat.test) >= .5*nrow(yhat.test)
-  return(yhat.maj)
-}
-
-residual_function <- function(model, data, target_data, predict_function){
-  yhat.maj <- predict_function(model, data)
-  res <- (length(which((!yhat.maj)&target_data)) +
-                    length(which(yhat.maj&!target_data)))
-  return(res)
-}
-
-bart_explainer <- explain.default(bartfit,
-                      data = xtrain,
-                      y = ytrain,
-                      predict_function = predict_function,
-                      residual_function = residual_function,
-                      type = "classification")
-
-bart_performance <- model_performance(bart_explainer)
-cat("AUC is", bart_performance$measures$auc, ".\n")
-
-nearest_host_profile <- model_profile(bart_explainer,
-                                     variables = "nearest_host_distance")
-anatidae_profile <- model_profile(bart_explainer,
-                                      variables = "anatidae_distance")
-larus_profile <- model_profile(bart_explainer,
-                                       variables = "larus_distance")
-seed_profile <- model_profile(bart_explainer,
-                               variables = "Diet.Seed")
-
-if (VARIMPS){
-  # Do a more thorough variable importance
-  tree_nos <- c(10,
-                20,
-                50,
-                100,
-                150,
-                200)
+for(i in 1:length(vars)){
   
-  for (i in 1:(length(tree_nos)-1)){
-    this_bartfit <- lbart(xtrain,
-                          ytrain,
-                          x.test = xtest,
-                          ntree = tree_nos[i])
-    if (i==1){
-      varimp_df <- data.frame(this_bartfit$varcount.mean/sum(this_bartfit$varcount.mean))
-    }
-    else{
-      varimp_df <- data.frame(varimp_df, this_bartfit$varcount.mean/sum(this_bartfit$varcount.mean))
-    }
+  # Adapted from embarcadero::partial
+  fullvarname <- varselect$fit$data@x %>% as.data.frame %>% dplyr::select(matches(vars[i])) %>% names
+  if (length(fullvarname) == 1) {
+    raw <- varselect$fit$data@x[, fullvarname]
+    lev <- list(seq(min(raw), max(raw), ((max(raw) - min(raw))/15)))
+    pd <- pdbart(varselect, xind = fullvarname, levs = lev, pl = FALSE)
+    
+    pd_summ[[i]] <- data.frame(var = vars[i],
+                                    x = unlist(lev), 
+                                    y = pd$fd[[1]] %>% apply(., 2, median) %>% pnorm,
+                                    upper = pd$fd[[1]] %>% apply(.,  2, quantile, probs = 0.025) %>% pnorm,
+                                    lower = pd$fd[[1]] %>% apply(.,  2, quantile, probs = 0.975) %>% pnorm
+                             )
   }
-  varimp_df <- data.frame(varimp_df, varcount_df)
-  
-  pal <- brewer.pal(6, "Dark2")
-  
-  par(mar= c(15, 8, 1, 5))
-  matplot(varimp_df[ord, ],
-          type = "l",
-          xlab = "",
-          ylab = "Normalised mean\n appearances per tree",
-          xaxt = "n",
-          col=pal,
-          lty = 1)
-  for (i in 1:length(tree_nos)){
-    points(x = 1:length(ord),
-           y = varimp_df[ord, i],
-           col = pal[i],
-           pch = 16)
-  }
-  axis(1, at = 1:ncol(x), labels = short_varnames, las = 2)
-  legend("topright",
-         inset=c(-0.125,0),
-         legend = tree_nos,
-         title = "Number of\n trees",
-         col = pal,
-         bty = "n",
-         pch = 20,
-         pt.cex = 2,
-         cex = 0.8,
-         xpd = TRUE)
 }
+
+fig_pd_chosen <- pd_summ %>%
+  bind_rows %>%
+  ggplot(aes(x = x, y = y, ymin = lower, ymax = upper)) +
+  geom_ribbon(alpha = 0.08, colour = NA) +
+  geom_line(lwd = 0.8, alpha = 0.4) +
+  scale_x_continuous(expand = c(0, 0)) +
+  ylab("Probability") +
+  theme_bw() +
+  theme(axis.title.x=element_blank()) +
+  facet_wrap(~ var, scales = "free_x")
+
+################################################################################
+# 
+# ntree <- 1000
+# bartfit <- lbart(xtrain,
+#                  ytrain,
+#                  x.test = xtest,
+#                  ntree = ntree,
+#                  ndpost = 10000,
+#                  nskip = 1000)
+# 
+# p <- stats::predict(object = bartfit, xtest)
+# 
+# # Use a majority judgement to decide whether to accept
+# yhat.train <- plogis(bartfit$yhat.train - bartfit$binaryOffset)
+# yhat.maj <- colSums(yhat.train) >= .5*nrow(yhat.train)
+# 
+# # Calculate error rates
+# false_neg_rate <- length(which((!yhat.maj)&ytrain))/length(which(ytrain))
+# false_pos_rate <- length(which(yhat.maj&!ytrain))/length(which(!ytrain))
+# misclass_rate <- (length(which((!yhat.maj)&ytrain)) +
+#                     length(which(yhat.maj&!ytrain))) / length(ytrain)
+# cat("Training false negative rate is",
+#     false_neg_rate,
+#     ".\n Training false positive rate is",
+#     false_pos_rate,
+#     ".\n Training misclassification rate is",
+#     misclass_rate,
+#     ".\n")
+# 
+# # And for test data:
+# yhat.test <- plogis(bartfit$yhat.test - bartfit$binaryOffset)
+# yhat.maj <- colSums(yhat.test) >= .5*nrow(yhat.test)
+# 
+# # Calculate error rates
+# false_neg_rate <- length(which((!yhat.maj)&ytest))/length(which(ytest))
+# false_pos_rate <- length(which(yhat.maj&!ytest))/length(which(!ytest))
+# misclass_rate <- (length(which((!yhat.maj)&ytest)) +
+#                     length(which(yhat.maj&!ytest))) / length(ytest)
+# cat("Test false negative rate is",
+#     false_neg_rate,
+#     ".\n Test false positive rate is",
+#     false_pos_rate,
+#     ".\n Test misclassification rate is",
+#     misclass_rate,
+#     ".\n")
+# 
+# # Explore impact of classification threshold on error rate:
+# threshold_vals <- seq(0.001, 1., 0.001)
+# yhat_vals <- sapply(threshold_vals,
+#                     FUN = function(x) {colSums(yhat.test) >= x*nrow(yhat.test)})
+# false_neg_vals <- apply(yhat_vals,
+#                         2,
+#                         FUN = function(x) {
+#                           length(which((!x)&ytest))/length(which(ytest))})
+# false_pos_vals <- apply(yhat_vals,
+#                         2,
+#                         FUN = function(x) {
+#                           length(which((x)&!ytest))/length(which(!ytest))})
+# misclass_vals <- apply(yhat_vals,
+#                         2,
+#                         FUN = function(x) {(length(which((!x)&ytest)) +
+#                           length(which((x)&!ytest)))/length(ytest)})
+# 
+# true_pos_vals <- apply(yhat_vals,
+#                         2,
+#                         FUN = function(x) {
+#                           length(which((x)&ytest))/length(which(ytest))})
+# L <- length(threshold_vals)
+# xvals <- order(false_pos_vals)
+# xvals1 <- xvals[1:L-1]
+# xvals2 <- xvals[2:L]
+# AUC <- sum(0.5*(true_pos_vals[xvals1] + true_pos_vals[xvals2]) *
+#   (false_pos_vals[xvals2] - false_pos_vals[xvals1]))
+# cat("My estimate of AUC is", AUC, ".\n")
+# if (PLOT){
+#   par(mar= c(5, 5, 1, 8))
+#   pal <- brewer.pal(3, "Dark2")
+#   auc_plot <- plot(false_pos_vals,
+#        true_pos_vals,
+#        xlab = "False positive rate",
+#        ylab = "True positive rate",
+#        type = "l",
+#        col = pal[1],
+#        lwd = 5)
+#   lines(seq(0., 1.),
+#        seq(0., 1.),
+#        lty = "dashed",
+#        col = pal[2],
+#        lwd = 2.5)
+#   legend("topright",
+#          inset=c(-0.15,0),
+#          legend = c("ROC", "Uninformative\n classifier"),
+#          col = pal,
+#          bty = "n",
+#          pch = 20,
+#          pt.cex = 2,
+#          cex = 0.8,
+#          xpd = TRUE)
+# }
+# 
+# if (PLOT){
+#   par(mar= c(5, 5, 1, 8))
+#   pal <- brewer.pal(3, "Dark2")
+#   misclass_plot <- plot(threshold_vals,
+#                         false_neg_vals,
+#                         xlab = "Threshold",
+#                         ylab = "Rate",
+#                         type = "l",
+#                         col = pal[1],
+#                         lwd = 5)
+#   lines(x = threshold_vals,
+#         y = false_pos_vals,
+#         col = pal[2],
+#         lwd = 5)
+#   lines(x = threshold_vals,
+#         y = misclass_vals,
+#         col = pal[3],
+#         lwd = 5)
+#   legend("topright",
+#          inset=c(-0.2,0),
+#          legend = c("False negative", "False positive", "Misclassification"),
+#          col = pal,
+#          bty = "n",
+#          pch = 20,
+#          pt.cex = 2,
+#          cex = 0.8,
+#          xpd = TRUE)
+# }
+# 
+# # Should find that a threshold of about 50% looks optimal!
+# cat("Difference between error rates is minimised when threshold is",
+#     threshold_vals[which.min(abs(false_neg_vals-false_pos_vals))],
+#     ".\n")
+# 
+# # How many times to variables appear?
+# ord <- order(bartfit$varcount.mean, decreasing = T)
+# varcount_df <- data.frame((1/ntree) * bartfit$varcount.mean)
+# 
+# if (PLOT){
+#   par(mar= c(14, 5, 1, 8))
+#   varimp_ord <- data.frame(varcount_df[ord, ])
+#   rownames(varimp_ord) <- rownames(varcount_df)[ord]
+#   short_varnames <- expand_names(rownames(varimp_ord))
+#   diet_vars <- which(rownames(varimp_ord) %like% "Diet.")
+#   forstrat_vars <- which(rownames(varimp_ord) %like% "ForStrat.")
+#   other_vars <- 1:ncol(x)
+#   other_vars <- other_vars[-which(other_vars %in% diet_vars)]
+#   other_vars <- other_vars[-which(other_vars %in% forstrat_vars)]
+#   bar_cols <- vector(length = ncol(x))
+#   pal <- brewer.pal(3, "Dark2")
+#   bar_cols[diet_vars] <- pal[1]
+#   bar_cols[forstrat_vars] <- pal[2]
+#   bar_cols[other_vars] <- pal[3]
+#   varimp_bars <- barplot(varimp_ord[, 1],
+#                          border = F,
+#                          las = 2,
+#                          names.arg = short_varnames,
+#                          col = bar_cols,
+#                          ylab = "Mean appearances\n per tree")
+#   legend("topright",
+#          inset=c(-0.225,0),
+#          legend = c("Dietary (% of calories)", "Foraging (% strategy)", "Other"),
+#          col = pal,
+#          bty = "n",
+#          pch = 20,
+#          pt.cex = 2,
+#          cex = 0.8,
+#          xpd = TRUE)
+# }
+# 
+# predict_function <- function(model, data){
+#   yhat.test <- plogis(predict(model, data)$yhat.test - model$binaryOffset)
+#   yhat.maj <- colSums(yhat.test) >= .5*nrow(yhat.test)
+#   return(yhat.maj)
+# }
+# 
+# residual_function <- function(model, data, target_data, predict_function){
+#   yhat.maj <- predict_function(model, data)
+#   res <- (length(which((!yhat.maj)&target_data)) +
+#                     length(which(yhat.maj&!target_data)))
+#   return(res)
+# }
+# 
+# bart_explainer <- explain.default(bartfit,
+#                       data = xtrain,
+#                       y = ytrain,
+#                       predict_function = predict_function,
+#                       residual_function = residual_function,
+#                       type = "classification")
+# 
+# bart_performance <- model_performance(bart_explainer)
+# cat("AUC is", bart_performance$measures$auc, ".\n")
+# 
+# nearest_host_profile <- model_profile(bart_explainer,
+#                                      variables = "nearest_host_distance")
+# anatidae_profile <- model_profile(bart_explainer,
+#                                       variables = "anatidae_distance")
+# larus_profile <- model_profile(bart_explainer,
+#                                        variables = "larus_distance")
+# seed_profile <- model_profile(bart_explainer,
+#                                variables = "Diet.Seed")
+# 
+# if (VARIMPS){
+#   # Do a more thorough variable importance
+#   tree_nos <- c(10,
+#                 20,
+#                 50,
+#                 100,
+#                 150,
+#                 200)
+#   
+#   for (i in 1:(length(tree_nos)-1)){
+#     this_bartfit <- lbart(xtrain,
+#                           ytrain,
+#                           x.test = xtest,
+#                           ntree = tree_nos[i])
+#     if (i==1){
+#       varimp_df <- data.frame(this_bartfit$varcount.mean/sum(this_bartfit$varcount.mean))
+#     }
+#     else{
+#       varimp_df <- data.frame(varimp_df, this_bartfit$varcount.mean/sum(this_bartfit$varcount.mean))
+#     }
+#   }
+#   varimp_df <- data.frame(varimp_df, varcount_df)
+#   
+#   pal <- brewer.pal(6, "Dark2")
+#   
+#   par(mar= c(15, 8, 1, 5))
+#   matplot(varimp_df[ord, ],
+#           type = "l",
+#           xlab = "",
+#           ylab = "Normalised mean\n appearances per tree",
+#           xaxt = "n",
+#           col=pal,
+#           lty = 1)
+#   for (i in 1:length(tree_nos)){
+#     points(x = 1:length(ord),
+#            y = varimp_df[ord, i],
+#            col = pal[i],
+#            pch = 16)
+#   }
+#   axis(1, at = 1:ncol(x), labels = short_varnames, las = 2)
+#   legend("topright",
+#          inset=c(-0.125,0),
+#          legend = tree_nos,
+#          title = "Number of\n trees",
+#          col = pal,
+#          bty = "n",
+#          pch = 20,
+#          pt.cex = 2,
+#          cex = 0.8,
+#          xpd = TRUE)
+# }
