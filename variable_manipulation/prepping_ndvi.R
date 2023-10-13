@@ -21,10 +21,20 @@ MODIStsp_get_prodlayers("(M*D13A2)")
 # Downloading the boundary 
 #map_boundary_euro <- rgeoboundaries::geoboundaries("Mongolia")
 map_boundary_terra <- terra::vect("output/euro_map.shp")
+ext(map_boundary_terra)
+
+rast <- terra::rast("output/euro_rast.tif")
+rast
+map_lonlat <- terra::project(rast, "epsg:4326")
+map_lonlat
+
 map_boundary <- st_read("output/euro_map.shp")
 plot(map_boundary)
 
+#map_boundary_lonlat <- st_transform(map_boundary, crs = crs(map_lonlat))
+
 eurounion <- st_union(map_boundary)
+#eurounion <- st_union(map_boundary_lonlat)
 plot(eurounion)
 eurounion
 
@@ -33,25 +43,32 @@ plot(map_boundary_euro)
 
 # Defining filepath to save downloaded spatial file
 spatial_filepath <- "data/vegetation_data/euro.shp"
+#spatial_filepath <- "data/vegetation_data/euro_lonlat.shp"
+
 # Saving downloaded spatial file on to our computer
 st_write(map_boundary_euro, paste0(spatial_filepath))
 
 MODIStsp_get_prodnames()
 
+## NB - as of 13/10/2023 the code below does not work with the updated version of R!!! 
+## Can use bbox as the bounding box but hard to work with the MODIS projection. 
+## As such this was run on my old laptop which has an old version of R on it.
+
 tictoc::tic()
 MODIStsp(gui             = FALSE,
-         out_folder      = "data/vegetation_data",
-         out_folder_mod  = "data/vegetation_data",
+         out_folder      = "data/vegetation_data/vegetation_data_2022",
+         out_folder_mod  = "data/vegetation_data/vegetation_data_2022",
          selprod = "Vegetation_Indexes_16Days_1Km (M*D13A2)",
          bandsel = c("NDVI"),
          user            = "sarahhayes" ,
          prod_version    = "061",  
          password        = "NASATigtogs43!",
-         start_date      = "2019.01.01", 
-         end_date        = "2019.12.31", 
+         start_date      = "2022.01.01", 
+         end_date        = "2022.12.31", 
          verbose         = FALSE,
          spatmeth        = "file",
          spafile         = spatial_filepath,
+         output_proj = "epsg:3035",
          out_format      = "GTiff")
 tictoc::toc()
 
@@ -61,7 +78,7 @@ tictoc::toc()
 
 # A google search suggests the MOD is Terra and the MYD is Aqua so assume we want Terra? 
 
-NDVI_raster <- terra::rast("data/vegetation_data/euro/VI_16Days_1Km_v61/NDVI/MOD13A2_NDVI_2019_033.tif")
+NDVI_raster <- terra::rast("data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_129.tif")
 NDVI_raster
 plot(NDVI_raster)
 
@@ -70,40 +87,40 @@ plot(NDVI_raster)
 # plot(MYD_raster)
 
 # Try and import them all in a stack
-rastlist <- list.files(path = "data/vegetation_data/euro/VI_16Days_1Km_v61/NDVI", 
-                       pattern='.tif$', all.files= T, full.names= T)
+# rastlist <- list.files(path = "data/vegetation_data/euro/VI_16Days_1Km_v61/NDVI", 
+#                        pattern='.tif$', all.files= T, full.names= T)
 
-ndvi_stack <- terra::rast(rastlist)
+# ndvi_stack <- terra::rast(rastlist)
 # this works but we probably want them in the separate seasons so do as 4 sections. 
 # these files are generated q 16 days so won't fit exactly into quarters. 
 
-first_quart <- c("data/vegetation_data/euro/VI_16Days_1Km_v61/NDVI/MOD13A2_NDVI_2019_001.tif",
-                 "data/vegetation_data/euro/VI_16Days_1Km_v61/NDVI/MOD13A2_NDVI_2019_017.tif",
-                 "data/vegetation_data/euro/VI_16Days_1Km_v61/NDVI/MOD13A2_NDVI_2019_033.tif",
-                 "data/vegetation_data/euro/VI_16Days_1Km_v61/NDVI/MOD13A2_NDVI_2019_049.tif",
-                 "data/vegetation_data/euro/VI_16Days_1Km_v61/NDVI/MOD13A2_NDVI_2019_065.tif",
-                 "data/vegetation_data/euro/VI_16Days_1Km_v61/NDVI/MOD13A2_NDVI_2019_081.tif")
+first_quart <- c("data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_001.tif",
+                 "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_017.tif",
+                 "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_033.tif",
+                 "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_049.tif",
+                 "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_065.tif",
+                 "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_081.tif")
 
 
-second_quart <- c("data/vegetation_data/euro/VI_16Days_1Km_v61/NDVI/MOD13A2_NDVI_2019_097.tif",
-                 "data/vegetation_data/euro/VI_16Days_1Km_v61/NDVI/MOD13A2_NDVI_2019_113.tif",
-                 "data/vegetation_data/euro/VI_16Days_1Km_v61/NDVI/MOD13A2_NDVI_2019_129.tif",
-                 "data/vegetation_data/euro/VI_16Days_1Km_v61/NDVI/MOD13A2_NDVI_2019_145.tif",
-                 "data/vegetation_data/euro/VI_16Days_1Km_v61/NDVI/MOD13A2_NDVI_2019_161.tif",
-                 "data/vegetation_data/euro/VI_16Days_1Km_v61/NDVI/MOD13A2_NDVI_2019_177.tif")
+second_quart <- c("data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_097.tif",
+                 "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_113.tif",
+                 "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_129.tif",
+                 "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_145.tif",
+                 "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_161.tif",
+                 "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_177.tif")
 
-third_quart <- c("data/vegetation_data/euro/VI_16Days_1Km_v61/NDVI/MOD13A2_NDVI_2019_193.tif",
-                  "data/vegetation_data/euro/VI_16Days_1Km_v61/NDVI/MOD13A2_NDVI_2019_209.tif",
-                  "data/vegetation_data/euro/VI_16Days_1Km_v61/NDVI/MOD13A2_NDVI_2019_225.tif",
-                  "data/vegetation_data/euro/VI_16Days_1Km_v61/NDVI/MOD13A2_NDVI_2019_241.tif",
-                  "data/vegetation_data/euro/VI_16Days_1Km_v61/NDVI/MOD13A2_NDVI_2019_257.tif")
+third_quart <- c("data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_193.tif",
+                  "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_209.tif",
+                  "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_225.tif",
+                  "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_241.tif",
+                  "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_257.tif")
 
-fourth_quart <- c("data/vegetation_data/euro/VI_16Days_1Km_v61/NDVI/MOD13A2_NDVI_2019_273.tif",
-                  "data/vegetation_data/euro/VI_16Days_1Km_v61/NDVI/MOD13A2_NDVI_2019_289.tif",
-                  "data/vegetation_data/euro/VI_16Days_1Km_v61/NDVI/MOD13A2_NDVI_2019_305.tif",
-                  "data/vegetation_data/euro/VI_16Days_1Km_v61/NDVI/MOD13A2_NDVI_2019_321.tif",
-                  "data/vegetation_data/euro/VI_16Days_1Km_v61/NDVI/MOD13A2_NDVI_2019_337.tif",
-                  "data/vegetation_data/euro/VI_16Days_1Km_v61/NDVI/MOD13A2_NDVI_2019_353.tif")
+fourth_quart <- c("data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_273.tif",
+                  "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_289.tif",
+                  "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_305.tif",
+                  "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_321.tif",
+                  "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_337.tif",
+                  "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_353.tif")
 
 first_stack <- terra::rast(first_quart)
 second_stack <- terra::rast(second_quart)
@@ -130,6 +147,8 @@ plot(fourth_stack_mean)
 blank_3035 <- terra::rast("output/euro_rast.tif")
 
 first_stack_prj <- terra::project(first_stack_mean, blank_3035)
+# as we haven't specified a method, the default will be bilinear interpolation as 
+# the value is numeric
 first_stack_prj
 plot(first_stack_prj)
 
@@ -138,9 +157,10 @@ third_stack_prj <- terra::project(third_stack_mean, blank_3035)
 fourth_stack_prj <- terra::project(fourth_stack_mean, blank_3035)
 
 second_stack_mean
+plot(second_stack_prj)
 
 # Cropping the data
-NDVI_raster <- raster::mask(NDVI_raster, as_Spatial(map_boundary))
+#NDVI_raster <- raster::mask(NDVI_raster, as_Spatial(map_boundary))
 
 # Dividing values by 10000 to have NDVI values between -1 and 1
 first_stack_prj <- first_stack_prj/10000
@@ -154,15 +174,17 @@ fourth_stack_prj <- fourth_stack_prj/10000
 plot(fourth_stack_prj)
 
 # save the rasters
-# terra::writeRaster(first_stack_prj, 
-#                    "variable_manipulation/variable_outputs/ndvi_first_quart.tif")
-# terra::writeRaster(second_stack_prj, 
-#                    "variable_manipulation/variable_outputs/ndvi_second_quart.tif")
-# terra::writeRaster(third_stack_prj, 
-#                    "variable_manipulation/variable_outputs/ndvi_third_quart.tif")
-# terra::writeRaster(fourth_stack_prj, 
-#                    "variable_manipulation/variable_outputs/ndvi_fourth_quart.tif")
+terra::writeRaster(first_stack_prj, 
+                    "variable_manipulation/variable_outputs/ndvi_first_quart_2022.tif")
+terra::writeRaster(second_stack_prj, 
+                    "variable_manipulation/variable_outputs/ndvi_second_quart_2022.tif")
+terra::writeRaster(third_stack_prj, 
+                    "variable_manipulation/variable_outputs/ndvi_third_quart_2022.tif")
+terra::writeRaster(fourth_stack_prj, 
+                    "variable_manipulation/variable_outputs/ndvi_fourth_quart_2022.tif")
 
+
+## As don't use the points - below not updated for 2022. CSV is thus still 2019
 
 ## extract the data 
 points_3035 <- terra::as.points(blank_3035)

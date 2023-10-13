@@ -18,7 +18,7 @@ global_elev_5
 # read in reference raster
 euro_rast_10 <- terra::rast("output/euro_rast_10k.tif") # first look on larger scale
 
-elev_euro_5_10 <- terra::project(x = global_elev, y = euro_rast_10, method = "mode") #
+elev_euro_5_10 <- terra::project(x = global_elev_5, y = euro_rast_10, method = "mode") #
 # for now using mode whilst working it out. 
 elev_euro_5_10
 plot(elev_euro_5_10)
@@ -29,8 +29,11 @@ plot(elev_euro_5_10)
 euro_rast <- terra::rast("output/euro_rast.tif")
 
 global_elev_0.5 <- elevation_global(res = 0.5, path = "data/variables/elevation/geodata_global_res0.5")
-global_elev_0.5 # 0.00833 degrees.  from this webpage: https://longlovemyu.com/metrics_gis/
+global_elev_0.5 # 0.00833 degrees (0r 30 seconds).  from this webpage: https://longlovemyu.com/metrics_gis/
 ## this is about 928m at the equator. 
+
+head(global_elev_0.5)
+plot(global_elev_0.5)
 
 elev_euro_0.5_max <- terra::project(x = global_elev_0.5, y = euro_rast, method = "max") #
 # first_looking at max. 

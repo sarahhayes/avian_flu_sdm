@@ -22,7 +22,7 @@ crs <- "epsg:3035"
 
 blank_raster <- terra::rast("output/euro_rast.tif")
 blank_raster
-terra::xyFromCell(blank_3035, 1) # coordinates of the centre of the first cell
+#terra::xyFromCell(blank_3035, 1) # coordinates of the centre of the first cell
 plot(blank_raster)
 
 glwd_crop_prj <- terra::project(x = glwd_rast, y = blank_raster, method = "near") 
@@ -174,12 +174,12 @@ plot(masked, breaks = c(0, bp_500),
      col= c("white", viridis::viridis(14)), background = "light blue")
 
 # ideally re-do this in km. 
-pdf("plots/distance_to_water_masked.pdf", width = 7, height = 5)
+#pdf("plots/distance_to_water_masked.pdf", width = 7, height = 5)
 plot(masked, breaks = c(0, bp_500), 
      plg = list(title = "Distance in m"),
      pax=list(side=1:2, cex.axis = 0.8),
      col= c("white", viridis::viridis(14)), background = "grey")
-dev.off()
+#dev.off()
 
 ### Extracting the values 
 # make a points object using the centre of each pixel from the reference raster
