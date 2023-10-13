@@ -2,7 +2,7 @@
 # ecological and phylogenetic factors to create rasters encoding the abundance
 # of birds with different qualities.
 
-PLOT <- FALSE # Make plots/animations
+PLOT <- TRUE # Make plots/animations
 HQ_ONLY <- TRUE # Determines whether to use only species with high-quality abundance data in eBird
 QUARTERLY <- TRUE # Generate quarterly (weeks 1-13 etc) rasters, otherwise do weekly
 SAVE_RAST <- TRUE # Save output rasters
@@ -954,6 +954,7 @@ idx_to_download <- which(sp_df$species_code %in% not_downloaded)
                              product = "percent-population",
                              period = "weekly",
                              resolution = "lr")
+    this_rast <- 1e-2 * this_rast # Convert from percentages to proportions
     this_rast <- project(x = this_rast, y = blank_3035, method = "near")
     
     # Get rid of NA's:
@@ -978,10 +979,12 @@ idx_to_download <- which(sp_df$species_code %in% not_downloaded)
     if (species_factors$nearest_host_distance < nhost_thresh){
       host_dist_rast <- host_dist_rast + (species_factors$pop_sizes * this_rast)
     }
+    
+    # Behavioural outputs are percentages so need to be scaled down by 1e-2
     around_surf_rast <- around_surf_rast +
-      species_factors$EltonTraits$ForStrat.wataroundsurf * (species_factors$pop_sizes * this_rast)
+      1e-2 * species_factors$EltonTraits$ForStrat.wataroundsurf * (species_factors$pop_sizes * this_rast)
     below_surf_rast <- below_surf_rast +
-      species_factors$EltonTraits$ForStrat.watbelowsurf * (species_factors$pop_sizes * this_rast)
+      1e-2 * species_factors$EltonTraits$ForStrat.watbelowsurf * (species_factors$pop_sizes * this_rast)
     
     no_processed <- no_processed + 1
     
@@ -1004,11 +1007,11 @@ idx_to_download <- which(sp_df$species_code %in% not_downloaded)
 }
 
 # Need to correct for abundance being percentage:
-cong_rast <- 1e-2 * cong_rast
-migr_rast <- 1e-2 * migr_rast
-around_surf_rast <- 1e-2 * around_surf_rast
-below_surf_rast <- 1e-2 * below_surf_rast
-host_dist_rast <- 1e-2 * host_dist_rast
+cong_rast <- cong_rast
+migr_rast <- migr_rast
+around_surf_rast <- around_surf_rast
+below_surf_rast <- below_surf_rast
+host_dist_rast <- host_dist_rast
 
 if (SAVE_RAST){
   writeRaster(cong_rast, "output/cong_rast.tif", overwrite=TRUE)
