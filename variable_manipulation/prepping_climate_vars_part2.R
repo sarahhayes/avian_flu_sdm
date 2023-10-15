@@ -187,3 +187,68 @@ terra::writeRaster(mean_mean_first_quart, "data/variables/climate/climate_preppe
 terra::writeRaster(mean_mean_second_quart, "data/variables/climate/climate_prepped/mean_temp_q2.tif")
 terra::writeRaster(mean_mean_third_quart, "data/variables/climate/climate_prepped/mean_temp_q3.tif")
 terra::writeRaster(mean_mean_fourth_quart, "data/variables/climate/climate_prepped/mean_temp_q4.tif")
+
+## labels in the means are still as for min. Plot the march mins next to the mean just to do a visual check
+## that isn't the same. 
+
+plot(files_mean_first_quart)
+plot(mar_min, add = T)
+
+files_mean_first_quart
+
+q1_min_means <- terra::app(files_mean_first_quart, min)
+q1_min_means # seems to have selected the minimums of the files
+q1_max_means <- terra::app(files_mean_first_quart, max)
+q1_max_min  <- c(q1_min_means, q1_max_means)
+q1_mean_range <- terra::diff(q1_max_min)
+
+plot(q1_mean_range)
+
+# run some checks
+
+test_dat <- seq(1,50000, 500)
+
+q1_test_min <- q1_min_means[test_dat]
+q1_test_max <- q1_max_means[test_dat]
+q1_test_range <- q1_mean_range[test_dat]
+
+test_df <- cbind(q1_test_min, q1_test_max, q1_test_range)
+colnames(test_df) <- c("min", "max", "diff")
+
+test_df$check_range <- test_df$max  - test_df$min
+
+nrow(test_df[which(test_df$check_range != test_df$diff),])
+
+## Seems to be OK so run for the other quarters. 
+q2_min_means <- terra::app(files_mean_second_quart, min)
+q2_max_means <- terra::app(files_mean_second_quart, max)
+q2_max_min  <- c(q2_min_means, q2_max_means)
+q2_mean_range <- terra::diff(q2_max_min)
+plot(q2_mean_range)
+
+## Q3
+q3_min_means <- terra::app(files_mean_third_quart, min)
+files_mean_third_quart
+q3_min_means
+q3_max_means <- terra::app(files_mean_third_quart, max)
+q3_max_min  <- c(q3_min_means, q3_max_means)
+q3_mean_range <- terra::diff(q3_max_min)
+plot(q3_mean_range)
+
+
+## Q4
+## Seems to be OK so run for the other quarters. 
+q4_min_means <- terra::app(files_mean_fourth_quart, min)
+q4_max_means <- terra::app(files_mean_fourth_quart, max)
+files_mean_fourth_quart
+q4_max_means
+q4_max_min  <- c(q4_min_means, q4_max_means)
+q4_mean_range <- terra::diff(q4_max_min)
+plot(q4_mean_range)
+
+
+terra::writeRaster(q1_mean_range, "data/variables/climate/climate_prepped/variation_in_quarterly_mean_temp_q1.tif")
+terra::writeRaster(q2_mean_range, "data/variables/climate/climate_prepped/variation_in_quarterly_mean_temp_q2.tif")
+terra::writeRaster(q3_mean_range, "data/variables/climate/climate_prepped/variation_in_quarterly_mean_temp_q3.tif")
+terra::writeRaster(q4_mean_range, "data/variables/climate/climate_prepped/variation_in_quarterly_mean_temp_q4.tif")
+
