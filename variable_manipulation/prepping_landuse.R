@@ -1,9 +1,12 @@
 ### 09/08/2023
 ### Looking at ways to get the land cover data
-## thi script is based on this webpage https://rspatial.org/modis/2-download.html
+## this script is based on this webpage https://rspatial.org/modis/2-download.html
 
 #install.packages("remotes")
 #remotes::install_github("rspatial/luna")
+
+#install.packages('luna', repos='https://rspatial.r-universe.dev')
+
 
 rm(list = ls())
 
@@ -28,8 +31,8 @@ product <- "MCD12Q1"
 # we define some parameters for the data we want: 
 # product name, start and end date, and area of interest.
 
-start <- "2020-01-01"
-end <- "2020-12-31"
+start <- "2022-01-01"
+end <- "2022-12-31"
 
 # To define the area of interest, we can define a spatial extent,
 # or use an object that has an extent. 
@@ -56,7 +59,7 @@ mf <- luna::getModis(product, start, end, aoi=map_rast_lonlat,
 mf
 
 
- #To download the tiles, usually you would download them to a folder 
+# To download the tiles, usually you would download them to a folder 
 # where you save the data for your project. 
 
 datadir <- file.path("data/landcover_data/euro")
@@ -103,37 +106,53 @@ plot(dem)
 
 ## save this raster
 # terra::writeRaster(dem, "data/landcover_data/landcover_type1_full_raster.tif")
-dem <- terra::rast("data/landcover_data/landcover_type1_full_raster.tif")
+#terra::writeRaster(dem, "data/landcover_data/landcover_type1_full_raster_2022.tif")
+
+#dem <- terra::rast("data/landcover_data/landcover_type1_full_raster.tif")
+dem <- terra::rast("data/landcover_data/landcover_type1_full_raster_2022.tif")
 plot(dem)
 ## Now we need to change projection and crop
 
-lc1_rast <- terra::project(dem, map_rast)
+## first ensure that the values are changed to categorical
+
+dem_fact <- terra::as.factor(dem)
+summary(dem_fact)
+
+lc1_rast <- terra::project(dem_fact, map_rast)
 lc1_rast
 plot(lc1_rast)
 
-lc1_factor <- terra::as.factor(lc1_rast)
-plot(lc1_factor)
-lc1_factor
+#lc1_factor <- terra::as.factor(lc1_rast)
+#plot(lc1_factor)
+#lc1_factor
 
 # save this raster 
-#writeRaster(lc1_factor, "variable_manipulation/variable_outputs/landcover_output_full.tif")
+#writeRaster(lc1_rast, "variable_manipulation/variable_outputs/landcover_output_full.tif",
+#            overwrite = T)
+writeRaster(lc1_rast, "variable_manipulation/variable_outputs/landcover_output_full_2022.tif",
+            overwrite = T)
+
+
 
 # make a points object using the centre of each pixel from the blank raster
 points_3035 <- terra::as.points(map_rast)
 points_3035
 
 tictoc::tic()
-lc_res_full_fact <- terra::extract(lc1_factor, points_3035, method = "simple", xy = T)
+lc_res_full_fact <- terra::extract(lc1_rast, points_3035, method = "simple", xy = T)
 tictoc::toc()
 summary(lc_res_full_fact[is.na(lc_res_full_fact)])
 
 # write.csv(lc_res_full_fact,
 #           "variable_manipulation/variable_outputs/landcover_output_full_factor.csv",
 #           row.names = F)
-#  
+  
+ # write.csv(lc_res_full_fact,
+ #           "variable_manipulation/variable_outputs/landcover_output_full_factor_2022.csv",
+ #           row.names = F)
 
-
-####
+#### Don't need this bit below?
+ 
 masked <- terra::mask(lc1_rast, map_rast)
 plot(masked)
 table(values(masked))
