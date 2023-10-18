@@ -1,6 +1,6 @@
-# In this script we combine abundance estimates from eBird with species-specific
-# ecological and phylogenetic factors to create rasters encoding the abundance
-# of birds with different qualities.
+# In this script we plot the abundance of all anseriformes to see whether there
+# is anywhere in Europe that doesn't have any. The outcome of this determines
+# how we should calculate phylogenetic richness/diversity.
 
 PLOT <- TRUE # Make plots/animations
 HQ_ONLY <- TRUE # Determines whether to use only species with high-quality abundance data in eBird
@@ -20,7 +20,6 @@ library(ggfortify)
 library(gridExtra)
 library(pdftools)
 require(PhyloMeasures)
-library(pracma)
 library(raster)
 library(RColorBrewer)
 library(readxl)
@@ -28,7 +27,6 @@ library(rnaturalearth)
 library(sf)
 library(stringr)
 library(terra)
-library(tidyverse)
 
 # First get list of birds which appear in Europewith eBird species codes, along
 # with estimates of global population sizes.
@@ -613,6 +611,87 @@ cat("Name matching fails at", length(which(!matched_locs)), "locations.")
 traits_by_eBird_species <- EltonTraits_df[position_in_EltonTraits, ]
 sp_df$EltonTraits <- traits_by_eBird_species
 
+
+################################################################################
+# Incorporate additional ecological data from IUCN
+
+IUCN_df <- rbind(
+  read.csv("data/eco_phylo_data/iucn-data-vol1/all_other_fields.csv"),
+  read.csv("data/eco_phylo_data/iucn-data-vol2/all_other_fields.csv"))
+IUCN_df <- distinct(IUCN_df)
+IUCN_df$scientificName <- sapply(IUCN_df$scientificName, tolower)
+
+# Inspect coding of congregatory and migratory behaviours: 
+cong_vals <- unique(IUCN_df$Congregatory.value)
+move_vals <- unique(IUCN_df$MovementPatterns.pattern)
+cat("Possible values of Congregatory.value are",
+    cong_vals,
+    sep = "\n")
+cat("Possible values of MovementPatterns.pattern are",
+    move_vals,
+    sep = "\n")
+
+# Set congregatory indicator to true if dispersive or year-round:
+IUCN_df$is_congregatory <- (IUCN_df$Congregatory.value != "")
+
+# Set migratory indicator to true if recorded as full migrant or not known:
+IUCN_df$is_migratory <- (IUCN_df$MovementPatterns.pattern == "Full Migrant") |
+  (IUCN_df$MovementPatterns.pattern == "Unknown")
+
+IUCN_df <- IUCN_df[, c("scientificName",
+                       "is_congregatory",
+                       "is_migratory")]
+
+# Consolidate lines that differ only in fields we don't care about:
+IUCN_df <- distinct(IUCN_df)
+
+# Check if we can do IUCN to eBird matches by binomial name:
+has_IUCN_data <- sapply(1:nrow(sp_df),
+                        FUN = function(i){
+                          (length(intersect(sp_df$synonyms[i, ], IUCN_df$scientificName))) > 0
+                        })
+cat("There are",
+    length(which(!has_IUCN_data)),
+    "species in eBird which can not be matched to the IUCN data.")
+# This is an easy fix:
+IUCN_df$scientificName[
+  which(IUCN_df$scientificName=="suthora webbiana")
+] <- "sinosuthora webbiana"
+
+multiple_IUCN_matches <- sapply(1:nrow(sp_df),
+                                FUN = function(i){
+                                  (length(intersect(sp_df$synonyms[i, ], IUCN_df$scientificName))) > 1
+                                })
+cat("There are",
+    length(which(multiple_IUCN_matches)),
+    "species in eBird with multiple matches in the IUCN data.")
+
+# Reduce to cases where we can't let binomial name take priority:
+problem_cases <- sapply(1:nrow(sp_df),
+                        FUN = function(i){
+                          (!(sp_df$scientific_name[i] %in% IUCN_df$scientificName)) &
+                            ((length(intersect(sp_df$synonyms[i, ], IUCN_df$scientificName))) > 1)
+                        })
+cat("There are",
+    length(which(problem_cases)),
+    "ambiguous cases which can not be resolved with default name.")
+
+# Find position of each species from eBird in IUCN data:
+position_in_IUCN <- sapply(
+  1:nrow(sp_df),
+  FUN = function(i){
+    if (sp_df$scientific_name[i] %in% IUCN_df$scientificName){
+      return(which(IUCN_df$scientificName == sp_df$scientific_name[i]))
+    }
+    else{
+      return(which(IUCN_df$scientificName %in% sp_df$synonyms[i, ]))
+    }
+  }
+)
+
+IUCN_by_eBird_species <- IUCN_df[position_in_IUCN, ]
+sp_df$IUCN <- IUCN_by_eBird_species
+
 ################################################################################
 # Bring in phylogenetic data
 
@@ -677,27 +756,6 @@ cat("Phylogeny can not be matched to",
     "species in eBird using names only.")
 # Should find there are no missing species!
 
-# These species aren't in eBird but are needed for an EltonTraits-BirdTree
-# matchup later:
-rownames(dmat_mean)[
-  which(rownames(dmat_mean)=="anthus longicaudatus")
-] <- "anthus vaalensis"
-rownames(dmat_mean)[
-  which(rownames(dmat_mean)=="polioptila clementsi")
-] <- "polioptila guianensis"
-rownames(dmat_mean)[
-  which(rownames(dmat_mean)=="hypositta perdita")
-] <- "oxylabes madagascariensis"
-
-# This next species just seems to be missing from AVONET so we remove it:
-dmat_mean <- dmat_mean[
-  -which(rownames(dmat_mean)=="amaurospiza carrizalensis"),
-  -which(rownames(dmat_mean)=="amaurospiza carrizalensis") ]
-
-rownames(dmat_mean)[
-  which(rownames(dmat_mean)=="lophura hatinhensis")
-] <- "lophura edwardsi"
-
 # See which (if any) have ambiguous matches:
 multiple_phylo_matches <- sapply(1:nrow(sp_df),
                                  FUN = function(i){
@@ -715,10 +773,6 @@ identical(multiple_Elton_matches, multiple_phylo_matches)
 
 nearest_host_df$phylo_sp[
   which(nearest_host_df$phylo_sp=="dendroica petechia")
-] <- "setophaga petechia"
-
-rownames(dmat_mean)[
-  which(rownames(dmat_mean)=="dendroica petechia")
 ] <- "setophaga petechia"
 
 # Find position of each species from eBird in phylo data:
@@ -761,76 +815,314 @@ if (HQ_ONLY){
 }
 
 ################################################################################
-# Experiment: see if distance between species is always same up to order
+# Now get abundance rasters for species and convolute with eco/phylo factors
 
-orders_in_dmat <- sapply(rownames(dmat_mean),
-                         FUN = function(x){
-                           EltonTraits_df$IOCOrder[which(EltonTraits_df$Scientific==x)[1]]})
-unique_ords <- unique(orders_in_dmat)
-no_orders = n_distinct(orders_in_dmat)
-order_idx_pairs <- meshgrid(1:no_orders, 1:no_orders)
-order_idx_pairs$X <- c(order_idx_pairs$X)
-order_idx_pairs$Y <- c(order_idx_pairs$Y)
-order_combs <- data.frame(sp1=orders_in_dmat[order_idx_pairs$X],
-                          sp2=orders_in_dmat[order_idx_pairs$Y])
-order_dmat_min <- matrix(0, no_orders, no_orders)
-rownames(order_dmat_min) <- unique_ords
-colnames(order_dmat_min) <- unique_ords
-order_dmat_max <- matrix(0, no_orders, no_orders)
-rownames(order_dmat_max) <- unique_ords
-colnames(order_dmat_max) <- unique_ords
-for (i in 2:no_orders){
-  cat("i=", unique_ords[i], "\n")
-  for (j in 1:i-1){
-    cat("j=", unique_ords[j], "\n")
-    pairwise_dist_mat <- dmat_mean[which(orders_in_dmat==unique_ords[i]),
-                           which(orders_in_dmat==unique_ords[j])]
-    order_dmat_min[i, j] <- min(pairwise_dist_mat)
-    order_dmat_min[j, i] <- min(pairwise_dist_mat)
-    order_dmat_max[i, j] <- max(pairwise_dist_mat)
-    order_dmat_max[j, i] <- max(pairwise_dist_mat)
+# set the crs we want to use
+crs <- "epsg:3035"
+
+# Create a blank raster with appropriate projection and extent
+blank_3035 <- terra::rast("output/euro_rast_10k.tif")
+euro_ext <- ext(blank_3035)
+
+# Create blank rasters for each of our quantities
+# We will create rasters corresponding to the following traits:
+# Congregatory behaviour
+# Migatory behaviour
+# Foraging around water surface
+# Foraging >5cm below water surface
+# Phylogenetic distance to a confirmed host
+
+if (QUARTERLY){
+  nlyrs <- 4
+  qrtr_bds <- c(0, 13, 26, 39, 52)
+}else{
+  nlyrs <- 52
+}
+
+pop_rast <- rast(nlyrs=nlyrs,
+                 crs=crs,
+                 extent=euro_ext,
+                 res=res(blank_3035))
+
+for (i in 1:nlyrs){
+  pop_rast[[i]] <- 0
+}
+
+sample_idx <- which(sp_df$EltonTraits$IOCOrder %in% c("Anseriformes"))
+no_species <- length(sample_idx)
+
+# # Remove unmatched species from sp_df
+# sp_df <- sp_df[which(sp_df$Avibase_ID %in% matched_data$Avibase_ID), ]
+
+# set.seed(1)
+# sample_idx <- sample(1:nrow(sp_df), no_species)
+
+# Make sure timeout is set high enough so we can actually download the data
+# Ten minutes per dataset should be enough
+if (getOption('timeout') < 10 * 60 * no_species){
+  options(timeout = 10 * 60 * no_species)
+  cat("Setting timeout to",
+      (1 / 60) * getOption('timeout'),
+      "minutes.\n")
+}
+
+# Get number of species already downloaded by searching for codes in ebirdst
+# data directory
+starting_dls <- ebirdst_data_dir() %>% 
+  paste("/2021", sep = "") %>% 
+  list.files()
+total_to_load <- starting_dls %in% sp_df$species_code %>% 
+  which() %>%
+  length()
+no_loaded <- 0
+total_to_download <- no_species - total_to_load
+no_downloaded <- 0
+
+not_downloaded <- setdiff((sp_df$species_code),
+                          (data.frame(starting_dls)$starting_dls))
+idx_to_download <- which(sp_df$species_code %in% not_downloaded)
+
+# Loop over other first no_species species:
+{
+  loop.start <- Sys.time()
+  mean_dl_time <- 0
+  mean_load_time <- 0
+  mean_process_time <- 0
+  no_processed <- 0
+  for (i in 1:no_species) {
+    
+    idx <- sample_idx[i]
+    species_sel <- sp_df$species_code[idx]
+    species_factors <- sp_df[idx, ]
+    
+    if (!(species_sel %in% starting_dls)){
+      dl_start <- Sys.time()
+      dl_flag <- TRUE
+      attempt_count <- 0
+      while (dl_flag){
+        attempt_count <- attempt_count + 1
+        cat("attempt = ", attempt_count, ".\n")
+        path <- try(ebirdst_download(species = species_sel,
+                                     pattern = "_lr_"))
+        if (!inherits(path, "try-error")){
+          dl_flag <- FALSE
+        }
+        if (attempt_count>50){
+          print("Download failed")
+          dl_flag <- FALSE
+        }
+      }
+      no_downloaded <- no_downloaded + 1
+      time.now <- Sys.time()
+      elapsed <- as.numeric(difftime(time.now, dl_start, units = "mins"))
+      mean_dl_time <- (1 / no_downloaded) * 
+        ((no_downloaded - 1) * mean_dl_time + elapsed)
+    }else{
+      load_start <- Sys.time()
+      path <- ebirdst_download(species = species_sel,
+                               pattern = "_lr_")
+      no_loaded <- no_loaded + 1
+      time.now <- Sys.time()
+      elapsed <- as.numeric(difftime(time.now, load_start, units = "mins"))
+      mean_load_time <- (1 / no_loaded) * 
+        ((no_loaded - 1) * mean_load_time + elapsed)
+    }
+    
+    process_start <- Sys.time()
+    
+    this_rast <- load_raster(path = path,
+                             product = "percent-population",
+                             period = "weekly",
+                             resolution = "lr")
+    this_rast <- 1e-2 * this_rast # Convert from percentages to proportions
+    this_rast <- project(x = this_rast, y = blank_3035, method = "near")
+    
+    # Get rid of NA's:
+    this_rast <- replace(this_rast, is.na(this_rast), 0)
+    
+    if (QUARTERLY){
+      this_rast <- lapply(1:nlyrs,
+                          FUN = function(i){
+                            app(this_rast[[qrtr_bds[i]:qrtr_bds[i+1]]], mean)}
+      ) %>%
+        rast
+      set.names(this_rast, c("Qrt1", "Qrt2", "Qrt3", "Qrt4"))
+    }
+    # Do species richness:
+    pop_rast <- pop_rast + species_factors$pop_sizes * this_rast
+    
+    no_processed <- no_processed + 1
+    
+    time.now <- Sys.time()
+    elapsed <- as.numeric(difftime(time.now, process_start, units = "mins"))
+    mean_process_time <- (1 / no_processed) * 
+      ((no_processed - 1) * mean_process_time + elapsed)
+    time_remaining <- (total_to_download - no_downloaded) * mean_dl_time +
+      (total_to_load - no_loaded) * mean_load_time +
+      (no_species - i) * mean_process_time
+    cat(as.numeric(difftime(time.now, loop.start, units="mins")),
+        " minutes elapsed since start, estimated ",
+        time_remaining,
+        " remaining.",
+        i,
+        "of",
+        no_species,
+        "species processed.\n")
   }
 }
 
-# Get difference between min and max distances by order:
-order_dmat_diff <- order_dmat_max - order_dmat_min
-
-# Should find there is one pair of orders where max and min don't match up:
-problem_idx <- which(order_dmat_diff>1e-8, arr.ind=TRUE)
-order_dmat_diff[problem_idx]
-
-# Discrepancy is in distances restricted to hummingbirds and nightjars - these
-# are known to be close and the discrepancy is fairly small, so we're safe
-# assuming distances are uniform up to order level.
-# So, to do max phylo span we just need to look at orders
-
-
-# Plot demonstrating tree-hierarchical nature of distance values:
-anser_dist_df <- data.frame(name=rownames(order_dmat_max),
-                            distance=order_dmat_max["Anseriformes", ])
-
-if (PLOT){
-  # Plot order counts:
-  p <- ggplot(data=anser_dist_df, aes(x=name, y=distance)) + 
-    geom_bar(stat = "identity")
-  p + coord_flip() + 
-    scale_x_discrete(limits=anser_dist_df$name) + 
-    xlab("Order") +
-    ylab("Distance")
+if (SAVE_RAST){
+  writeRaster(pop_rast, "output/anser_pop.tiff", overwrite=TRUE)
 }
 
-# Passerine distances help us get an idea of "nesting" of orders:
-pass_dist_df <- data.frame(name=rownames(order_dmat_max),
-                            distance=order_dmat_max["Passeriformes", ])
-pass_dist_df <- pass_dist_df[order(pass_dist_df$distance,
-                                   decreasing = TRUE), ]
+# Plot locations with at least one anseriforme:
+plot(pop_rast>1)
 
-if (PLOT){
-  # Plot order counts:
-  p <- ggplot(data=pass_dist_df, aes(x=name, y=distance)) + 
-    geom_bar(stat = "identity")
-  p + coord_flip() + 
-    scale_x_discrete(limits=pass_dist_df$name) + 
-    xlab("Order") +
-    ylab("Distance")
+# Greater than zero chance of seeing one:
+plot(pop_rast>0)
+
+################################################################################
+# Try as well with galliformes as well
+
+pop_rast <- rast(nlyrs=nlyrs,
+                 crs=crs,
+                 extent=euro_ext,
+                 res=res(blank_3035))
+
+for (i in 1:nlyrs){
+  pop_rast[[i]] <- 0
 }
+
+sample_idx <- which(sp_df$EltonTraits$IOCOrder %in% c("Anseriformes",
+                                                      "Galliformes"))
+no_species <- length(sample_idx)
+
+# # Remove unmatched species from sp_df
+# sp_df <- sp_df[which(sp_df$Avibase_ID %in% matched_data$Avibase_ID), ]
+
+# set.seed(1)
+# sample_idx <- sample(1:nrow(sp_df), no_species)
+
+# Make sure timeout is set high enough so we can actually download the data
+# Ten minutes per dataset should be enough
+if (getOption('timeout') < 10 * 60 * no_species){
+  options(timeout = 10 * 60 * no_species)
+  cat("Setting timeout to",
+      (1 / 60) * getOption('timeout'),
+      "minutes.\n")
+}
+
+# Get number of species already downloaded by searching for codes in ebirdst
+# data directory
+starting_dls <- ebirdst_data_dir() %>% 
+  paste("/2021", sep = "") %>% 
+  list.files()
+total_to_load <- starting_dls %in% sp_df$species_code %>% 
+  which() %>%
+  length()
+no_loaded <- 0
+total_to_download <- no_species - total_to_load
+no_downloaded <- 0
+
+not_downloaded <- setdiff((sp_df$species_code),
+                          (data.frame(starting_dls)$starting_dls))
+idx_to_download <- which(sp_df$species_code %in% not_downloaded)
+
+# Loop over other first no_species species:
+{
+  loop.start <- Sys.time()
+  mean_dl_time <- 0
+  mean_load_time <- 0
+  mean_process_time <- 0
+  no_processed <- 0
+  for (i in 1:no_species) {
+    
+    idx <- sample_idx[i]
+    species_sel <- sp_df$species_code[idx]
+    species_factors <- sp_df[idx, ]
+    
+    if (!(species_sel %in% starting_dls)){
+      dl_start <- Sys.time()
+      dl_flag <- TRUE
+      attempt_count <- 0
+      while (dl_flag){
+        attempt_count <- attempt_count + 1
+        cat("attempt = ", attempt_count, ".\n")
+        path <- try(ebirdst_download(species = species_sel,
+                                     pattern = "_lr_"))
+        if (!inherits(path, "try-error")){
+          dl_flag <- FALSE
+        }
+        if (attempt_count>50){
+          print("Download failed")
+          dl_flag <- FALSE
+        }
+      }
+      no_downloaded <- no_downloaded + 1
+      time.now <- Sys.time()
+      elapsed <- as.numeric(difftime(time.now, dl_start, units = "mins"))
+      mean_dl_time <- (1 / no_downloaded) * 
+        ((no_downloaded - 1) * mean_dl_time + elapsed)
+    }else{
+      load_start <- Sys.time()
+      path <- ebirdst_download(species = species_sel,
+                               pattern = "_lr_")
+      no_loaded <- no_loaded + 1
+      time.now <- Sys.time()
+      elapsed <- as.numeric(difftime(time.now, load_start, units = "mins"))
+      mean_load_time <- (1 / no_loaded) * 
+        ((no_loaded - 1) * mean_load_time + elapsed)
+    }
+    
+    process_start <- Sys.time()
+    
+    this_rast <- load_raster(path = path,
+                             product = "percent-population",
+                             period = "weekly",
+                             resolution = "lr")
+    this_rast <- 1e-2 * this_rast # Convert from percentages to proportions
+    this_rast <- project(x = this_rast, y = blank_3035, method = "near")
+    
+    # Get rid of NA's:
+    this_rast <- replace(this_rast, is.na(this_rast), 0)
+    
+    if (QUARTERLY){
+      this_rast <- lapply(1:nlyrs,
+                          FUN = function(i){
+                            app(this_rast[[qrtr_bds[i]:qrtr_bds[i+1]]], mean)}
+      ) %>%
+        rast
+      set.names(this_rast, c("Qrt1", "Qrt2", "Qrt3", "Qrt4"))
+    }
+    # Do species richness:
+    pop_rast <- pop_rast + species_factors$pop_sizes * this_rast
+    
+    no_processed <- no_processed + 1
+    
+    time.now <- Sys.time()
+    elapsed <- as.numeric(difftime(time.now, process_start, units = "mins"))
+    mean_process_time <- (1 / no_processed) * 
+      ((no_processed - 1) * mean_process_time + elapsed)
+    time_remaining <- (total_to_download - no_downloaded) * mean_dl_time +
+      (total_to_load - no_loaded) * mean_load_time +
+      (no_species - i) * mean_process_time
+    cat(as.numeric(difftime(time.now, loop.start, units="mins")),
+        " minutes elapsed since start, estimated ",
+        time_remaining,
+        " remaining.",
+        i,
+        "of",
+        no_species,
+        "species processed.\n")
+  }
+}
+
+if (SAVE_RAST){
+  writeRaster(pop_rast, "output/galloanser_pop.tiff", overwrite=TRUE)
+}
+
+# Plot locations with at least one galloanseriforme:
+plot(pop_rast>1)
+
+# Greater than zero chance of seeing one:
+plot(pop_rast>0)
