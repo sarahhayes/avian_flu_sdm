@@ -66,7 +66,7 @@ cat(length(setdiff(sp_df$common_name, pop_size_df$Common.name)),
     "common names are missing from the population size list.")
 sci_mismatch <- which(!(sp_df$scientific_name %in% pop_size_df$Scientific.name))
 com_mismatch <- which(!(sp_df$common_name %in% pop_size_df$Common.name))
-full_mismatch <- intersect(sci_mismatch, com_mismatch)
+full_mismatch <- base::intersect(sci_mismatch, com_mismatch)
 cat(length(full_mismatch),
   "species are missing binomial AND common names in the population size list.")
 cat("Missing species common names are:",
@@ -114,9 +114,9 @@ missing_species_df <- AVONET_df[missing_species_in_AVONET, ]
 print(missing_species_df)
 
 # See which alternative names show up in the population size data:
-alts_from_BirdLife <- intersect(pop_size_df$Scientific.name,
+alts_from_BirdLife <- base::intersect(pop_size_df$Scientific.name,
                                 missing_species_df$Species1_BirdLife)
-alts_from_BirdTree <- intersect(pop_size_df$Scientific.name,
+alts_from_BirdTree <- base::intersect(pop_size_df$Scientific.name,
                                 missing_species_df$Species3_BirdTree)
 
 sub_strs <- sapply(union(alts_from_BirdLife, alts_from_BirdTree),
@@ -195,7 +195,7 @@ cat(length(setdiff(sp_df$common_name, pop_size_df$Common.name)),
     "common names are missing from the population size list.")
 sci_mismatch <- which(!(sp_df$scientific_name %in% pop_size_df$Scientific.name))
 com_mismatch <- which(!(sp_df$common_name %in% pop_size_df$Common.name))
-full_mismatch <- intersect(sci_mismatch, com_mismatch)
+full_mismatch <- base::intersect(sci_mismatch, com_mismatch)
 cat(length(full_mismatch),
     "species are missing binomial AND common names in the population size list.")
 
@@ -459,8 +459,8 @@ no_host_species <- length(host_species_IDs)
 
 host_indicator <- sapply(1:nrow(sp_df),
                FUN = function(i){
-                 (length(intersect(sp_df$synonyms[i, ], CLOVER_df$Host)) + 
-                 length(intersect(sp_df$Avibase_ID[i, ], host_species_IDs))) > 0
+                 (length(base::intersect(sp_df$synonyms[i, ], CLOVER_df$Host)) + 
+                 length(base::intersect(sp_df$Avibase_ID[i, ], host_species_IDs))) > 0
                  })
 sp_df$host_indicator <- host_indicator
 
@@ -554,7 +554,7 @@ cat(length(which(EltonTraits_IDs[, 2]=="-100")), "species were not ID'd.")
 # Check that we can make at least one assignment for all species in eBird:
 has_eco_data <- sapply(1:nrow(sp_df),
            FUN = function(i){
-             (length(intersect(sp_df$synonyms[i, ], EltonTraits_df$Scientific))) > 0
+             (length(base::intersect(sp_df$synonyms[i, ], EltonTraits_df$Scientific))) > 0
            })
 cat("Elton traits can not be matched to",
     length(which(!has_eco_data)),
@@ -564,7 +564,7 @@ cat("Elton traits can not be matched to",
 # See which (if any) have ambiguous matches:
 multiple_Elton_matches <- sapply(1:nrow(sp_df),
                        FUN = function(i){
-                         (length(intersect(sp_df$synonyms[i, ], EltonTraits_df$Scientific))>1)
+                         (length(base::intersect(sp_df$synonyms[i, ], EltonTraits_df$Scientific))>1)
                        })
 cat("There are multiple matches for",
     length(which(multiple_Elton_matches)),
@@ -648,7 +648,7 @@ IUCN_df <- distinct(IUCN_df)
 # Check if we can do IUCN to eBird matches by binomial name:
 has_IUCN_data <- sapply(1:nrow(sp_df),
                        FUN = function(i){
-                         (length(intersect(sp_df$synonyms[i, ], IUCN_df$scientificName))) > 0
+                         (length(base::intersect(sp_df$synonyms[i, ], IUCN_df$scientificName))) > 0
                        })
 cat("There are",
     length(which(!has_IUCN_data)),
@@ -660,7 +660,7 @@ IUCN_df$scientificName[
 
 multiple_IUCN_matches <- sapply(1:nrow(sp_df),
                         FUN = function(i){
-                          (length(intersect(sp_df$synonyms[i, ], IUCN_df$scientificName))) > 1
+                          (length(base::intersect(sp_df$synonyms[i, ], IUCN_df$scientificName))) > 1
                         })
 cat("There are",
     length(which(multiple_IUCN_matches)),
@@ -670,7 +670,7 @@ cat("There are",
 problem_cases <- sapply(1:nrow(sp_df),
                                 FUN = function(i){
                                   (!(sp_df$scientific_name[i] %in% IUCN_df$scientificName)) &
-                                  ((length(intersect(sp_df$synonyms[i, ], IUCN_df$scientificName))) > 1)
+                                  ((length(base::intersect(sp_df$synonyms[i, ], IUCN_df$scientificName))) > 1)
                                 })
 cat("There are",
     length(which(problem_cases)),
@@ -736,8 +736,8 @@ phylo_syns <- phylo_syns_and_IDs[[2]]
 # Identify host species in phylo data:
 hosts_in_phylo <- sapply(1:length(phylo_sp),
                          FUN = function(i){
-                           (length(intersect(phylo_syns[i, ], CLOVER_df$Host)) + 
-                              length(intersect(phylo_IDs[i, ], host_species_IDs))) > 0
+                           (length(base::intersect(phylo_syns[i, ], CLOVER_df$Host)) + 
+                              length(base::intersect(phylo_IDs[i, ], host_species_IDs))) > 0
                          })
 
 dmat_host_cols <- dmat_mean[, which(hosts_in_phylo)]
@@ -749,7 +749,7 @@ nearest_host_df <- data.frame(phylo_sp, nearest_host_distance)
 # Check that we can make at least one assignment for all species in eBird:
 has_phylo_data <- sapply(1:nrow(sp_df),
                        FUN = function(i){
-                         (length(intersect(sp_df$synonyms[i, ], nearest_host_df$phylo_sp))) > 0
+                         (length(base::intersect(sp_df$synonyms[i, ], nearest_host_df$phylo_sp))) > 0
                        })
 cat("Phylogeny can not be matched to",
     length(which(!has_phylo_data)),
@@ -759,7 +759,7 @@ cat("Phylogeny can not be matched to",
 # See which (if any) have ambiguous matches:
 multiple_phylo_matches <- sapply(1:nrow(sp_df),
                                  FUN = function(i){
-                                   (length(intersect(sp_df$synonyms[i, ], nearest_host_df$phylo_sp))>1)
+                                   (length(base::intersect(sp_df$synonyms[i, ], nearest_host_df$phylo_sp))>1)
                                  })
 cat("There are multiple matches for",
     length(which(multiple_phylo_matches)),
@@ -855,6 +855,18 @@ below_surf_rast <- rast(nlyrs=nlyrs,
                         crs=crs,
                         extent=euro_ext,
                         res=res(blank_3035))
+plant_rast <- rast(nlyrs=nlyrs,
+                         crs=crs,
+                         extent=euro_ext,
+                         res=res(blank_3035))
+scav_rast <- rast(nlyrs=nlyrs,
+                        crs=crs,
+                        extent=euro_ext,
+                        res=res(blank_3035))
+vend_rast <- rast(nlyrs=nlyrs,
+                  crs=crs,
+                  extent=euro_ext,
+                  res=res(blank_3035))
 host_dist_rast <- rast(nlyrs=nlyrs,
                         crs=crs,
                         extent=euro_ext,
@@ -873,6 +885,9 @@ for (i in 1:nlyrs){
   migr_rast[[i]] <- 0
   around_surf_rast[[i]] <- 0
   below_surf_rast[[i]] <- 0
+  plant_rast[[i]] <- 0
+  scav_rast[[i]] <- 0
+  vend_rast[[i]] <- 0
   host_dist_rast[[i]] <- 0
   pop_rast[[i]] <- 0
   species_rast[[i]] <-0
@@ -995,6 +1010,12 @@ idx_to_download <- which(sp_df$species_code %in% not_downloaded)
       1e-2 * species_factors$EltonTraits$ForStrat.wataroundsurf * (species_factors$pop_sizes * this_rast)
     below_surf_rast <- below_surf_rast +
       1e-2 * species_factors$EltonTraits$ForStrat.watbelowsurf * (species_factors$pop_sizes * this_rast)
+    plant_rast <- plant_rast +
+      1e-2 * species_factors$EltonTraits$Diet.PlantO * (species_factors$pop_sizes * this_rast)
+    scav_rast <- scav_rast +
+      1e-2 * species_factors$EltonTraits$Diet.Scav * (species_factors$pop_sizes * this_rast)
+    vend_rast <- vend_rast +
+      1e-2 * species_factors$EltonTraits$Diet.Vend * (species_factors$pop_sizes * this_rast)
     
     # Do species richness:
     pop_rast <- species_factors$pop_sizes * this_rast
@@ -1020,18 +1041,14 @@ idx_to_download <- which(sp_df$species_code %in% not_downloaded)
   }
 }
 
-# Need to correct for abundance being percentage:
-cong_rast <- cong_rast
-migr_rast <- migr_rast
-around_surf_rast <- around_surf_rast
-below_surf_rast <- below_surf_rast
-host_dist_rast <- host_dist_rast
-
 if (SAVE_RAST){
   writeRaster(cong_rast, "output/cong_rast.tif", overwrite=TRUE)
   writeRaster(migr_rast, "output/migr_rast.tif", overwrite=TRUE)
   writeRaster(around_surf_rast, "output/around_surf_rast.tif", overwrite=TRUE)
   writeRaster(below_surf_rast, "output/below_surf_rast.tif", overwrite=TRUE)
+  writeRaster(plant_rast, "output/plant_rast.tif", overwrite=TRUE)
+  writeRaster(scav_rast, "output/scav_rast.tif", overwrite=TRUE)
+  writeRaster(vend_rast, "output/vend_rast.tif", overwrite=TRUE)
   writeRaster(host_dist_rast, "output/host_dist_rast.tif", overwrite=TRUE)
   writeRaster(species_rast, "output/species_richness_rast.tif", overwrite=TRUE)
 }
@@ -1049,6 +1066,15 @@ if (PLOT){
   av_capture_graphics(animate(clamp(below_surf_rast, upper = 5e6), n=1),
                       framerate = 5.2,
                       output = "below_surf_rast.mp4")
+  av_capture_graphics(animate(clamp(plant_rast, upper = 5e6), n=1),
+                      framerate = 5.2,
+                      output = "plant_rast.mp4")
+  av_capture_graphics(animate(clamp(scav_rast, upper = 5e6), n=1),
+                      framerate = 5.2,
+                      output = "scav_rast.mp4")
+  av_capture_graphics(animate(clamp(vend_rast, upper = no_species), n=1),
+                      framerate = 5.2,
+                      output = "vend_rast.mp4")
   av_capture_graphics(animate(clamp(host_dist_rast, upper = 5e6), n=1),
                       framerate = 5.2,
                       output = "host_dist_rast.mp4")
@@ -1069,30 +1095,48 @@ log_around_surf_rast <- (around_surf_rast + 1e-6) %>%
 log_below_surf_rast <- (below_surf_rast + 1e-6) %>%
                        log(base = 10) %>%
                        clamp(lower = 0)
+log_plant_rast <- (plant_rast + 1e-6) %>%
+                        log(base = 10) %>%
+                        clamp(lower = 0)
+log_scav_rast <- (scav_rast + 1e-6) %>%
+                        log(base = 10) %>%
+                        clamp(lower = 0)
+log_vend_rast <- (vend_rast + 1e-6) %>%
+                      log(base = 10) %>%
+                      clamp(lower = 0)
 log_host_dist_rast <- (host_dist_rast + 1e-6) %>%
                      log(base = 10) %>%
                      clamp(lower = 0)
 log_species_rast <- (species_rast + 1e-6) %>%
-  log(base = 10) %>%
-  clamp(lower = 0)
+                    log(base = 10) %>%
+                    clamp(lower = 0)
 
 if (PLOT){
-  av_capture_graphics(animate(log_cong_rast, n=1),
+  av_capture_graphics(animate(clamp(log_cong_rast, upper = 5e4), n=1),
                       framerate = 5.2,
                       output = "log_cong_rast.mp4")
-  av_capture_graphics(animate(log_migr_rast, n=1),
+  av_capture_graphics(animate(clamp(log_migr_rast, upper = 5e4), n=1),
                       framerate = 5.2,
                       output = "log_migr_rast.mp4")
-  av_capture_graphics(animate(log_around_surf_rast, n=1),
+  av_capture_graphics(animate(clamp(log_around_surf_rast, upper = 5e6), n=1),
                       framerate = 5.2,
                       output = "log_around_surf_rast.mp4")
-  av_capture_graphics(animate(log_below_surf_rast, n=1),
+  av_capture_graphics(animate(clamp(log_below_surf_rast, upper = 5e6), n=1),
                       framerate = 5.2,
                       output = "log_below_surf_rast.mp4")
-  av_capture_graphics(animate(log_host_dist_rast, n=1),
+  av_capture_graphics(animate(clamp(log_plant_rast, upper = 5e6), n=1),
+                      framerate = 5.2,
+                      output = "log_plant_rast.mp4")
+  av_capture_graphics(animate(clamp(log_scav_rast, upper = 5e6), n=1),
+                      framerate = 5.2,
+                      output = "log_scav_rast.mp4")
+  av_capture_graphics(animate(clamp(log_vend_rast, upper = no_species), n=1),
+                      framerate = 5.2,
+                      output = "log_vend_rast.mp4")
+  av_capture_graphics(animate(clamp(log_host_dist_rast, upper = 5e6), n=1),
                       framerate = 5.2,
                       output = "log_host_dist_rast.mp4")
-  av_capture_graphics(animate(log_species_rast, n=1),
+  av_capture_graphics(animate(clamp(log_species_rast, upper = no_species), n=1),
                       framerate = 5.2,
                       output = "log_species_rast.mp4")
 }
