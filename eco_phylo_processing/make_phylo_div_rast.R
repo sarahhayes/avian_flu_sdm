@@ -68,7 +68,7 @@ cat(length(setdiff(sp_df$common_name, pop_size_df$Common.name)),
     "common names are missing from the population size list.")
 sci_mismatch <- which(!(sp_df$scientific_name %in% pop_size_df$Scientific.name))
 com_mismatch <- which(!(sp_df$common_name %in% pop_size_df$Common.name))
-full_mismatch <- intersect(sci_mismatch, com_mismatch)
+full_mismatch <- base::intersect(sci_mismatch, com_mismatch)
 cat(length(full_mismatch),
     "species are missing binomial AND common names in the population size list.")
 cat("Missing species common names are:",
@@ -116,9 +116,9 @@ missing_species_df <- AVONET_df[missing_species_in_AVONET, ]
 print(missing_species_df)
 
 # See which alternative names show up in the population size data:
-alts_from_BirdLife <- intersect(pop_size_df$Scientific.name,
+alts_from_BirdLife <- base::intersect(pop_size_df$Scientific.name,
                                 missing_species_df$Species1_BirdLife)
-alts_from_BirdTree <- intersect(pop_size_df$Scientific.name,
+alts_from_BirdTree <- base::intersect(pop_size_df$Scientific.name,
                                 missing_species_df$Species3_BirdTree)
 
 sub_strs <- sapply(union(alts_from_BirdLife, alts_from_BirdTree),
@@ -197,7 +197,7 @@ cat(length(setdiff(sp_df$common_name, pop_size_df$Common.name)),
     "common names are missing from the population size list.")
 sci_mismatch <- which(!(sp_df$scientific_name %in% pop_size_df$Scientific.name))
 com_mismatch <- which(!(sp_df$common_name %in% pop_size_df$Common.name))
-full_mismatch <- intersect(sci_mismatch, com_mismatch)
+full_mismatch <- base::intersect(sci_mismatch, com_mismatch)
 cat(length(full_mismatch),
     "species are missing binomial AND common names in the population size list.")
 
@@ -461,8 +461,8 @@ no_host_species <- length(host_species_IDs)
 
 host_indicator <- sapply(1:nrow(sp_df),
                          FUN = function(i){
-                           (length(intersect(sp_df$synonyms[i, ], CLOVER_df$Host)) + 
-                              length(intersect(sp_df$Avibase_ID[i, ], host_species_IDs))) > 0
+                           (length(base::intersect(sp_df$synonyms[i, ], CLOVER_df$Host)) + 
+                              length(base::intersect(sp_df$Avibase_ID[i, ], host_species_IDs))) > 0
                          })
 sp_df$host_indicator <- host_indicator
 
@@ -556,7 +556,7 @@ cat(length(which(EltonTraits_IDs[, 2]=="-100")), "species were not ID'd.")
 # Check that we can make at least one assignment for all species in eBird:
 has_eco_data <- sapply(1:nrow(sp_df),
                        FUN = function(i){
-                         (length(intersect(sp_df$synonyms[i, ], EltonTraits_df$Scientific))) > 0
+                         (length(base::intersect(sp_df$synonyms[i, ], EltonTraits_df$Scientific))) > 0
                        })
 cat("Elton traits can not be matched to",
     length(which(!has_eco_data)),
@@ -566,7 +566,7 @@ cat("Elton traits can not be matched to",
 # See which (if any) have ambiguous matches:
 multiple_Elton_matches <- sapply(1:nrow(sp_df),
                                  FUN = function(i){
-                                   (length(intersect(sp_df$synonyms[i, ], EltonTraits_df$Scientific))>1)
+                                   (length(base::intersect(sp_df$synonyms[i, ], EltonTraits_df$Scientific))>1)
                                  })
 cat("There are multiple matches for",
     length(which(multiple_Elton_matches)),
@@ -657,8 +657,8 @@ phylo_syns <- phylo_syns_and_IDs[[2]]
 # Identify host species in phylo data:
 hosts_in_phylo <- sapply(1:length(phylo_sp),
                          FUN = function(i){
-                           (length(intersect(phylo_syns[i, ], CLOVER_df$Host)) + 
-                              length(intersect(phylo_IDs[i, ], host_species_IDs))) > 0
+                           (length(base::intersect(phylo_syns[i, ], CLOVER_df$Host)) + 
+                              length(base::intersect(phylo_IDs[i, ], host_species_IDs))) > 0
                          })
 
 dmat_host_cols <- dmat_mean[, which(hosts_in_phylo)]
@@ -670,7 +670,7 @@ nearest_host_df <- data.frame(phylo_sp, nearest_host_distance)
 # Check that we can make at least one assignment for all species in eBird:
 has_phylo_data <- sapply(1:nrow(sp_df),
                          FUN = function(i){
-                           (length(intersect(sp_df$synonyms[i, ], nearest_host_df$phylo_sp))) > 0
+                           (length(base::intersect(sp_df$synonyms[i, ], nearest_host_df$phylo_sp))) > 0
                          })
 cat("Phylogeny can not be matched to",
     length(which(!has_phylo_data)),
@@ -701,7 +701,7 @@ rownames(dmat_mean)[
 # See which (if any) have ambiguous matches:
 multiple_phylo_matches <- sapply(1:nrow(sp_df),
                                  FUN = function(i){
-                                   (length(intersect(sp_df$synonyms[i, ], nearest_host_df$phylo_sp))>1)
+                                   (length(base::intersect(sp_df$synonyms[i, ], nearest_host_df$phylo_sp))>1)
                                  })
 cat("There are multiple matches for",
     length(which(multiple_phylo_matches)),
@@ -771,8 +771,8 @@ no_orders = n_distinct(orders_in_dmat)
 order_idx_pairs <- meshgrid(1:no_orders, 1:no_orders)
 order_idx_pairs$X <- c(order_idx_pairs$X)
 order_idx_pairs$Y <- c(order_idx_pairs$Y)
-order_combs <- data.frame(sp1=orders_in_dmat[order_idx_pairs$X],
-                          sp2=orders_in_dmat[order_idx_pairs$Y])
+order_combs <- data.frame(sp1=unique_ords[order_idx_pairs$X],
+                          sp2=unique_ords[order_idx_pairs$Y])
 order_dmat_min <- matrix(0, no_orders, no_orders)
 rownames(order_dmat_min) <- unique_ords
 colnames(order_dmat_min) <- unique_ords
@@ -833,4 +833,201 @@ if (PLOT){
     scale_x_discrete(limits=pass_dist_df$name) + 
     xlab("Order") +
     ylab("Distance")
+}
+
+################################################################################
+# Start building the actual diversity raster
+
+# First add distances to order combination datframe
+
+order_combs["distance"] <- sapply(1:nrow(order_combs), FUN = function(i){
+  return(order_dmat_max[order_combs$sp1[i], order_combs$sp2[i]])})
+
+# set the crs we want to use
+crs <- "epsg:3035"
+
+# Create a blank raster with appropriate projection and extent
+blank_3035 <- terra::rast("output/euro_rast_10k.tif")
+euro_ext <- ext(blank_3035)
+
+# Create blank rasters for each of our quantities
+# We will create rasters corresponding to the following traits:
+# Congregatory behaviour
+# Migatory behaviour
+# Foraging around water surface
+# Foraging >5cm below water surface
+# Phylogenetic distance to a confirmed host
+
+if (QUARTERLY){
+  nlyrs <- 4
+  qrtr_bds <- c(0, 13, 26, 39, 52)
+}else{
+  nlyrs <- 52
+}
+
+# Raster storing most distant combination of orders by location:
+sp_comb_rast <- rast(nlyrs=nlyrs,
+                 crs=crs,
+                 extent=euro_ext,
+                 res=res(blank_3035))
+
+# Raster storing maximum pairwise distance:
+div_rast <- rast(nlyrs=nlyrs,
+                  crs=crs,
+                  extent=euro_ext,
+                  res=res(blank_3035))
+
+for (i in 1:nlyrs){
+  sp_comb_rast[[i]] <- -100 # Set to negative value so we can easily find cells with no species recorded
+  div_rast[[i]] <- 0
+}
+
+raster_dims <- dim(div_rast)
+
+no_species <- nrow(sp_df)
+sample_idx <- 1:no_species
+
+# # Remove unmatched species from sp_df
+# sp_df <- sp_df[which(sp_df$Avibase_ID %in% matched_data$Avibase_ID), ]
+
+# set.seed(1)
+# sample_idx <- sample(1:nrow(sp_df), no_species)
+
+# Make sure timeout is set high enough so we can actually download the data
+# Ten minutes per dataset should be enough
+if (getOption('timeout') < 10 * 60 * no_species){
+  options(timeout = 10 * 60 * no_species)
+  cat("Setting timeout to",
+      (1 / 60) * getOption('timeout'),
+      "minutes.\n")
+}
+
+# Get number of species already downloaded by searching for codes in ebirdst
+# data directory
+starting_dls <- ebirdst_data_dir() %>% 
+  paste("/2021", sep = "") %>% 
+  list.files()
+total_to_load <- starting_dls %in% sp_df$species_code %>% 
+  which() %>%
+  length()
+no_loaded <- 0
+total_to_download <- no_species - total_to_load
+no_downloaded <- 0
+
+not_downloaded <- setdiff((sp_df$species_code),
+                          (data.frame(starting_dls)$starting_dls))
+idx_to_download <- which(sp_df$species_code %in% not_downloaded)
+
+# Loop over other first no_species species:
+{
+  loop.start <- Sys.time()
+  mean_dl_time <- 0
+  mean_load_time <- 0
+  mean_process_time <- 0
+  no_processed <- 0
+  for (i in 1:10) {
+    
+    idx <- sample_idx[i]
+    species_sel <- sp_df$species_code[idx]
+    species_factors <- sp_df[idx, ]
+    
+    if (!(species_sel %in% starting_dls)){
+      dl_start <- Sys.time()
+      dl_flag <- TRUE
+      attempt_count <- 0
+      while (dl_flag){
+        attempt_count <- attempt_count + 1
+        cat("attempt = ", attempt_count, ".\n")
+        path <- try(ebirdst_download(species = species_sel,
+                                     pattern = "_lr_"))
+        if (!inherits(path, "try-error")){
+          dl_flag <- FALSE
+        }
+        if (attempt_count>50){
+          print("Download failed")
+          dl_flag <- FALSE
+        }
+      }
+      no_downloaded <- no_downloaded + 1
+      time.now <- Sys.time()
+      elapsed <- as.numeric(difftime(time.now, dl_start, units = "mins"))
+      mean_dl_time <- (1 / no_downloaded) * 
+        ((no_downloaded - 1) * mean_dl_time + elapsed)
+    }else{
+      load_start <- Sys.time()
+      path <- ebirdst_download(species = species_sel,
+                               pattern = "_lr_")
+      no_loaded <- no_loaded + 1
+      time.now <- Sys.time()
+      elapsed <- as.numeric(difftime(time.now, load_start, units = "mins"))
+      mean_load_time <- (1 / no_loaded) * 
+        ((no_loaded - 1) * mean_load_time + elapsed)
+    }
+    
+    process_start <- Sys.time()
+    
+    this_rast <- load_raster(path = path,
+                             product = "percent-population",
+                             period = "weekly",
+                             resolution = "lr")
+    this_rast <- 1e-2 * this_rast # Convert from percentages to proportions
+    this_rast <- project(x = this_rast, y = blank_3035, method = "near")
+    
+    # Get rid of NA's:
+    this_rast <- replace(this_rast, is.na(this_rast), 0)
+    
+    if (QUARTERLY){
+      this_rast <- lapply(1:nlyrs,
+                          FUN = function(i){
+                            app(this_rast[[qrtr_bds[i]:qrtr_bds[i+1]]], mean)}
+      ) %>%
+        rast
+      set.names(this_rast, c("Qrt1", "Qrt2", "Qrt3", "Qrt4"))
+    }
+    
+    # Scale up to individual animals:
+    this_rast <- species_factors$pop_sizes * this_rast
+    
+    for (j in 1:raster_dims[1]){
+      for (k in 1:raster_dims[2]){
+        for (l in 1:raster_dims[3]){
+          if (this_rast[j, k, l]>1){
+            if (sp_comb_rast[j, k, l] < 1){
+              sp_comb_rast[j, k, l] <- which((order_combs$sp1 == species_factors$EltonTraits$IOCOrder)
+                                             & (order_combs$sp2 == species_factors$EltonTraits$IOCOrder))
+              div_rast[j, k, l] <- order_combs$dist[unlist(sp_comb_rast[j, k, l])]
+            }
+            else{
+              comb_idx <- unlist(sp_comb_rast[j, k, l])
+              new_dist <- order_dmat_max[species_factors$EltonTraits$IOCOrder,
+                                         order_combs$sp1[comb_idx]]
+              if (new_dist > order_combs$dist[comb_idx]){
+                sp_comb_rast[j, k, l] <- which((order_combs$sp1 == order_combs$sp1[unlist(sp_comb_rast[j, k, l])])
+                                               & (order_combs$sp2 == species_factors$EltonTraits$IOCOrder))
+                div_rast[j, k, l] <- order_combs$dist[unlist(sp_comb_rast[j, k, l])]
+              }
+            }
+          }
+        }
+      }
+    }
+    
+    no_processed <- no_processed + 1
+    
+    time.now <- Sys.time()
+    elapsed <- as.numeric(difftime(time.now, process_start, units = "mins"))
+    mean_process_time <- (1 / no_processed) * 
+      ((no_processed - 1) * mean_process_time + elapsed)
+    time_remaining <- (total_to_download - no_downloaded) * mean_dl_time +
+      (total_to_load - no_loaded) * mean_load_time +
+      (no_species - i) * mean_process_time
+    cat(as.numeric(difftime(time.now, loop.start, units="mins")),
+        " minutes elapsed since start, estimated ",
+        time_remaining,
+        " remaining.",
+        i,
+        "of",
+        no_species,
+        "species processed.\n")
+  }
 }

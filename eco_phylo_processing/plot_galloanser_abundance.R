@@ -982,7 +982,7 @@ plot(pop_rast>1)
 plot(pop_rast>0)
 
 ################################################################################
-# Try as well with galliformes as well
+# Try with galliformes as well
 
 pop_rast <- rast(nlyrs=nlyrs,
                  crs=crs,
@@ -1126,3 +1126,152 @@ plot(pop_rast>1)
 
 # Greater than zero chance of seeing one:
 plot(pop_rast>0)
+
+################################################################################
+# Try plotting all locations with at least one galloanseriforme and at least one
+# other order:
+
+galans_rast <- rast(nlyrs=nlyrs,
+                 crs=crs,
+                 extent=euro_ext,
+                 res=res(blank_3035))
+other_rast <- rast(nlyrs=nlyrs,
+                    crs=crs,
+                    extent=euro_ext,
+                    res=res(blank_3035))
+
+for (i in 1:nlyrs){
+  galans_rast[[i]] <- 0
+  other_rast[[i]] <- 0
+}
+
+no_species <- nrow(sp_df)
+sample_idx <- 1:no_species
+
+# # Remove unmatched species from sp_df
+# sp_df <- sp_df[which(sp_df$Avibase_ID %in% matched_data$Avibase_ID), ]
+
+# set.seed(1)
+# sample_idx <- sample(1:nrow(sp_df), no_species)
+
+# Make sure timeout is set high enough so we can actually download the data
+# Ten minutes per dataset should be enough
+if (getOption('timeout') < 10 * 60 * no_species){
+  options(timeout = 10 * 60 * no_species)
+  cat("Setting timeout to",
+      (1 / 60) * getOption('timeout'),
+      "minutes.\n")
+}
+
+# Get number of species already downloaded by searching for codes in ebirdst
+# data directory
+starting_dls <- ebirdst_data_dir() %>% 
+  paste("/2021", sep = "") %>% 
+  list.files()
+total_to_load <- starting_dls %in% sp_df$species_code %>% 
+  which() %>%
+  length()
+no_loaded <- 0
+total_to_download <- no_species - total_to_load
+no_downloaded <- 0
+
+not_downloaded <- setdiff((sp_df$species_code),
+                          (data.frame(starting_dls)$starting_dls))
+idx_to_download <- which(sp_df$species_code %in% not_downloaded)
+
+# Loop over other first no_species species:
+{
+  loop.start <- Sys.time()
+  mean_dl_time <- 0
+  mean_load_time <- 0
+  mean_process_time <- 0
+  no_processed <- 0
+  for (i in 1:no_species) {
+    
+    idx <- sample_idx[i]
+    species_sel <- sp_df$species_code[idx]
+    species_factors <- sp_df[idx, ]
+    
+    if (!(species_sel %in% starting_dls)){
+      dl_start <- Sys.time()
+      dl_flag <- TRUE
+      attempt_count <- 0
+      while (dl_flag){
+        attempt_count <- attempt_count + 1
+        cat("attempt = ", attempt_count, ".\n")
+        path <- try(ebirdst_download(species = species_sel,
+                                     pattern = "_lr_"))
+        if (!inherits(path, "try-error")){
+          dl_flag <- FALSE
+        }
+        if (attempt_count>50){
+          print("Download failed")
+          dl_flag <- FALSE
+        }
+      }
+      no_downloaded <- no_downloaded + 1
+      time.now <- Sys.time()
+      elapsed <- as.numeric(difftime(time.now, dl_start, units = "mins"))
+      mean_dl_time <- (1 / no_downloaded) * 
+        ((no_downloaded - 1) * mean_dl_time + elapsed)
+    }else{
+      load_start <- Sys.time()
+      path <- ebirdst_download(species = species_sel,
+                               pattern = "_lr_")
+      no_loaded <- no_loaded + 1
+      time.now <- Sys.time()
+      elapsed <- as.numeric(difftime(time.now, load_start, units = "mins"))
+      mean_load_time <- (1 / no_loaded) * 
+        ((no_loaded - 1) * mean_load_time + elapsed)
+    }
+    
+    process_start <- Sys.time()
+    
+    this_rast <- load_raster(path = path,
+                             product = "percent-population",
+                             period = "weekly",
+                             resolution = "lr")
+    this_rast <- 1e-2 * this_rast # Convert from percentages to proportions
+    this_rast <- project(x = this_rast, y = blank_3035, method = "near")
+    
+    # Get rid of NA's:
+    this_rast <- replace(this_rast, is.na(this_rast), 0)
+    
+    if (QUARTERLY){
+      this_rast <- lapply(1:nlyrs,
+                          FUN = function(i){
+                            app(this_rast[[qrtr_bds[i]:qrtr_bds[i+1]]], mean)}
+      ) %>%
+        rast
+      set.names(this_rast, c("Qrt1", "Qrt2", "Qrt3", "Qrt4"))
+    }
+    
+    if (species_factors$EltonTraits$IOCOrder %in% c("Anseriformes",
+                                                    "Galliformes")){
+      galans_rast <- galans_rast + (species_factors$pop_sizes * this_rast)
+    }
+    else{
+      other_rast <- other_rast + (species_factors$pop_sizes * this_rast)
+    }
+    
+    no_processed <- no_processed + 1
+    
+    time.now <- Sys.time()
+    elapsed <- as.numeric(difftime(time.now, process_start, units = "mins"))
+    mean_process_time <- (1 / no_processed) * 
+      ((no_processed - 1) * mean_process_time + elapsed)
+    time_remaining <- (total_to_download - no_downloaded) * mean_dl_time +
+      (total_to_load - no_loaded) * mean_load_time +
+      (no_species - i) * mean_process_time
+    cat(as.numeric(difftime(time.now, loop.start, units="mins")),
+        " minutes elapsed since start, estimated ",
+        time_remaining,
+        " remaining.",
+        i,
+        "of",
+        no_species,
+        "species processed.\n")
+  }
+}
+
+plot((galans_rast>1)|(other_rast>1))
