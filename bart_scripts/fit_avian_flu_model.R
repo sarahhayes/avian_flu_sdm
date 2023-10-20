@@ -41,10 +41,11 @@ if (BUILD_COVS){
   set.names(q4_eco_layers, eco_lyrnames)
   
   # Now do environmental:
-  env_paths <- list.files(paste(PATH_TO_DATA, "AI_S2_SDM_storage/Environmental rasters/", sep = ""),
+  env_paths <- list.files(paste(PATH_TO_DATA, "AI_S2_SDM_storage/Environmental rasters", sep = ""),
                           pattern = "*.tif",
                           full.names = TRUE)
   env_paths <- env_paths[-grep("landcover_output_full", env_paths)]
+  env_paths <- env_paths[-grep("chicken_density_2015", env_paths)]
   env_paths <- env_paths[-grep("duck_density_2015", env_paths)]
   env_lyrnames <- env_paths %>%
     sub(pattern = paste(PATH_TO_DATA, "AI_S2_SDM_storage/Environmental rasters/", sep = ""),
