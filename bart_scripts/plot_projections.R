@@ -27,7 +27,7 @@ for (idx in 1:4){
   
 }
 
-png("plots/all_poster.png", width = 7, height = 7,
+png("plots/projections.png", width = 7, height = 7,
     units = "in", res = 330)
 spplot(stack(preds[[1]][[1]],
              preds[[2]][[1]], 

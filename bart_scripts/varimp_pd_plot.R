@@ -42,14 +42,21 @@ df <- varimp_summ %>%
   mutate(var = gsub("_first_quart$|_second_quart$|_third_quart$|_fourth_quart$", "", var),  # determine plot labels
          var = case_when(var == "around_surf" ~ "abundance: surface-feeders", 
                          var == "below_surf" ~ "abundance: sub-surface feeders", 
+                         var == "plant" ~ "abundance: plant diet",
+                         var == "scav" ~ "abundance: scavengers",
+                         var == "vend" ~ "abundance: endotherm diet",
                          var == "host_dist" ~ "avg. phylo dist to host", 
                          var == "migr" ~ "abundance: migratory", 
                          var == "cong" ~ "abundance: congregative", 
-                         var == "chicken_density" ~ "chicken density", 
+                         var == "species_richness" ~ "species richness",
+                         var == "chicken_density_2010" ~ "chicken density", 
                          var == "duck_density_2010" ~ "duck density", 
+                         var == "mean_relative_humidity" ~ "mean relative humidity",
                          var == "mean_diff" ~ "temperature range", 
+                         var == "mean_temp" ~ "mean temperature",
                          var == "mean_tmax" ~ "max temperature", 
                          var == "mean_tmin" ~ "min temperature", 
+                         var == "variation_in_quarterly_mean_temp" ~ "temperature variation",
                          var == "mean_prec" ~ "total rainfall", 
                          var == "dist_to_coast_km" ~ "dist. to coast", 
                          var == "dist_to_water" ~ "dist. to inland water", 
@@ -57,23 +64,23 @@ df <- varimp_summ %>%
                          var == "elev_max" ~ "max altitude",
                          var == "elev_diff" ~ "altitude range",
                          var == "ndvi" ~ "vegetation index", 
-                         var == "lc_1" ~ "water bodies",
-                         var == "lc_2" ~ "evergreen needleleaf forests",
-                         var == "lc_3" ~ "evergreen broadleaf forests",
-                         var == "lc_4" ~ "deciduous needleleaf forests",
-                         var == "lc_5" ~ "deciduous broadleaf forests",
-                         var == "lc_6" ~ "mixed forests",
-                         var == "lc_7" ~ "closed shrublands",
-                         var == "lc_8" ~ "open_shrublands",
-                         var == "lc_9" ~ "woody savannas",
-                         var == "lc_10" ~ "savannas",
-                         var == "lc_11" ~ "grasslands",
-                         var == "lc_12" ~ "permanent wetlands",
-                         var == "lc_13" ~ "croplands",
-                         var == "lc_14" ~ "urband and built-up lands",
-                         var == "lc_15" ~ "cropland/natural vegetation mosaics",
-                         var == "lc_16" ~ "non-vegetated lands",
-                         var == "lc_17" ~ "unclassified land"
+                         var == "Water_bodies" ~ "water bodies",
+                         var == "Evergreen_Needleleaf_Forests" ~ "evergreen needleleaf forests",
+                         var == "Evergreen_Broadleaf_Forests" ~ "evergreen broadleaf forests",
+                         var == "Deciduous_Needleleaf_Forests" ~ "deciduous needleleaf forests",
+                         var == "Deciduous_Broadleaf_Forests" ~ "deciduous broadleaf forests",
+                         var == "Mixed_Forests" ~ "mixed forests",
+                         var == "Closed_Shrublands" ~ "closed shrublands",
+                         var == "Open_Shrublands" ~ "open_shrublands",
+                         var == "Woody_Savannas" ~ "woody savannas",
+                         var == "Savannas" ~ "savannas",
+                         var == "Grasslands" ~ "grasslands",
+                         var == "Permanent_Wetlands" ~ "permanent wetlands",
+                         var == "Croplands" ~ "croplands",
+                         var == "Urban_and_Built-up_Lands" ~ "urband and built-up lands",
+                         var == "Cropland/Natural_Vegetation_Mosaics" ~ "cropland/natural vegetation mosaics",
+                         var == "Non-Vegetated_Lands" ~ "non-vegetated lands",
+                         var == "Unclassified" ~ "unclassified land"
          ))
 ordered_var <- unique(as.character(df$var[order(df$mean, decreasing = TRUE)]))
 df <- df %>% mutate(var = fct_relevel(var, ordered_var),
@@ -160,7 +167,7 @@ varimp_rank <- varimp_summ %>%
 # Calc and bind pd across all quarters for given variables by name
 # TO DO: catch cases where variables are binary (land cover)
 
-vars <- c("elev_min","below_surf")
+vars <- c("species_richness", "dist_to_coast_km")
 
 pd_summ <- replicate(4, vector("list", length(vars)), simplify = FALSE) # initialise empty lists
 
@@ -180,7 +187,7 @@ for(i in 1:4){
   for(j in 1:length(vars)){
     
     # Adapted from embarcadero::partial
-    fullvarname <- sdm$fit$data@x %>% as.data.frame %>% select(matches(vars[j])) %>% names
+    fullvarname <- sdm$fit$data@x %>% as.data.frame %>% dplyr::select(matches(vars[j])) %>% names
     if (length(fullvarname) == 1) {
     raw <- sdm$fit$data@x[, fullvarname]
     lev <- list(seq(min(raw), max(raw), ((max(raw) - min(raw))/15)))
@@ -199,8 +206,8 @@ for(i in 1:4){
 fig_pd_chosen <- pd_summ %>%
   bind_rows %>%
   mutate(var = gsub("_first_quart$|_second_quart$|_third_quart$|_fourth_quart$", "", var),
-         var = case_when(var == "below_surf" ~ "abundance: sub-surface feeders",
-                         var == "elev_min" ~ "min altitude (m)"),
+         var = case_when(var == "species_richness" ~ "species richness",
+                         var == "dist_to_coast_km" ~ "distance to coast"),
   ) %>%
   ggplot(aes(x = x, y = y, ymin = lower, ymax = upper, fill = Q, color = Q)) +
   geom_ribbon(alpha = 0.08, colour = NA) +
@@ -218,4 +225,4 @@ fig_pd_chosen <- pd_summ %>%
   facet_wrap(~ var, scales = "free_x")
 
 
-ggsave("plots/partial_dependence_poster.png", plot = fig_pd_chosen, width = 6, height = 3)
+ggsave("plots/partial_dependence.png", plot = fig_pd_chosen, width = 6, height = 3)
