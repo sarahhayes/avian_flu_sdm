@@ -45,6 +45,8 @@ quarter_id = commandArgs(trailingOnly = TRUE)
   env_paths <- env_paths[-grep("landcover_output_full", env_paths)]
   env_paths <- env_paths[-grep("chicken_density_2015", env_paths)]
   env_paths <- env_paths[-grep("duck_density_2015", env_paths)]
+  env_paths <- env_paths[-grep("mean_tmax", env_paths)]
+  env_paths <- env_paths[-grep("mean_tmin", env_paths)]
   env_lyrnames <- env_paths %>%
     sub(pattern = paste(PATH_TO_DATA, "AI_S2_SDM_storage/Environmental rasters/", sep = ""),
         replacement = "") %>%
