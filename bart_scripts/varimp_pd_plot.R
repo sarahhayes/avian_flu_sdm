@@ -39,7 +39,7 @@ pal <- c("#2271B2",
 
 df <- varimp_summ %>% 
   bind_rows %>%
-  mutate(var = gsub("_first_quart$|_second_quart$|_third_quart$|_fourth_quart$", "", var),  # determine plot labels
+  mutate(var = gsub("_first_quart.*$|_second_quart.*$|_third_quart.*$|_fourth_quart.*$", "", var),  # determine plot labels
          var = case_when(var == "around_surf" ~ "abundance: surface-feeders", 
                          var == "below_surf" ~ "abundance: sub-surface feeders", 
                          var == "plant" ~ "abundance: plant diet",
