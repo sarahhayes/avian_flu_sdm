@@ -20,13 +20,13 @@ if (BUILD_COVS){
   euro_ext <- terra::ext(2000000, 6000000, 1000000, 5500000) # swap to base raster later
   
   eco_paths <- list.files(paste(PATH_TO_DATA, "AI_S2_SDM_storage/Eco-Rasters", sep = ""),
-                              pattern = "*.tif",
-                              full.names = TRUE)
+                          pattern = "*.tif",
+                          full.names = TRUE)
   eco_lyrnames <- eco_paths %>%
-                  sub(pattern = paste(PATH_TO_DATA, "AI_S2_SDM_storage/Eco-Rasters/", sep = ""),
-                      replacement = "") %>%
-                  sub(pattern = "_rast.tif",
-                      replacement = "")
+    sub(pattern = paste(PATH_TO_DATA, "AI_S2_SDM_storage/Eco-Rasters/", sep = ""),
+        replacement = "") %>%
+    sub(pattern = "_rast.tif",
+        replacement = "")
   
   eco_layers <- rast(lapply(eco_paths, rast))
   
@@ -47,6 +47,8 @@ if (BUILD_COVS){
   env_paths <- env_paths[-grep("landcover_output_full", env_paths)]
   env_paths <- env_paths[-grep("chicken_density_2015", env_paths)]
   env_paths <- env_paths[-grep("duck_density_2015", env_paths)]
+  env_paths <- env_paths[-grep("mean_tmax", env_paths)]
+  env_paths <- env_paths[-grep("mean_tmin", env_paths)]
   env_lyrnames <- env_paths %>%
     sub(pattern = paste(PATH_TO_DATA, "AI_S2_SDM_storage/Environmental rasters/", sep = ""),
         replacement = "") %>%
@@ -85,9 +87,9 @@ if (BUILD_COVS){
   n_landtypes <- 17
   landcover_layers <- lapply(1:n_landtypes,
                              FUN = function(i){landcover_rast == i}) %>%
-                      rast()
+    rast()
   names(landcover_layers) <- lapply(1:n_landtypes,
-                                  FUN = function(i){paste("lc_", i, sep = "")})
+                                    FUN = function(i){paste("lc_", i, sep = "")})
   lc_lookup <- pairlist("lc_1" = "Water_bodies",
                         "lc_2" = "Evergreen_Needleleaf_Forests",
                         "lc_3" = "Evergreen_Broadleaf_Forests",
@@ -109,8 +111,8 @@ if (BUILD_COVS){
                                     FUN = function(n){lc_lookup[[n]]})
   # Remove layers that are either all True or all False:
   hom_layers <- sapply(1:n_landtypes,
-                FUN = function(i){diff(minmax(landcover_layers[[i]]))==0}) %>%
-                which()
+                       FUN = function(i){diff(minmax(landcover_layers[[i]]))==0}) %>%
+    which()
   if (length(hom_layers)>0){
     landcover_layers <- landcover_layers[[-hom_layers]]
   }
@@ -120,30 +122,38 @@ if (BUILD_COVS){
                          landcover_layers,
                          cov_coast,
                          cov_water,
-                         cov_alt)
+                         cov_alt)  
+  writeRaster(q1_covs, paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covariates/q1_covs.tif", sep = ""), overwrite = TRUE)
+  rm(q1_covs)
+  gc()
   q2_covs <- c(resample(q2_eco_layers, env_layers, method = "near"),
                          q2_env_layers,
                          landcover_layers,
                          cov_coast,
                          cov_water,
                          cov_alt)
+  writeRaster(q2_covs, paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covariates/q2_covs.tif", sep = ""), overwrite = TRUE)
+  rm(q2_covs)
+  gc()
   q3_covs <- c(resample(q3_eco_layers, env_layers, method = "near"),
                         q3_env_layers,
                         landcover_layers,
                         cov_coast,
                         cov_water,
                         cov_alt)
+  writeRaster(q3_covs, paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covariates/q3_covs.tif", sep = ""), overwrite = TRUE)
+  rm(q3_covs)
+  gc()
   q4_covs <- c(resample(q4_eco_layers, env_layers, method = "near"),
                          q4_env_layers,
                          landcover_layers,
                          cov_coast,
                          cov_water,
                          cov_alt)
-  
-  writeRaster(q1_covs, paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covariates/q1_covs.tif", sep = ""), overwrite = TRUE)
-  writeRaster(q2_covs, paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covariates/q2_covs.tif", sep = ""), overwrite = TRUE)
-  writeRaster(q3_covs, paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covariates/q3_covs.tif", sep = ""), overwrite = TRUE)
   writeRaster(q4_covs, paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covariates/q4_covs.tif", sep = ""), overwrite = TRUE)
+  rm(q4_covs)
+  gc()
+
 }
 
 ################################################################################
