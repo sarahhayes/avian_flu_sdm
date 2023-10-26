@@ -2,6 +2,8 @@
 
 rm(list = ls())
 
+ALL_VARS_FOR_PD = FALSE # If set to true we do partial dependence on everything
+
 PATH_TO_DATA <- "../../../OneDrive - The University of Liverpool/"
 
 library(tidyverse)
@@ -28,6 +30,10 @@ for(i in 1:4){
     data.frame(var = row.names(.), Q = paste0("Q",i)) %>%
     relocate(var) %>%
     rename("mean" = "X1", "sd" = "X2")
+  rownames(varimp_summ[[i]]) <- gsub(
+            "_first_quart.*$|_second_quart.*$|_third_quart.*$|_fourth_quart.*$",
+            "",
+            x = rownames(varimp_summ[[i]]))
   
 }  
 
@@ -167,7 +173,14 @@ varimp_rank <- varimp_summ %>%
 # Calc and bind pd across all quarters for given variables by name
 # TO DO: catch cases where variables are binary (land cover)
 
-vars <- c("species_richness", "dist_to_coast_km")
+if (ALL_VARS_FOR_PD){
+  vars <- gsub("\\..*",
+            "",
+            x=rownames(df)) %>%
+          unique()
+}else{
+  vars = c("species_richness", "dist_to_coast_km")
+}
 
 pd_summ <- replicate(4, vector("list", length(vars)), simplify = FALSE) # initialise empty lists
 
