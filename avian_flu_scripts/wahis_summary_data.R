@@ -23,8 +23,8 @@ woah_subtype_country <- as.data.frame(table(woah_data$country,
                                              woah_data$sero_sub_genotype_eng)) %>%
   filter(Freq != 0) 
 
-#write.csv(woah_subtype, "output/woah_summaries/fao_subtypes.csv", row.names = F)
-#write.csv(woah_subtype_country, "output/woah_summaries/fao_subtypes_countries.csv", row.names = F)
+write.csv(woah_subtype, "output/woah_summaries/woah_subtypes.csv", row.names = F)
+write.csv(woah_subtype_country, "output/woah_summaries/woah_subtypes_countries.csv", row.names = F)
 
 # counts per country
 
