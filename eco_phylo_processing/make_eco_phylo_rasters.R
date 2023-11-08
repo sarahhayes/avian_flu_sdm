@@ -795,6 +795,59 @@ sp_df$nearest_host_distance <- phylo_dist_by_eBird_species$nearest_host_distance
 nhost_thresh <- 50.
 
 ################################################################################
+# Identify taxa in data
+
+# For genus, just take the first word of each species name.
+genera_in_data <- sapply(sp_df$scientific_name,
+                         FUN = function(x){
+                           word(x, 1)})
+
+# Corrections to genus based on AVONET:
+genera_in_data[which(genera_in_data=="limicola")] <- "calidris"
+genera_in_data[which(genera_in_data=="philomachus")] <- "calidris"
+genera_in_data[which(genera_in_data=="eurynorhynchus")] <- "calidris"
+genera_in_data[which(genera_in_data=="tryngites")] <- "calidris"
+genera_in_data[which(genera_in_data=="aphriza")] <- "calidris"
+
+genera_in_data[which(genera_in_data=="chen")] <- "anser"
+
+sp_df$is_ardeidae <- sp_df$EltonTraits$BLFamilyLatin=="Ardeidae"
+sp_df$is_arenaria_or_calidris <- genera_in_data %in% c("arenaria", "calidris")
+sp_df$is_laridae <- sp_df$EltonTraits$BLFamilyLatin=="Laridae"
+
+# Status of anatinae is uncertain, so we break it into definite members and more
+# controversial assignments:
+certain_anatinae_genera <- c("anas",
+                             "spatula",
+                             "mareca",
+                             "amazonetta")
+other_anatinae_genera <- c("heteronetta",
+                           "oxyura",
+                           "aix",
+                           "cairina",
+                           "callonetta",
+                           "chenonetta",
+                           "polysticta",
+                           "somateria",
+                           "histrionicus",
+                           "melanitta",
+                           "clangula",
+                           "bucephala",
+                           "mergellus",
+                           "lophodytes",
+                           "mergus"
+                           )
+
+# For now just do less controversial genera and othe relevant Anatidae genre:
+sp_df$is_anatidae_subfamily <- genera_in_data %in% c("cygnus",
+                                                     "anser",
+                                                     "branta",
+                                                     "aythya",
+                                                     "netta",
+                                                     certain_anatinae_genera)
+  
+
+################################################################################
 # Filter for eBird data quality
 
 sp_df$min_quality <- sapply(1:nrow(sp_df),
@@ -879,6 +932,22 @@ species_rast <- rast(nlyrs=nlyrs,
                      crs=crs,
                      extent=euro_ext,
                      res=res(blank_3035))
+ardeidae_rast <- rast(nlyrs=nlyrs,
+                      crs=crs,
+                      extent=euro_ext,
+                      res=res(blank_3035))
+arenaria_calidris_rast <- rast(nlyrs=nlyrs,
+                      crs=crs,
+                      extent=euro_ext,
+                      res=res(blank_3035))
+laridae_rast <- rast(nlyrs=nlyrs,
+                      crs=crs,
+                      extent=euro_ext,
+                      res=res(blank_3035))
+anatidae_rast <- rast(nlyrs=nlyrs,
+                      crs=crs,
+                      extent=euro_ext,
+                      res=res(blank_3035))
 
 for (i in 1:nlyrs){
   cong_rast[[i]] <- 0
@@ -891,6 +960,10 @@ for (i in 1:nlyrs){
   host_dist_rast[[i]] <- 0
   pop_rast[[i]] <- 0
   species_rast[[i]] <-0
+  ardeidae_rast[[i]] <- 0
+  arenaria_calidris_rast[[i]] <- 0
+  laridae_rast[[i]] <- 0
+  anatidae_rast[[i]] <-0
 }
 
 no_species <- nrow(sp_df)
@@ -1004,6 +1077,18 @@ idx_to_download <- which(sp_df$species_code %in% not_downloaded)
     if (species_factors$nearest_host_distance < nhost_thresh){
       host_dist_rast <- host_dist_rast + (species_factors$pop_sizes * this_rast)
     }
+    if (species_factors$is_ardeidae){
+      ardeidae_rast <- ardeidae_rast + (species_factors$pop_sizes * this_rast)
+    }
+    if (species_factors$is_arenaria_or_calidris){
+      arenaria_calidris_rast <- arenaria_calidris_rast + (species_factors$pop_sizes * this_rast)
+    }
+    if (species_factors$is_laridae){
+      laridae_rast <- laridae_rast + (species_factors$pop_sizes * this_rast)
+    }
+    if (species_factors$is_anatidae_subfamily){
+      anatidae_rast <- anatidae_rast + (species_factors$pop_sizes * this_rast)
+    }
     
     # Behavioural outputs are percentages so need to be scaled down by 1e-2
     around_surf_rast <- around_surf_rast +
@@ -1051,6 +1136,10 @@ if (SAVE_RAST){
   writeRaster(vend_rast, "output/vend_rast.tif", overwrite=TRUE)
   writeRaster(host_dist_rast, "output/host_dist_rast.tif", overwrite=TRUE)
   writeRaster(species_rast, "output/species_richness_rast.tif", overwrite=TRUE)
+  writeRaster(ardeidae_rast, "output/ardeidae_rast.tif", overwrite=TRUE)
+  writeRaster(arenaria_calidris_rast, "output/arenaria_calidris_rast.tif", overwrite=TRUE)
+  writeRaster(laridae_rast, "output/laridae_rast.tif", overwrite=TRUE)
+  writeRaster(anatidae_rast, "output/anatidae_rast.tif", overwrite=TRUE)
 }
 
 if (PLOT){
