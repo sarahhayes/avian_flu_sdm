@@ -793,6 +793,27 @@ sp_df$nearest_host_distance <- phylo_dist_by_eBird_species$nearest_host_distance
 
 # Set threshold to use for deciding a species is a risk factor
 nhost_thresh <- 50.
+  
+
+################################################################################
+# Filter for eBird data quality
+
+sp_df$min_quality <- sapply(1:nrow(sp_df),
+                      FUN = function(i){
+                        min_qual <- sp_df[i,
+                                        c("breeding_quality",
+                                          "nonbreeding_quality",
+                                          "postbreeding_migration_quality",
+                                          "prebreeding_migration_quality",
+                                          "resident_quality")] %>%
+                          as.numeric %>%
+                          min(na.rm = TRUE)
+                        return(min_qual)
+                      })
+
+if (HQ_ONLY){
+  sp_df <- sp_df[which(sp_df$min_quality > 1), ]
+}
 
 ################################################################################
 # Identify taxa in data
@@ -815,6 +836,11 @@ sp_df$is_ardeidae <- sp_df$EltonTraits$BLFamilyLatin=="Ardeidae"
 sp_df$is_arenaria_or_calidris <- genera_in_data %in% c("arenaria", "calidris")
 sp_df$is_laridae <- sp_df$EltonTraits$BLFamilyLatin=="Laridae"
 
+sp_df$is_anserinae <- genera_in_data %in% c("cygnus",
+                                            "anser")
+sp_df$is_aythyini <- genera_in_data %in% c("aythya",
+                                           "netta")
+
 # Status of anatinae is uncertain, so we break it into definite members and more
 # controversial assignments:
 certain_anatinae_genera <- c("anas",
@@ -836,36 +862,10 @@ other_anatinae_genera <- c("heteronetta",
                            "mergellus",
                            "lophodytes",
                            "mergus"
-                           )
+)
 
 # For now just do less controversial genera and othe relevant Anatidae genre:
-sp_df$is_anatidae_subfamily <- genera_in_data %in% c("cygnus",
-                                                     "anser",
-                                                     "branta",
-                                                     "aythya",
-                                                     "netta",
-                                                     certain_anatinae_genera)
-  
-
-################################################################################
-# Filter for eBird data quality
-
-sp_df$min_quality <- sapply(1:nrow(sp_df),
-                      FUN = function(i){
-                        min_qual <- sp_df[i,
-                                        c("breeding_quality",
-                                          "nonbreeding_quality",
-                                          "postbreeding_migration_quality",
-                                          "prebreeding_migration_quality",
-                                          "resident_quality")] %>%
-                          as.numeric %>%
-                          min(na.rm = TRUE)
-                        return(min_qual)
-                      })
-
-if (HQ_ONLY){
-  sp_df <- sp_df[which(sp_df$min_quality > 1), ]
-}
+sp_df$is_anatinae <- genera_in_data %in% c(certain_anatinae_genera)
 
 ################################################################################
 # Now get abundance rasters for species and convolute with eco/phylo factors
@@ -944,7 +944,15 @@ laridae_rast <- rast(nlyrs=nlyrs,
                       crs=crs,
                       extent=euro_ext,
                       res=res(blank_3035))
-anatidae_rast <- rast(nlyrs=nlyrs,
+anserinae_rast <- rast(nlyrs=nlyrs,
+                      crs=crs,
+                      extent=euro_ext,
+                      res=res(blank_3035))
+aythyini_rast <- rast(nlyrs=nlyrs,
+                      crs=crs,
+                      extent=euro_ext,
+                      res=res(blank_3035))
+anatinae_rast <- rast(nlyrs=nlyrs,
                       crs=crs,
                       extent=euro_ext,
                       res=res(blank_3035))
@@ -963,7 +971,9 @@ for (i in 1:nlyrs){
   ardeidae_rast[[i]] <- 0
   arenaria_calidris_rast[[i]] <- 0
   laridae_rast[[i]] <- 0
-  anatidae_rast[[i]] <-0
+  anserinae_rast[[i]] <- 0
+  aythyini_rast[[i]] <- 0
+  anatinae_rast[[i]] <-0
 }
 
 no_species <- nrow(sp_df)
@@ -1086,8 +1096,14 @@ idx_to_download <- which(sp_df$species_code %in% not_downloaded)
     if (species_factors$is_laridae){
       laridae_rast <- laridae_rast + (species_factors$pop_sizes * this_rast)
     }
-    if (species_factors$is_anatidae_subfamily){
-      anatidae_rast <- anatidae_rast + (species_factors$pop_sizes * this_rast)
+    if (species_factors$is_anserinae){
+      anserinae_rast <- anserinae_rast + (species_factors$pop_sizes * this_rast)
+    }
+    if (species_factors$is_aythyini){
+      aythyini_rast <- aythyini_rast + (species_factors$pop_sizes * this_rast)
+    }
+    if (species_factors$is_anatinae){
+      anatinae_rast <- anatinae_rast + (species_factors$pop_sizes * this_rast)
     }
     
     # Behavioural outputs are percentages so need to be scaled down by 1e-2
@@ -1139,7 +1155,9 @@ if (SAVE_RAST){
   writeRaster(ardeidae_rast, "output/ardeidae_rast.tif", overwrite=TRUE)
   writeRaster(arenaria_calidris_rast, "output/arenaria_calidris_rast.tif", overwrite=TRUE)
   writeRaster(laridae_rast, "output/laridae_rast.tif", overwrite=TRUE)
-  writeRaster(anatidae_rast, "output/anatidae_rast.tif", overwrite=TRUE)
+  writeRaster(anserinae_rast, "output/anserinae_rast.tif", overwrite=TRUE)
+  writeRaster(aythyini_rast, "output/aythyini_rast.tif", overwrite=TRUE)
+  writeRaster(anatinae_rast, "output/anatinae_rast.tif", overwrite=TRUE)
 }
 
 if (PLOT){
