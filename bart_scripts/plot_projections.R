@@ -40,6 +40,54 @@ grid::grid.text("Probability", x=grid::unit(0.98, "npc"), y=grid::unit(0.50, "np
 dev.off()
 
 
+png("plots/q1_uncertainty.png", width = 21, height = 7,
+    units = "in", res = 330)
+spplot(stack(preds[[1]][[2]],
+             preds[[1]][[1]],
+             preds[[1]][[3]]),
+       col.regions = viridis_pal()(100),
+       at = seq(0,1,0.01),
+       cex = 0.8)
+grid::grid.text("Probability", x=grid::unit(0.98, "npc"), y=grid::unit(0.50, "npc"), rot=-90)
+dev.off()
+
+
+png("plots/q2_uncertainty.png", width = 21, height = 7,
+    units = "in", res = 330)
+spplot(stack(preds[[2]][[2]],
+             preds[[2]][[1]],
+             preds[[2]][[3]]),
+       col.regions = viridis_pal()(100),
+       at = seq(0,1,0.01),
+       cex = 0.8)
+grid::grid.text("Probability", x=grid::unit(0.98, "npc"), y=grid::unit(0.50, "npc"), rot=-90)
+dev.off()
+
+
+png("plots/q3_uncertainty.png", width = 21, height = 7,
+    units = "in", res = 330)
+spplot(stack(preds[[3]][[2]],
+             preds[[3]][[1]],
+             preds[[3]][[3]]),
+       col.regions = viridis_pal()(100),
+       at = seq(0,1,0.01),
+       cex = 0.8)
+grid::grid.text("Probability", x=grid::unit(0.98, "npc"), y=grid::unit(0.50, "npc"), rot=-90)
+dev.off()
+
+
+png("plots/q4_uncertainty.png", width = 21, height = 7,
+    units = "in", res = 330)
+spplot(stack(preds[[4]][[2]],
+             preds[[4]][[1]],
+             preds[[4]][[3]]),
+       col.regions = viridis_pal()(100),
+       at = seq(0,1,0.01),
+       cex = 0.8)
+grid::grid.text("Probability", x=grid::unit(0.98, "npc"), y=grid::unit(0.50, "npc"), rot=-90)
+dev.off()
+
+
 pdf("plots/all_uncertainty.pdf", paper="a4", width = 8, height = 11.3)
 spplot(stack(preds[[1]][[2]],
              preds[[1]][[1]],
