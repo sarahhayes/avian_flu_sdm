@@ -20,6 +20,7 @@ quarter_id = commandArgs(trailingOnly = TRUE)
   eco_paths <- list.files(paste(PATH_TO_DATA, "AI_S2_SDM_storage/Eco-Rasters", sep = ""),
                           pattern = "*.tif",
                           full.names = TRUE)
+  eco_paths <- env_paths[-grep("anatidae_rast", env_paths)]
   eco_lyrnames <- eco_paths %>%
     sub(pattern = paste(PATH_TO_DATA, "AI_S2_SDM_storage/Eco-Rasters/", sep = ""),
         replacement = "") %>%

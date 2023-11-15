@@ -1,8 +1,8 @@
  # In this script we train a BART model to classify sites for avian flu
 # presence/absence based on environmental and species abundance factors
 
-SAVE_FITS <- TRUE
-SAVE_PLOTS <- TRUE
+SAVE_FITS <- FALSE
+SAVE_PLOTS <- FALSE
 BUILD_COVS <- FALSE
 
 # Set path to folder containing data, and where output will be stored
