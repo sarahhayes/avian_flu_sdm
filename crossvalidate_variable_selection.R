@@ -1,6 +1,46 @@
 # In this script we define a function for doing both cross validating models
 # with variable selection
 
+PATH_TO_DATA <- "../../../OneDrive - The University of Liverpool/"
+
+library(embarcadero)
+library(pracma)
+library(raster)
+library(terra)
+set.seed(12345)
+
+quietly <- function(x) {
+  sink(tempfile())
+  on.exit(sink())
+  invisible(force(x))
+} 
+
+################################################################################
+# Do the Q1 analysis
+
+covstack <- raster::stack(paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covariates/q1_covs.tif", sep = ""))
+
+# Drop unclassified land layer
+covstack <- dropLayer(covstack, "lc_17")
+
+
+# Load training data
+training_coords <- readRDS("training_sets/training_coords_Q1.RDS")
+cov_df <- data.frame(raster::extract(covstack, training_coords[, 1:2]))
+
+# Take reduced dataset to
+cols_to_keep <- sample(1:ncol(cov_df), 5)
+reduced_cov_df <- cov_df[, cols_to_keep]
+
+n_pts <- nrow(training_coords)
+n_training <- round(.75 * n_pts)
+
+training <- sample(1:nrow(cov_df), n_training)
+xtrain <- reduced_cov_df[training, ]
+ytrain <- training_coords$pos[training]
+xtest <- reduced_cov_df[-training, ]
+ytest <- training_coords$pos[-training]
+
 
 # ADAPTED FROM EMBARCADERO:
 
@@ -210,10 +250,11 @@ cv_with_vs <- function(xtrain, ytrain,
     for (i in 1:n_folds){
       xfold <- xtrain[-unlist(folds[i]), ]
       yfold <- ytrain[-unlist(folds[i])]
-      model <- bart.step.cv(xfold, yfold, 
+      quietly(model <- bart.step.cv(xfold, yfold, 
                             k,
                             power,
                             base)
+      )
       
       pred.p <- colMeans(pnorm(model$yhat.train))[ytrain==1]
       pred.a <- colMeans(pnorm(model$yhat.train))[ytrain==0]
@@ -227,7 +268,7 @@ cv_with_vs <- function(xtrain, ytrain,
   return(loss_vect)
 }
 
-retune.vs <- function(xtrain, ytrain, reps = 10) {
+retune.vs <- function(xtrain, ytrain, reps = 2, verbose = TRUE) {
   
   # auto-drops 
   
@@ -248,22 +289,44 @@ retune.vs <- function(xtrain, ytrain, reps = 10) {
   
   ####
   
-  k_vals <- c(1,2,3)
-  power_vals <- c(1.5, 1.6, 1.7, 1.8, 1.9, 2)
-  base_vals <- c(0.75, 0.8, 0.85, 0.9, 0.95)
+  k_vals <- c(1,3)
+  power_vals <- c(1.6, 2)
+  base_vals <- c(0.75, 0.95)
   
   loss_array <- array(0, dim=c(length(k_vals), length(power_vals), length(base_vals)))
+  
+  if (verbose){
+    loop_start <- Sys.time()
+    total_fits <- length(k_vals) * length(power_vals) * length(base_vals)
+    fits_left <- total_fits
+  }
+  
   
   for (i in 1:length(k_vals)){
     for (j in 1:length(power_vals)){
       for (k in 1:length(base_vals)){
         x <- cv_with_vs(xtrain,
                         ytrain,
-                        n_folds = 5, n.reps = reps,
+                        n_folds = 2, n.reps = reps,
                         k = k_vals[i],
                         power = power_vals[j],
                         base = base_vals[k])
         loss_array[i] <- x
+        if (verbose){
+          elapsed <- as.numeric(difftime(Sys.time(), loop_start, units = "mins"))
+          fits_left <- fits_left - 1
+          ave_fit_time <- elapsed / (total_fits - fits_left)
+          remaining <- fits_left * ave_fit_time
+          cat(total_fits-fits_left,
+              "parameter combinations done in",
+              elapsed,
+              "minutes, estimated",
+              remaining,
+              "minutes remaining for",
+              fits_left,
+              "fits.\n",
+              sep = " ")
+        }
       }
     }
   }
@@ -279,3 +342,4 @@ retune.vs <- function(xtrain, ytrain, reps = 10) {
   
 }
 
+cv <- retune.vs(xtrain, ytrain, reps=2)
