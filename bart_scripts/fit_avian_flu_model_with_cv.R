@@ -528,7 +528,7 @@ invisible(sdm$fit$state)
 summary(sdm)
 if (SAVE_FITS){
   save(sdm,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/sdm_Q1.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_sdm_Q1.rds", sep = ""))
 }
 
 covstack_lores <- aggregate(covstack, fact = 10)
@@ -541,11 +541,11 @@ pred_layer <- predict(object = sdm,
                       )
 if (SAVE_FITS){
   save(pred_layer,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/prediction_Q1.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_prediction_Q1.rds", sep = ""))
 }
 
 if (SAVE_PLOTS){
-  png(filename = "../../bartfit-plots/q1_map.png")
+  png(filename = "../../bartfit-plots/cv_q1_map.png")
 }
 # Plot map
 plot(pred_layer[[1]],
@@ -557,7 +557,7 @@ if (SAVE_PLOTS){
 }
 
 if (SAVE_PLOTS){
-  png(filename = "../../bartfit-plots/q1_lbound.png")
+  png(filename = "../../bartfit-plots/cv_q1_lbound.png")
 }
 plot(pred_layer[[2]],
      box = FALSE,
@@ -568,7 +568,7 @@ if (SAVE_PLOTS){
 }
 
 if (SAVE_PLOTS){
-  png(filename = "../../bartfit-plots/q1_ubound.png")
+  png(filename = "../../bartfit-plots/cv_q1_ubound.png")
 }
 plot(pred_layer[[3]],
      box = FALSE,
@@ -585,6 +585,7 @@ covstack <- raster::stack(paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covar
 
 # Drop unclassified land layer
 covstack <- dropLayer(covstack, "lc_17")
+
 
 # Load training data
 training_coords <- readRDS("training_sets/training_coords_Q2.RDS")
@@ -616,15 +617,24 @@ if (SAVE_FITS){
        file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/basic_model_Q2.rds", sep = ""))
 }
 
+retuned_model <- retune(basic_model)
+
+k_retune = retuned_model$fit$model@node.hyperprior@k
+power_retune = retuned_model$fit$model@tree.prior@power
+base_retune = retuned_model$fit$model@tree.prior@base
+
 sdm <- bart.step(x.data = xtrain,
                  y.data = ytrain,
+                 k = k_retune,
+                 power = power_retune,
+                 base = base_retune,
                  full = TRUE,
                  quiet = TRUE)
 invisible(sdm$fit$state)
 summary(sdm)
 if (SAVE_FITS){
   save(sdm,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/sdm_Q2.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_sdm_Q2.rds", sep = ""))
 }
 
 covstack_lores <- aggregate(covstack, fact = 10)
@@ -637,11 +647,11 @@ pred_layer <- predict(object = sdm,
 )
 if (SAVE_FITS){
   save(pred_layer,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/prediction_Q2.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_prediction_Q2.rds", sep = ""))
 }
 
 if (SAVE_PLOTS){
-  png(filename = "../../bartfit-plots/q2_map.png")
+  png(filename = "../../bartfit-plots/cv_q2_map.png")
 }
 # Plot map
 plot(pred_layer[[1]],
@@ -653,7 +663,7 @@ if (SAVE_PLOTS){
 }
 
 if (SAVE_PLOTS){
-  png(filename = "../../bartfit-plots/q2_lbound.png")
+  png(filename = "../../bartfit-plots/cv_q2_lbound.png")
 }
 plot(pred_layer[[2]],
      box = FALSE,
@@ -664,7 +674,7 @@ if (SAVE_PLOTS){
 }
 
 if (SAVE_PLOTS){
-  png(filename = "../../bartfit-plots/q2_ubound.png")
+  png(filename = "../../bartfit-plots/cv_q2_ubound.png")
 }
 plot(pred_layer[[3]],
      box = FALSE,
@@ -681,6 +691,7 @@ covstack <- raster::stack(paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covar
 
 # Drop unclassified land layer
 covstack <- dropLayer(covstack, "lc_17")
+
 
 # Load training data
 training_coords <- readRDS("training_sets/training_coords_Q3.RDS")
@@ -712,15 +723,24 @@ if (SAVE_FITS){
        file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/basic_model_Q3.rds", sep = ""))
 }
 
+retuned_model <- retune(basic_model)
+
+k_retune = retuned_model$fit$model@node.hyperprior@k
+power_retune = retuned_model$fit$model@tree.prior@power
+base_retune = retuned_model$fit$model@tree.prior@base
+
 sdm <- bart.step(x.data = xtrain,
                  y.data = ytrain,
+                 k = k_retune,
+                 power = power_retune,
+                 base = base_retune,
                  full = TRUE,
                  quiet = TRUE)
 invisible(sdm$fit$state)
 summary(sdm)
 if (SAVE_FITS){
   save(sdm,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/sdm_Q3.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_sdm_Q3.rds", sep = ""))
 }
 
 covstack_lores <- aggregate(covstack, fact = 10)
@@ -733,11 +753,11 @@ pred_layer <- predict(object = sdm,
 )
 if (SAVE_FITS){
   save(pred_layer,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/prediction_Q3.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_prediction_Q3.rds", sep = ""))
 }
 
 if (SAVE_PLOTS){
-  png(filename = "../../bartfit-plots/q3_map.png")
+  png(filename = "../../bartfit-plots/cv_q3_map.png")
 }
 # Plot map
 plot(pred_layer[[1]],
@@ -749,7 +769,7 @@ if (SAVE_PLOTS){
 }
 
 if (SAVE_PLOTS){
-  png(filename = "../../bartfit-plots/q3_lbound.png")
+  png(filename = "../../bartfit-plots/cv_q3_lbound.png")
 }
 plot(pred_layer[[2]],
      box = FALSE,
@@ -760,7 +780,7 @@ if (SAVE_PLOTS){
 }
 
 if (SAVE_PLOTS){
-  png(filename = "../../bartfit-plots/q3_ubound.png")
+  png(filename = "../../bartfit-plots/cv_q3_ubound.png")
 }
 plot(pred_layer[[3]],
      box = FALSE,
@@ -777,6 +797,7 @@ covstack <- raster::stack(paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covar
 
 # Drop unclassified land layer
 covstack <- dropLayer(covstack, "lc_17")
+
 
 # Load training data
 training_coords <- readRDS("training_sets/training_coords_Q4.RDS")
@@ -808,15 +829,24 @@ if (SAVE_FITS){
        file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/basic_model_Q4.rds", sep = ""))
 }
 
+retuned_model <- retune(basic_model)
+
+k_retune = retuned_model$fit$model@node.hyperprior@k
+power_retune = retuned_model$fit$model@tree.prior@power
+base_retune = retuned_model$fit$model@tree.prior@base
+
 sdm <- bart.step(x.data = xtrain,
                  y.data = ytrain,
+                 k = k_retune,
+                 power = power_retune,
+                 base = base_retune,
                  full = TRUE,
                  quiet = TRUE)
 invisible(sdm$fit$state)
 summary(sdm)
 if (SAVE_FITS){
   save(sdm,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/sdm_Q4.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_sdm_Q4.rds", sep = ""))
 }
 
 covstack_lores <- aggregate(covstack, fact = 10)
@@ -829,11 +859,11 @@ pred_layer <- predict(object = sdm,
 )
 if (SAVE_FITS){
   save(pred_layer,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/prediction_Q4.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_prediction_Q4.rds", sep = ""))
 }
 
 if (SAVE_PLOTS){
-  png(filename = "../../bartfit-plots/q4_map.png")
+  png(filename = "../../bartfit-plots/cv_q4_map.png")
 }
 # Plot map
 plot(pred_layer[[1]],
@@ -845,7 +875,7 @@ if (SAVE_PLOTS){
 }
 
 if (SAVE_PLOTS){
-  png(filename = "../../bartfit-plots/q4_lbound.png")
+  png(filename = "../../bartfit-plots/cv_q4_lbound.png")
 }
 plot(pred_layer[[2]],
      box = FALSE,
@@ -856,7 +886,7 @@ if (SAVE_PLOTS){
 }
 
 if (SAVE_PLOTS){
-  png(filename = "../../bartfit-plots/q4_ubound.png")
+  png(filename = "../../bartfit-plots/cv_q4_ubound.png")
 }
 plot(pred_layer[[3]],
      box = FALSE,
