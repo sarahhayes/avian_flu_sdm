@@ -2,10 +2,10 @@
 # ecological and phylogenetic factors to create rasters encoding the abundance
 # of birds with different qualities.
 
-PLOT <- TRUE # Make plots/animations
+PLOT <- FALSE # Make plots/animations
 HQ_ONLY <- TRUE # Determines whether to use only species with high-quality abundance data in eBird
 QUARTERLY <- TRUE # Generate quarterly (weeks 1-13 etc) rasters, otherwise do weekly
-SAVE_RAST <- FALSE # Save output rasters
+SAVE_RAST <- TRUE # Save output rasters
 
 library(av)
 require(ape)
@@ -36,16 +36,6 @@ sp_df <- ebirdst_runs
 sp_df$scientific_name <- sapply(sp_df$scientific_name,
                                 tolower,
                                 USE.NAMES = FALSE)
-sp_df <- sp_df[, c(
-  "species_code",
-  "scientific_name",
-  "common_name",
-  "breeding_quality",
-  "nonbreeding_quality",
-  "postbreeding_migration_quality",
-  "prebreeding_migration_quality",
-  "resident_quality"
-)]
 
 # Get codes for species in Europe
 euro_bird_codes <- read.csv("ebird/codes_for_europe_clean.csv")
@@ -798,6 +788,52 @@ nhost_thresh <- 50.
 ################################################################################
 # Filter for eBird data quality
 
+
+qual_cols <- c("breeding_quality",
+               "nonbreeding_quality",
+               "postbreeding_migration_quality",
+               "prebreeding_migration_quality",
+               "resident_quality")
+season_names <- gsub("_quality", "", qual_cols)
+
+get_hq_season_lims <- function(species_factors, bd=2){
+  quals <- species_factors[qual_cols]
+  if (length(which(quals>=bd))==0){
+    return(NA)
+  }
+  else{
+    qual_seasons <- season_names[which(quals>=bd)]
+    qual_starts <- sapply(1:length(qual_seasons),
+                          FUN = function(i){
+                            this_name <- paste(qual_seasons[i], "_start", sep="")
+                            return(species_factors[this_name])
+                          })
+    qual_ends <- sapply(1:length(qual_seasons),
+                          FUN = function(i){
+                            this_name <- paste(qual_seasons[i], "_end", sep="")
+                            return(species_factors[this_name])
+                          })
+    if (length(qual_seasons)==1){
+      return(data.frame(season=qual_seasons,
+                        start=qual_starts,
+                        end=qual_ends))
+    }
+    else{
+      seasons_df <- data.frame(season=qual_seasons,
+                               start=unlist(qual_starts),
+                               end=unlist(qual_ends))
+      for (i in 1:nrow(seasons_df)){
+        for (j in 1:nrow(seasons_df)){
+          diff_in_wks <- seasons_df$start[j] - seasons_df$end[i]
+          if ((diff_in_wks<8)&((diff_in_wks>0))){
+            seasons_df$end[i] <- seasons_df$end[j]
+          }
+        }
+      }
+    }
+  }
+}
+
 sp_df$min_quality <- sapply(1:nrow(sp_df),
                       FUN = function(i){
                         min_qual <- sp_df[i,
@@ -811,8 +847,42 @@ sp_df$min_quality <- sapply(1:nrow(sp_df),
                         return(min_qual)
                       })
 
+sp_df$max_quality <- sapply(1:nrow(sp_df),
+                            FUN = function(i){
+                              max_qual <- sp_df[i,
+                                                c("breeding_quality",
+                                                  "nonbreeding_quality",
+                                                  "postbreeding_migration_quality",
+                                                  "prebreeding_migration_quality",
+                                                  "resident_quality")] %>%
+                                as.numeric %>%
+                                max(na.rm = TRUE)
+                              return(max_qual)
+                            })
+
+sp_df$hq_season <- sapply(1:nrow(sp_df),
+                          FUN = function(i){
+                            max_idx <- sp_df[i,
+                                              qual_cols] %>%
+                              as.numeric %>%
+                              which.max()
+                            return(season_names[max_idx])
+                          })
+sp_df$hq_season_start <- sapply(1:nrow(sp_df),
+                          FUN = function(i){
+                            max_idx <- sp_df[i,
+                                             qual_cols] %>%
+                              as.numeric %>%
+                              which.max()
+                            return(season_names[max_idx])
+                          })
+
+
+qrtr_bd_df <- data.frame(q_start=c("01-01-2022", "04-01-2022", "07-01-2022", "10-01-2022"),
+                         q_end=c("03-31-2022", "06-30-2022", "09-30-2022", "12-31-2022"))
+
 if (HQ_ONLY){
-  sp_df <- sp_df[which(sp_df$min_quality > 1), ]
+  sp_df <- sp_df[which(sp_df$max_quality > 1), ]
 }
 
 ################################################################################
