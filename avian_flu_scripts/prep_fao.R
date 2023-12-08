@@ -13,13 +13,14 @@ library(zoo)
 # The third set "epidemiology_raw_data..." come from the epidemiology page and the download raw data
 # tab in the upper right corner. Not 100% sure how I got the second set!!!)
 
-fao_data1 <- read.csv("data/flu_data/raw_data/fao_world_wild_full_1970_2023.csv")
+fao_data1<- read.csv("data/flu_data/raw_data/fao_world_wild_full_1970_2023.csv")
 fao_data2 <- read.csv("data/flu_data/raw_data/overview-raw-data_202307141702.csv")
 fao_data3  <- read.csv("data/flu_data/raw_data/epidemiology-raw-data_202308011345.csv")
 
 table(fao_data1$Region)
 table(fao_data2$Region)
 table(fao_data3$Region)
+
 ## filter to Europe
 
 data_europe1 <- fao_data1[which(fao_data1$Region == "Europe"),]
@@ -34,7 +35,6 @@ data_europe3 <-  dplyr::rename(data_europe3, observation.date = "Observation.dat
 data_europe3 <-  dplyr::rename(data_europe3, report.date = "Report.date..dd.mm.yyyy.")
 
 # There are rows with no entries for observation date so remove these
-
 
 # remove the ones without a date
 data_europe1 <- data_europe1[which(data_europe1$observation.date != ""),]

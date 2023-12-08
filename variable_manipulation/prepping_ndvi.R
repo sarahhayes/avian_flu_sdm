@@ -173,6 +173,18 @@ fourth_stack_prj <- fourth_stack_prj/10000
 
 plot(fourth_stack_prj)
 
+pdf("plots/NDVI_first.pdf", height = 7, width = 7)
+par(mfrow = c(1,1))
+plot(first_stack_prj,# range = c(0,400), 
+     #col= rev(viridis::viridis(50)),
+     mar = c(2,2,2,4.5),
+     plg = list(size = 0.9, cex = 1, title = "Mean\
+NDVI", title.cex = 0.9, x = "right"),
+     pax=list(side=1:2, cex.axis = 1.2),
+     main = "First quarter", cex.main = 1)
+dev.off()
+
+
 # save the rasters
 terra::writeRaster(first_stack_prj, 
                     "variable_manipulation/variable_outputs/ndvi_first_quart_2022.tif")

@@ -100,6 +100,8 @@ ggplot(pos_counts, aes(x = date, y = n)) +
   theme_bw() + 
   xlim(c(as.Date("2003-01-01"), as.Date("2023-01-01")))
 
+sum(pos_data_counts$n) # matches the number we should have 
+
 # ggsave("plots/timeline_bvbrc_pos.png")
 
 ## look at entries per month
@@ -171,7 +173,12 @@ zipmap <- terra::vect(x = "data/gis_europe/CNTR_RG_03M_2020_4326.shp.zip",
                       layer = "CNTR_RG_03M_2020_4326")
 plot(zipmap)
 crs <- "epsg:3035"
-euro_ext <- terra::ext(2000000, 9000000, 1000000, 9000000)
+#euro_ext <- terra::ext(2000000, 9000000, 1000000, 9000000)
+
+# set the extent as the same as the euro shapefil
+euro_shp <- terra::vect("output/euro_map.shp")
+ext(euro_shp)
+euro_ext <- ext(euro_shp)
 
 # change projection and extent. 
 # using quite a generous extent whilst plotting as looking at where to set the boundaries
@@ -181,11 +188,13 @@ plot(euro_map)
 plot(euro_map_crop)
 
 # Transform the data to spatial points
-pts_pos <- terra::vect(pos_data, geom=c("Collection.Longitude", "Collection.Latitude"),
+pos_data_for_points <- pos_data[,c("Collection.Longitude", "Collection.Latitude")]
+pts_pos <- terra::vect(pos_data_for_points, geom=c("Collection.Longitude","Collection.Latitude"),
                    crs =  "+proj=longlat +ellps=WGS84 +datum=WGS84")
 pts_pos <- terra::project(pts_pos,  "epsg:3035")
 
-pts_neg <- terra::vect(neg_data, geom=c("Collection.Longitude", "Collection.Latitude"),
+neg_data_for_points <- neg_data[,c("Collection.Longitude", "Collection.Latitude")]
+pts_neg <- terra::vect(neg_data_for_points, geom=c("Collection.Longitude", "Collection.Latitude"),
                        crs =  "+proj=longlat +ellps=WGS84 +datum=WGS84")
 pts_neg <- terra::project(pts_neg,  "epsg:3035")
 

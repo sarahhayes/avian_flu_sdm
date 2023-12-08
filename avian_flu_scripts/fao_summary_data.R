@@ -8,14 +8,14 @@ library(zoo)
 fao_data <- read.csv("data/flu_data/prepped_data/fao_europe.csv")
 
 
-# These data contain the source which is listed for some as OIE. Might be useful when comoaring
+# These data contain the source which is listed for some as OIE. Might be useful when comparing
 # these data to WAHIS to have this variable. 
 
 # look at a few things to check as expected
 table(fao_data$Country)
 table(fao_data$Animal.type)
 species_raw <- as.data.frame(table(fao_data$Species))
-
+table(fao_data$Region)
 ## Lots and lots of species and not entered in a very uniform way. 
 ### Can also see that there are some mammals in here. 
 
@@ -23,7 +23,7 @@ species_raw <- as.data.frame(table(fao_data$Species))
 # Fox; Gray seal; Harbor Seal; Mink; Red fox; South American Coati; Stone Marten; Unspecified mammal
 # there are also lots listed as 'Domestic:...'
 
-# i think we want to remove these
+# i think we want to remove these - this is done in the 'create_flu_csv.R' script  
 # 
 # fao_data <- fao_data %>%
 #   dplyr::filter(grepl("wild|Wild", Species))
@@ -75,6 +75,7 @@ fao_data %>%
        title = "Positive samples from wild birds in Europe 
        (FAO)") +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), legend.position = "none")
+
 # ggsave("plots/by_country_pos_fao.png" )#, width = 5, height = 5)
 
 
@@ -123,6 +124,12 @@ zipmap <- terra::vect(x = "data/gis_europe/CNTR_RG_03M_2020_4326.shp.zip",
 plot(zipmap)
 crs <- "epsg:3035"
 euro_ext <- terra::ext(2000000, 9000000, 1000000, 9000000) 
+
+# set the extent as the same as the euro shapefile
+euro_shp <- terra::vect("output/euro_map.shp")
+ext(euro_shp)
+euro_ext <- ext(euro_shp)
+
 
 # change projection and extent. 
 # using quite a generous extent whilst plotting as looking at where to set the boundaries

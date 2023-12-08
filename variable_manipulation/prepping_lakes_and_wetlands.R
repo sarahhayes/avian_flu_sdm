@@ -167,11 +167,13 @@ euro_rast
 masked <- terra::mask(blank_raster, euro_rast )
 plot(masked)
 
+png("plots/distance_to_water_m.png", width = 600, height = 400)
 bp_500 <- c(1000,5000, 10000, 15000, 20000, 25000, 30000, 40000, 50000, 
             100000, 200000, 500000, 1000000)
 plot(masked, breaks = c(0, bp_500), 
      plg = list(title = "Distance in m"),
      col= c("white", viridis::viridis(14)), background = "light blue")
+dev.off()
 
 # ideally re-do this in km. 
 #pdf("plots/distance_to_water_masked.pdf", width = 7, height = 5)

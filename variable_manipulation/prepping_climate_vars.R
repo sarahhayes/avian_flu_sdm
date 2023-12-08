@@ -350,6 +350,17 @@ plot(mean_prec_third_quart, range = c(0,400),
      main = "Third quarter", cex.main = 0.8)
 dev.off()
 
+pdf("plots/precipitation_third.pdf", height = 7, width = 7)
+par(mfrow = c(1,1))
+plot(mean_prec_third_quart, range = c(0,400), 
+     col= rev(viridis::viridis(50)),
+     mar = c(2,2,2,4.5),
+     plg = list(size = 0.9, cex = 1, title = "Mean
+          precipitation
+(mm)", title.cex = 0.9, x = "right"),
+     pax=list(side=1:2, cex.axis = 1),
+     main = "Third quarter", cex.main = 1)
+dev.off()
 
 #################################################################################
 
