@@ -2,10 +2,10 @@
 # ecological and phylogenetic factors to create rasters encoding the abundance
 # of birds with different qualities.
 
-PLOT <- TRUE # Make plots/animations
+PLOT <- FALSE # Make plots/animations
 HQ_ONLY <- TRUE # Determines whether to use only species with high-quality abundance data in eBird
 QUARTERLY <- TRUE # Generate quarterly (weeks 1-13 etc) rasters, otherwise do weekly
-SAVE_RAST <- FALSE # Save output rasters
+SAVE_RAST <- TRUE # Save output rasters
 
 library(av)
 require(ape)
@@ -36,16 +36,6 @@ sp_df <- ebirdst_runs
 sp_df$scientific_name <- sapply(sp_df$scientific_name,
                                 tolower,
                                 USE.NAMES = FALSE)
-sp_df <- sp_df[, c(
-  "species_code",
-  "scientific_name",
-  "common_name",
-  "breeding_quality",
-  "nonbreeding_quality",
-  "postbreeding_migration_quality",
-  "prebreeding_migration_quality",
-  "resident_quality"
-)]
 
 # Get codes for species in Europe
 euro_bird_codes <- read.csv("ebird/codes_for_europe_clean.csv")
@@ -798,21 +788,59 @@ nhost_thresh <- 50.
 ################################################################################
 # Filter for eBird data quality
 
-sp_df$min_quality <- sapply(1:nrow(sp_df),
-                      FUN = function(i){
-                        min_qual <- sp_df[i,
-                                        c("breeding_quality",
-                                          "nonbreeding_quality",
-                                          "postbreeding_migration_quality",
-                                          "prebreeding_migration_quality",
-                                          "resident_quality")] %>%
-                          as.numeric %>%
-                          min(na.rm = TRUE)
-                        return(min_qual)
-                      })
+
+season_names <- c("breeding",
+               "nonbreeding",
+               "postbreeding_migration",
+               "prebreeding_migration",
+               "resident")
+
+earliest_date <- as.Date("2021-01-04")
+
+get_wkly_quality <- function(species_factors){
+  quality_by_wk <- rep(-100, length = 52)
+  for (sn in season_names){
+    if (!is.na(species_factors[[paste(sn, "_start", sep="")]]) &
+        !is.na(species_factors[[paste(sn, "_end", sep="")]])){
+      start_wk <- species_factors[[paste(sn, "_start", sep="")]] %>%
+                  difftime(earliest_date, units = "weeks") %>%
+                  as.numeric() %>%
+                  floor()
+      end_wk <- species_factors[[paste(sn, "_end", sep="")]] %>%
+        difftime(earliest_date, units = "weeks") %>%
+        as.numeric() %>%
+        floor()
+      if (start_wk<=end_wk){
+        quality_by_wk[(start_wk + 1):(end_wk + 1)] <- species_factors[[paste(sn, "_quality", sep="")]] %>%
+          as.numeric()
+      }
+      else{
+        quality_by_wk[(start_wk + 1):52] <- species_factors[[paste(sn, "_quality", sep="")]] %>%
+                                            as.numeric()
+        quality_by_wk[1:(end_wk + 1)] <- species_factors[[paste(sn, "_quality", sep="")]] %>%
+                                            as.numeric()
+      }
+    }
+  }
+  return(quality_by_wk)
+}
+
+sp_df$wkly_quality <- lapply(1:nrow(sp_df), FUN=function(i){species_factors <- as.data.frame(sp_df[i, ])
+                                      return(get_wkly_quality(species_factors))})
+
+
+sp_df$min_quality <- sapply(sp_df$wkly_quality, min)
+sp_df$max_quality <- sapply(sp_df$wkly_quality, max)
+
+cat("There are",
+    length(which(sp_df$min_quality>1)),
+    "species with a quality score greater than 1 year-round.")
+cat("There are",
+    length(which(sp_df$max_quality>1)),
+    "species with a quality score greater than 1 for at least some of the year.")
 
 if (HQ_ONLY){
-  sp_df <- sp_df[which(sp_df$min_quality > 1), ]
+  sp_df <- sp_df[which(sp_df$max_quality > 1), ]
 }
 
 ################################################################################
