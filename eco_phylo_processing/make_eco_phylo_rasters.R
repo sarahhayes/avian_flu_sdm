@@ -3,9 +3,21 @@
 # of birds with different qualities.
 
 PLOT <- FALSE # Make plots/animations
-HQ_ONLY <- TRUE # Determines whether to use only species with high-quality abundance data in eBird
+QUALITY_METHOD <- "HQ_WEIGHTED" # Options are: "HQ_ONLY" to only use species with high
+                  # quality year-round; "HQ_WEIGHTED" to assign abundances for a
+                  # season based on mean abundances during weeks where we have
+                  # high quality abundance; "HQ_ABSENCE" to treat low-quality
+                  # weeks as zero (not currently implemented!); "ALL" to use all species including those with
+                  # lower-quality abundance estimates.
 QUARTERLY <- TRUE # Generate quarterly (weeks 1-13 etc) rasters, otherwise do weekly
 SAVE_RAST <- TRUE # Save output rasters
+
+if (QUARTERLY){
+  nlyrs <- 4
+  qrtr_bds <- c(1, 14, 27, 40, 53)
+}else{
+  nlyrs <- 52
+}
 
 library(av)
 require(ape)
@@ -839,8 +851,34 @@ cat("There are",
     length(which(sp_df$max_quality>1)),
     "species with a quality score greater than 1 for at least some of the year.")
 
-if (HQ_ONLY){
+if (QUALITY_METHOD=="HQ_ONLY"){
   sp_df <- sp_df[which(sp_df$max_quality > 1), ]
+}else if (QUALITY_METHOD=="HQ_WEIGHTED"){
+  sp_df$include_q1 <- sapply(1:nrow(sp_df),
+                             FUN = function(i){
+                               (sp_df$wkly_quality[[i]][1:13] > 1) %>%
+                                 which() %>%
+                                 length() > 6
+                             })
+  sp_df$include_q2 <- sapply(1:nrow(sp_df),
+                             FUN = function(i){
+                               (sp_df$wkly_quality[[i]][14:26] > 1) %>%
+                                 which() %>%
+                                 length() > 6
+                             })
+  sp_df$include_q3 <- sapply(1:nrow(sp_df),
+                             FUN = function(i){
+                               (sp_df$wkly_quality[[i]][27:39] > 1) %>%
+                                 which() %>%
+                                 length() > 6
+                             })
+  sp_df$include_q4 <- sapply(1:nrow(sp_df),
+                             FUN = function(i){
+                               (sp_df$wkly_quality[[i]][40:52] > 1) %>%
+                                 which() %>%
+                                 length() > 6
+                             })
+  sp_df <- sp_df[which(sp_df$include_q1|sp_df$include_q2|sp_df$include_q3|sp_df$include_q4), ]
 }
 
 ################################################################################
@@ -912,13 +950,6 @@ euro_ext <- ext(blank_3035)
 # Foraging around water surface
 # Foraging >5cm below water surface
 # Phylogenetic distance to a confirmed host
-
-if (QUARTERLY){
-  nlyrs <- 4
-  qrtr_bds <- c(0, 13, 26, 39, 52)
-}else{
-  nlyrs <- 52
-}
 
 cong_rast <- rast(nlyrs=nlyrs,
                   crs=crs,
@@ -1046,7 +1077,6 @@ idx_to_download <- which(sp_df$species_code %in% not_downloaded)
   mean_process_time <- 0
   no_processed <- 0
   for (i in 1:no_species) {
-    
     idx <- sample_idx[i]
     species_sel <- sp_df$species_code[idx]
     species_factors <- sp_df[idx, ]
@@ -1097,11 +1127,40 @@ idx_to_download <- which(sp_df$species_code %in% not_downloaded)
     this_rast <- replace(this_rast, is.na(this_rast), 0)
     
     if (QUARTERLY){
+      if ((QUALITY_METHOD=="HQ_ONlY")|(QUALITY_METHOD=="ALL")){
       this_rast <- lapply(1:nlyrs,
                           FUN = function(i){
-                            app(this_rast[[qrtr_bds[i]:qrtr_bds[i+1]]], mean)}
+                            app(this_rast[[qrtr_bds[i]:(qrtr_bds[i+1]-1)]], mean)}
                           ) %>%
                     rast
+      }
+      else if (QUALITY_METHOD=="HQ_WEIGHTED"){
+        qual_wks_by_qrtr <- lapply(1:nlyrs,
+                                   FUN = function(i){
+                                   qual_wks <- which(species_factors$wkly_quality[[1]][qrtr_bds[i]:(qrtr_bds[i+1]-1)]>1)
+                                   if (length(qual_wks)==0){
+                                     return(c(-100))} # Note: doing this means low-quality quarters will initially be assigned mean across whole year, but then set to zero later
+                                   else{return(qual_wks)}
+                                    }
+        )
+        this_rast <- lapply(1:nlyrs,
+                            FUN = function(i){
+                              app(this_rast[[(qrtr_bds[i]-1) + qual_wks_by_qrtr[[i]]]], mean)}
+        ) %>%
+          rast
+        if (!species_factors$include_q1){
+          this_rast[[1]] <- 0
+        }
+        if (!species_factors$include_q2){
+          this_rast[[2]] <- 0
+        }
+        if (!species_factors$include_q3){
+          this_rast[[3]] <- 0
+        }
+        if (!species_factors$include_q4){
+          this_rast[[4]] <- 0
+        }
+      }
       set.names(this_rast, c("Qrt1", "Qrt2", "Qrt3", "Qrt4"))
     }
     
@@ -1275,3 +1334,20 @@ if (PLOT){
                       framerate = 5.2,
                       output = "log_species_rast.mp4")
 }
+
+################################################################################
+# Quick plot of surface feeder abundance for slides:
+
+spplot(log_around_surf_rast[[2]],
+       col.regions = c("#FFFFFF", rev(viridis_pal()(100))),
+       cex=0.8)
+
+at <- seq(0, 4, 0.1)
+labs <- as.character(10^at)
+labs[-c(11,21,31,41)] <- ""
+spplot(log_around_surf_rast[[2]],
+       col.regions = c("#FFFFFF", viridis_pal()(100)),
+       colorkey=list(at = at,
+                     labels = labs,
+                     tck=0,
+                     title="Abundance of water surface feeders"))
