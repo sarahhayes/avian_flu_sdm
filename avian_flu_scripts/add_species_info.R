@@ -1,3 +1,55 @@
+# ## Lines 1-50 are for use within create_flu_csv scripts if updates to raw data have occurred
+# 
+# # use Taxize to see how many can be identified automatically
+# # If no updates to data can skip this part and just read in the csv below.
+# 
+# library(taxize)
+# 
+# species_list <- as.data.frame(table(ai_data_prj_area$Species))
+# 
+# colnames(species_list) <- c("species", "freq")
+# species_list$species <- as.character(species_list$species)
+# 
+# for (i in 1:nrow(species_list)) {
+#   species_list[i,"class"] <- tax_name(species_list[i,"species"],
+#                                       get = "class",
+#                                       db = "ncbi")$class
+#   print(i)
+# }
+# 
+# not_sp <- species_list[which(is.na(species_list$class)),]
+# # manual inspection suggests some of these may not be found due to things like having 'incognita' added to name
+# 
+# not_sp$species_edit <- not_sp$species
+# not_sp$species_edit <- sub("\\(.*", "", not_sp$species_edit)
+# not_sp$species_edit <- sub("\\:.*", "", not_sp$species_edit)
+# 
+# for (i in 1:nrow(not_sp)) {
+#   not_sp[i,"class"] <- tax_name(not_sp[i,"species_edit"],
+#                                 get = "class",
+#                                 db = "ncbi")$class
+#   print(i)
+# }
+# 
+# 
+# # still quite a few without a class which may have to manually look through
+# 
+# not_sp <- rename(not_sp, class_2 = class)
+# species_list <- left_join(species_list, not_sp)
+# species_list[which(is.na(species_list$class)), "class"] <- species_list[which(is.na(species_list$class)), "class_2"]
+# species_list <- dplyr::select(species_list, c("species", "freq", "class"))
+# 
+# # Peacock has been mislabelled as an insect so change to Aves
+# 
+# species_list[which(species_list$species == "Peacock"),"class"] <- "Aves"
+# 
+# #select the ones labelled "Mammalia" for removal
+# # save the species list so don't have to generate every time'
+# 
+# #write.csv(species_list, "avian_flu_scripts/detecting_mammals.csv", row.names = F)
+
+#####################################################################################
+
 # trying to automate the process of identifying the taxons
 
 species_list$species <- as.character(species_list$species)
@@ -5,7 +57,7 @@ species_list$species <- as.character(species_list$species)
 ## automatically remove any labels such as 'sp' or 'spp' in species
 species_list$species <- str_remove(species_list$species, pattern = " sp.")
 
-# library(taxize)
+library(taxize)
 
 # remove the brackets as this helped earlier
 species_list$species <- sub("\\(.*", "", species_list$species)
@@ -13,7 +65,7 @@ species_list$species <- sub("\\:.*", "", species_list$species)
 species_list$species <- str_squish(species_list$species)
 
 #for (i in 1:20) {
-for (i in 365:nrow(species_list)) {
+for (i in 353:nrow(species_list)) {
   species_list[i,"order"] <- tax_name(species_list[i,"species"], 
                                        get = "order",
                                        db = "ncbi")$order 
@@ -227,7 +279,7 @@ species_list[which(species_list$species == "Wild Duck"),
              c("class", "order", "family", "genus")] <- 
   c("Aves", "Anseriformes", "Anatidae", "")
 
-no_family[54]
+
 
 ##############################
 ## May not need the below. 

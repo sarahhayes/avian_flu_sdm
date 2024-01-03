@@ -1,5 +1,7 @@
-## 02/11/2023
+## 03/01/2024
 ## Creating the avian flu data csv for use within the BART model
+## No longer using the BV-BRC data, 
+## An older version of this script is available in the z_old_and_unused_script folder if needed for ref
 ## Also create some summaries of the individual datasets for the area we are using
 ## and remove the mammals into a separate set
 
@@ -73,92 +75,17 @@ inf_a_hpai_trim <- dplyr::select(inf_a_hpai_wild, all_of(c("Latitude", "Longitud
                                                            "country", "sero_sub_genotype_eng")))
 inf_a_hpai_trim$source <- "woah"
 
-
-# BVBRC
-bvbrc_data <- read.csv("data/flu_data/raw_data/BVBRC_surveillance.csv")
-
-columns_needed <- c("Collection.Date", "Collection.Year", "Collection.Country", 
-                    "Collection.Latitude", "Collection.Longitude", "Pathogen.Test.Result",
-                    "Host.Species", "Host.Group", "Host.Natural.State", "Host.Health", 
-                    "Subtype", "Strain")
-
-bvbrc_data_slim <- dplyr::select(bvbrc_data, all_of(columns_needed))
-table(bvbrc_data_slim$Collection.Country) # still contains global data as required
-
-bvbrc_data_slim <- filter(bvbrc_data_slim, Host.Natural.State == "Wild")
-
-# remove the ones without a year
-bvbrc_data_slim <- drop_na(bvbrc_data_slim, Collection.Year)
-
-# There are samples labelled "env" which I assume are environmental so remove these
-bvbrc_data_slim <- bvbrc_data_slim[which(bvbrc_data_slim$Host.Species != "Env"),]
-
-# separate positive and negative
-pos_data <- filter(bvbrc_data_slim, Pathogen.Test.Result == "Positive")
-neg_data <- filter(bvbrc_data_slim, Pathogen.Test.Result == "Negative")
-
-bv_pos_data_trim <- dplyr::select(pos_data, all_of(c("Collection.Date", 
-                                                     "Collection.Latitude",
-                                                     "Collection.Longitude",
-                                                     "Host.Species",
-                                                     "Collection.Country",
-                                                     "Subtype")))
-
-bv_pos_data_trim$source <- "bvbrc"
-bv_pos_data_trim$Collection.Date <- as.Date(bv_pos_data_trim$Collection.Date,
-                                            "%Y-%m-%d")
-
-
-bv_neg_data_trim <- dplyr::select(neg_data, all_of(c("Collection.Date", 
-                                                     "Collection.Latitude",
-                                                     "Collection.Longitude",
-                                                     "Host.Species",
-                                                     "Collection.Country",
-                                                     "Subtype")))
-bv_neg_data_trim$source <- "bvbrc"
-bv_neg_data_trim$Collection.Date <- as.Date(bv_neg_data_trim$Collection.Date,
-                                            "%Y-%m-%d")
-
 # We now have the trimmed data sets for all the sources. 
-# combine them and add a section for pos or neg
-
 # first need all the names to match so we can rbind
 
 colnames(fao_data_trim)
 colnames(inf_a_hpai_trim)
-colnames(bv_pos_data_trim)
 inf_a_hpai_trim <- rename(inf_a_hpai_trim, observation.date = Outbreak_start_date, 
                           Country = country, Serotype = sero_sub_genotype_eng)
-bv_pos_data_trim <- rename(bv_pos_data_trim, Latitude = Collection.Latitude,
-                           Longitude = Collection.Longitude,
-                           observation.date = Collection.Date,
-                           Species  = Host.Species,
-                           Country = Collection.Country,
-                           Serotype = Subtype)
 
-bv_pos_data_trim <- dplyr::select(bv_pos_data_trim, c(Latitude, Longitude, observation.date, Species,
-                                                      Country, Serotype, source))
-colnames(bv_pos_data_trim)
 
-all_ai_data <- rbind(fao_data_trim, inf_a_hpai_trim, bv_pos_data_trim)
+all_ai_data <- rbind(fao_data_trim, inf_a_hpai_trim)
 all_ai_data$flu <- 1 # denotes a positive
-
-###### ** Not using negatives so no longer need the below script
-## deal with the negatives
-
-# bv_neg_data_trim <- rename(bv_neg_data_trim, Latitude = Collection.Latitude,
-#                            Longitude = Collection.Longitude,
-#                            observation.date = Collection.Date,
-#                            Species  = Host.Species,
-#                            Country = Collection.Country,
-#                            Serotype = Subtype)
-# 
-# bv_neg_data_trim <- dplyr::select(bv_neg_data_trim, c(Latitude, Longitude, observation.date, Species,
-#                                                       Country, Serotype, source))
-# colnames(bv_neg_data_trim)
-# bv_neg_data_trim$flu <- 0 # denotes negative test
-# 
-# all_ai_data <- rbind(all_ai_data, bv_neg_data_trim)
 
 ## check for any NA values
 sum(is.na(all_ai_data$Latitude))
@@ -212,68 +139,17 @@ ai_data_prj_area <- point_data_df %>%
 pos_ai_data_prj_area <- ai_data_prj_area %>%
   filter(flu == 1)
 
-#neg_ai_data_prj_area <- ai_data_prj_area %>%
-#  filter(flu == 0)
-
 nrow(pos_ai_data_prj_area)
 nrow(ai_data_prj_area)
 
 #save these
-#write.csv(pos_ai_data_prj_area, "output/avian_flu/pos_points_proj_area_all_sources_all_wild.csv" )
-#write.csv(neg_ai_data_prj_area, "output/avian_flu/neg_points_proj_area_all_sources_all_wild.csv" )
+#write.csv(pos_ai_data_prj_area, "output/avian_flu/pos_points_proj_area_fao_woah_all_wild.csv" )
 
-# ## We need to remove mammals from these data 
-# ### Next task is to remove the non-birds from the data... 
-# 
-# # use Taxize to see how many can be identified automatically 
-# # If no updates to data can skip this part and just read in the csv below. 
-# 
-# #install.packages("taxizedb")
-# #library(taxizedb)
-# library(taxize)
-#  
-#  species_list <- as.data.frame(table(ai_data_prj_area$Species))
-#  
-# colnames(species_list) <- c("species", "freq")
-# species_list$species <- as.character(species_list$species)
-#  
-# for (i in 1:nrow(species_list)) {
-#   species_list[i,"class"] <- tax_name(species_list[i,"species"],
-#                                        get = "class",
-#                                        db = "ncbi")$class
-#   print(i)
-# }
-# 
-# not_sp <- species_list[which(is.na(species_list$class)),]
-# # manual inspection suggests some of these may not be found due to things like having 'incognita' added to name
-# 
-# not_sp$species_edit <- not_sp$species
-# not_sp$species_edit <- sub("\\(.*", "", not_sp$species_edit)
-# not_sp$species_edit <- sub("\\:.*", "", not_sp$species_edit)
-# 
-# for (i in 1:nrow(not_sp)) {
-#   not_sp[i,"class"] <- tax_name(not_sp[i,"species_edit"],
-#                                       get = "class",
-#                                       db = "ncbi")$class
-#   print(i)
-# }
-# 
-# 
-# # still quite a few without a class which may have to manually look through
-# 
-# not_sp <- rename(not_sp, class_2 = class)
-# species_list <- left_join(species_list, not_sp)
-# species_list[which(is.na(species_list$class)), "class"] <- species_list[which(is.na(species_list$class)), "class_2"]
-# species_list <- dplyr::select(species_list, c("species", "freq", "class"))
-# 
-# # Peacock has been mislabelled as an insect so change to Aves
-# 
-# species_list[which(species_list$species == "Peacock"),"class"] <- "Aves"
+## We need to remove mammals from these data
 
-#select the ones labelled "Mammalia" for removal
-# save the species list so don't have to generate every time'
-
-#write.csv(species_list, "avian_flu_scripts/detecting_mammals.csv", row.names = F)
+## Lines 1-50 in the add_species_info.R script can be used to identify mammals at this point 
+## if these have been changes to the raw data. 
+## If no changes just read in the species list
 
 species_list <- read.csv("avian_flu_scripts/detecting_mammals.csv")
 
@@ -295,14 +171,6 @@ nrow(ai_data_prj_area[which(ai_data_prj_area$Species %in% unwanted_sp),])
 
 # 123 mammal entries that we are removing. 
 
-# unwanted_sp <- c("Unspecified Mammal", "Stone Marten", 
-#                  "South American Coati (Nasua Nasua):Procyonidae-Carnivora",
-#                  "Red Fox", "Polecat", "Polar Fox", "Nyctereutes Viverrinus (Japanese Racoon Dog)",
-#                  "Mink", "Harbor Seal (Phoca Vitulina):Phocidae-Carnivora", 
-#                  "Gray Seal (Halichoerus Grypus):Phocidae-Carnivora", "Fox",
-#                  "European Pine Marten", "Civet", "Caspian Seal (Pusa Caspica)",
-#                  "Halichoerus grypus", "Phoca vitulina", "Mustela putorius")
-
 ## Remove from the data so just birds
 
 ai_pos_birds <- 
@@ -320,19 +188,32 @@ plot(ai_pos_birds[which(ai_pos_birds$source == "woah"),], add = T,
      pch = 18, legend = T, col = "blue", cex = 0.5)
 dev.off()
 
-png("plots/bvbrc_data_pos.png", width = 480, height = 480)
-plot(euro_shp, main = "BV-BRC")
-plot(ai_pos_birds[which(ai_pos_birds$source == "bvbrc"),], add = T, 
-     pch = 18, legend = T, col = "orange", cex = 0.5)
-dev.off()
+# Remove any of the data that are labelled LPAI
+table(ai_pos_birds$Serotype)
+ai_pos_birds$serotype_HN <- ai_pos_birds$Serotype
+# some of these state that they are LPAI so remove those. 
+ai_pos_birds <- ai_pos_birds %>% filter(!str_detect(Serotype, "LPAI"))
+# Now remove extra info
+ai_pos_birds$serotype_HN <-  gsub("HPAI","",as.character(ai_pos_birds$serotype_HN))
+ai_pos_birds$serotype_HN <-  gsub("LPAI","",as.character(ai_pos_birds$serotype_HN))
+ai_pos_birds$serotype_HN<-toupper(ai_pos_birds$serotype_HN) # so they match
+ai_pos_birds$serotype_HN <- trimws(ai_pos_birds$serotype_HN) # trim any white space in the entries to aid matching
+table(ai_pos_birds$serotype_HN)
 
-nrow(ai_pos_birds[which(ai_pos_birds$source == "bvbrc"),])
+# # manually change the one entry that has the serotype entered twice
+# ai_pos_birds[(which(ai_pos_birds$serotype_HN == "H7N2,H7N2")), "serotype_HN"] <- "H7N2"
 
-## Before remove duplicates, try and count number of species/families etc.
-## To do this, run the script in add_species_info.R
+table(ai_pos_birds$source, ai_pos_birds$serotype_HN)
 
+serotype_source_df <- as.data.frame(table(ai_pos_birds$source, ai_pos_birds$serotype_HN))
+serotype_source_df <- pivot_wider(serotype_source_df, names_from = Var1, values_from = "Freq")
+
+
+## Before remove duplicates, try and count number of bird species/families etc.
 species_list <- 
   species_list[-which(species_list$species %in% unwanted_sp),]
+
+## To do this, run the script in add_species_info.R starting at line 50
 
 table(species_list$family)
 unique(species_list$family)
@@ -367,37 +248,10 @@ no_dups_all_except_source <- unique(dt_pos, by = c("X", "Y", "observation.date",
 # easier to re-classify the dataframe so can use the existing code
 ai_pos_birds <- no_duplicates_date_and_loc
 
-table(ai_pos_birds$Serotype)
-ai_pos_birds$serotype_HN <- ai_pos_birds$Serotype
-ai_pos_birds$serotype_HN <-  gsub("HPAI","",as.character(ai_pos_birds$serotype_HN))
-ai_pos_birds$serotype_HN <-  gsub("LPAI","",as.character(ai_pos_birds$serotype_HN))
-ai_pos_birds$serotype_HN<-toupper(ai_pos_birds$serotype_HN) # so they match
-ai_pos_birds$serotype_HN <- trimws(ai_pos_birds$serotype_HN) # trim any white space in the entries to aid matching
 table(ai_pos_birds$serotype_HN)
 
-# manually change the one entry that has the serotype entered twice
-ai_pos_birds[(which(ai_pos_birds$serotype_HN == "H7N2,H7N2")), "serotype_HN"] <- "H7N2"
-
-# Difficult to split by LPAI and HPAI as not specified directly. 
-# FAO and WOAH only report HPAI so the ones listed in this data base should all be HPAI
-
-table(ai_pos_birds$source, ai_pos_birds$serotype_HN)
-
-serotype_source_df <- as.data.frame(table(ai_pos_birds$source, ai_pos_birds$serotype_HN))
-serotype_source_df <- pivot_wider(serotype_source_df, names_from = Var1, values_from = "Freq")
-
-sum(colSums(serotype_source_df[2:4]))
-
-# if we filter by all the entries that don't have an entry in either FAO or WOAH then this
-# may well leave only the LPAI? 
-# Alternatively just select all the H5 and H7
-
-hpai <- ai_pos_birds %>% filter(str_detect(serotype_HN,"H5") | str_detect(serotype_HN, "H7"))
-hpai <- rename(hpai, species = Species)
-
-## To do - need to get species info for the birds that are HPAI only? 
-
-#write.csv(hpai, "data/flu_data/prepped_data/hpai_pos_birds")
+hpai <- ai_pos_birds
+# write.csv(hpai, "data/flu_data/prepped_data/hpai_pos_birds")
 
 # Add a year and month and year_month to the data
 
@@ -408,6 +262,8 @@ hpai$week <- format(hpai$observation.date, "%Y Week %W")
 hpai$week_num <- lubridate::isoweek(hpai$observation.date)
 
 range(hpai$observation.date)
+
+# Now to plot the time series by serotype 
 
 serotype_data <- as.data.frame(table(hpai$serotype_HN))
 
@@ -430,7 +286,6 @@ all_dates$month <- lubridate::month(all_dates$date)
 all_dates$month_year <- format(all_dates$date, "%Y-%m")
 all_dates$week <- format(all_dates$date, "%Y Week %W")
 all_dates$week_num <- lubridate::isoweek(all_dates$date)
-
 
 # For quite a number of the subtypes there are only a few entries. 
 # For the line plot by subtype, only use those that have >10 entries
@@ -471,10 +326,9 @@ ggplot(data = all_dates_subtype_data,
         plot.margin = margin(1,1,1,1, "cm"), 
         axis.title =  element_text(size = 14),
         plot.background = element_rect(fill = "light blue"))+
-      #  panel.background = element_rect(fill = "white", colour = "grey50")) + 
+  #  panel.background = element_rect(fill = "white", colour = "grey50")) + 
   labs(colour = "Subtype", y = "Number of weekly cases", x = "Year", size = 18) +
   scale_x_continuous(breaks = weekbreaks, labels = yearlabs)
-
 ggsave("plots/subtypes/serotype_line_by_week_hpai_only.png")
 
 
@@ -492,6 +346,7 @@ subtype_counts_year$factor_HN <- as.factor(subtype_counts_year$serotype_HN)
 
 ggplot(data = subtype_plot_data, aes(x = year, fill = serotype_HN))+
   geom_bar()
+ggsave("plots/subtypes/serotype_bar_by_year.png")
 
 # Year seems to work OK. suspect this is because year is a numeric variable. 
 # The lines below are likely to miss out some dates as they are character variables. 
@@ -499,13 +354,14 @@ ggplot(data = subtype_plot_data, aes(x = year, fill = serotype_HN))+
 # As such, don't use below without creating new data set where specify the weeks/months over the period as we did above. 
 
 # 
-# ggplot(data = subtype_plot_data, aes(x = month_year, fill = serotype_HN)) + 
+# ggplot(data = subtype_plot_data, aes(x = month_year, fill = serotype_HN)) +
 #   geom_bar()
 # ggsave("plots/subtypes/serotype_bar_by_month.png")
 # 
-# ggplot(data = subtype_plot_data, aes(x = week, fill = serotype_HN)) + 
+# ggplot(data = subtype_plot_data, aes(x = week, fill = serotype_HN)) +
 #   geom_bar()
 # ggsave("plots/subtypes/serotype_bar_by_week.png")
+# 
 
 
 
@@ -546,11 +402,11 @@ year_cols <- c("2005" = "grey",
 
 #trial run
 ggplot(q1_sub, aes(x=week_num, fill = year_fact)) +
-   geom_bar() +
+  geom_bar() +
   scale_fill_manual(values = c(year_cols)) + 
   theme(legend.key.size = unit(0.3, "cm"),
         legend.key.height = unit(0.3, "cm"))
-  
+
 # these data contain some labelled as week 52 and 53 due to variations in calendar. 
 # Not sure of the best way to deal with these. Possibly label as 0 and -1 to aid display? 
 
