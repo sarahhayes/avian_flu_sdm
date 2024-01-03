@@ -143,22 +143,22 @@ colnames(bv_pos_data_trim)
 all_ai_data <- rbind(fao_data_trim, inf_a_hpai_trim, bv_pos_data_trim)
 all_ai_data$flu <- 1 # denotes a positive
 
-
+###### ** Not using negatives so no longer need the below script
 ## deal with the negatives
 
-bv_neg_data_trim <- rename(bv_neg_data_trim, Latitude = Collection.Latitude,
-                           Longitude = Collection.Longitude,
-                           observation.date = Collection.Date,
-                           Species  = Host.Species,
-                           Country = Collection.Country,
-                           Serotype = Subtype)
-
-bv_neg_data_trim <- dplyr::select(bv_neg_data_trim, c(Latitude, Longitude, observation.date, Species,
-                                                      Country, Serotype, source))
-colnames(bv_neg_data_trim)
-bv_neg_data_trim$flu <- 0 # denotes negative test
-
-all_ai_data <- rbind(all_ai_data, bv_neg_data_trim)
+# bv_neg_data_trim <- rename(bv_neg_data_trim, Latitude = Collection.Latitude,
+#                            Longitude = Collection.Longitude,
+#                            observation.date = Collection.Date,
+#                            Species  = Host.Species,
+#                            Country = Collection.Country,
+#                            Serotype = Subtype)
+# 
+# bv_neg_data_trim <- dplyr::select(bv_neg_data_trim, c(Latitude, Longitude, observation.date, Species,
+#                                                       Country, Serotype, source))
+# colnames(bv_neg_data_trim)
+# bv_neg_data_trim$flu <- 0 # denotes negative test
+# 
+# all_ai_data <- rbind(all_ai_data, bv_neg_data_trim)
 
 ## check for any NA values
 sum(is.na(all_ai_data$Latitude))
@@ -207,72 +207,52 @@ ai_data_prj_area <- point_data_df %>%
   dplyr::filter(X >= 2600000 & X <= 7000000) %>%
   dplyr::filter(Y >= 1500000 & Y <= 6400000)
 
-# separate pos and neg
+# select positives - should be all data now not using negative
 
 pos_ai_data_prj_area <- ai_data_prj_area %>%
   filter(flu == 1)
 
-neg_ai_data_prj_area <- ai_data_prj_area %>%
-  filter(flu == 0)
+#neg_ai_data_prj_area <- ai_data_prj_area %>%
+#  filter(flu == 0)
 
-nrow(pos_ai_data_prj_area) + nrow(neg_ai_data_prj_area)
+nrow(pos_ai_data_prj_area)
 nrow(ai_data_prj_area)
 
 #save these
 #write.csv(pos_ai_data_prj_area, "output/avian_flu/pos_points_proj_area_all_sources_all_wild.csv" )
 #write.csv(neg_ai_data_prj_area, "output/avian_flu/neg_points_proj_area_all_sources_all_wild.csv" )
 
-# remove rows where duplicates of coordinates 
-library(data.table)
-dt_pos <- data.table(pos_ai_data_prj_area)
-#Remove duplicates on specific column
-tictoc::tic()
-dt_pos <- unique(dt_pos, by = c("X", "Y", "observation.date"))
-tictoc::toc()
-head(dt_pos)
-table(dt_pos$flu)
-
-# repeat for negative
-dt_neg <- unique(neg_ai_data_prj_area, by = c("X", "Y", "observation.date"))
-head(dt_neg)
-table(dt_neg$flu)
-
-#write.csv(dt_pos, "output/avian_flu/pos_points_proj_area_all_sources_all_wild_duplicates_removed.csv" )
-#write.csv(dt_neg, "output/avian_flu/neg_points_proj_area_all_sources_all_wild_duplicates_removed.csv" )
-
-plot(euro_shp)
-plot(pos_ai_data_prj_area, add = T, pch = 18, legend = T)
-
-### Next task is to remove the non-birds from the data... 
-
-# use Taxize to see how many can be identified automatically 
-# If no updates to data can skip this part and just read in the csv. 
-
-#install.packages("taxizedb")
-#library(taxizedb)
+# ## We need to remove mammals from these data 
+# ### Next task is to remove the non-birds from the data... 
+# 
+# # use Taxize to see how many can be identified automatically 
+# # If no updates to data can skip this part and just read in the csv below. 
+# 
+# #install.packages("taxizedb")
+# #library(taxizedb)
 # library(taxize)
-# 
-# species_list <- as.data.frame(table(ai_data_prj_area$Species))
-# 
+#  
+#  species_list <- as.data.frame(table(ai_data_prj_area$Species))
+#  
 # colnames(species_list) <- c("species", "freq")
 # species_list$species <- as.character(species_list$species)
-# 
+#  
 # for (i in 1:nrow(species_list)) {
-#   species_list[i,"class"] <- tax_name(species_list[i,"species"], 
+#   species_list[i,"class"] <- tax_name(species_list[i,"species"],
 #                                        get = "class",
 #                                        db = "ncbi")$class
 #   print(i)
 # }
 # 
 # not_sp <- species_list[which(is.na(species_list$class)),]
-# # manual inspection suggests some of these may not be found due to things like having 'incognita' added to name 
+# # manual inspection suggests some of these may not be found due to things like having 'incognita' added to name
 # 
 # not_sp$species_edit <- not_sp$species
 # not_sp$species_edit <- sub("\\(.*", "", not_sp$species_edit)
 # not_sp$species_edit <- sub("\\:.*", "", not_sp$species_edit)
 # 
-# for (i in 26:nrow(not_sp)) {
-#   not_sp[i,"class"] <- tax_name(not_sp[i,"species_edit"], 
+# for (i in 1:nrow(not_sp)) {
+#   not_sp[i,"class"] <- tax_name(not_sp[i,"species_edit"],
 #                                       get = "class",
 #                                       db = "ncbi")$class
 #   print(i)
@@ -290,10 +270,10 @@ plot(pos_ai_data_prj_area, add = T, pch = 18, legend = T)
 # 
 # species_list[which(species_list$species == "Peacock"),"class"] <- "Aves"
 
-#select the ones labelled "Mammalia" for removal 
+#select the ones labelled "Mammalia" for removal
 # save the species list so don't have to generate every time'
 
-# write.csv(species_list, "avian_flu_scripts/detecting_mammals.csv")
+#write.csv(species_list, "avian_flu_scripts/detecting_mammals.csv", row.names = F)
 
 species_list <- read.csv("avian_flu_scripts/detecting_mammals.csv")
 
@@ -307,13 +287,13 @@ unwanted_sp_manual_ext <- c("Al indeterminatum fau",
                             "Polecat",
                             "Stone Marten",
                             "Unspecified Mammal")
-                            
+
 
 unwanted_sp <- c(unwanted_sp, unwanted_sp_manual_ext)
 
-nrow(dt_pos[which(dt_pos$Species %in% unwanted_sp),])
+nrow(ai_data_prj_area[which(ai_data_prj_area$Species %in% unwanted_sp),])
 
-# 73 mammal entries that we are removing. 
+# 123 mammal entries that we are removing. 
 
 # unwanted_sp <- c("Unspecified Mammal", "Stone Marten", 
 #                  "South American Coati (Nasua Nasua):Procyonidae-Carnivora",
@@ -323,22 +303,82 @@ nrow(dt_pos[which(dt_pos$Species %in% unwanted_sp),])
 #                  "European Pine Marten", "Civet", "Caspian Seal (Pusa Caspica)",
 #                  "Halichoerus grypus", "Phoca vitulina", "Mustela putorius")
 
-ai_pos_birds <- 
-   dt_pos[-which(dt_pos$Species %in% unwanted_sp),]
+## Remove from the data so just birds
 
+ai_pos_birds <- 
+  ai_data_prj_area[-which(ai_data_prj_area$Species %in% unwanted_sp),]
+
+png("plots/fao_data_pos.png", width = 480, height = 480)
+plot(euro_shp, main = "FAO")
+plot(ai_pos_birds[which(ai_pos_birds$source == "fao"),], add = T, 
+     pch = 18, legend = T, col = "red", cex = 0.5)
+dev.off()
+
+png("plots/woah_data_pos.png", width = 480, height = 480)
+plot(euro_shp, main = "WOAH")
+plot(ai_pos_birds[which(ai_pos_birds$source == "woah"),], add = T, 
+     pch = 18, legend = T, col = "blue", cex = 0.5)
+dev.off()
+
+png("plots/bvbrc_data_pos.png", width = 480, height = 480)
+plot(euro_shp, main = "BV-BRC")
+plot(ai_pos_birds[which(ai_pos_birds$source == "bvbrc"),], add = T, 
+     pch = 18, legend = T, col = "orange", cex = 0.5)
+dev.off()
+
+nrow(ai_pos_birds[which(ai_pos_birds$source == "bvbrc"),])
+
+## Before remove duplicates, try and count number of species/families etc.
+## To do this, run the script in add_species_info.R
+
+species_list <- 
+  species_list[-which(species_list$species %in% unwanted_sp),]
+
+table(species_list$family)
+unique(species_list$family)
+
+## 44 bird families in total 
+
+## Save this table as it takes a while to run
+# write.csv(species_list, "avian_flu_scripts/species_list_with_order_and_family.csv")
+
+## Next I want to remove the duplicates that are present in the data 
+
+library(data.table)
+dt_pos <- data.table(ai_pos_birds)
+
+no_duplicates_date_and_loc <- unique(dt_pos, by = c("X", "Y", "observation.date"))
+no_duplicates_all <- unique(dt_pos, by = c("X", "Y", "observation.date", "source", "Species", "Country"))
+no_dups_all_except_source <- unique(dt_pos, by = c("X", "Y", "observation.date", "Species", "Country"))
+
+# The last two are the same, suggesting that there are none that are the same for all details except source. 
+
+## No duplicates_all will still have some that are the same place and time but different species. However, when looking
+## at these, there are instances where we have fao and woah reporting a same location and date but one has the common name
+## for the bird and one has the scientific name. I think we basically want to know if a location has AI in wild birds
+## so we don't mind which species. 
+## As such, no_duplicates_date_and_time is probably the one to use. 
+
+# However, if we want to look at HPAI only, it might be worth filtering on this first? ]
+# Just in case we might otherwise remove HPAI and leave in LPAI. 
+
+# Let's look at serotypes
+
+# easier to re-classify the dataframe so can use the existing code
+ai_pos_birds <- no_duplicates_date_and_loc
 
 table(ai_pos_birds$Serotype)
 ai_pos_birds$serotype_HN <- ai_pos_birds$Serotype
 ai_pos_birds$serotype_HN <-  gsub("HPAI","",as.character(ai_pos_birds$serotype_HN))
 ai_pos_birds$serotype_HN <-  gsub("LPAI","",as.character(ai_pos_birds$serotype_HN))
 ai_pos_birds$serotype_HN<-toupper(ai_pos_birds$serotype_HN) # so they match
-ai_pos_birds$serotype_HN <- trimws(ai_pos_birds$serotype_HN) # tri, amy white space innthe entries to aid matching
+ai_pos_birds$serotype_HN <- trimws(ai_pos_birds$serotype_HN) # trim any white space in the entries to aid matching
 table(ai_pos_birds$serotype_HN)
 
 # manually change the one entry that has the serotype entered twice
 ai_pos_birds[(which(ai_pos_birds$serotype_HN == "H7N2,H7N2")), "serotype_HN"] <- "H7N2"
 
-# Difficult to split by LPAI and HPA as not specified directly. 
+# Difficult to split by LPAI and HPAI as not specified directly. 
 # FAO and WOAH only report HPAI so the ones listed in this data base should all be HPAI
 
 table(ai_pos_birds$source, ai_pos_birds$serotype_HN)
@@ -350,20 +390,26 @@ sum(colSums(serotype_source_df[2:4]))
 
 # if we filter by all the entries that don't have an entry in either FAO or WOAH then this
 # may well leave only the LPAI? 
+# Alternatively just select all the H5 and H7
 
-poss_lpai <- serotype_source_df[which(serotype_source_df$fao == 0 & serotype_source_df$woah == 0),]
-sum(poss_lpai[,"bvbrc"]) # These are the ones that I am most confident are LPAI. But would need to exclude H5Nx as could be HPAI
+hpai <- ai_pos_birds %>% filter(str_detect(serotype_HN,"H5") | str_detect(serotype_HN, "H7"))
+hpai <- rename(hpai, species = Species)
 
+## To do - need to get species info for the birds that are HPAI only? 
+
+#write.csv(hpai, "data/flu_data/prepped_data/hpai_pos_birds")
 
 # Add a year and month and year_month to the data
 
-ai_pos_birds$year <- lubridate::year(ai_pos_birds$observation.date)
-ai_pos_birds$month <- lubridate::month(ai_pos_birds$observation.date)
-ai_pos_birds$month_year <-  format(as.Date(ai_pos_birds$observation.date), "%Y-%m")
-ai_pos_birds$week <- format(ai_pos_birds$observation.date, "%Y Week %W")
-ai_pos_birds$week_num <- lubridate::isoweek(ai_pos_birds$observation.date)
+hpai$year <- lubridate::year(hpai$observation.date)
+hpai$month <- lubridate::month(hpai$observation.date)
+hpai$month_year <-  format(as.Date(hpai$observation.date), "%Y-%m")
+hpai$week <- format(hpai$observation.date, "%Y Week %W")
+hpai$week_num <- lubridate::isoweek(hpai$observation.date)
 
-serotype_data <- as.data.frame(table(ai_pos_birds$serotype_HN))
+range(hpai$observation.date)
+
+serotype_data <- as.data.frame(table(hpai$serotype_HN))
 
 ## Need to ensure that have all the weeks represented as currently misses out those with no cases 
 
@@ -386,19 +432,18 @@ all_dates$week <- format(all_dates$date, "%Y Week %W")
 all_dates$week_num <- lubridate::isoweek(all_dates$date)
 
 
-# For quite a number of these there are only a few entries. 
+# For quite a number of the subtypes there are only a few entries. 
 # For the line plot by subtype, only use those that have >10 entries
 
 serotype_data_ten_or_more <- serotype_data[which(serotype_data$Freq > 10),]
 serotype_data_ten_or_more <- serotype_data_ten_or_more[which(serotype_data_ten_or_more$Var1 != ""),]
 
-subtype_plot_data <- ai_pos_birds[which(ai_pos_birds$serotype_HN %in% serotype_data_ten_or_more$Var1),]
+subtype_plot_data <- hpai[which(hpai$serotype_HN %in% serotype_data_ten_or_more$Var1),]
 subtype_plot_data <- dplyr::select(subtype_plot_data, c("year", "month", "month_year", "week","week_num", "serotype_HN"))
 
 # by week 
 subtype_counts_weekyear <- subtype_plot_data %>%
   group_by(week, serotype_HN) %>% count()
-
 
 # merge with the weekly counts
 all_dates_subtype_data <- left_join(all_dates, subtype_counts_weekyear)
@@ -430,42 +475,16 @@ ggplot(data = all_dates_subtype_data,
   labs(colour = "Subtype", y = "Number of weekly cases", x = "Year", size = 18) +
   scale_x_continuous(breaks = weekbreaks, labels = yearlabs)
 
-#ggsave("plots/subtypes/serotype_line_by_week.png")
+ggsave("plots/subtypes/serotype_line_by_week_hpai_only.png")
 
 
-## Start here
-## If want to include year and month, will need to do another table to join with 
+## If want to repeat by month, will need to do another table to join with 
 ## so don't miss any months.
 
-# subtype_counts_year <- subtype_plot_data %>%
-#   group_by(year, serotype_HN) %>% count()
-# 
-# subtype_counts_year_all <- left_join()
-# 
-# ggplot(data = subtype_counts_year, aes(x = year, y = n, col = serotype_HN))+
-#   geom_line()
-# 
-# # by month and year. 
-# subtype_counts_monthyear <- subtype_plot_data %>%
-#   group_by(month_year, serotype_HN) %>% count()
-# subtype_counts_monthyear$log_count <- log(subtype_counts_monthyear$n)
-# subtype_counts_monthyear$serotype_HN_factor <- as.factor(subtype_counts_monthyear$serotype_HN)
-# 
-# ggplot(data = subtype_counts_monthyear, 
-#        aes(x = month_year, y = n, col = serotype_HN_factor, group = serotype_HN_factor)) +
-#   geom_line()
-# 
-# 
-# # by week 
-# subtype_counts_weekyear <- subtype_plot_data %>%
-#   group_by(week, serotype_HN) %>% count()
-# 
-# ggplot(data = subtype_counts_weekyear, 
-#        aes(x = week, y = n, col = serotype_HN, group = serotype_HN)) +
-#   geom_line(lwd = 0.8) + 
-#   scale_color_brewer(palette="Paired")
-# ggsave("plots/subtypes/serotype_line_by_week.png")
-# 
+subtype_counts_year <- subtype_plot_data %>%
+  group_by(year, serotype_HN) %>% count()
+
+table(subtype_counts_year$year) #NB there are no data from 2012 in here. 
 
 # stacked bar plot coloured by serotype
 
@@ -474,14 +493,19 @@ subtype_counts_year$factor_HN <- as.factor(subtype_counts_year$serotype_HN)
 ggplot(data = subtype_plot_data, aes(x = year, fill = serotype_HN))+
   geom_bar()
 
+# Year seems to work OK. suspect this is because year is a numeric variable. 
+# The lines below are likely to miss out some dates as they are character variables. 
+# This seems to be confirmed by the fact that there are no gaps in the plots. 
+# As such, don't use below without creating new data set where specify the weeks/months over the period as we did above. 
 
-ggplot(data = subtype_plot_data, aes(x = month_year, fill = serotype_HN)) + 
-  geom_bar()
-ggsave("plots/subtypes/serotype_bar_by_month.png")
-
-ggplot(data = subtype_plot_data, aes(x = week, fill = serotype_HN)) + 
-  geom_bar()
-ggsave("plots/subtypes/serotype_bar_by_week.png")
+# 
+# ggplot(data = subtype_plot_data, aes(x = month_year, fill = serotype_HN)) + 
+#   geom_bar()
+# ggsave("plots/subtypes/serotype_bar_by_month.png")
+# 
+# ggplot(data = subtype_plot_data, aes(x = week, fill = serotype_HN)) + 
+#   geom_bar()
+# ggsave("plots/subtypes/serotype_bar_by_week.png")
 
 
 
@@ -492,7 +516,6 @@ q1_sub <- subtype_plot_data[which(subtype_plot_data$month %in% c(1,2,3)),]
 q2_sub <- subtype_plot_data[which(subtype_plot_data$month %in% c(4,5,6)),]
 q3_sub <- subtype_plot_data[which(subtype_plot_data$month %in% c(7,8,9)),]
 q4_sub <- subtype_plot_data[which(subtype_plot_data$month %in% c(10,11,12)),]
-
 
 q1_sub$year_fact <- as.factor(q1_sub$year)
 
@@ -528,6 +551,11 @@ ggplot(q1_sub, aes(x=week_num, fill = year_fact)) +
   theme(legend.key.size = unit(0.3, "cm"),
         legend.key.height = unit(0.3, "cm"))
   
+# these data contain some labelled as week 52 and 53 due to variations in calendar. 
+# Not sure of the best way to deal with these. Possibly label as 0 and -1 to aid display? 
+
+q1_sub[which(q1_sub$week_num == 53), "week_num"] <- 0
+q1_sub[which(q1_sub$week_num == 52), "week_num"] <- -1
 
 q1plot <- ggplot(q1_sub, aes(x=week_num, fill = year_fact)) +
   geom_bar() +
@@ -546,6 +574,7 @@ q2plot <- ggplot(q2_sub, aes(x=week_num, fill = year_fact)) +
   theme(legend.key.size = unit(0.3, "cm"),
         legend.key.height = unit(0.3, "cm"))
 
+q2plot
 
 q3_sub$year_fact <- as.factor(q3_sub$year)
 q3plot <- ggplot(q3_sub, aes(x=week_num, fill = year_fact)) +
@@ -564,167 +593,27 @@ q4plot <- ggplot(q4_sub, aes(x=week_num, fill = year_fact)) +
   theme(legend.key.size = unit(0.3, "cm"),
         legend.key.height = unit(0.3, "cm"))
 
-
-
 ggpubr::ggarrange(q1plot, q2plot, q3plot, q4plot, ncol = 2, nrow = 2)
 
 ggsave("plots/counts_by_week_per_quart_coloured_by_year.png")
 
 
+## Would also be useful to see the spatial distribution of the hpai cases. 
+plot(euro_shp)
+plot(hpai$geometry, add = T, pch = 18, cex = 0.6, col = "red")
 
-# ############################# MAKE RASTER  ############################
-# 
-# # Other manipulations needed to rasterize
-# table(point_data$flu) # this is pos and neg data
-# 
-# points_sp <- sf::as_Spatial(point_data)
-# head(points_sp)
-# 
-# points_vect <- terra::vect(points_sp)
-# head(points_vect)
-# plot(points_vect) # this is also still the global data set
-# 
-# #read in the raster we are using for the project
-# euro_rast <- terra::rast("output/euro_rast.tif")
-# euro_rast <- terra::rast("output/euro_rast_plus.tif")
-# 
-# euro_rast
-# 
-# ## use the vector within rasterize
-# points_rast <- terra::rasterize(points_vect, euro_rast, field = "flu", fun = "max")
-# # using max because if it has a positive in the cell (1) and a negative (0) we want
-# # the cell to be classes as a negative
-# plot(points_rast)
-# points_rast
-# head(points_rast)
-# 
-# plot(euro_shp)
-# plot(points_rast, add = TRUE, col = "red")
-# 
-# table(terra::values(points_rast))
-# 
-# # Create the csv file for avian flu cases
-# # make a points object using the centre of each pixel from the ref raster
-# points_euro_rast <- terra::as.points(euro_rast)
-# points_euro_rast
-# 
-# tictoc::tic()
-# flu_res <- terra::extract(points_rast, points_euro_rast, method = "simple", xy = T)
-# tictoc::toc()
-# 
-# table(flu_res$max)
-# table(values(points_rast))
-# euro_rast
-# nrow(flu_res)
-# points_rast
-# 
-# # why have we got fewer values in the results table rather than the raster? 
-# # Looked at it with the 10km raster and wonder if some of them are in the sea/on land too small to be 
-# # noted on our raster?? 
-# 
-# points_rast
-# euro_rast
-# table(values(points_rast))
-# # we have the higher number in the points raster
-# 
-# points_euro_rast # the points are all within the boundaries of the euro-raster.
-# # so that's not the issue
-# 
-# # so I think the issue is somewhere in extract or if there were NAs in the euroraster that
-# # are not in the case data.
-# 
-# euro_nonNA_coords <- as.data.frame(terra::crds(euro_rast, na.rm = T))
-# cases_nonNA_coords <- as.data.frame(terra::crds(points_rast, na.rm = T))
-# sum(table(values(points_rast))) - sum(table(flu_res$max))
-# diff_nas <- setdiff( cases_nonNA_coords, euro_nonNA_coords) # this is the same number
-# # as are missing between the datasets
-# 
-# # let's turn these into spatial points and plot them 
-# missing_points <- st_as_sf(x = diff_nas, 
-#                            coords = c("x", "y"),
-#                            crs = "3035")
-# plot(euro_map)
-# plot(missing_points, add = T, col = "red", pch = 18)
-# 
-# 
-# 
-# 
-# 
-# dev.off()
-# plot(euro_map)
-# plot(points_rast, xlim= c(4000000, 5000000), ylim = c(3000000, 4000000), 
-#      col = "hot pink")#, background = "blue")
-# plot(points_rast, col = "red")
-# plot(points_rast, col = "red", add = T, axes = F)
-# plot(euro_rast, col = "White", add = T, axes = F)
-# #plot(euro_map, add = T, axes = F)
-# 
-# euro_rast
-# points_rast
-# euro_rast[1000:2000] # we can see that there are NAs
-# points_rast[1:100]
-# 
-# # we want to know which points have NA in euro_rast that aren't NA in points rast. 
-# # if it's a NA in the euro_rast but has a value in the points rast that might explain it
-# 
-# ################################################################
-# ## Some trials to aid understanding/visualisation
-# 
-# ## Hard to see. Look at with larger raster
-# 
-# #read in the raster we are using for the project
-# euro_rast_10k <- terra::rast("output/euro_rast_10k.tif")
-# euro_rast_10k
-# 
-# points_rast_10k <- terra::rasterize(points_vect, euro_rast_10k,"flu", fun = max)
-# plot(points_rast_10k)
-# points_rast_10k
-# head(points_rast_10k)
-# table(values(points_rast_10k))
-# # Easier to visualise that it probably is working OK. 
-# # I think the 1km are just too small to see. 
-# 
-# dev.off()
-# plot(euro_map)
-# plot(points_rast_10k, col = "red")
-# plot(euro_rast_10k, col = "White", add = T, axes = F)
-# 
-# 
-# 
-# # Create the csv file for avian flu cases
-# # make a points object using the centre of each pixel from the ref raster
-# points_euro_rast_10k <- terra::as.points(euro_rast_10k)
-# points_euro_rast_10k
-# 
-# flu_res_10k <- terra::extract(points_rast_10k, points_euro_rast_10k,
-#                               method = "simple", xy = T)
-# 
-# table(flu_res_10k$max)
-# table(values(points_rast_10k))
-# 
-# dev.off()
-# plot(points_rast_10k, col = "red")
-# plot(euro_map, add = T, axes = F)
-# 
-# 
-# 
-# #Perhaps just look at UK? 
-# GB_ext <- terra::ext(3300000, 3800000, 3100000, 4100000)
-# GB_crop <- terra::crop(euro_map, GB_ext)
-# plot(GB_crop)
-# 
-# GB_rast <- terra::crop(points_rast, GB_ext)
-# plot(GB_crop)
-# plot(GB_rast, add = T, axes = F)
-# 
-# 
-# ## bit from fao data - useful for making mammal dataset later 
-# 
-# unwanted_sp <- c("Unspecified Mammal", "Stone Marten", 
-#                  "South American Coati (Nasua Nasua):Procyonidae-Carnivora",
-#                  "Red Fox", "Polecat", "Polar Fox", "Nyctereutes Viverrinus (Japanese Racoon Dog)",
-#                  "Mink", "Harbor Seal (Phoca Vitulina):Phocidae-Carnivora", 
-#                  "Gray Seal (Halichoerus Grypus):Phocidae-Carnivora", "Fox",
-#                  "European Pine Marten", "Civet", "Caspian Seal (Pusa Caspica)")
-# 
-# fao_data <- fao_data[-which(fao_data$Species %in% unwanted_sp),]
+
+# Alternatively, plot the H5N8 and H5N1
+plot(euro_shp, main = "H5N1")
+plot(hpai[which(hpai$serotype_HN == "H5N1"), "geometry"], add = T, col = "blue", pch = 18, cex = 0.5)
+
+plot(euro_shp, main = "H5N8")
+plot(hpai[which(hpai$serotype_HN == "H5N8"), "geometry"], add = T, col = "orange", pch = 18, cex = 0.5)
+
+# for the H5N8, also split by the first and second waves. 
+plot(euro_shp, main = "H5N8 pre-2020")
+plot(hpai[which(hpai$serotype_HN == "H5N8" & hpai$year < "2020"), "geometry"], add = T, col = "orange", pch = 18, cex = 0.5)
+
+plot(euro_shp, main = "H5N8 2020 onwards")
+plot(hpai[which(hpai$serotype_HN == "H5N8" & hpai$year >= "2020"), "geometry"], add = T, col = "dark green", pch = 18, cex = 0.5)
+
