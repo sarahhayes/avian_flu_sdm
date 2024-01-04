@@ -215,8 +215,8 @@ species_list <-
 
 ## To do this, run the script in add_species_info.R starting at line 50
 
-table(species_list$family)
-unique(species_list$family)
+#table(species_list$family)
+#unique(species_list$family)
 
 ## 44 bird families in total 
 
@@ -231,14 +231,17 @@ dt_pos <- data.table(ai_pos_birds)
 no_duplicates_date_and_loc <- unique(dt_pos, by = c("X", "Y", "observation.date"))
 no_duplicates_all <- unique(dt_pos, by = c("X", "Y", "observation.date", "source", "Species", "Country"))
 no_dups_all_except_source <- unique(dt_pos, by = c("X", "Y", "observation.date", "Species", "Country"))
+no_dups_date_loc_serotype <- unique(dt_pos, by = c("X", "Y", "observation.date", "serotype_HN"))
 
-# The last two are the same, suggesting that there are none that are the same for all details except source. 
-
+# The middle two are the same, suggesting that there are none that are the same for all details except source. 
+# The final one (no_dups_date_loc_serotype) contains 16 more than the one filtered just on date and location.
+# On inspection, these are indeed listed as different serotypes in the same location and same date. could be an error,
+# but no way to check
 ## No duplicates_all will still have some that are the same place and time but different species. However, when looking
 ## at these, there are instances where we have fao and woah reporting a same location and date but one has the common name
 ## for the bird and one has the scientific name. I think we basically want to know if a location has AI in wild birds
 ## so we don't mind which species. 
-## As such, no_duplicates_date_and_time is probably the one to use. 
+## As such, no_duplicates_date_loc_serotype is probably the one to use. 
 
 # However, if we want to look at HPAI only, it might be worth filtering on this first? ]
 # Just in case we might otherwise remove HPAI and leave in LPAI. 
@@ -246,12 +249,12 @@ no_dups_all_except_source <- unique(dt_pos, by = c("X", "Y", "observation.date",
 # Let's look at serotypes
 
 # easier to re-classify the dataframe so can use the existing code
-ai_pos_birds <- no_duplicates_date_and_loc
+ai_pos_birds <- no_dups_date_loc_serotype
 
 table(ai_pos_birds$serotype_HN)
 
 hpai <- ai_pos_birds
-# write.csv(hpai, "data/flu_data/prepped_data/hpai_pos_birds")
+# write.csv(hpai, "data/flu_data/prepped_data/hpai_pos_birds_nobvbrc.csv")
 
 # Add a year and month and year_month to the data
 
@@ -329,7 +332,7 @@ ggplot(data = all_dates_subtype_data,
   #  panel.background = element_rect(fill = "white", colour = "grey50")) + 
   labs(colour = "Subtype", y = "Number of weekly cases", x = "Year", size = 18) +
   scale_x_continuous(breaks = weekbreaks, labels = yearlabs)
-ggsave("plots/subtypes/serotype_line_by_week_hpai_only.png")
+#ggsave("plots/subtypes/serotype_line_by_week_hpai_only.png")
 
 
 ## If want to repeat by month, will need to do another table to join with 
@@ -346,7 +349,7 @@ subtype_counts_year$factor_HN <- as.factor(subtype_counts_year$serotype_HN)
 
 ggplot(data = subtype_plot_data, aes(x = year, fill = serotype_HN))+
   geom_bar()
-ggsave("plots/subtypes/serotype_bar_by_year.png")
+#ggsave("plots/subtypes/serotype_bar_by_year.png")
 
 # Year seems to work OK. suspect this is because year is a numeric variable. 
 # The lines below are likely to miss out some dates as they are character variables. 
@@ -364,8 +367,7 @@ ggsave("plots/subtypes/serotype_bar_by_year.png")
 # 
 
 
-
-#Plots of quarters – for each day in the year per quarter do a stacked bar plot coloured by year –
+# Plots of quarters – for each day in the year per quarter do a stacked bar plot coloured by year –
 # to visualise which years we are primarily getting data from for each quarter.
 
 q1_sub <- subtype_plot_data[which(subtype_plot_data$month %in% c(1,2,3)),]
@@ -415,8 +417,9 @@ q1_sub[which(q1_sub$week_num == 52), "week_num"] <- -1
 
 q1plot <- ggplot(q1_sub, aes(x=week_num, fill = year_fact)) +
   geom_bar() +
-  scale_fill_manual(values = c(year_cols))+ 
+  scale_fill_manual(values = c(year_cols), name = "Year")+ 
   ggtitle("Q1") + 
+  labs(x = "Week number", y = "Number of cases") +
   theme(legend.key.size = unit(0.3, "cm"),
         legend.key.height = unit(0.3, "cm"))
 
@@ -425,8 +428,9 @@ q1plot
 q2_sub$year_fact <- as.factor(q2_sub$year)
 q2plot <- ggplot(q2_sub, aes(x=week_num, fill = year_fact)) +
   geom_bar() +
-  scale_fill_manual(values = c(year_cols))+ 
+  scale_fill_manual(values = c(year_cols), name = "Year")+ 
   ggtitle("Q2") + 
+  labs(x = "Week number", y = "Number of cases") +
   theme(legend.key.size = unit(0.3, "cm"),
         legend.key.height = unit(0.3, "cm"))
 
@@ -435,8 +439,9 @@ q2plot
 q3_sub$year_fact <- as.factor(q3_sub$year)
 q3plot <- ggplot(q3_sub, aes(x=week_num, fill = year_fact)) +
   geom_bar() +
-  scale_fill_manual(values = c(year_cols))+
+  scale_fill_manual(values = c(year_cols), name = "Year")+
   ggtitle("Q3") + 
+  labs(x = "Week number", y = "Number of cases") +
   theme(legend.key.size = unit(0.3, "cm"),
         legend.key.height = unit(0.3, "cm"))
 
@@ -444,22 +449,27 @@ q3plot <- ggplot(q3_sub, aes(x=week_num, fill = year_fact)) +
 q4_sub$year_fact <- as.factor(q4_sub$year)
 q4plot <- ggplot(q4_sub, aes(x=week_num, fill = year_fact)) +
   geom_bar() +
-  scale_fill_manual(values = c(year_cols))+
+  scale_fill_manual(values = c(year_cols), name = "Year")+
   ggtitle("Q4")+ 
+  labs(x = "Week number", y = "Number of cases") +
   theme(legend.key.size = unit(0.3, "cm"),
         legend.key.height = unit(0.3, "cm"))
 
 ggpubr::ggarrange(q1plot, q2plot, q3plot, q4plot, ncol = 2, nrow = 2)
 
-ggsave("plots/counts_by_week_per_quart_coloured_by_year.png")
+# ggsave("plots/counts_by_week_per_quart_coloured_by_year.png")
 
 
 ## Would also be useful to see the spatial distribution of the hpai cases. 
 plot(euro_shp)
 plot(hpai$geometry, add = T, pch = 18, cex = 0.6, col = "red")
 
-
+dev.off()
 # Alternatively, plot the H5N8 and H5N1
+#png("plots/H5N1_H5N8_maps.png", width = 480, height = 480)
+par(mar = c(0,0,0,0))
+par(mfrow = c(2,2))
+
 plot(euro_shp, main = "H5N1")
 plot(hpai[which(hpai$serotype_HN == "H5N1"), "geometry"], add = T, col = "blue", pch = 18, cex = 0.5)
 
@@ -468,8 +478,8 @@ plot(hpai[which(hpai$serotype_HN == "H5N8"), "geometry"], add = T, col = "orange
 
 # for the H5N8, also split by the first and second waves. 
 plot(euro_shp, main = "H5N8 pre-2020")
-plot(hpai[which(hpai$serotype_HN == "H5N8" & hpai$year < "2020"), "geometry"], add = T, col = "orange", pch = 18, cex = 0.5)
+plot(hpai[which(hpai$serotype_HN == "H5N8" & hpai$year < "2020"), "geometry"], add = T, col = "turquoise", pch = 18, cex = 0.5)
 
 plot(euro_shp, main = "H5N8 2020 onwards")
 plot(hpai[which(hpai$serotype_HN == "H5N8" & hpai$year >= "2020"), "geometry"], add = T, col = "dark green", pch = 18, cex = 0.5)
-
+#dev.off()
