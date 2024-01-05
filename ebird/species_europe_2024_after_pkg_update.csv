@@ -1,0 +1,732 @@
+"","common_name","common_code","sci_name","sci_code"
+"1","Greater Rhea",NA,"Rhea americana",NA
+"2","White-faced Whistling-Duck",NA,"Dendrocygna viduata",NA
+"3","Black-bellied Whistling-Duck","bbwduc","Dendrocygna autumnalis","bbwduc"
+"4","Fulvous Whistling-Duck","fuwduc","Dendrocygna bicolor","fuwduc"
+"5","Lesser Whistling-Duck",NA,"Dendrocygna javanica",NA
+"6","Bar-headed Goose",NA,"Anser indicus",NA
+"7","Emperor Goose","empgoo","Anser canagicus","empgoo"
+"8","Snow Goose","snogoo","Anser caerulescens","snogoo"
+"9","Ross's Goose","rosgoo","Anser rossii","rosgoo"
+"10","Graylag Goose",NA,"Anser anser",NA
+"11","Greater White-fronted Goose","gwfgoo","Anser albifrons","gwfgoo"
+"12","Taiga Bean-Goose",NA,"Anser fabalis",NA
+"13","Pink-footed Goose",NA,"Anser brachyrhynchus",NA
+"14","Brant","brant","Branta bernicla","brant"
+"15","Barnacle Goose",NA,"Branta leucopsis",NA
+"16","Cackling Goose","cacgoo1","Branta hutchinsii","cacgoo1"
+"17","Canada Goose","cangoo","Branta canadensis","cangoo"
+"18","Red-breasted Goose",NA,"Branta ruficollis",NA
+"19","Mute Swan","mutswa","Cygnus olor","mutswa"
+"20","Black Swan","blkswa","Cygnus atratus","blkswa"
+"21","Black-necked Swan","blnswa2","Cygnus melancoryphus","blnswa2"
+"22","Trumpeter Swan","truswa","Cygnus buccinator","truswa"
+"23","Tundra Swan","tunswa","Cygnus columbianus","tunswa"
+"24","Whooper Swan","whoswa","Cygnus cygnus","whoswa"
+"25","Coscoroba Swan","cosswa1","Coscoroba coscoroba","cosswa1"
+"26","Orinoco Goose",NA,"Oressochen jubatus",NA
+"27","Andean Goose","andgoo1","Oressochen melanopterus","andgoo1"
+"28","Upland Goose","uplgoo1","Chloephaga picta","uplgoo1"
+"29","Ashy-headed Goose",NA,"Chloephaga poliocephala",NA
+"30","Egyptian Goose","egygoo","Alopochen aegyptiaca","egygoo"
+"31","Paradise Shelduck","parshe1","Tadorna variegata","parshe1"
+"32","Common Shelduck",NA,"Tadorna tadorna",NA
+"33","Spur-winged Goose",NA,"Plectropterus gambensis",NA
+"34","Crested Duck",NA,"Lophonetta specularioides",NA
+"35","Muscovy Duck","musduc","Cairina moschata","musduc"
+"36","Ringed Teal",NA,"Callonetta leucophrys",NA
+"37","Wood Duck","wooduc","Aix sponsa","wooduc"
+"38","Mandarin Duck",NA,"Aix galericulata",NA
+"39","Brazilian Teal","bratea1","Amazonetta brasiliensis","bratea1"
+"40","Garganey",NA,"Spatula querquedula",NA
+"41","Silver Teal","siltea1","Spatula versicolor","siltea1"
+"42","Blue-winged Teal","buwtea","Spatula discors","buwtea"
+"43","Cinnamon Teal","cintea","Spatula cyanoptera","cintea"
+"44","Red Shoveler","redsho1","Spatula platalea","redsho1"
+"45","Australasian Shoveler","aussho1","Spatula rhynchotis","aussho1"
+"46","Northern Shoveler","norsho","Spatula clypeata","norsho"
+"47","Gadwall","gadwal","Mareca strepera","gadwal"
+"48","Eurasian Wigeon",NA,"Mareca penelope",NA
+"49","American Wigeon","amewig","Mareca americana","amewig"
+"50","Chiloe Wigeon","chiwig1","Mareca sibilatrix","chiwig1"
+"51","African Black Duck",NA,"Anas sparsa",NA
+"52","Yellow-billed Duck","yebduc1","Anas undulata","yebduc1"
+"53","Pacific Black Duck",NA,"Anas superciliosa",NA
+"54","Indian Spot-billed Duck",NA,"Anas poecilorhyncha",NA
+"55","Eastern Spot-billed Duck","spbduc","Anas zonorhyncha","spbduc"
+"56","Mallard","mallar3","Anas platyrhynchos","mallar3"
+"57","American Black Duck","ambduc","Anas rubripes","ambduc"
+"58","White-cheeked Pintail","whcpin","Anas bahamensis","whcpin"
+"59","Red-billed Duck",NA,"Anas erythrorhyncha",NA
+"60","Northern Pintail","norpin","Anas acuta","norpin"
+"61","Yellow-billed Pintail","yebpin1","Anas georgica","yebpin1"
+"62","Green-winged Teal","gnwtea","Anas crecca","gnwtea"
+"63","Yellow-billed Teal","yebtea1","Anas flavirostris","yebtea1"
+"64","Red-crested Pochard",NA,"Netta rufina",NA
+"65","Rosy-billed Pochard",NA,"Netta peposaca",NA
+"66","Canvasback","canvas","Aythya valisineria","canvas"
+"67","Redhead","redhea","Aythya americana","redhea"
+"68","Common Pochard",NA,"Aythya ferina",NA
+"69","Ring-necked Duck","rinduc","Aythya collaris","rinduc"
+"70","Ferruginous Duck",NA,"Aythya nyroca",NA
+"71","Tufted Duck",NA,"Aythya fuligula",NA
+"72","Greater Scaup","gresca","Aythya marila","gresca"
+"73","Lesser Scaup","lessca","Aythya affinis","lessca"
+"74","Steller's Eider","steeid","Polysticta stelleri","steeid"
+"75","King Eider","kineid","Somateria spectabilis","kineid"
+"76","Common Eider","comeid","Somateria mollissima","comeid"
+"77","Harlequin Duck","harduc","Histrionicus histrionicus","harduc"
+"78","Surf Scoter","sursco","Melanitta perspicillata","sursco"
+"79","Velvet Scoter",NA,"Melanitta fusca",NA
+"80","White-winged Scoter","whwsco2","Melanitta deglandi","whwsco2"
+"81","Common Scoter",NA,"Melanitta nigra",NA
+"82","Black Scoter","blksco2","Melanitta americana","blksco2"
+"83","Long-tailed Duck","lotduc","Clangula hyemalis","lotduc"
+"84","Bufflehead","buffle","Bucephala albeola","buffle"
+"85","Common Goldeneye","comgol","Bucephala clangula","comgol"
+"86","Barrow's Goldeneye","bargol","Bucephala islandica","bargol"
+"87","Smew",NA,"Mergellus albellus",NA
+"88","Hooded Merganser","hoomer","Lophodytes cucullatus","hoomer"
+"89","Common Merganser","commer","Mergus merganser","commer"
+"90","Red-breasted Merganser","rebmer","Mergus serrator","rebmer"
+"91","Black-headed Duck",NA,"Heteronetta atricapilla",NA
+"92","Ruddy Duck","rudduc","Oxyura jamaicensis","rudduc"
+"93","White-headed Duck",NA,"Oxyura leucocephala",NA
+"94","Lake Duck",NA,"Oxyura vittata",NA
+"95","Northern Bobwhite","norbob","Colinus virginianus","norbob"
+"96","California Quail","calqua","Callipepla californica","calqua"
+"97","Wild Turkey","wiltur","Meleagris gallopavo","wiltur"
+"98","Hazel Grouse",NA,"Tetrastes bonasia",NA
+"99","Willow Ptarmigan","wilpta","Lagopus lagopus","wilpta"
+"100","Rock Ptarmigan",NA,"Lagopus muta",NA
+"101","Black Grouse",NA,"Lyrurus tetrix",NA
+"102","Gray Partridge","grypar","Perdix perdix","grypar"
+"103","Ring-necked Pheasant","rinphe1","Phasianus colchicus","rinphe1"
+"104","Swinhoe's Pheasant",NA,"Lophura swinhoii",NA
+"105","Kalij Pheasant",NA,"Lophura leucomelanos",NA
+"106","Indian Peafowl","compea","Pavo cristatus","compea"
+"107","Red Junglefowl",NA,"Gallus gallus",NA
+"108","Black Francolin",NA,"Francolinus francolinus",NA
+"109","Common Quail",NA,"Coturnix coturnix",NA
+"110","Red-legged Partridge","relpar1","Alectoris rufa","relpar1"
+"111","Chukar","chukar","Alectoris chukar","chukar"
+"112","Chilean Flamingo","chifla1","Phoenicopterus chilensis","chifla1"
+"113","American Flamingo","grefla2","Phoenicopterus ruber","grefla2"
+"114","Little Grebe",NA,"Tachybaptus ruficollis",NA
+"115","Pied-billed Grebe","pibgre","Podilymbus podiceps","pibgre"
+"116","Horned Grebe","horgre","Podiceps auritus","horgre"
+"117","Red-necked Grebe","rengre","Podiceps grisegena","rengre"
+"118","Great Crested Grebe",NA,"Podiceps cristatus",NA
+"119","Eared Grebe","eargre","Podiceps nigricollis","eargre"
+"120","Rock Pigeon","rocpig","Columba livia","rocpig"
+"121","Speckled Pigeon","spepig1","Columba guinea","spepig1"
+"122","Stock Dove",NA,"Columba oenas",NA
+"123","Common Wood-Pigeon","cowpig1","Columba palumbus","cowpig1"
+"124","European Turtle-Dove",NA,"Streptopelia turtur",NA
+"125","Oriental Turtle-Dove","ortdov","Streptopelia orientalis","ortdov"
+"126","Eurasian Collared-Dove","eucdov","Streptopelia decaocto","eucdov"
+"127","Red Collared-Dove","recdov1","Streptopelia tranquebarica","recdov1"
+"128","Crested Pigeon","crepig1","Ocyphaps lophotes","crepig1"
+"129","Ruddy Ground Dove","rugdov","Columbina talpacoti","rugdov"
+"130","Mourning Dove","moudov","Zenaida macroura","moudov"
+"131","Black-bellied Sandgrouse",NA,"Pterocles orientalis",NA
+"132","Great Spotted Cuckoo",NA,"Clamator glandarius",NA
+"133","Yellow-billed Cuckoo","yebcuc","Coccyzus americanus","yebcuc"
+"134","Black-billed Cuckoo","bkbcuc","Coccyzus erythropthalmus","bkbcuc"
+"135","Common Cuckoo",NA,"Cuculus canorus",NA
+"136","Oriental Cuckoo",NA,"Cuculus optatus",NA
+"137","Common Nighthawk","comnig","Chordeiles minor","comnig"
+"138","Red-necked Nightjar",NA,"Caprimulgus ruficollis",NA
+"139","Eurasian Nightjar",NA,"Caprimulgus europaeus",NA
+"140","Chimney Swift","chiswi","Chaetura pelagica","chiswi"
+"141","White-throated Needletail",NA,"Hirundapus caudacutus",NA
+"142","Alpine Swift",NA,"Tachymarptis melba",NA
+"143","Common Swift",NA,"Apus apus",NA
+"144","Plain Swift",NA,"Apus unicolor",NA
+"145","Pallid Swift",NA,"Apus pallidus",NA
+"146","Pacific Swift",NA,"Apus pacificus",NA
+"147","Little Swift",NA,"Apus affinis",NA
+"148","White-rumped Swift",NA,"Apus caffer",NA
+"149","Water Rail",NA,"Rallus aquaticus",NA
+"150","Corn Crake",NA,"Crex crex",NA
+"151","Giant Wood-Rail",NA,"Aramides ypecaha",NA
+"152","Sora","sora","Porzana carolina","sora"
+"153","Spotted Crake",NA,"Porzana porzana",NA
+"154","Eurasian Moorhen",NA,"Gallinula chloropus",NA
+"155","Eurasian Coot",NA,"Fulica atra",NA
+"156","Red-knobbed Coot",NA,"Fulica cristata",NA
+"157","American Coot","y00475","Fulica americana","y00475"
+"158","Purple Gallinule","purgal2","Porphyrio martinica","purgal2"
+"159","Gray-headed Swamphen","purswa3","Porphyrio poliocephalus","purswa3"
+"160","Little Crake",NA,"Zapornia parva",NA
+"161","Gray Crowned-Crane",NA,"Balearica regulorum",NA
+"162","Sandhill Crane","sancra","Antigone canadensis","sancra"
+"163","Common Crane",NA,"Grus grus",NA
+"164","Black-winged Stilt",NA,"Himantopus himantopus",NA
+"165","Black-necked Stilt","bknsti","Himantopus mexicanus","bknsti"
+"166","Eurasian Oystercatcher","euroys1","Haematopus ostralegus","euroys1"
+"167","Black-bellied Plover","bkbplo","Pluvialis squatarola","bkbplo"
+"168","European Golden-Plover","eugplo","Pluvialis apricaria","eugplo"
+"169","American Golden-Plover","amgplo","Pluvialis dominica","amgplo"
+"170","Pacific Golden-Plover",NA,"Pluvialis fulva",NA
+"171","Eurasian Dotterel",NA,"Eudromias morinellus",NA
+"172","Killdeer","killde","Charadrius vociferus","killde"
+"173","Common Ringed Plover",NA,"Charadrius hiaticula",NA
+"174","Semipalmated Plover","semplo","Charadrius semipalmatus","semplo"
+"175","Little Ringed Plover","lirplo","Charadrius dubius","lirplo"
+"176","Northern Lapwing","norlap","Vanellus vanellus","norlap"
+"177","Blacksmith Lapwing","blaplo1","Vanellus armatus","blaplo1"
+"178","Spur-winged Lapwing",NA,"Vanellus spinosus",NA
+"179","Red-wattled Lapwing","rewlap1","Vanellus indicus","rewlap1"
+"180","Masked Lapwing","maslap1","Vanellus miles","maslap1"
+"181","Greater Sand-Plover",NA,"Anarhynchus leschenaultii",NA
+"182","Kentish Plover",NA,"Anarhynchus alexandrinus",NA
+"183","Wattled Jacana","watjac1","Jacana jacana","watjac1"
+"184","Upland Sandpiper","uplsan","Bartramia longicauda","uplsan"
+"185","Whimbrel","whimbr","Numenius phaeopus","whimbr"
+"186","Little Curlew",NA,"Numenius minutus",NA
+"187","Eurasian Curlew",NA,"Numenius arquata",NA
+"188","Bar-tailed Godwit","batgod","Limosa lapponica","batgod"
+"189","Black-tailed Godwit",NA,"Limosa limosa",NA
+"190","Hudsonian Godwit","hudgod","Limosa haemastica","hudgod"
+"191","Short-billed Dowitcher","shbdow","Limnodromus griseus","shbdow"
+"192","Long-billed Dowitcher","lobdow","Limnodromus scolopaceus","lobdow"
+"193","Jack Snipe",NA,"Lymnocryptes minimus",NA
+"194","Eurasian Woodcock",NA,"Scolopax rusticola",NA
+"195","Common Snipe",NA,"Gallinago gallinago",NA
+"196","Wilson's Snipe","wilsni1","Gallinago delicata","wilsni1"
+"197","Wilson's Phalarope","wilpha","Phalaropus tricolor","wilpha"
+"198","Red-necked Phalarope",NA,"Phalaropus lobatus",NA
+"199","Terek Sandpiper",NA,"Xenus cinereus",NA
+"200","Common Sandpiper","comsan","Actitis hypoleucos","comsan"
+"201","Spotted Sandpiper","sposan","Actitis macularius","sposan"
+"202","Green Sandpiper",NA,"Tringa ochropus",NA
+"203","Solitary Sandpiper","solsan","Tringa solitaria","solsan"
+"204","Gray-tailed Tattler",NA,"Tringa brevipes",NA
+"205","Marsh Sandpiper",NA,"Tringa stagnatilis",NA
+"206","Wood Sandpiper",NA,"Tringa glareola",NA
+"207","Common Redshank","comred1","Tringa totanus","comred1"
+"208","Lesser Yellowlegs","lesyel","Tringa flavipes","lesyel"
+"209","Willet","willet1","Tringa semipalmata","willet1"
+"210","Spotted Redshank",NA,"Tringa erythropus",NA
+"211","Common Greenshank",NA,"Tringa nebularia",NA
+"212","Greater Yellowlegs","greyel","Tringa melanoleuca","greyel"
+"213","Ruddy Turnstone","rudtur","Arenaria interpres","rudtur"
+"214","Great Knot",NA,"Calidris tenuirostris",NA
+"215","Red Knot","redkno","Calidris canutus","redkno"
+"216","Ruff",NA,"Calidris pugnax",NA
+"217","Broad-billed Sandpiper",NA,"Calidris falcinellus",NA
+"218","Sharp-tailed Sandpiper",NA,"Calidris acuminata",NA
+"219","Curlew Sandpiper",NA,"Calidris ferruginea",NA
+"220","Stilt Sandpiper","stisan","Calidris himantopus","stisan"
+"221","Temminck's Stint",NA,"Calidris temminckii",NA
+"222","Long-toed Stint",NA,"Calidris subminuta",NA
+"223","Red-necked Stint",NA,"Calidris ruficollis",NA
+"224","Buff-breasted Sandpiper","bubsan","Calidris subruficollis","bubsan"
+"225","Sanderling","sander","Calidris alba","sander"
+"226","Dunlin","dunlin","Calidris alpina","dunlin"
+"227","Purple Sandpiper","pursan","Calidris maritima","pursan"
+"228","Baird's Sandpiper","baisan","Calidris bairdii","baisan"
+"229","Little Stint",NA,"Calidris minuta",NA
+"230","White-rumped Sandpiper",NA,"Calidris fuscicollis",NA
+"231","Least Sandpiper","leasan","Calidris minutilla","leasan"
+"232","Pectoral Sandpiper","pecsan","Calidris melanotos","pecsan"
+"233","Western Sandpiper","wessan","Calidris mauri","wessan"
+"234","Semipalmated Sandpiper","semsan","Calidris pusilla","semsan"
+"235","Oriental Pratincole",NA,"Glareola maldivarum",NA
+"236","Long-tailed Jaeger",NA,"Stercorarius longicaudus",NA
+"237","Parasitic Jaeger","parjae","Stercorarius parasiticus","parjae"
+"238","Pomarine Jaeger","pomjae","Stercorarius pomarinus","pomjae"
+"239","Little Gull",NA,"Hydrocoloeus minutus",NA
+"240","Ross's Gull",NA,"Rhodostethia rosea",NA
+"241","Ivory Gull",NA,"Pagophila eburnea",NA
+"242","Sabine's Gull","sabgul","Xema sabini","sabgul"
+"243","Bonaparte's Gull","bongul","Chroicocephalus philadelphia","bongul"
+"244","Black-headed Gull",NA,"Chroicocephalus ridibundus",NA
+"245","Gray Gull",NA,"Leucophaeus modestus",NA
+"246","Laughing Gull","laugul","Leucophaeus atricilla","laugul"
+"247","Franklin's Gull","fragul","Leucophaeus pipixcan","fragul"
+"248","Audouin's Gull","audgul1","Ichthyaetus audouinii","audgul1"
+"249","Mediterranean Gull",NA,"Ichthyaetus melanocephalus",NA
+"250","Common Gull",NA,"Larus canus",NA
+"251","Ring-billed Gull","ribgul","Larus delawarensis","ribgul"
+"252","Caspian Gull",NA,"Larus cachinnans",NA
+"253","Kelp Gull","kelgul","Larus dominicanus","kelgul"
+"254","Herring Gull","hergul","Larus argentatus","hergul"
+"255","Yellow-legged Gull","yelgul1","Larus michahellis","yelgul1"
+"256","Great Black-backed Gull","gbbgul","Larus marinus","gbbgul"
+"257","Glaucous Gull","glagul","Larus hyperboreus","glagul"
+"258","Lesser Black-backed Gull","lbbgul","Larus fuscus","lbbgul"
+"259","Glaucous-winged Gull","glwgul","Larus glaucescens","glwgul"
+"260","Slaty-backed Gull",NA,"Larus schistisagus",NA
+"261","Iceland Gull","y00478","Larus glaucoides","y00478"
+"262","Little Tern",NA,"Sternula albifrons",NA
+"263","Least Tern","leater1","Sternula antillarum","leater1"
+"264","Caspian Tern","caster1","Hydroprogne caspia","caster1"
+"265","Black Tern","blkter","Chlidonias niger","blkter"
+"266","White-winged Tern",NA,"Chlidonias leucopterus",NA
+"267","Forster's Tern","forter","Sterna forsteri","forter"
+"268","Arctic Tern","arcter","Sterna paradisaea","arcter"
+"269","Common Tern","comter","Sterna hirundo","comter"
+"270","Roseate Tern",NA,"Sterna dougallii",NA
+"271","Sandwich Tern","santer1","Thalasseus sandvicensis","santer1"
+"272","Elegant Tern","eleter1","Thalasseus elegans","eleter1"
+"273","Royal Tern","royter1","Thalasseus maximus","royter1"
+"274","Red-throated Loon","retloo","Gavia stellata","retloo"
+"275","Arctic Loon",NA,"Gavia arctica",NA
+"276","Pacific Loon","pacloo","Gavia pacifica","pacloo"
+"277","Common Loon","comloo","Gavia immer","comloo"
+"278","Yellow-billed Loon",NA,"Gavia adamsii",NA
+"279","Yelkouan Shearwater",NA,"Puffinus yelkouan",NA
+"280","Balearic Shearwater",NA,"Puffinus mauretanicus",NA
+"281","Black Stork",NA,"Ciconia nigra",NA
+"282","White Stork",NA,"Ciconia ciconia",NA
+"283","Magnificent Frigatebird","magfri","Fregata magnificens","magfri"
+"284","Northern Gannet","norgan","Morus bassanus","norgan"
+"285","Pygmy Cormorant",NA,"Microcarbo pygmaeus",NA
+"286","Great Cormorant","grecor","Phalacrocorax carbo","grecor"
+"287","European Shag",NA,"Gulosus aristotelis",NA
+"288","Double-crested Cormorant","doccor","Nannopterum auritum","doccor"
+"289","Great White Pelican",NA,"Pelecanus onocrotalus",NA
+"290","Hamerkop",NA,"Scopus umbretta",NA
+"291","Great Bittern",NA,"Botaurus stellaris",NA
+"292","American Bittern","amebit","Botaurus lentiginosus","amebit"
+"293","Least Bittern","leabit","Ixobrychus exilis","leabit"
+"294","Little Bittern",NA,"Ixobrychus minutus",NA
+"295","Yellow-crowned Night Heron","ycnher","Nyctanassa violacea","ycnher"
+"296","Black-crowned Night Heron","bcnher","Nycticorax nycticorax","bcnher"
+"297","Little Blue Heron","libher","Egretta caerulea","libher"
+"298","Tricolored Heron","triher","Egretta tricolor","triher"
+"299","Snowy Egret","snoegr","Egretta thula","snoegr"
+"300","Little Egret",NA,"Egretta garzetta",NA
+"301","Western Reef-Heron",NA,"Egretta gularis",NA
+"302","Striated Heron",NA,"Butorides striata",NA
+"303","Green Heron","grnher","Butorides virescens","grnher"
+"304","Squacco Heron",NA,"Ardeola ralloides",NA
+"305","Indian Pond-Heron","inpher1","Ardeola grayii","inpher1"
+"306","Chinese Pond-Heron",NA,"Ardeola bacchus",NA
+"307","Great Egret","greegr","Ardea alba","greegr"
+"308","Gray Heron",NA,"Ardea cinerea",NA
+"309","Great Blue Heron","grbher3","Ardea herodias","grbher3"
+"310","Purple Heron",NA,"Ardea purpurea",NA
+"311","White Ibis","whiibi","Eudocimus albus","whiibi"
+"312","Glossy Ibis","gloibi","Plegadis falcinellus","gloibi"
+"313","Black-faced Ibis",NA,"Theristicus melanopis",NA
+"314","Hadada Ibis","hadibi1","Bostrychia hagedash","hadibi1"
+"315","Eurasian Spoonbill",NA,"Platalea leucorodia",NA
+"316","Turkey Vulture","turvul","Cathartes aura","turvul"
+"317","Osprey","osprey","Pandion haliaetus","osprey"
+"318","Black-winged Kite",NA,"Elanus caeruleus",NA
+"319","Bearded Vulture",NA,"Gypaetus barbatus",NA
+"320","Egyptian Vulture",NA,"Neophron percnopterus",NA
+"321","European Honey-buzzard",NA,"Pernis apivorus",NA
+"322","Oriental Honey-buzzard","orihob2","Pernis ptilorhynchus","orihob2"
+"323","Swallow-tailed Kite","swtkit","Elanoides forficatus","swtkit"
+"324","Cinereous Vulture","cinvul1","Aegypius monachus","cinvul1"
+"325","Hooded Vulture",NA,"Necrosyrtes monachus",NA
+"326","White-backed Vulture",NA,"Gyps africanus",NA
+"327","Himalayan Griffon",NA,"Gyps himalayensis",NA
+"328","Eurasian Griffon","eurgri1","Gyps fulvus","eurgri1"
+"329","Short-toed Snake-Eagle",NA,"Circaetus gallicus",NA
+"330","Lesser Spotted Eagle",NA,"Clanga pomarina",NA
+"331","Greater Spotted Eagle",NA,"Clanga clanga",NA
+"332","Booted Eagle","booeag1","Hieraaetus pennatus","booeag1"
+"333","Steppe Eagle",NA,"Aquila nipalensis",NA
+"334","Spanish Eagle",NA,"Aquila adalberti",NA
+"335","Imperial Eagle",NA,"Aquila heliaca",NA
+"336","Golden Eagle","goleag","Aquila chrysaetos","goleag"
+"337","Bonelli's Eagle",NA,"Aquila fasciata",NA
+"338","Western Marsh Harrier",NA,"Circus aeruginosus",NA
+"339","Eastern Marsh Harrier",NA,"Circus spilonotus",NA
+"340","Hen Harrier",NA,"Circus cyaneus",NA
+"341","Northern Harrier","norhar2","Circus hudsonius","norhar2"
+"342","Pallid Harrier",NA,"Circus macrourus",NA
+"343","Montagu's Harrier",NA,"Circus pygargus",NA
+"344","Levant Sparrowhawk",NA,"Accipiter brevipes",NA
+"345","Eurasian Sparrowhawk",NA,"Accipiter nisus",NA
+"346","American Goshawk","norgos","Accipiter atricapillus","norgos"
+"347","Red Kite","redkit1","Milvus milvus","redkit1"
+"348","Black Kite","blakit1","Milvus migrans","blakit1"
+"349","Brahminy Kite",NA,"Haliastur indus",NA
+"350","Bald Eagle","baleag","Haliaeetus leucocephalus","baleag"
+"351","Harris's Hawk","hrshaw","Parabuteo unicinctus","hrshaw"
+"352","Black-chested Buzzard-Eagle","bcbeag1","Geranoaetus melanoleucus","bcbeag1"
+"353","Red-tailed Hawk","rethaw","Buteo jamaicensis","rethaw"
+"354","Rough-legged Hawk","rolhaw","Buteo lagopus","rolhaw"
+"355","Ferruginous Hawk","ferhaw","Buteo regalis","ferhaw"
+"356","Common Buzzard",NA,"Buteo buteo",NA
+"357","Barn Owl","brnowl","Tyto alba","brnowl"
+"358","Eurasian Scops-Owl",NA,"Otus scops",NA
+"359","Snowy Owl","snoowl1","Bubo scandiacus","snoowl1"
+"360","Great Horned Owl","grhowl","Bubo virginianus","grhowl"
+"361","Northern Hawk Owl","nohowl","Surnia ulula","nohowl"
+"362","Eurasian Pygmy-Owl",NA,"Glaucidium passerinum",NA
+"363","Little Owl","litowl1","Athene noctua","litowl1"
+"364","Tawny Owl",NA,"Strix aluco",NA
+"365","Long-eared Owl","loeowl","Asio otus","loeowl"
+"366","Short-eared Owl","sheowl","Asio flammeus","sheowl"
+"367","Eurasian Hoopoe",NA,"Upupa epops",NA
+"368","Southern Ground-Hornbill",NA,"Bucorvus leadbeateri",NA
+"369","Common Kingfisher","comkin1","Alcedo atthis","comkin1"
+"370","Laughing Kookaburra","laukoo1","Dacelo novaeguineae","laukoo1"
+"371","White-throated Kingfisher",NA,"Halcyon smyrnensis",NA
+"372","Belted Kingfisher","belkin1","Megaceryle alcyon","belkin1"
+"373","Pied Kingfisher","piekin1","Ceryle rudis","piekin1"
+"374","European Bee-eater","eubeat1","Merops apiaster","eubeat1"
+"375","European Roller",NA,"Coracias garrulus",NA
+"376","Eurasian Wryneck",NA,"Jynx torquilla",NA
+"377","Yellow-bellied Sapsucker","yebsap","Sphyrapicus varius","yebsap"
+"378","Eurasian Three-toed Woodpecker",NA,"Picoides tridactylus",NA
+"379","Middle Spotted Woodpecker",NA,"Dendrocoptes medius",NA
+"380","White-backed Woodpecker",NA,"Dendrocopos leucotos",NA
+"381","Great Spotted Woodpecker",NA,"Dendrocopos major",NA
+"382","Syrian Woodpecker","syrwoo1","Dendrocopos syriacus","syrwoo1"
+"383","Lesser Spotted Woodpecker",NA,"Dryobates minor",NA
+"384","Gray-headed Woodpecker",NA,"Picus canus",NA
+"385","Eurasian Green Woodpecker",NA,"Picus viridis",NA
+"386","Iberian Green Woodpecker","grnwoo3","Picus sharpei","grnwoo3"
+"387","Black Woodpecker",NA,"Dryocopus martius",NA
+"388","Northern Flicker","norfli","Colaptes auratus","norfli"
+"389","Crested Caracara","y00678","Caracara plancus","y00678"
+"390","Yellow-headed Caracara","yehcar1","Daptrius chimachima","yehcar1"
+"391","Lesser Kestrel",NA,"Falco naumanni",NA
+"392","Eurasian Kestrel","eurkes","Falco tinnunculus","eurkes"
+"393","American Kestrel","amekes","Falco sparverius","amekes"
+"394","Red-footed Falcon",NA,"Falco vespertinus",NA
+"395","Eleonora's Falcon",NA,"Falco eleonorae",NA
+"396","Merlin","merlin","Falco columbarius","merlin"
+"397","Aplomado Falcon","aplfal","Falco femoralis","aplfal"
+"398","Peregrine Falcon","perfal","Falco peregrinus","perfal"
+"399","Cockatiel","cockat","Nymphicus hollandicus","cockat"
+"400","Galah","galah","Eolophus roseicapilla","galah"
+"401","Sulphur-crested Cockatoo","succoc","Cacatua galerita","succoc"
+"402","Australian King-Parrot","aukpar1","Alisterus scapularis","aukpar1"
+"403","Alexandrine Parakeet","alepar2","Psittacula eupatria","alepar2"
+"404","Rose-ringed Parakeet",NA,"Psittacula krameri",NA
+"405","Plum-headed Parakeet","plhpar1","Psittacula cyanocephala","plhpar1"
+"406","Red-crowned Parakeet",NA,"Cyanoramphus novaezelandiae",NA
+"407","Crimson Rosella","criros2","Platycercus elegans","criros2"
+"408","Eastern Rosella","easros1","Platycercus eximius","easros1"
+"409","Red-rumped Parrot","rerpar1","Psephotus haematonotus","rerpar1"
+"410","Budgerigar","budger","Melopsittacus undulatus","budger"
+"411","Rainbow Lorikeet","railor5","Trichoglossus moluccanus","railor5"
+"412","Rosy-faced Lovebird",NA,"Agapornis roseicollis",NA
+"413","Monk Parakeet","monpar","Myiopsitta monachus","monpar"
+"414","Scaly-headed Parrot",NA,"Pionus maximiliani",NA
+"415","Yellow-crowned Parrot",NA,"Amazona ochrocephala",NA
+"416","Turquoise-fronted Parrot",NA,"Amazona aestiva",NA
+"417","Mealy Parrot","meapar","Amazona farinosa","meapar"
+"418","Orange-winged Parrot",NA,"Amazona amazonica",NA
+"419","Brown-throated Parakeet",NA,"Eupsittula pertinax",NA
+"420","Nanday Parakeet","bkhpar","Aratinga nenday","bkhpar"
+"421","Blue-and-yellow Macaw","baymac","Ara ararauna","baymac"
+"422","Scarlet Macaw","scamac1","Ara macao","scamac1"
+"423","Red-and-green Macaw",NA,"Ara chloropterus",NA
+"424","Blue-crowned Parakeet",NA,"Thectocercus acuticaudatus",NA
+"425","Crimson-fronted Parakeet",NA,"Psittacara finschi",NA
+"426","Mitred Parakeet",NA,"Psittacara mitratus",NA
+"427","Red-masked Parakeet",NA,"Psittacara erythrogenys",NA
+"428","White-eyed Parakeet",NA,"Psittacara leucophthalmus",NA
+"429","Eastern Wood-Pewee","eawpew","Contopus virens","eawpew"
+"430","Yellow-bellied Flycatcher","yebfly","Empidonax flaviventris","yebfly"
+"431","Acadian Flycatcher","acafly","Empidonax virescens","acafly"
+"432","Alder Flycatcher","aldfly","Empidonax alnorum","aldfly"
+"433","Least Flycatcher","leafly","Empidonax minimus","leafly"
+"434","Western Kingbird","weskin","Tyrannus verticalis","weskin"
+"435","Eastern Kingbird","easkin","Tyrannus tyrannus","easkin"
+"436","White-eyed Vireo","whevir","Vireo griseus","whevir"
+"437","Yellow-throated Vireo","yetvir","Vireo flavifrons","yetvir"
+"438","Philadelphia Vireo","phivir","Vireo philadelphicus","phivir"
+"439","Warbling Vireo","warvir","Vireo gilvus","warvir"
+"440","Red-eyed Vireo","reevir1","Vireo olivaceus","reevir1"
+"441","Eurasian Golden Oriole","eugori2","Oriolus oriolus","eugori2"
+"442","Red-backed Shrike","rebshr1","Lanius collurio","rebshr1"
+"443","Brown Shrike","brnshr","Lanius cristatus","brnshr"
+"444","Long-tailed Shrike","lotshr1","Lanius schach","lotshr1"
+"445","Northern Shrike","norshr4","Lanius borealis","norshr4"
+"446","Iberian Gray Shrike","ibgshr1","Lanius meridionalis","ibgshr1"
+"447","Great Gray Shrike",NA,"Lanius excubitor",NA
+"448","Lesser Gray Shrike",NA,"Lanius minor",NA
+"449","Woodchat Shrike","wooshr1","Lanius senator","wooshr1"
+"450","Siberian Jay",NA,"Perisoreus infaustus",NA
+"451","Green Jay","grnjay","Cyanocorax yncas","grnjay"
+"452","Eurasian Jay","eurjay1","Garrulus glandarius","eurjay1"
+"453","Iberian Magpie","azwmag3","Cyanopica cooki","azwmag3"
+"454","Eurasian Magpie","eurmag1","Pica pica","eurmag1"
+"455","Black-billed Magpie","bkbmag1","Pica hudsonia","bkbmag1"
+"456","Eurasian Nutcracker",NA,"Nucifraga caryocatactes",NA
+"457","Red-billed Chough",NA,"Pyrrhocorax pyrrhocorax",NA
+"458","Yellow-billed Chough",NA,"Pyrrhocorax graculus",NA
+"459","Eurasian Jackdaw",NA,"Corvus monedula",NA
+"460","House Crow","houcro1","Corvus splendens","houcro1"
+"461","Rook",NA,"Corvus frugilegus",NA
+"462","Carrion Crow",NA,"Corvus corone",NA
+"463","Hooded Crow",NA,"Corvus cornix",NA
+"464","Pied Crow",NA,"Corvus albus",NA
+"465","Common Raven","comrav","Corvus corax","comrav"
+"466","Coal Tit",NA,"Periparus ater",NA
+"467","Crested Tit",NA,"Lophophanes cristatus",NA
+"468","Sombre Tit",NA,"Poecile lugubris",NA
+"469","Marsh Tit","martit2","Poecile palustris","martit2"
+"470","Willow Tit",NA,"Poecile montanus",NA
+"471","Gray-headed Chickadee",NA,"Poecile cinctus",NA
+"472","Eurasian Blue Tit","blutit","Cyanistes caeruleus","blutit"
+"473","Great Tit","gretit1","Parus major","gretit1"
+"474","Eurasian Penduline-Tit",NA,"Remiz pendulinus",NA
+"475","Horned Lark","horlar","Eremophila alpestris","horlar"
+"476","Calandra Lark","callar1","Melanocorypha calandra","callar1"
+"477","Wood Lark",NA,"Lullula arborea",NA
+"478","Eurasian Skylark",NA,"Alauda arvensis",NA
+"479","Thekla's Lark","thelar1","Galerida theklae","thelar1"
+"480","Crested Lark","crelar1","Galerida cristata","crelar1"
+"481","Bearded Reedling",NA,"Panurus biarmicus",NA
+"482","Zitting Cisticola",NA,"Cisticola juncidis",NA
+"483","Booted Warbler",NA,"Iduna caligata",NA
+"484","Sykes's Warbler",NA,"Iduna rama",NA
+"485","Western Olivaceous Warbler",NA,"Iduna opaca",NA
+"486","Melodious Warbler",NA,"Hippolais polyglotta",NA
+"487","Icterine Warbler",NA,"Hippolais icterina",NA
+"488","Sedge Warbler",NA,"Acrocephalus schoenobaenus",NA
+"489","Paddyfield Warbler",NA,"Acrocephalus agricola",NA
+"490","Blyth's Reed Warbler","blrwar1","Acrocephalus dumetorum","blrwar1"
+"491","Marsh Warbler",NA,"Acrocephalus palustris",NA
+"492","Common Reed Warbler",NA,"Acrocephalus scirpaceus",NA
+"493","Great Reed Warbler",NA,"Acrocephalus arundinaceus",NA
+"494","River Warbler",NA,"Locustella fluviatilis",NA
+"495","Savi's Warbler",NA,"Locustella luscinioides",NA
+"496","Common Grasshopper Warbler",NA,"Locustella naevia",NA
+"497","Bank Swallow","banswa","Riparia riparia","banswa"
+"498","Tree Swallow","treswa","Tachycineta bicolor","treswa"
+"499","Purple Martin","purmar","Progne subis","purmar"
+"500","Eurasian Crag-Martin","eurcrm1","Ptyonoprogne rupestris","eurcrm1"
+"501","Barn Swallow","barswa","Hirundo rustica","barswa"
+"502","Red-rumped Swallow","rerswa1","Cecropis daurica","rerswa1"
+"503","Cliff Swallow","cliswa","Petrochelidon pyrrhonota","cliswa"
+"504","Red-whiskered Bulbul",NA,"Pycnonotus jocosus",NA
+"505","Red-vented Bulbul","revbul","Pycnonotus cafer","revbul"
+"506","White-spectacled Bulbul",NA,"Pycnonotus xanthopygos",NA
+"507","Wood Warbler",NA,"Phylloscopus sibilatrix",NA
+"508","Western Bonelli's Warbler",NA,"Phylloscopus bonelli",NA
+"509","Yellow-browed Warbler",NA,"Phylloscopus inornatus",NA
+"510","Pallas's Leaf Warbler",NA,"Phylloscopus proregulus",NA
+"511","Dusky Warbler",NA,"Phylloscopus fuscatus",NA
+"512","Willow Warbler","wlwwar","Phylloscopus trochilus","wlwwar"
+"513","Common Chiffchaff","comchi1","Phylloscopus collybita","comchi1"
+"514","Iberian Chiffchaff","ibechi2","Phylloscopus ibericus","ibechi2"
+"515","Green Warbler",NA,"Phylloscopus nitidus",NA
+"516","Greenish Warbler",NA,"Phylloscopus trochiloides",NA
+"517","Arctic Warbler",NA,"Phylloscopus borealis",NA
+"518","Kamchatka Leaf Warbler",NA,"Phylloscopus examinandus",NA
+"519","Cetti's Warbler","cetwar1","Cettia cetti","cetwar1"
+"520","Eurasian Blackcap",NA,"Sylvia atricapilla",NA
+"521","Garden Warbler",NA,"Sylvia borin",NA
+"522","Barred Warbler",NA,"Curruca nisoria",NA
+"523","Lesser Whitethroat","leswhi4","Curruca curruca","leswhi4"
+"524","Western Orphean Warbler",NA,"Curruca hortensis",NA
+"525","Eastern Orphean Warbler",NA,"Curruca crassirostris",NA
+"526","Sardinian Warbler","sarwar1","Curruca melanocephala","sarwar1"
+"527","Moltoni's Warbler",NA,"Curruca subalpina",NA
+"528","Western Subalpine Warbler",NA,"Curruca iberiae",NA
+"529","Greater Whitethroat","grewhi1","Curruca communis","grewhi1"
+"530","Dartford Warbler","darwar1","Curruca undata","darwar1"
+"531","Balearic Warbler",NA,"Curruca balearica",NA
+"532","Vinous-throated Parrotbill",NA,"Suthora webbiana",NA
+"533","Indian White-eye",NA,"Zosterops palpebrosus",NA
+"534","Red-billed Leiothrix","reblei","Leiothrix lutea","reblei"
+"535","Ruby-crowned Kinglet","ruckin","Corthylio calendula","ruckin"
+"536","Goldcrest","goldcr1","Regulus regulus","goldcr1"
+"537","Common Firecrest",NA,"Regulus ignicapilla",NA
+"538","Wallcreeper",NA,"Tichodroma muraria",NA
+"539","Krüper's Nuthatch",NA,"Sitta krueperi",NA
+"540","Red-breasted Nuthatch","rebnut","Sitta canadensis","rebnut"
+"541","Western Rock Nuthatch",NA,"Sitta neumayer",NA
+"542","Eurasian Nuthatch",NA,"Sitta europaea",NA
+"543","Short-toed Treecreeper","shttre1","Certhia brachydactyla","shttre1"
+"544","Eurasian Wren",NA,"Troglodytes troglodytes",NA
+"545","Winter Wren","winwre3","Troglodytes hiemalis","winwre3"
+"546","White-throated Dipper",NA,"Cinclus cinclus",NA
+"547","Common Hill Myna","hilmyn","Gracula religiosa","hilmyn"
+"548","European Starling","eursta","Sturnus vulgaris","eursta"
+"549","Spotless Starling","sposta1","Sturnus unicolor","sposta1"
+"550","Rosy Starling",NA,"Pastor roseus",NA
+"551","Indian Pied Starling",NA,"Gracupica contra",NA
+"552","White-shouldered Starling",NA,"Sturnia sinensis",NA
+"553","Common Myna","commyn","Acridotheres tristis","commyn"
+"554","Crested Myna",NA,"Acridotheres cristatellus",NA
+"555","Superb Starling",NA,"Lamprotornis superbus",NA
+"556","Gray Catbird","grycat","Dumetella carolinensis","grycat"
+"557","Tropical Mockingbird","tromoc","Mimus gilvus","tromoc"
+"558","Northern Mockingbird","normoc","Mimus polyglottos","normoc"
+"559","Varied Thrush","varthr","Ixoreus naevius","varthr"
+"560","Veery","veery","Catharus fuscescens","veery"
+"561","Gray-cheeked Thrush","gycthr","Catharus minimus","gycthr"
+"562","Swainson's Thrush","swathr","Catharus ustulatus","swathr"
+"563","Hermit Thrush","herthr","Catharus guttatus","herthr"
+"564","Wood Thrush","woothr","Hylocichla mustelina","woothr"
+"565","Orange-headed Thrush",NA,"Geokichla citrina",NA
+"566","Mistle Thrush",NA,"Turdus viscivorus",NA
+"567","Song Thrush",NA,"Turdus philomelos",NA
+"568","Redwing",NA,"Turdus iliacus",NA
+"569","Eurasian Blackbird","eurbla","Turdus merula","eurbla"
+"570","American Robin","amerob","Turdus migratorius","amerob"
+"571","Eyebrowed Thrush",NA,"Turdus obscurus",NA
+"572","Pale Thrush","palthr1","Turdus pallidus","palthr1"
+"573","Fieldfare",NA,"Turdus pilaris",NA
+"574","Ring Ouzel",NA,"Turdus torquatus",NA
+"575","Asian Brown Flycatcher",NA,"Muscicapa dauurica",NA
+"576","Spotted Flycatcher",NA,"Muscicapa striata",NA
+"577","Rufous-tailed Scrub-Robin",NA,"Cercotrichas galactotes",NA
+"578","White-rumped Shama","whrsha","Copsychus malabaricus","whrsha"
+"579","Verditer Flycatcher",NA,"Eumyias thalassinus",NA
+"580","European Robin","eurrob1","Erithacus rubecula","eurrob1"
+"581","White-throated Robin",NA,"Irania gutturalis",NA
+"582","Thrush Nightingale",NA,"Luscinia luscinia",NA
+"583","Common Nightingale","comnig1","Luscinia megarhynchos","comnig1"
+"584","Bluethroat","blueth","Luscinia svecica","blueth"
+"585","Siberian Rubythroat",NA,"Calliope calliope",NA
+"586","Taiga Flycatcher",NA,"Ficedula albicilla",NA
+"587","Red-breasted Flycatcher",NA,"Ficedula parva",NA
+"588","European Pied Flycatcher",NA,"Ficedula hypoleuca",NA
+"589","Collared Flycatcher",NA,"Ficedula albicollis",NA
+"590","Common Redstart",NA,"Phoenicurus phoenicurus",NA
+"591","Black Redstart","blared1","Phoenicurus ochruros","blared1"
+"592","Rufous-tailed Rock-Thrush",NA,"Monticola saxatilis",NA
+"593","Blue Rock-Thrush",NA,"Monticola solitarius",NA
+"594","Whinchat",NA,"Saxicola rubetra",NA
+"595","European Stonechat",NA,"Saxicola rubicola",NA
+"596","Siberian Stonechat",NA,"Saxicola maurus",NA
+"597","Amur Stonechat",NA,"Saxicola stejnegeri",NA
+"598","Pied Bushchat",NA,"Saxicola caprata",NA
+"599","Northern Wheatear",NA,"Oenanthe oenanthe",NA
+"600","Isabelline Wheatear",NA,"Oenanthe isabellina",NA
+"601","Western Black-eared Wheatear",NA,"Oenanthe hispanica",NA
+"602","Eastern Black-eared Wheatear",NA,"Oenanthe melanoleuca",NA
+"603","Black Wheatear",NA,"Oenanthe leucura",NA
+"604","Bohemian Waxwing","bohwax","Bombycilla garrulus","bohwax"
+"605","Cedar Waxwing","cedwax","Bombycilla cedrorum","cedwax"
+"606","Northern Red Bishop",NA,"Euplectes franciscanus",NA
+"607","Indian Silverbill",NA,"Euodice malabarica",NA
+"608","Java Sparrow",NA,"Padda oryzivora",NA
+"609","Scaly-breasted Munia","nutman","Lonchura punctulata","nutman"
+"610","White-rumped Munia",NA,"Lonchura striata",NA
+"611","Tricolored Munia",NA,"Lonchura malacca",NA
+"612","Chestnut Munia",NA,"Lonchura atricapilla",NA
+"613","Common Waxbill",NA,"Estrilda astrild",NA
+"614","Pin-tailed Whydah",NA,"Vidua macroura",NA
+"615","Alpine Accentor",NA,"Prunella collaris",NA
+"616","Dunnock",NA,"Prunella modularis",NA
+"617","House Sparrow","houspa","Passer domesticus","houspa"
+"618","Italian Sparrow",NA,"Passer italiae",NA
+"619","Spanish Sparrow",NA,"Passer hispaniolensis",NA
+"620","Eurasian Tree Sparrow","eutspa","Passer montanus","eutspa"
+"621","White-winged Snowfinch",NA,"Montifringilla nivalis",NA
+"622","Gray Wagtail","grywag","Motacilla cinerea","grywag"
+"623","Western Yellow Wagtail",NA,"Motacilla flava",NA
+"624","Eastern Yellow Wagtail",NA,"Motacilla tschutschensis",NA
+"625","Citrine Wagtail",NA,"Motacilla citreola",NA
+"626","White Wagtail",NA,"Motacilla alba",NA
+"627","Australian Pipit","auspip2","Anthus australis","auspip2"
+"628","Richard's Pipit",NA,"Anthus richardi",NA
+"629","Paddyfield Pipit",NA,"Anthus rufulus",NA
+"630","Tawny Pipit",NA,"Anthus campestris",NA
+"631","Berthelot's Pipit",NA,"Anthus berthelotii",NA
+"632","Meadow Pipit",NA,"Anthus pratensis",NA
+"633","Tree Pipit",NA,"Anthus trivialis",NA
+"634","Olive-backed Pipit",NA,"Anthus hodgsoni",NA
+"635","Red-throated Pipit",NA,"Anthus cervinus",NA
+"636","Water Pipit",NA,"Anthus spinoletta",NA
+"637","Rock Pipit",NA,"Anthus petrosus",NA
+"638","American Pipit","amepip","Anthus rubescens","amepip"
+"639","Common Chaffinch","comcha","Fringilla coelebs","comcha"
+"640","Brambling",NA,"Fringilla montifringilla",NA
+"641","Hawfinch",NA,"Coccothraustes coccothraustes",NA
+"642","Common Rosefinch",NA,"Carpodacus erythrinus",NA
+"643","Pine Grosbeak","pingro","Pinicola enucleator","pingro"
+"644","Eurasian Bullfinch",NA,"Pyrrhula pyrrhula",NA
+"645","House Finch","houfin","Haemorhous mexicanus","houfin"
+"646","European Greenfinch",NA,"Chloris chloris",NA
+"647","Yellow-fronted Canary",NA,"Crithagra mozambica",NA
+"648","Twite",NA,"Linaria flavirostris",NA
+"649","Eurasian Linnet",NA,"Linaria cannabina",NA
+"650","Common Redpoll","comred","Acanthis flammea","comred"
+"651","Lesser Redpoll",NA,"Acanthis cabaret",NA
+"652","Hoary Redpoll","hoared","Acanthis hornemanni","hoared"
+"653","Parrot Crossbill",NA,"Loxia pytyopsittacus",NA
+"654","Red Crossbill","redcro","Loxia curvirostra","redcro"
+"655","White-winged Crossbill","whwcro","Loxia leucoptera","whwcro"
+"656","European Goldfinch","eurgol","Carduelis carduelis","eurgol"
+"657","Citril Finch",NA,"Carduelis citrinella",NA
+"658","European Serin","eurser1","Serinus serinus","eurser1"
+"659","Eurasian Siskin",NA,"Spinus spinus",NA
+"660","American Goldfinch","amegfi","Spinus tristis","amegfi"
+"661","Hooded Siskin",NA,"Spinus magellanicus",NA
+"662","Lapland Longspur","laplon","Calcarius lapponicus","laplon"
+"663","Snow Bunting","snobun","Plectrophenax nivalis","snobun"
+"664","Black-headed Bunting",NA,"Emberiza melanocephala",NA
+"665","Corn Bunting","corbun1","Emberiza calandra","corbun1"
+"666","Rock Bunting",NA,"Emberiza cia",NA
+"667","Cirl Bunting",NA,"Emberiza cirlus",NA
+"668","Yellowhammer",NA,"Emberiza citrinella",NA
+"669","Ortolan Bunting",NA,"Emberiza hortulana",NA
+"670","Cretzschmar's Bunting",NA,"Emberiza caesia",NA
+"671","Reed Bunting",NA,"Emberiza schoeniclus",NA
+"672","Yellow-breasted Bunting",NA,"Emberiza aureola",NA
+"673","Little Bunting",NA,"Emberiza pusilla",NA
+"674","Rustic Bunting",NA,"Emberiza rustica",NA
+"675","Lark Sparrow","larspa","Chondestes grammacus","larspa"
+"676","American Tree Sparrow","amtspa","Spizelloides arborea","amtspa"
+"677","Fox Sparrow","foxspa","Passerella iliaca","foxspa"
+"678","Dark-eyed Junco","daejun","Junco hyemalis","daejun"
+"679","Rufous-collared Sparrow","rucspa1","Zonotrichia capensis","rucspa1"
+"680","White-crowned Sparrow","whcspa","Zonotrichia leucophrys","whcspa"
+"681","White-throated Sparrow","whtspa","Zonotrichia albicollis","whtspa"
+"682","Savannah Sparrow","savspa","Passerculus sandwichensis","savspa"
+"683","Song Sparrow","sonspa","Melospiza melodia","sonspa"
+"684","Lincoln's Sparrow","linspa","Melospiza lincolnii","linspa"
+"685","Spotted Towhee","spotow","Pipilo maculatus","spotow"
+"686","Yellow-headed Blackbird","yehbla","Xanthocephalus xanthocephalus","yehbla"
+"687","Bobolink","boboli","Dolichonyx oryzivorus","boboli"
+"688","Baltimore Oriole","balori","Icterus galbula","balori"
+"689","Red-winged Blackbird","rewbla","Agelaius phoeniceus","rewbla"
+"690","Brown-headed Cowbird","bnhcow","Molothrus ater","bnhcow"
+"691","Common Grackle","comgra","Quiscalus quiscula","comgra"
+"692","Boat-tailed Grackle","botgra","Quiscalus major","botgra"
+"693","Great-tailed Grackle","grtgra","Quiscalus mexicanus","grtgra"
+"694","Ovenbird","ovenbi1","Seiurus aurocapilla","ovenbi1"
+"695","Northern Waterthrush","norwat","Parkesia noveboracensis","norwat"
+"696","Golden-winged Warbler","gowwar","Vermivora chrysoptera","gowwar"
+"697","Blue-winged Warbler","buwwar","Vermivora cyanoptera","buwwar"
+"698","Black-and-white Warbler","bawwar","Mniotilta varia","bawwar"
+"699","Prothonotary Warbler","prowar","Protonotaria citrea","prowar"
+"700","Tennessee Warbler","tenwar","Leiothlypis peregrina","tenwar"
+"701","Connecticut Warbler","conwar","Oporornis agilis","conwar"
+"702","Common Yellowthroat","comyel","Geothlypis trichas","comyel"
+"703","Hooded Warbler","hoowar","Setophaga citrina","hoowar"
+"704","American Redstart","amered","Setophaga ruticilla","amered"
+"705","Cape May Warbler","camwar","Setophaga tigrina","camwar"
+"706","Cerulean Warbler","cerwar","Setophaga cerulea","cerwar"
+"707","Northern Parula","norpar","Setophaga americana","norpar"
+"708","Magnolia Warbler","magwar","Setophaga magnolia","magwar"
+"709","Bay-breasted Warbler","babwar","Setophaga castanea","babwar"
+"710","Blackburnian Warbler","bkbwar","Setophaga fusca","bkbwar"
+"711","Yellow Warbler","yelwar","Setophaga petechia","yelwar"
+"712","Chestnut-sided Warbler","chswar","Setophaga pensylvanica","chswar"
+"713","Blackpoll Warbler","bkpwar","Setophaga striata","bkpwar"
+"714","Black-throated Blue Warbler","btbwar","Setophaga caerulescens","btbwar"
+"715","Palm Warbler","palwar","Setophaga palmarum","palwar"
+"716","Yellow-rumped Warbler","yerwar","Setophaga coronata","yerwar"
+"717","Yellow-throated Warbler","yetwar","Setophaga dominica","yetwar"
+"718","Black-throated Green Warbler","btnwar","Setophaga virens","btnwar"
+"719","Canada Warbler","canwar","Cardellina canadensis","canwar"
+"720","Wilson's Warbler","wlswar","Cardellina pusilla","wlswar"
+"721","Scarlet Tanager","scatan","Piranga olivacea","scatan"
+"722","Northern Cardinal","norcar","Cardinalis cardinalis","norcar"
+"723","Rose-breasted Grosbeak","robgro","Pheucticus ludovicianus","robgro"
+"724","Blue Grosbeak","blugrb1","Passerina caerulea","blugrb1"
+"725","Indigo Bunting","indbun","Passerina cyanea","indbun"
+"726","Painted Bunting","paibun","Passerina ciris","paibun"
+"727","Dickcissel","dickci","Spiza americana","dickci"
+"728","Red-crested Cardinal","reccar","Paroaria coronata","reccar"
+"729","Saffron Finch","saffin","Sicalis flaveola","saffin"
+"730","Red-crested Finch","recfin1","Coryphospingus cucullatus","recfin1"
+"731","Yellow-faced Grassquit","yefgra1","Tiaris olivaceus","yefgra1"
