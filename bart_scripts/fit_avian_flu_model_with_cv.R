@@ -558,7 +558,7 @@ for (i in 1:25){
 }
 ################################################################################
 
-cov_df <- data.frame(raster::extract(covstack, training_coords))
+cov_df <- data.frame(raster::extract(covstack, training_coords[, 1:2]))
 
 n_pts <- nrow(training_coords)
 n_training <- round(.75 * n_pts)
