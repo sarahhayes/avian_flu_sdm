@@ -14,6 +14,47 @@ library(raster)
 library(terra)
 set.seed(12345)
 
+################################################################################
+# Snippet adapted from
+# https://stackoverflow.com/questions/14334970/convert-latitude-and-longitude-coordinates-to-country-name-in-r
+library(sp)
+library(rworldmap)
+
+# The single argument to this function, points, is a data.frame in which:
+#   - column 1 contains the longitude in degrees
+#   - column 2 contains the latitude in degrees
+coords2country = function(sample_data)
+{  
+  # Convert from EPSG to lat long decimal:
+  coordinates(sample_data) <- c("X", "Y")
+  proj4string(sample_data) <- CRS("epsg:3035")
+  sample_data <- spTransform(sample_data, CRS("+init=epsg:4326")) %>% as.data.frame()
+  
+  # Extract coordinates as dataframe with appropriate labels:
+  points <- data.frame(lon = sample_data$coords.x1, lat = sample_data$coords.x2)
+  countriesSP <- getMap(resolution='low')
+  #countriesSP <- getMap(resolution='high') #you could use high res map from rworldxtra if you were concerned about detail
+  
+  # convert our list of points to a SpatialPoints object
+  
+  # pointsSP = SpatialPoints(points, proj4string=CRS(" +proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0"))
+  
+  #setting CRS directly to that from rworldmap
+  pointsSP = SpatialPoints(points, proj4string=CRS(proj4string(countriesSP)))
+  
+  
+  # use 'over' to get indices of the Polygons object containing each point 
+  indices = over(pointsSP, countriesSP)
+  
+  # return the ADMIN names of each country
+  indices$ADMIN  
+  #indices$ISO3 # returns the ISO3 code 
+  #indices$continent   # returns the continent (6 continent model)
+  #indices$REGION   # returns the continent (7 continent model)
+}
+
+################################################################################
+
 # EMBARCADERO FUNCTIONS ADJUSTED TO ALLOW CUSTOM BART PARAMETERS:
 
 bart.flex <- function(x.data, y.data, ri.data = NULL,
@@ -480,10 +521,10 @@ covstack <- raster::stack(paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covar
 # Drop unclassified land layer
 covstack <- dropLayer(covstack, "lc_17")
 
-
 # Load training data
 training_coords <- readRDS("training_sets/training_coords_Q1.RDS")
-cov_df <- data.frame(raster::extract(covstack, training_coords[, 1:2]))
+sample_countries <- coords2country(training_coords) %>% as.data.frame()
+cov_df <- data.frame(raster::extract(covstack, training_coords))
 
 n_pts <- nrow(training_coords)
 n_training <- round(.75 * n_pts)
