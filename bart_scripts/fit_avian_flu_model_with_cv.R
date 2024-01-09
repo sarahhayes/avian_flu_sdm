@@ -523,7 +523,41 @@ covstack <- dropLayer(covstack, "lc_17")
 
 # Load training data
 training_coords <- readRDS("training_sets/training_coords_Q1.RDS")
-sample_countries <- coords2country(training_coords) %>% as.data.frame()
+sample_countries <- coords2country(training_coords) %>% as.character() %>% as.data.frame()
+colnames(sample_countries) <- "country"
+
+################################################################################
+# Quick digression to validate coords2country function:
+zipmap <- terra::vect(x = "data/gis_europe/CNTR_RG_03M_2020_4326.shp.zip",
+                      layer = "CNTR_RG_03M_2020_4326")
+crs <- "epsg:3035"
+euro_ext <- extent(covstack[[1]])
+
+# change projection and extent. 
+# using quite a generous extent whilst plotting as looking at where to set the boundaries
+euro_map <- terra::project(x = zipmap, y = crs) 
+euro_map_crop <- terra::crop(euro_map, euro_ext)
+
+plot(euro_map_crop,
+     col = "white",
+     background = "azure2",
+     axes = FALSE,
+     buffer = FALSE,
+     xmin = euro_ext@xmin,
+     mar = c(0, 0, 0, 0))
+pts_to_plot <- sample(1:nrow(training_coords), 25)
+for (i in 1:25){
+  pts_pos <- terra::vect(training_coords[pts_to_plot[i], ], geom=c("X", "Y"),
+                         crs =  "+proj=longlat +ellps=WGS84 +datum=WGS84")
+  plot(pts_pos, add = T, col = "red", pch = 16, cex = .3)
+  text(pts_pos, labels=sample_countries$country[pts_to_plot[i]])
+  cat("This point is in",
+      sample_countries$country[pts_to_plot[i]],
+      ".\n")
+  Sys.sleep(1)
+}
+################################################################################
+
 cov_df <- data.frame(raster::extract(covstack, training_coords))
 
 n_pts <- nrow(training_coords)
