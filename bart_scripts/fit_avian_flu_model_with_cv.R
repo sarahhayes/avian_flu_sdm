@@ -558,7 +558,30 @@ for (i in 1:25){
 }
 ################################################################################
 
-cov_df <- data.frame(raster::extract(covstack, training_coords[, 1:2]))
+# Breaking construction of cov_df into steps speeds up execution time - this
+# appears to be a quirk of how raster extraction and/or data frame construction
+# is done.
+{
+  n_blocks <- floor((1/250) * nrow(training_coords))
+  time_now <- Sys.time()
+  cov_df <- data.frame(raster::extract(covstack, training_coords[1:250, 1:2]))
+  for (i in 2:n_blocks){cov_df <- rbind(cov_df,
+                  data.frame(
+                    raster::extract(
+                      covstack,
+                      training_coords[(250*(i-1)+1:250*i), 1:2]
+                    )
+                  )
+                  )}
+  cov_df <- rbind(cov_df,
+                  data.frame(
+                    raster::extract(
+                      covstack,
+                      training_coords[(250*n_blocks+1:nrow(training_coords)), 1:2]
+                      )
+                    )
+                  )
+  cov_build_time <- as.numeric(difftime(Sys.time(), time_now, units="mins"))}
 
 n_pts <- nrow(training_coords)
 n_training <- round(.75 * n_pts)
