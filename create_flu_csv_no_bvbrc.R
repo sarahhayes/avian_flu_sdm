@@ -47,6 +47,13 @@ inf_data <- wahis[which(wahis$disease_eng %in%
                             "Influenza A virus (Inf. with)",
                             "Influenza A viruses of high pathogenicity (Inf. with) (non-poultry including wild birds) (2017-)")),]
 
+# Are these wild cases mislabelled as poultry cases? Should they be included?
+inf_a_poss_hpai <- dplyr::filter(wahis, disease_eng == "High pathogenicity avian influenza viruses (poultry) (Inf. with)" &
+                                   is_wild == T &
+                                   Species != "Al indeterminatum fau" &
+                                   (wild_type != "captive"|is.na(wild_type))
+)
+
 inf_a_hpai <- dplyr::filter(inf_data, disease_eng == "Influenza A viruses of high pathogenicity (Inf. with) (non-poultry including wild birds) (2017-)" )
 table(inf_a_hpai$region) # all regions represented
 colnames(inf_a_hpai)
@@ -65,7 +72,9 @@ table(zoo_cases$wild_type) # this doesn't show the many NAs
 # so perhaps we should remove the zoo captives? So select all those that are wild and then remove those that
 # are captive 
 inf_a_hpai_wild <- inf_a_hpai[which(inf_a_hpai$is_wild == T),]
-inf_a_hpai_wild <- inf_a_hpai_wild[which(inf_a_hpai_wild$wild_type != "captive"),]
+#inf_a_hpai_wild <- inf_a_hpai_wild[which(inf_a_hpai_wild$wild_type != "captive"),] #10,328 observations
+inf_a_hpai_wild <- dplyr::filter(inf_a_hpai_wild, (wild_type != "captive"|is.na(wild_type))) #12,119 observations
+
 table(inf_a_hpai_wild$Epi_unit, inf_a_hpai_wild$is_wild)
 
 table(inf_a_hpai_wild$wild_type)
