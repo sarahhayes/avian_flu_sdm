@@ -1,508 +1,442 @@
-species,freq,class
-Accipiter brevipes,1,Aves
-Accipiter gentilis,44,Aves
-Accipiter Gentilis ,10,Aves
-Accipiter nisus,54,Aves
-Accipitridae (incognita),231,Aves
-Accipitridae (Incognita),212,Aves
-Accipitridae (Unidentified):Accipitridae (Incognita)(Accipitridae),25,Aves
-Acrocephalus arundinaceus,11,Aves
-Acrocephalus melanopogon,7,Aves
-Acrocephalus schoenobaenus,19,Aves
-Acrocephalus scirpaceus,47,Aves
-Actitis hypoleucos,240,Aves
-Aechmophorus occidentalis,3,Aves
-Aix galericulata,36,Aves
-Aix sponsa,2,Aves
-Al indeterminatum fau,6,NA
-Alauda arvensis,2,Aves
-Alca torda,53,Aves
-Alcedo atthis,17,Aves
-Alcidae (incognita),2,Aves
-Alectoris rufa,5,Aves
-Alle alle,2,Aves
-Alopochen aegyptiaca,132,Aves
-Alopochen aegyptiacus,616,Aves
-Anas acuta,140,Aves
-Anas americana,1,Aves
-Anas bahamensis bahamensis,3,Aves
-Anas clypeata,498,NA
-Anas crecca,3796,Aves
-Anas penelope,11481,Aves
-Anas platyrhynchos,92455,Aves
-Anas querquedula,110,Aves
-Anas rhynchotis,1,Aves
-Anas sp.,53,Aves
-Anas strepera,3072,Aves
-Anatidae (incognita),887,Aves
-Anatidae (Incognita),995,Aves
-Anser albifrons,9098,Aves
-Anser anser,2793,Aves
-Anser brachyrhynchus,215,Aves
-Anser erythropus,4,Aves
-Anser fabalis,1127,Aves
-Anser fabalis serrirostris,2,NA
-Anser indicus,1,Aves
-Anser serrirostris,6,Aves
-Anser sp.,90,Aves
-Anserinae (unidentified),142,Aves
-Anserinae (Unidentified):Anserinae (Incognita)(Anatidae),155,Aves
-Apus apus,1,Aves
-Aquila audax,1,Aves
-Aquila chrysaetos,6,Aves
-Aquila fasciata,1,Aves
-Aquila heliaca,4,Aves
-Arctic Skua (Or Parasitic Jaeger),3,NA
-Arctic Tern (Sterna Paradisea),3,Aves
-Ardea alba,18,Aves
-Ardea cinerea,172,Aves
-Ardea herodias,5,Aves
-Ardea purpurea,78,Aves
-Ardeidae (incognita),38,Aves
-Ardeidae (Unspecified),10,Aves
-Ardeola ralloides,6,Aves
-Arenaria interpres,661,Aves
-Armenian Gull (Larus Armenicus),1,Aves
-Arremonops rufivirgatus,2,Aves
-Asio flammeus,1,Aves
-Asio otus,12,Aves
-Athene noctua,3,Aves
-Atlantic Puffin (Fratercula Arctica),2,Aves
-Aythya ferina,64,Aves
-Aythya fuligula,145,Aves
-Aythya marila,26,Aves
-Aythya nyroca,6,Aves
-Barn Owl (Tyto Alba),5,NA
-Barnacle Goose:branta Leucopsis(Anatidae),260,Aves
-Bean Goose (Anser Fabalis),11,Aves
-Bearded Vulture (Gypaetus Barbatus),5,NA
-Black-Faced Spoonbill (Platalea Minor),1,Aves
-Black-Legged Kittiwake (Rissa Tridactyla):Laridae-Charadriiformes,15,Aves
-Black-Necked Grebe (Podiceps Nigricollis):Podicipedidae-Procellariiformes,1,Aves
-Black Backed Gull (Larus Marinus),4,NA
+"species","freq","class"
+"Accipiter gentilis",39,"Aves"
+"Accipiter Gentilis ",10,"Aves"
+"Accipiter nisus",46,"Aves"
+"Accipitridae (incognita)",294,"Aves"
+"Accipitridae (Incognita)",212,"Aves"
+"Accipitridae (Unidentified):Accipitridae (Incognita)(Accipitridae)",25,"Aves"
+"Aechmophorus occidentalis",3,"Aves"
+"Agapornis personatus",1,"Aves"
+"Agapornis roseicollis",1,"Aves"
+"Aix galericulata",2,"Aves"
+"Aix sponsa",2,"Aves"
+"Al indeterminatum fau",634,NA
+"Alca torda",6,"Aves"
+"Alcidae (incognita)",2,"Aves"
+"Alectoris rufa",1,"Aves"
+"Alle alle",2,"Aves"
+"Alopochen aegyptiaca",11,"Aves"
+"Anas acuta",3,"Aves"
+"Anas bernieri",1,"Aves"
+"Anas clypeata",2,NA
+"Anas crecca",38,"Aves"
+"Anas penelope",69,"Aves"
+"Anas platyrhynchos",174,"Aves"
+"Anas querquedula",1,"Aves"
+"Anas rhynchotis",1,"Aves"
+"Anas strepera",10,"Aves"
+"Anas versicolor",1,"Aves"
+"Anatidae (incognita)",1167,"Aves"
+"Anatidae (Incognita)",995,"Aves"
+"Anser albifrons",45,"Aves"
+"Anser anser",461,"Aves"
+"Anser brachyrhynchus",129,"Aves"
+"Anser erythropus",2,"Aves"
+"Anser fabalis",16,"Aves"
+"Anserinae (unidentified)",370,"Aves"
+"Anserinae (Unidentified):Anserinae (Incognita)(Anatidae)",155,"Aves"
+"Aquila audax",1,"Aves"
+"Aquila chrysaetos",4,"Aves"
+"Aquila fasciata",1,"Aves"
+"Aquila heliaca",2,"Aves"
+"Aquila nipalensis",1,"Aves"
+"Ara ararauna",1,"Aves"
+"Ara macao",1,"Aves"
+"Aratinga auricapillus",1,"Aves"
+"Arctic Skua (Or Parasitic Jaeger)",3,NA
+"Arctic Tern (Sterna Paradisea)",3,"Aves"
+"Ardea alba",23,"Aves"
+"Ardea cinerea",84,"Aves"
+"Ardea herodias",5,"Aves"
+"Ardeidae (incognita)",47,"Aves"
+"Ardeidae (Unspecified)",10,"Aves"
+"Arenaria interpres",1,"Aves"
+"Armenian Gull (Larus Armenicus)",1,"Aves"
+"Asio flammeus",3,"Aves"
+"Asio otus",8,"Aves"
+"Athene noctua",3,"Aves"
+"Atlantic Puffin (Fratercula Arctica)",2,"Aves"
+"Aythya ferina",9,"Aves"
+"Aythya fuligula",83,"Aves"
+"Aythya marila",2,"Aves"
+"Balearica regulorum",2,"Aves"
+"Barn Owl (Tyto Alba)",5,NA
+"Barnacle Goose:branta Leucopsis(Anatidae)",260,"Aves"
+"Bean Goose (Anser Fabalis)",11,"Aves"
+"Bearded Vulture (Gypaetus Barbatus)",5,NA
+"Black-Faced Spoonbill (Platalea Minor)",1,"Aves"
+"Black-Legged Kittiwake (Rissa Tridactyla):Laridae-Charadriiformes",15,"Aves"
+"Black-Necked Grebe (Podiceps Nigricollis):Podicipedidae-Procellariiformes",1,"Aves"
+"Black Backed Gull (Larus Marinus)",4,NA
 "Black Guillemot (Cepphus Grylle)	",2,NA
-Black Guillemot (Cepphus Grylle):Alcidae-Charadriiformes,5,NA
-Black Headed Gull (Chroicocephalus Ridibundus),805,Aves
-Black Swan:cygnus Atratus(Anatidae),10,Aves
-Botaurus stellaris,4,Aves
-Branta bernicla,729,Aves
-Branta canadensis,544,Aves
-Branta leucopsis,4446,Aves
-Branta ruficollis,85,Aves
-Brent Goose:branta Bernicla(Anatidae),18,NA
-Brown-Headed Gull (Chroicocephalus Brunnicephalus),16,Aves
-Bubo bubo,23,Aves
-Bubulcus ibis,3,Aves
-Bucephala clangula,19,Aves
-Buteo buteo,524,Aves
-Buteo lagopus,5,Aves
-Buzzard,281,NA
-Cackling Goose (Branta Hutchinsii),1,Aves
-Cairina moschata,4,Aves
-Calidris alba,786,Aves
-Calidris alpina,682,Aves
-Calidris canutus,48,Aves
-Calidris ferruginea,18,Aves
-Calidris fuscicollis,1,Aves
-Calidris maritima,12,Aves
-Calidris minuta,103,Aves
-Calidris pusilla,2,Aves
-Calidris temminckii,30,Aves
-Canada Goose:branta Canadensis(Anatidae),119,Aves
-Carduelis cannabina,12,Aves
-Carduelis carduelis,21,Aves
-Carduelis chloris,4,Aves
-Carduelis spinus,1,Aves
-Caspian Gull (Larus Cachinnans),5,Aves
-Cattle Egret,2,Aves
-Cecropis daurica,1,Aves
-Cepphus grylle,28,Aves
-Charadriidae (incognita),29,Aves
-Charadriidae (Unidentified):Charadriidae (Incognita)(Charadriidae),44,Aves
-Charadrius alexandrinus,10,Aves
-Charadrius dubius,169,Aves
-Charadrius hiaticula,91,Aves
-Charadrius morinellus,2,Aves
-Charadrius Pallidus,3,Aves
-Chilean Flamingo (Phoenicopterus Chilensis),1,Aves
-Chlidonias hybridus,69,Aves
-Chlidonias leucopterus,116,Aves
-Chlidonias niger,184,Aves
-Chroicocephalus cirrocephalus,9,Aves
-Chroicocephalus genei,20,Aves
-Chroicocephalus ridibundus,3240,Aves
-Ciconia ciconia,289,Aves
-Ciconiidae (incognita),12,Aves
-Ciconiidae (Unidentified):Ciconiidae(Incognita)(Ciconiidae),7,Aves
-Circus aeruginosus,2,Aves
-Circus assimilis,1,Aves
-Circus cyaneus,4,Aves
-Circus pygargus,2,Aves
-Clangula hyemalis,102,Aves
-Coccothraustes coccothraustes,1,Aves
-Cockatiel,2,Aves
-Coloeus monedula,4,Aves
-Columba livia,13,Aves
-Columba palumbus,15,Aves
-Columba sp.,3,Aves
-Columbidae (incognita),4,Aves
-Columbidae (Unidentified):Columbidae (Incognita)(Columbidae),4,Aves
-Common Coot,7,Aves
-Common Eider (Somateria Mollissima),13,Aves
-Common Goldeneye:bucephala Clangula(Anatidae),2,Aves
-Common Kestrel:falco Tinnunculus(Falconidae),29,Aves
-Common Loon (Gavia Immer),1,Aves
-Common Moorhen (Gallinula Chloropus),7,Aves
-Common Murre (Uria Aalge) ,19,Aves
-Common Pochard (Aythya Ferina),9,Aves
-Common Quail:coturnix Coturnix(Phasianidae),3,Aves
-Common Raven (Corvus Corax),5,Aves
-Common Shelduck (Tadorna Tadorna),10,Aves
-Common Snipe,1,Aves
-Common Tern (Sterna Hirundo),81,Aves
-Common Wood-Pigeon:columba Palumbus(Columbidae),7,NA
-Cormorant,17,Aves
-Corvidae (incognita),16,Aves
-Corvidae (Incognita),4,Aves
-Corvus corax,15,Aves
-Corvus cornix,3,Aves
-Corvus corone,8,Aves
-Corvus corone cornix,2,Aves
-Corvus frugilegus,10,Aves
-Corvus monedula,12,Aves
-Coscoroba coscoroba,1,Aves
-Coturnix coturnix,339,Aves
-Crane,14,NA
-Crex crex,37,Aves
-Crow,34,NA
-Crowned Cormorant (Microcarbo Coronatus),1,Aves
-Cuculus canorus,2,Aves
-Curlew,17,NA
-Cygnus (incognita),171,Aves
-Cygnus atratus,33,Aves
-Cygnus bewickii,94,Aves
-Cygnus columbianus bewickii,195,NA
-Cygnus cygnus,294,Aves
-Cygnus olor,2312,Aves
-Dalmatian Pelican (Pelecanus Crispus),18,Aves
-Dendrocopos major,2,Aves
-Duck,90,Aves
-Egret,6,NA
-Egretta alba,27,Aves
-Egretta caerulea,1,Aves
-Egretta garzetta,36,Aves
-Egyptian Goose (Alopochen Aegyptiacus),9,Aves
-Emberiza schoeniclus,53,Aves
-Emu (Dromaius Novaehollandiae),3,Aves
-Eurasian Blackbird (Turdus Merula),1,Aves
-Eurasian Buzzard (Common Buzzard):Buteo Buteo(Accipitridae),59,NA
-Eurasian Collared Dove (Streptopelia Decaocto),3,Aves
-Eurasian Coot (Fulica Atra),9,Aves
-Eurasian Eagle-Owl:bubo Bubo(Strigidae),13,Aves
-Eurasian Jackdaw (Coloeus Monedula),5,NA
-Eurasian Oystercatcher,5,Aves
-Eurasian Sparrowhawk:accipiter Nisus(Accipitridae),22,Aves
-Eurasian Spoonbill (Platalea Leucorodia),3,Aves
-Eurasian Tree Sparrow ,2,Aves
-Eurasian Wigeon:anas Penelope(Anatidae),59,Aves
-European Pine Marten,1,Mammalia
-European Turtle Dove,1,NA
-Falco biarmicus,1,Aves
-Falco cherrug,4,Aves
-Falco columbarius,3,Aves
-Falco peregrinus,130,Aves
-Falco rusticolus,1,Aves
-Falco sparverius,1,Aves
-Falco tinnunculus,40,Aves
-Falco vespertinus,1,Aves
-Falcon,8,NA
-Falconidae (incognita),6,Aves
-Falconidae fam,2,NA
-Ficedula hypoleuca,17,Aves
-Fox,10,NA
-Fratercula arctica,159,Aves
-Fringilla coelebs,1,Aves
-Fulica atra,1166,Aves
-Fulmarus glacialis,14,Aves
-Gadwall,6,Aves
-Gallinago gallinago,253,Aves
-Gallinago media,71,Aves
-Gallinula chloropus,260,Aves
-Gallus gallus,3,Aves
-Garrulus glandarius,8,Aves
-Gavia immer,1,Aves
-Gavia stellata,3,Aves
-Gelochelidon nilotica,1,Aves
-Geronticus eremita,1,Aves
-Glareola pratincola,12,Aves
-Glaucous Gull (Larus Hyperboreus),1,Aves
-Goosander,3,NA
-Goose,195,Aves
-Goshawk,11,Aves
-Gray Seal (Halichoerus Grypus):Phocidae-Carnivora,2,Mammalia
-Great Black-Backed Gull (Larus Marinus),33,Aves
-Great Black-Headed Gull (Ichthyaetus Ichthyaetus),5,Aves
-Great Blue Heron,4,Aves
-Great Cormorant (Phalacrocorax Carbo),32,Aves
-Great Crested Grebe (Podiceps Cristatus),13,Aves
-Great Crested Grebe:podiceps Cristatus(Podicipedidae),6,Aves
-Great Egret (Ardea Alba),11,Aves
-Great Skua (Stercorarius Skua),19,Aves
-Greater Flamingo (Phoenicopterus Roseus),3,Aves
-Greater Rhea (Rhea Americana),3,Aves
-Greater Scaup,2,Aves
-Greater White-Fronted Goose (Anser Albifrons),28,NA
-Grebe,5,NA
-Green Sandpiper,2,Aves
-Grey Crowned Crane:balearica Regulorum(Gruidae),1,Aves
-Grey Headed Gull (Chroicocephalus Cirrocephalus),10,Aves
-Grey Heron:ardea Cinerea(Ardeidae),55,Aves
-Greylag Goose,55,Aves
-Greylag Goose:anser Anser(Anatidae),211,Aves
-Griffon Vulture (Gyps Fulvus) ,5,Aves
-Gruidae (Unidentified):Gruidae (Incognita)(Gruidae),3,Aves
-Grus grus,13,Aves
-Gull,122,Aves
-Gull-Billed Tern (Gelochelidon Nilotica),1,Aves
-Gypaetus barbatus,5,Aves
-Gyps fulvus,12,Aves
-Haematopodidae (incognita),3,Aves
-Haematopodidae (Unidentified):Haematopodidae (Incognita)(Haematopodidae),2,Aves
-Haematopus ostralegus,426,Aves
-Halcyon malimbica,2,Aves
-Haliaeetus albicilla,59,Aves
-Halichoerus grypus,1,Mammalia
-Harbor Seal (Phoca Vitulina):Phocidae-Carnivora,1,Mammalia
-Harris's Hawk (Parabuteo Unicinctus),1,Aves
-Hawk,5,NA
-Heron,25,NA
-Herring Gull:larus Argentatus(Laridae),243,Aves
-Himantopus himantopus,27,Aves
-Hirundinidae (incognita),1,Aves
-Hirundo rustica,57,Aves
-Hooded Crow (Corvus Cornix),7,Aves
-House Sparrow,9,Aves
-Hydrocoloeus minutus,4,Aves
-Hydroprogne caspia,1,Aves
-Ichthyaetus melanocephalus,12,Aves
-Ivory Gull (Pagophila Eburnea),1,Aves
-Ixobrychus minutus,16,Aves
-Jackdaw,3,Aves
-Jynx torquilla,1,Aves
-Kite,5,NA
-Lagopus muta,51,Aves
-Lanius collurio,12,Aves
-Lanius excubitor,1,Aves
-Laridae (incognita),437,Aves
-Laridae (Unidentified):Laridae (Incognita)(Laridae),397,Aves
-Larus argentatus,1304,Aves
-Larus argentatus cachinnans,466,Aves
-Larus armenicus,57,Aves
-Larus brunicephalus,14,NA
-Larus cachinnans,30,Aves
-Larus cachinnans cachinnans,7,Aves
-Larus canus,1639,Aves
-Larus fuscus,1399,Aves
-Larus genei,2,Aves
-Larus glaucoides,66,Aves
-Larus hyperboreus,241,Aves
-Larus hyperboreus x Larus argentatus,7,NA
-Larus ichthyaetus,17,Aves
-Larus marinus,263,Aves
-Larus melanocephalus,165,Aves
-Larus michahellis,3566,Aves
-Larus minutus,4,Aves
-Larus novaehollandiae,10,Aves
-Larus ridibundus,10065,Aves
-Larus scopulinus,1,Aves
-Larus smithsonianus,10,Aves
-Larus sp.,872,NA
-Lesser Black-Backed Gull:larus Fuscus(Laridae),12,Aves
-Limicola falcinellus,14,Aves
-Limosa lapponica,2,Aves
-Limosa limosa,5,Aves
-Little Egret,3,Aves
-Little Grebe:tachybaptus Ruficollis(Podicipedidae),5,Aves
-Little Owl (Athene Noctua):Strigidae-Suliformes,1,Aves
-Locustella luscinioides,3,Aves
-Luscinia megarhynchos,2,Aves
-Magpie,17,NA
-Mallard:anas Platyrhynchos(Anatidae),133,Aves
-Marbled Teal,1,Aves
-Marmaronetta angustirostris,1,Aves
-Mediterranean Gull ,20,Aves
-Mergellus albellus,4,Aves
-Mergus merganser,4,Aves
-Mergus serrator,10,Aves
-Merops apiaster,19,Aves
-Mew Gull (Larus Canus),17,Aves
-Microcarbo coronatus,1,Aves
-Milvus milvus,14,Aves
-Mink,4,Mammalia
-Morus bassanus,336,Aves
-Motacilla alba,10,Aves
-Motacilla feldegg,2,Aves
-Motacilla flava,3,Aves
-Motacilla thunbergi,4,Aves
-Muscicapa striata,1,Aves
-Muscovy Duck:cairina Moschata(Anatidae),1,Aves
-Mustela putorius,2,Mammalia
-Mute Swan:cygnus Olor(Anatidae),954,Aves
-Netta rufina,9,Aves
-Northern Bald Ibis (Geronticus Eremita) ,1,Aves
-Northern Crested Caracara (Caracara Cheriway),1,NA
-"Northern Fulmar (Fulmarus Glacialis)	",2,Aves
-Northern Gannet:morus Bassanus(Sulidae),204,Aves
-Northern Lapwing,1,Aves
-Northern Pintail (Anas Acuta),2,Aves
-Northern Shoveler,1,Aves
-Numenius arquata,26,Aves
-Numenius phaeopus,2,Aves
-Numididae (Unidentified),1,Aves
-Nyctereutes Viverrinus (Japanese Racoon Dog),2,NA
-Nycticorax nycticorax,19,Aves
-Oenanthe oenanthe,1,Aves
-Otus scops,1,Aves
-Owl,29,NA
-Oxyura leucocephala,6,Aves
-Oyster Catcher,1,NA
-Pandion haliaetus,1,Aves
-Parus caeruleus,1,Aves
-Parus major,2,Aves
-Passer domesticus,26,Aves
-Passer hispaniolensis,8,Aves
-Passer montanus,2,Aves
-Passeridae (incognita),4,Aves
-Passeridae (Unidentified):Passeridae (Incognita)(Passeridae),5,Aves
-Peacock,1,Aves
-Pelecanidae (incognita),3,Aves
-Pelecanidae (Unidentified):Pelecanidae (Incognita)(Pelecanidae),16,Aves
-Pelecanus crispus,22,Aves
-Pelecanus onocrotalus,16,Aves
-Peregrin Falcon:falco Peregrinus(Falconidae),121,NA
-Pernis apivorus,3,Aves
-Phalacrocoracidae (incognita),12,Aves
-Phalacrocorax aristotelis,35,Aves
-Phalacrocorax carbo,50,Aves
-Phalacrocorax pygmeus,18,Aves
-Phalaropus lobatus,4,Aves
-Phasianidae (incognita),9,Aves
-Phasianidae (Unidentified):Phasianidae (Incognita)(Phasianidae),55,Aves
-Phasianus colchicus,61,Aves
-Phasianus Colchicus (Common Pheasant) - Phasanidae,22,Aves
-Philomachus pugnax,61,Aves
-Phoca vitulina,2,Mammalia
-Phoenicopterus roseus,4,Aves
-Phylloscopus sibilatrix,4,Aves
-Phylloscopus trochilus,1,Aves
-Pica pica,13,Aves
-Pigeon,10,NA
-Pink-Footed Goose (Anser Brachyrhynchus),14,Aves
-Platalea leucorodia,4,Aves
-Plegadis falcinellus,16,Aves
-Pluvialis apricaria,18,Aves
-Pluvialis squatarola,40,Aves
-Pochard,3,Aves
-Podiceps cristatus,25,Aves
-Podiceps nigricollis,3,Aves
-Podicipedidae (incognita),1,Aves
-Polar Fox,7,NA
-Polecat,2,NA
-Porphyrio porphyrio,18,Aves
-Porzana parva,40,Aves
-Porzana porzana,42,Aves
-Porzana pusilla,15,Aves
-Puffinus puffinus,2,Aves
-Pyrrhula pyrrhula,2,Aves
-Rallidae (incognita),2,Aves
-Rallus aquaticus,93,Aves
-Razorbill (Alca Torda):Alcidae-Charadriiformes,2,Aves
-Recurvirostra avosetta,1,Aves
-Red-Billed Gull (Larus Scopulinus):Laridae-Charadriiformes,1,Aves
-Red Fox,45,Mammalia
-Red Junglefowl,2,Aves
-Red Knot,2,Aves
-Remiz pendulinus,26,Aves
-Riparia riparia,13,Aves
-Rissa tridactyla,37,Aves
-Rock Dove (Columba Livia),7,Aves
-Rook,8,Aves
-Rose Pelican (Pelecanus Onocrotalus),1,NA
-Saker Falcon (Falco Cherrug),1,Aves
-Sanderling ,8,Aves
-Sandwich Tern,44,Aves
-Scolopacidae (incognita),4,Aves
-Scolopacidae (Unidentified):Scolopacidae (Incognita)(Scolopacidae),4,Aves
-Scolopax rusticola,26,Aves
-Semipalmated Sandpiper,3,Aves
-Serinus serinus,7,Aves
-Silver Teal (Anas Versicolor) ,1,NA
-Slender-Billed Gull,3,Aves
-Somateria mollissima,122,Aves
-South American Coati (Nasua Nasua):Procyonidae-Carnivora,1,Mammalia
-Spatula querquedula,1,Aves
-Spotted Dove,1,Aves
-Starling,4,Aves
-Stercorarius parasiticus,2,Aves
-Stercorarius skua,31,Aves
-Sterna albifrons,2,Aves
-Sterna hirundo,222,Aves
-Sterna paradisaea,157,Aves
-Sterna sandvicensis,2,Aves
-Stone Marten,1,NA
-Stork,44,NA
-Streptopelia decaocto,6,Aves
-Strigidae (incognita),22,Aves
-Strigidae (Unidentified):Strigidae (Incognita)(Strigidae),19,Aves
-Strix aluco,16,Aves
-Strix uralensis,1,Aves
-Sturnus vulgaris,60,Aves
-Sulidae (incognita),22,Aves
-Sulids (Sulidae),18,NA
-Swallow,1,NA
-Swan,524,NA
-Swift Tern (Thalasseus Bergii),1,NA
-Sylvia atricapilla,2,Aves
-Sylvia borin,1,Aves
-Sylvia communis,1,Aves
-Sylvia curruca,4,Aves
-Sylvia hortensis,1,Aves
-Tachybaptus ruficollis,23,Aves
-Tadorna ferruginea,27,Aves
-Tadorna tadorna,51,Aves
-Tawny Owl (Strix Aluco),4,Aves
-Teal,21,NA
-Tern,5,NA
-Thalasseus sandvicensis,40,Aves
-Threskiornithidae (incognita),2,Aves
-Threskiornithidae (Unidentified):Threskiornithidae (Incognita)(Threskiornithidae),2,Aves
-Thrush (Turdidae),2,NA
-Tringa erythropus,6,Aves
-Tringa glareola,289,Aves
-Tringa nebularia,30,Aves
-Tringa ochropus,24,Aves
-Tringa stagnatilis,7,Aves
-Tringa totanus,122,Aves
-Tufted Duck,81,Aves
-Tundra Swan (Cygnus Columbianus),2,Aves
-Turdus merula,3,Aves
-Turdus philomelos,5,Aves
-Tyto alba,27,Aves
-Unspecified Bird,359,NA
-Unspecified Mammal,2,NA
-Uria aalge,175,Aves
-Uria lomvia,1,Aves
-Vanellus vanellus,26,Aves
-Variable Hawk (Geranoaetus Polyosoma) ,1,NA
-Vulpes vulpes,34,Mammalia
-Vulture,2,NA
-Wader,1,NA
-Water Hen,1,NA
-Western Grebe (Aechmophorus Occidentalis):Podicipedidae-Procellariiformes,1,Aves
-White Stork:ciconia Ciconia(Ciconiidae),6,Aves
-White Tailed Eagle (Haliaeetus Albicilla),103,Aves
-Whooper Swan:cygnus Cygnus(Anatidae),171,NA
-Wigeons:mareca Penelope(Anatidae),1,NA
-Wild Duck,63,NA
-Xenus cinereus,14,Aves
-Yellow-Legged Gull ,19,Aves
+"Black Guillemot (Cepphus Grylle):Alcidae-Charadriiformes",5,NA
+"Black Headed Gull (Chroicocephalus Ridibundus)",805,"Aves"
+"Black Swan:cygnus Atratus(Anatidae)",10,"Aves"
+"Botaurus stellaris",1,"Aves"
+"Branta bernicla",18,"Aves"
+"Branta canadensis",275,"Aves"
+"Branta leucopsis",382,"Aves"
+"Branta ruficollis",1,"Aves"
+"Brent Goose:branta Bernicla(Anatidae)",18,NA
+"Brown-Headed Gull (Chroicocephalus Brunnicephalus)",16,"Aves"
+"Bubo bubo",24,"Aves"
+"Bubulcus ibis",5,"Aves"
+"Bucephala clangula",3,"Aves"
+"Buteo buteo",539,"Aves"
+"Buteo lagopus",5,"Aves"
+"Buzzard",281,NA
+"Cacatua ducorpsii",1,"Aves"
+"Cackling Goose (Branta Hutchinsii)",1,"Aves"
+"Cairina moschata",9,"Aves"
+"Calidris alba",9,"Aves"
+"Calidris alpina",1,"Aves"
+"Calidris canutus",5,"Aves"
+"Calidris fuscicollis",1,"Aves"
+"Calidris maritima",1,"Aves"
+"Calidris pusilla",2,"Aves"
+"Canada Goose:branta Canadensis(Anatidae)",119,"Aves"
+"Carduelis carduelis",1,"Aves"
+"Carduelis chloris",1,"Aves"
+"Caspian Gull (Larus Cachinnans)",5,"Aves"
+"Casuariidae (incognita)",2,"Aves"
+"Cattle Egret",2,"Aves"
+"Cepphus grylle",16,"Aves"
+"Charadriidae (incognita)",50,"Aves"
+"Charadriidae (Unidentified):Charadriidae (Incognita)(Charadriidae)",44,"Aves"
+"Charadrius hiaticula",2,"Aves"
+"Charadrius Pallidus",3,"Aves"
+"Chenonetta jubata",1,"Aves"
+"Chilean Flamingo (Phoenicopterus Chilensis)",1,"Aves"
+"Chroicocephalus cirrocephalus",9,"Aves"
+"Chroicocephalus ridibundus",973,"Aves"
+"Ciconia ciconia",71,"Aves"
+"Ciconiidae (incognita)",19,"Aves"
+"Ciconiidae (Unidentified):Ciconiidae(Incognita)(Ciconiidae)",7,"Aves"
+"Circus aeruginosus",3,"Aves"
+"Circus assimilis",1,"Aves"
+"Circus cyaneus",3,"Aves"
+"Circus pygargus",2,"Aves"
+"Clanga pomarina",1,"Aves"
+"Cockatiel",2,"Aves"
+"Colinus virginianus",1,"Aves"
+"Columba livia",15,"Aves"
+"Columba palumbus",15,"Aves"
+"Columbidae (incognita)",11,"Aves"
+"Columbidae (Unidentified):Columbidae (Incognita)(Columbidae)",4,"Aves"
+"Common Coot",7,"Aves"
+"Common Eider (Somateria Mollissima)",13,"Aves"
+"Common Goldeneye:bucephala Clangula(Anatidae)",2,"Aves"
+"Common Kestrel:falco Tinnunculus(Falconidae)",29,"Aves"
+"Common Loon (Gavia Immer)",1,"Aves"
+"Common Moorhen (Gallinula Chloropus)",7,"Aves"
+"Common Murre (Uria Aalge) ",19,"Aves"
+"Common Pochard (Aythya Ferina)",9,"Aves"
+"Common Quail:coturnix Coturnix(Phasianidae)",3,"Aves"
+"Common Raven (Corvus Corax)",5,"Aves"
+"Common Shelduck (Tadorna Tadorna)",10,"Aves"
+"Common Snipe",1,"Aves"
+"Common Tern (Sterna Hirundo)",81,"Aves"
+"Common Wood-Pigeon:columba Palumbus(Columbidae)",7,NA
+"Cormorant",17,"Aves"
+"Corvidae (incognita)",20,"Aves"
+"Corvidae (Incognita)",4,"Aves"
+"Corvus corax",15,"Aves"
+"Corvus cornix",9,"Aves"
+"Corvus corone",6,"Aves"
+"Corvus frugilegus",8,"Aves"
+"Corvus monedula",12,"Aves"
+"Coscoroba coscoroba",1,"Aves"
+"Coturnix coturnix",2,"Aves"
+"Coturnix japonica",1,"Aves"
+"Crane",14,NA
+"Crow",34,NA
+"Crowned Cormorant (Microcarbo Coronatus)",1,"Aves"
+"Curlew",17,NA
+"Cygnus (incognita)",199,"Aves"
+"Cygnus atratus",15,"Aves"
+"Cygnus bewickii",2,"Aves"
+"Cygnus columbianus",2,"Aves"
+"Cygnus cygnus",258,"Aves"
+"Cygnus olor",1456,"Aves"
+"Dalmatian Pelican (Pelecanus Crispus)",18,"Aves"
+"Dendrocopos major",2,"Aves"
+"Dendrocygna eytoni",1,"Aves"
+"Diopsittaca nobilis",1,"Aves"
+"Dromaiidae (incognita)",1,"Aves"
+"Dromaius novaehollandiae",2,"Aves"
+"Duck",90,"Aves"
+"Egret",6,NA
+"Egretta caerulea",1,"Aves"
+"Egretta garzetta",9,"Aves"
+"Egyptian Goose (Alopochen Aegyptiacus)",9,"Aves"
+"Emu (Dromaius Novaehollandiae)",3,"Aves"
+"Eurasian Blackbird (Turdus Merula)",1,"Aves"
+"Eurasian Buzzard (Common Buzzard):Buteo Buteo(Accipitridae)",59,NA
+"Eurasian Collared Dove (Streptopelia Decaocto)",3,"Aves"
+"Eurasian Coot (Fulica Atra)",9,"Aves"
+"Eurasian Eagle-Owl:bubo Bubo(Strigidae)",13,"Aves"
+"Eurasian Jackdaw (Coloeus Monedula)",5,NA
+"Eurasian Oystercatcher",5,"Aves"
+"Eurasian Sparrowhawk:accipiter Nisus(Accipitridae)",22,"Aves"
+"Eurasian Spoonbill (Platalea Leucorodia)",3,"Aves"
+"Eurasian Tree Sparrow ",2,"Aves"
+"Eurasian Wigeon:anas Penelope(Anatidae)",59,"Aves"
+"European Pine Marten",1,"Mammalia"
+"European Turtle Dove",1,NA
+"Falco biarmicus",1,"Aves"
+"Falco cherrug",2,"Aves"
+"Falco columbarius",1,"Aves"
+"Falco peregrinus",156,"Aves"
+"Falco rusticolus",1,"Aves"
+"Falco sparverius",1,"Aves"
+"Falco subbuteo",1,"Aves"
+"Falco tinnunculus",45,"Aves"
+"Falco vespertinus",1,"Aves"
+"Falcon",8,NA
+"Falconidae (incognita)",8,"Aves"
+"Fox",10,NA
+"Fratercula arctica",4,"Aves"
+"Fringilla coelebs",2,"Aves"
+"Fulica atra",14,"Aves"
+"Fulmarus glacialis",5,"Aves"
+"Gadwall",6,"Aves"
+"Galliformes (incognita) (incognita)",1,"Aves"
+"Gallinago gallinago",1,"Aves"
+"Gallinula chloropus",11,"Aves"
+"Gallus gallus",3,"Aves"
+"Garrulus glandarius",2,"Aves"
+"Gavia immer",1,"Aves"
+"Gavia stellata",2,"Aves"
+"Gelochelidon nilotica",1,"Aves"
+"Geronticus eremita",1,"Aves"
+"Glaucous Gull (Larus Hyperboreus)",1,"Aves"
+"Goosander",3,NA
+"Goose",195,"Aves"
+"Goshawk",11,"Aves"
+"Gray Seal (Halichoerus Grypus):Phocidae-Carnivora",2,"Mammalia"
+"Great Black-Backed Gull (Larus Marinus)",33,"Aves"
+"Great Black-Headed Gull (Ichthyaetus Ichthyaetus)",5,"Aves"
+"Great Blue Heron",4,"Aves"
+"Great Cormorant (Phalacrocorax Carbo)",32,"Aves"
+"Great Crested Grebe (Podiceps Cristatus)",13,"Aves"
+"Great Crested Grebe:podiceps Cristatus(Podicipedidae)",6,"Aves"
+"Great Egret (Ardea Alba)",11,"Aves"
+"Great Skua (Stercorarius Skua)",19,"Aves"
+"Greater Flamingo (Phoenicopterus Roseus)",3,"Aves"
+"Greater Rhea (Rhea Americana)",3,"Aves"
+"Greater Scaup",2,"Aves"
+"Greater White-Fronted Goose (Anser Albifrons)",28,NA
+"Grebe",5,NA
+"Green Sandpiper",2,"Aves"
+"Grey Crowned Crane:balearica Regulorum(Gruidae)",1,"Aves"
+"Grey Headed Gull (Chroicocephalus Cirrocephalus)",10,"Aves"
+"Grey Heron:ardea Cinerea(Ardeidae)",55,"Aves"
+"Greylag Goose",55,"Aves"
+"Greylag Goose:anser Anser(Anatidae)",211,"Aves"
+"Griffon Vulture (Gyps Fulvus) ",5,"Aves"
+"Gruidae (incognita)",6,"Aves"
+"Gruidae (Unidentified):Gruidae (Incognita)(Gruidae)",3,"Aves"
+"Grus grus",14,"Aves"
+"Gull",122,"Aves"
+"Gull-Billed Tern (Gelochelidon Nilotica)",1,"Aves"
+"Gypaetus barbatus",5,"Aves"
+"Gyps fulvus",13,"Aves"
+"Haematopodidae (incognita)",6,"Aves"
+"Haematopodidae (Unidentified):Haematopodidae (Incognita)(Haematopodidae)",2,"Aves"
+"Haematopus ostralegus",8,"Aves"
+"Haliaeetus albicilla",114,"Aves"
+"Halichoerus grypus",1,"Mammalia"
+"Harbor Seal (Phoca Vitulina):Phocidae-Carnivora",1,"Mammalia"
+"Harris's Hawk (Parabuteo Unicinctus)",1,"Aves"
+"Hawk",5,NA
+"Heron",25,NA
+"Herring Gull:larus Argentatus(Laridae)",243,"Aves"
+"Hirundinidae (incognita)",2,"Aves"
+"Hooded Crow (Corvus Cornix)",7,"Aves"
+"House Sparrow",9,"Aves"
+"Hydroprogne caspia",1,"Aves"
+"Ichthyaetus melanocephalus",11,"Aves"
+"Ivory Gull (Pagophila Eburnea)",1,"Aves"
+"Jackdaw",3,"Aves"
+"Kite",5,NA
+"Laniidae (incognita)",1,"Aves"
+"Laridae (incognita)",494,"Aves"
+"Laridae (Unidentified):Laridae (Incognita)(Laridae)",397,"Aves"
+"Larus argentatus",362,"Aves"
+"Larus armenicus",1,"Aves"
+"Larus brunicephalus",14,NA
+"Larus cachinnans",13,"Aves"
+"Larus canus",33,"Aves"
+"Larus fuscus",18,"Aves"
+"Larus genei",2,"Aves"
+"Larus hyperboreus",2,"Aves"
+"Larus ichthyaetus",17,"Aves"
+"Larus marinus",58,"Aves"
+"Larus michahellis",26,"Aves"
+"Larus novaehollandiae",10,"Aves"
+"Larus ridibundus",117,"Aves"
+"Larus scopulinus",1,"Aves"
+"Larus smithsonianus",1,"Aves"
+"Lesser Black-Backed Gull:larus Fuscus(Laridae)",12,"Aves"
+"Little Egret",3,"Aves"
+"Little Grebe:tachybaptus Ruficollis(Podicipedidae)",5,"Aves"
+"Little Owl (Athene Noctua):Strigidae-Suliformes",1,"Aves"
+"Lophura nycthemera",1,"Aves"
+"Magpie",17,NA
+"Mallard:anas Platyrhynchos(Anatidae)",133,"Aves"
+"Marbled Teal",1,"Aves"
+"Marmaronetta angustirostris",1,"Aves"
+"Mediterranean Gull ",20,"Aves"
+"Melopsittacus undulatus",2,"Aves"
+"Mergus merganser",5,"Aves"
+"Mew Gull (Larus Canus)",17,"Aves"
+"Microcarbo coronatus",1,"Aves"
+"Milvus milvus",12,"Aves"
+"Mink",4,"Mammalia"
+"Morus bassanus",336,"Aves"
+"Motacillidae (incognita)",2,"Aves"
+"Muscovy Duck:cairina Moschata(Anatidae)",1,"Aves"
+"Mustela putorius",2,"Mammalia"
+"Mute Swan:cygnus Olor(Anatidae)",954,"Aves"
+"Netta rufina",2,"Aves"
+"Northern Bald Ibis (Geronticus Eremita) ",1,"Aves"
+"Northern Crested Caracara (Caracara Cheriway)",1,NA
+"Northern Fulmar (Fulmarus Glacialis)	",2,"Aves"
+"Northern Gannet:morus Bassanus(Sulidae)",204,"Aves"
+"Northern Lapwing",1,"Aves"
+"Northern Pintail (Anas Acuta)",2,"Aves"
+"Northern Shoveler",1,"Aves"
+"Numenius arquata",22,"Aves"
+"Numenius phaeopus",1,"Aves"
+"Numida meleagris",1,"Aves"
+"Numididae (incognita)",2,"Aves"
+"Numididae (Unidentified)",1,"Aves"
+"Nyctereutes Viverrinus (Japanese Racoon Dog)",2,NA
+"Nymphicus hollandicus",2,"Aves"
+"Owl",29,NA
+"Oyster Catcher",1,NA
+"Pandion haliaetus",1,"Aves"
+"Passer domesticus",6,"Aves"
+"Passer montanus",1,"Aves"
+"Passeridae (incognita)",9,"Aves"
+"Passeridae (Unidentified):Passeridae (Incognita)(Passeridae)",5,"Aves"
+"Pavo cristatus",6,"Aves"
+"Peacock",1,"Aves"
+"Pelecanidae (incognita)",5,"Aves"
+"Pelecanidae (Unidentified):Pelecanidae (Incognita)(Pelecanidae)",16,"Aves"
+"Pelecanus crispus",26,"Aves"
+"Pelecanus onocrotalus",6,"Aves"
+"Pelecanus philippensis",1,"Aves"
+"Perdix perdix",2,"Aves"
+"Peregrin Falcon:falco Peregrinus(Falconidae)",121,NA
+"Phalacrocoracidae (incognita)",14,"Aves"
+"Phalacrocorax carbo",42,"Aves"
+"Phalacrocorax pygmaeus",1,NA
+"Phasianidae (incognita)",30,"Aves"
+"Phasianidae (Unidentified):Phasianidae (Incognita)(Phasianidae)",55,"Aves"
+"Phasianus colchicus",58,"Aves"
+"Phasianus Colchicus (Common Pheasant) - Phasanidae",22,"Aves"
+"Phoca vitulina",2,"Mammalia"
+"Phoenicopteridae (incognita)",4,"Aves"
+"Phoenicopterus roseus",4,"Aves"
+"Phylloscopus trochilus",1,"Aves"
+"Pica pica",20,"Aves"
+"Pigeon",10,NA
+"Pink-Footed Goose (Anser Brachyrhynchus)",14,"Aves"
+"Platalea leucorodia",5,"Aves"
+"Plegadis falcinellus",2,"Aves"
+"Pochard",3,"Aves"
+"Podiceps cristatus",28,"Aves"
+"Podiceps nigricollis",1,"Aves"
+"Podicipedidae (incognita)",1,"Aves"
+"Polar Fox",7,NA
+"Polecat",2,NA
+"Psittacidae (incognita)",7,"Aves"
+"Psittacula derbiana",1,"Aves"
+"Psittacula eupatria",1,"Aves"
+"Psittacula krameri",1,"Aves"
+"Psittacus erithacus",1,"Aves"
+"Puffinus puffinus",2,"Aves"
+"Pyrrhula pyrrhula",2,"Aves"
+"Rallidae (incognita)",4,"Aves"
+"Rallus aquaticus",2,"Aves"
+"Razorbill (Alca Torda):Alcidae-Charadriiformes",2,"Aves"
+"Red-Billed Gull (Larus Scopulinus):Laridae-Charadriiformes",1,"Aves"
+"Red Fox",45,"Mammalia"
+"Red Junglefowl",2,"Aves"
+"Red Knot",2,"Aves"
+"Rhea americana",1,"Aves"
+"Rheidae (incognita)",2,"Aves"
+"Rissa tridactyla",10,"Aves"
+"Rock Dove (Columba Livia)",7,"Aves"
+"Rook",8,"Aves"
+"Rose Pelican (Pelecanus Onocrotalus)",1,NA
+"Saker Falcon (Falco Cherrug)",1,"Aves"
+"Sanderling ",8,"Aves"
+"Sandwich Tern",44,"Aves"
+"Scolopacidae (incognita)",7,"Aves"
+"Scolopacidae (Unidentified):Scolopacidae (Incognita)(Scolopacidae)",4,"Aves"
+"Scolopax rusticola",1,"Aves"
+"Semipalmated Sandpiper",3,"Aves"
+"Serinus canaria",1,"Aves"
+"Silver Teal (Anas Versicolor) ",1,NA
+"Slender-Billed Gull",3,"Aves"
+"Somateria mollissima",25,"Aves"
+"South American Coati (Nasua Nasua):Procyonidae-Carnivora",1,"Mammalia"
+"Spatula querquedula",1,"Aves"
+"Spheniscidae (incognita)",1,"Aves"
+"Spotted Dove",1,"Aves"
+"Starling",4,"Aves"
+"Stercorarius parasiticus",2,"Aves"
+"Stercorarius skua",31,"Aves"
+"Sterna hirundo",72,"Aves"
+"Sterna paradisaea",8,"Aves"
+"Stone Marten",1,NA
+"Stork",44,NA
+"Streptopelia decaocto",8,"Aves"
+"Strigidae (incognita)",39,"Aves"
+"Strigidae (Unidentified):Strigidae (Incognita)(Strigidae)",19,"Aves"
+"Strix aluco",17,"Aves"
+"Strix uralensis",1,"Aves"
+"Struthionidae (incognita)",1,"Aves"
+"Sturnus vulgaris",2,"Aves"
+"Sulidae (incognita)",22,"Aves"
+"Sulids (Sulidae)",18,NA
+"Swallow",1,NA
+"Swan",524,NA
+"Swift Tern (Thalasseus Bergii)",1,NA
+"Syrmaticus reevesii",1,"Aves"
+"Tachybaptus ruficollis",8,"Aves"
+"Tadorna tadorna",14,"Aves"
+"Taeniopygia guttata",1,"Aves"
+"Tawny Owl (Strix Aluco)",4,"Aves"
+"Teal",21,NA
+"Tern",5,NA
+"Thalasseus sandvicensis",40,"Aves"
+"Threskiornithidae (incognita)",5,"Aves"
+"Threskiornithidae (Unidentified):Threskiornithidae (Incognita)(Threskiornithidae)",2,"Aves"
+"Thrush (Turdidae)",2,NA
+"Tringa ochropus",2,"Aves"
+"Tringa totanus",1,"Aves"
+"Tufted Duck",81,"Aves"
+"Tundra Swan (Cygnus Columbianus)",2,"Aves"
+"Turdus merula",4,"Aves"
+"Turdus philomelos",3,"Aves"
+"Turdus pilaris",1,"Aves"
+"Tyto alba",10,"Aves"
+"Unspecified Bird",359,NA
+"Unspecified Mammal",2,NA
+"Uria aalge",43,"Aves"
+"Vanellus vanellus",2,"Aves"
+"Variable Hawk (Geranoaetus Polyosoma) ",1,NA
+"Vulpes vulpes",34,"Mammalia"
+"Vulture",2,NA
+"Wader",1,NA
+"Water Hen",1,NA
+"Western Grebe (Aechmophorus Occidentalis):Podicipedidae-Procellariiformes",1,"Aves"
+"White Stork:ciconia Ciconia(Ciconiidae)",6,"Aves"
+"White Tailed Eagle (Haliaeetus Albicilla)",103,"Aves"
+"Whooper Swan:cygnus Cygnus(Anatidae)",171,NA
+"Wigeons:mareca Penelope(Anatidae)",1,NA
+"Wild Duck",63,NA
+"Yellow-Legged Gull ",19,"Aves"

@@ -54,7 +54,8 @@ inf_a_poss_hpai <- dplyr::filter(wahis, disease_eng == "High pathogenicity avian
                                    (wild_type != "captive"|is.na(wild_type))
 )
 
-inf_a_hpai <- dplyr::filter(inf_data, disease_eng == "Influenza A viruses of high pathogenicity (Inf. with) (non-poultry including wild birds) (2017-)" )
+inf_a_hpai <- dplyr::filter(inf_data, disease_eng %in% c("Influenza A viruses of high pathogenicity (Inf. with) (non-poultry including wild birds) (2017-)",
+                                                         "High pathogenicity avian influenza viruses (poultry) (Inf. with)"))
 table(inf_a_hpai$region) # all regions represented
 colnames(inf_a_hpai)
 table(inf_a_hpai$is_wild)
@@ -72,10 +73,11 @@ table(zoo_cases$wild_type) # this doesn't show the many NAs
 # so perhaps we should remove the zoo captives? So select all those that are wild and then remove those that
 # are captive 
 inf_a_hpai_wild <- inf_a_hpai[which(inf_a_hpai$is_wild == T),]
-#inf_a_hpai_wild <- inf_a_hpai_wild[which(inf_a_hpai_wild$wild_type != "captive"),] #10,328 observations
-inf_a_hpai_wild <- dplyr::filter(inf_a_hpai_wild, (wild_type != "captive"|is.na(wild_type))) #12,119 observations
+#inf_a_hpai_wild <- inf_a_hpai_wild[which(inf_a_hpai_wild$wild_type != "captive"),] #10,328 observations as removes NAs
+inf_a_hpai_wild <- dplyr::filter(inf_a_hpai_wild, (wild_type != "captive"|is.na(wild_type))) #14,449 observations
 
 table(inf_a_hpai_wild$Epi_unit, inf_a_hpai_wild$is_wild)
+zoo_cases_wild <- inf_a_hpai_wild[which(inf_a_hpai_wild$Epi_unit == "Zoo"),]
 
 table(inf_a_hpai_wild$wild_type)
 
@@ -178,7 +180,7 @@ unwanted_sp <- c(unwanted_sp, unwanted_sp_manual_ext)
 
 nrow(ai_data_prj_area[which(ai_data_prj_area$Species %in% unwanted_sp),])
 
-# 123 mammal entries that we are removing. 
+# 751 mammal entries that we are removing. 
 
 ## Remove from the data so just birds
 
@@ -223,19 +225,26 @@ species_list <-
   species_list[-which(species_list$species %in% unwanted_sp),]
 
 ## To do this, run the script in add_species_info.R starting at line 50
+## if no updates this has been saved
+
+species_list_fam <- read.csv("avian_flu_scripts/species_with_family.csv")
 
 #table(species_list$family)
 #unique(species_list$family)
+unique(species_list_fam$family)
 
-## 44 bird families in total 
+## 53 bird families in total (remove the NA and "")
 
-## Save this table as it takes a while to run
-# write.csv(species_list, "avian_flu_scripts/species_list_with_order_and_family.csv")
 
 ## Next I want to remove the duplicates that are present in the data 
 
 library(data.table)
 dt_pos <- data.table(ai_pos_birds)
+
+table(dt_pos$Country) # a couple of different spellings for a number of the countries
+dt_pos[which(dt_pos$Country == "Faeroe Islands"), "Country"] <- "Faroe Islands"
+dt_pos[which(dt_pos$Country == "Russian Federation"), "Country"] <- "Russia"
+dt_pos[which(dt_pos$Country == "U.K. of Great Britain and Northern Ireland"), "Country"] <- "United Kingdom"
 
 no_duplicates_date_and_loc <- unique(dt_pos, by = c("X", "Y", "observation.date"))
 no_duplicates_all <- unique(dt_pos, by = c("X", "Y", "observation.date", "source", "Species", "Country"))
@@ -393,7 +402,7 @@ getPalette = colorRampPalette(brewer.pal(9, "Set1"))
 
 year_cols <- c("2005" = "grey", 
                "2006" = "pink", 
-               "2007" = "green", 
+               "2007" = "#3300cc", 
                "2008" = "brown",
                "2009" = "#003399",
                "2010" = "#FF3300",
@@ -409,7 +418,7 @@ year_cols <- c("2005" = "grey",
                "2020" = "#CC6699",
                "2021" = "#3399FF",
                "2022" = "#FF0000",
-               "2023" = "#00CC33")
+               "2023" = "#99FFFF")
 
 #trial run
 ggplot(q1_sub, aes(x=week_num, fill = year_fact)) +
