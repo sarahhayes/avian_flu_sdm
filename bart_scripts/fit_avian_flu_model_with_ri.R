@@ -1,18 +1,61 @@
-# In this script we train a BART model to classify sites for avian flu
+ # In this script we train a BART model to classify sites for avian flu
 # presence/absence based on environmental and species abundance factors.
 # This script includes cross-validation of BART parameters.
 
 SAVE_FITS <- FALSE
 SAVE_PLOTS <- FALSE
 BUILD_COVS <- FALSE
+PLOT_COUNTRY_VALIDATION <- TRUE
 
 # Set path to folder containing data, and where output will be stored
 PATH_TO_DATA <- "../../../OneDrive - The University of Liverpool/"
 
+library(dbarts)
 library(embarcadero)
 library(raster)
 library(terra)
 set.seed(12345)
+
+################################################################################
+# Snippet adapted from
+# https://stackoverflow.com/questions/14334970/convert-latitude-and-longitude-coordinates-to-country-name-in-r
+library(sp)
+library(rworldmap)
+
+# The single argument to this function, points, is a data.frame in which:
+#   - column 1 contains the longitude in degrees
+#   - column 2 contains the latitude in degrees
+coords2country = function(sample_data)
+{  
+  # Convert from EPSG to lat long decimal:
+  coordinates(sample_data) <- c("X", "Y")
+  proj4string(sample_data) <- CRS("epsg:3035")
+  sample_data <- spTransform(sample_data, CRS("+init=epsg:4326")) %>% as.data.frame()
+  
+  # Extract coordinates as dataframe with appropriate labels:
+  points <- data.frame(lon = sample_data$coords.x1, lat = sample_data$coords.x2)
+  countriesSP <- getMap(resolution='low')
+  #countriesSP <- getMap(resolution='high') #you could use high res map from rworldxtra if you were concerned about detail
+  
+  # convert our list of points to a SpatialPoints object
+  
+  # pointsSP = SpatialPoints(points, proj4string=CRS(" +proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0"))
+  
+  #setting CRS directly to that from rworldmap
+  pointsSP = SpatialPoints(points, proj4string=CRS(proj4string(countriesSP)))
+  
+  
+  # use 'over' to get indices of the Polygons object containing each point 
+  indices = over(pointsSP, countriesSP)
+  
+  # return the ADMIN names of each country
+  indices$ADMIN  
+  #indices$ISO3 # returns the ISO3 code 
+  #indices$continent   # returns the continent (6 continent model)
+  #indices$REGION   # returns the continent (7 continent model)
+}
+
+################################################################################
 
 # EMBARCADERO FUNCTIONS ADJUSTED TO ALLOW CUSTOM BART PARAMETERS:
 
@@ -434,42 +477,42 @@ if (BUILD_COVS){
   }
   
   q1_covs <- c(resample(q1_eco_layers, env_layers, method = "near"),
-               q1_env_layers,
-               landcover_layers,
-               cov_coast,
-               cov_water,
-               cov_alt)  
+                         q1_env_layers,
+                         landcover_layers,
+                         cov_coast,
+                         cov_water,
+                         cov_alt)  
   writeRaster(q1_covs, paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covariates/q1_covs.tif", sep = ""), overwrite = TRUE)
   rm(q1_covs)
   gc()
   q2_covs <- c(resample(q2_eco_layers, env_layers, method = "near"),
-               q2_env_layers,
-               landcover_layers,
-               cov_coast,
-               cov_water,
-               cov_alt)
+                         q2_env_layers,
+                         landcover_layers,
+                         cov_coast,
+                         cov_water,
+                         cov_alt)
   writeRaster(q2_covs, paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covariates/q2_covs.tif", sep = ""), overwrite = TRUE)
   rm(q2_covs)
   gc()
   q3_covs <- c(resample(q3_eco_layers, env_layers, method = "near"),
-               q3_env_layers,
-               landcover_layers,
-               cov_coast,
-               cov_water,
-               cov_alt)
+                        q3_env_layers,
+                        landcover_layers,
+                        cov_coast,
+                        cov_water,
+                        cov_alt)
   writeRaster(q3_covs, paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covariates/q3_covs.tif", sep = ""), overwrite = TRUE)
   rm(q3_covs)
   gc()
   q4_covs <- c(resample(q4_eco_layers, env_layers, method = "near"),
-               q4_env_layers,
-               landcover_layers,
-               cov_coast,
-               cov_water,
-               cov_alt)
+                         q4_env_layers,
+                         landcover_layers,
+                         cov_coast,
+                         cov_water,
+                         cov_alt)
   writeRaster(q4_covs, paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covariates/q4_covs.tif", sep = ""), overwrite = TRUE)
   rm(q4_covs)
   gc()
-  
+
 }
 
 ################################################################################
@@ -480,10 +523,87 @@ covstack <- raster::stack(paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covar
 # Drop unclassified land layer
 covstack <- dropLayer(covstack, "lc_17")
 
-
 # Load training data
 training_coords <- readRDS("training_sets/training_coords_Q1.RDS")
-cov_df <- data.frame(raster::extract(covstack, training_coords[, 1:2]))
+training_coords$country <- coords2country(training_coords)
+
+# Identify and plot samples where a country could not be assigned - should find
+# it's all on-water samples.
+
+mismatch_samples <- which(is.na(training_coords$country))
+mismatch_pts <- terra::vect(training_coords[mismatch_samples, ], geom=c("X", "Y"),
+                            crs =  "+proj=longlat +ellps=WGS84 +datum=WGS84")
+zipmap <- terra::vect(x = "data/gis_europe/CNTR_RG_03M_2020_4326.shp.zip",
+                      layer = "CNTR_RG_03M_2020_4326")
+crs <- "epsg:3035"
+euro_ext <- extent(covstack[[1]])
+
+# change projection and extent. 
+# using quite a generous extent whilst plotting as looking at where to set the boundaries
+euro_map <- terra::project(x = zipmap, y = crs) 
+euro_map_crop <- terra::crop(euro_map, euro_ext)
+plot(euro_map_crop,
+     col = "white",
+     background = "azure2",
+     axes = FALSE,
+     buffer = FALSE,
+     xmin = euro_ext@xmin,
+     mar = c(0, 0, 0, 0))
+plot(mismatch_pts, add = T, col = "red", pch = 16, cex = .3)
+
+# Remove NA's from data - although we should think about how to fix this
+training_coords <- training_coords[-mismatch_samples,]
+
+if (PLOT_COUNTRY_VALIDATION){
+  # Quick digression to validate coords2country function:
+  
+  plot(euro_map_crop,
+       col = "white",
+       background = "azure2",
+       axes = FALSE,
+       buffer = FALSE,
+       xmin = euro_ext@xmin,
+       mar = c(0, 0, 0, 0))
+  pts_to_plot <- sample(1:nrow(training_coords), 25)
+  for (i in 1:25){
+    pts_pos <- terra::vect(training_coords[pts_to_plot[i], ], geom=c("X", "Y"),
+                           crs =  "+proj=longlat +ellps=WGS84 +datum=WGS84")
+    plot(pts_pos, add = T, col = "red", pch = 16, cex = .3)
+    text(pts_pos, labels=training_coords$country[pts_to_plot[i]])
+    cat("This point is in",
+        training_coords$country[pts_to_plot[i]],
+        ".\n")
+    Sys.sleep(1)
+  }
+}
+
+# Breaking construction of cov_df into steps speeds up execution time - this
+# appears to be a quirk of how raster extraction and/or data frame construction
+# is done.
+{
+  n_blocks <- floor((1/250) * nrow(training_coords))
+  time_now <- Sys.time()
+  cov_df <- data.frame(raster::extract(covstack, training_coords[1:250, 1:2]))
+  for (i in 2:n_blocks){cov_df <- rbind(cov_df,
+                  data.frame(
+                    raster::extract(
+                      covstack,
+                      training_coords[(250*(i-1)+1:250*i), 1:2]
+                    )
+                  )
+  )
+  cat("nrow(cov_df)=",nrow(cov_df),"\n")
+  }
+  cov_df <- rbind(cov_df,
+                  data.frame(
+                    raster::extract(
+                      covstack,
+                      training_coords[(250*n_blocks+1):nrow(training_coords), 1:2]
+                      )
+                    )
+                  )
+  cov_build_time <- as.numeric(difftime(Sys.time(), time_now, units="mins"))
+}
 
 n_pts <- nrow(training_coords)
 n_training <- round(.75 * n_pts)
@@ -493,16 +613,27 @@ xtrain <- cov_df[training, ]
 ytrain <- training_coords$pos[training]
 xtest <- cov_df[-training, ]
 ytest <- training_coords$pos[-training]
+countrytrain <- training_coords$country[training]
+countrytest <- training_coords$country[-training]
+
+combined_data <- cov_df
+combined_data$pos <- training_coords$pos
+combined_data$country <- training_coords$country
+
+df_train <- combined_data[training, ]
+df_test <- combined_data[-training, ]
 
 if (SAVE_FITS){
   save(xtrain, ytrain, xtest, ytest, file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/q1_train_test_data.rds", sep = ""))
 }
 
 # Initialise model
-basic_model <- bart(xtrain,
-                    ytrain,
-                    x.test = xtest,
-                    keeptrees = TRUE)
+basic_model <- rbart_vi(pos ~ . - country,
+                    df_train,
+                    group.by = country,
+                    group.by.test = country,
+                    test = df_test,
+                    keepTrees = TRUE)
 invisible(basic_model$fit$state)
 summary(basic_model)
 
@@ -538,7 +669,7 @@ pred_layer <- predict(object = sdm,
                       x.layers = covstack_lores,
                       quantiles = c(0.025, 0.975),
                       splitby = 20
-)
+                      )
 if (SAVE_FITS){
   save(pred_layer,
        file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_prediction_Q1.rds", sep = ""))
