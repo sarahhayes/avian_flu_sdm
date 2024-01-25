@@ -26,7 +26,8 @@ plot(elev_euro_5_10)
 ### That seems reasonable and quick. 
 ### Now let's look at a smaller res for both parts
 
-euro_rast <- terra::rast("output/euro_rast.tif")
+#euro_rast <- terra::rast("output/euro_rast.tif") # for 1k res
+euro_rast <- terra::rast("output/euro_rast_10k.tif") # for 10k res
 
 global_elev_0.5 <- elevation_global(res = 0.5, path = "data/variables/elevation/geodata_global_res0.5")
 global_elev_0.5 # 0.00833 degrees (0r 30 seconds).  from this webpage: https://longlovemyu.com/metrics_gis/
@@ -35,19 +36,37 @@ global_elev_0.5 # 0.00833 degrees (0r 30 seconds).  from this webpage: https://l
 head(global_elev_0.5)
 plot(global_elev_0.5)
 
+##  first_looking at max.
+
 elev_euro_0.5_max <- terra::project(x = global_elev_0.5, y = euro_rast, method = "max") #
-# first_looking at max. 
 elev_euro_0.5_max
+head(elev_euro_0.5_max)
 plot(elev_euro_0.5_max)
 
+# then minimum. 
 elev_euro_0.5_min <- terra::project(x = global_elev_0.5, y = euro_rast, method = "min") #
-# first_looking at max. 
 elev_euro_0.5_min
 plot(elev_euro_0.5_min)
 
+# next thing is to look at the difference between min and max values in a cell. 
 elev_euro_0.5_diff <- elev_euro_0.5_max - elev_euro_0.5_min
-elev_euro_0.5_diff # diff of 2 km in places! 
+elev_euro_0.5_diff # diff of 2 km in places in 1k res and up to 3.5 in 10k res 
 plot(elev_euro_0.5_diff)
+
+# wondering about also incorporating some kind of average to get an idea of the predominat elevation at that area.
+# I think mode might work best for this? 
+elev_euro_0.5_mode <- terra::project(x = global_elev_0.5, y = euro_rast, method = "mode")
+elev_euro_0.5_mode # diff of 2 km in places in 1k res and up to 3.5 in 10k res 
+plot(elev_euro_0.5_mode)
+
+dev.off()
+par(mfrow = c(2,2))
+plot(elev_euro_0.5_min, main = "min")
+plot(elev_euro_0.5_max, main = "max")
+plot(elev_euro_0.5_diff, main = "diff")
+plot(elev_euro_0.5_mode, main = "mode")
+
+
 
 #save these rasters
 # terra::writeRaster(elev_euro_0.5_min, 
@@ -56,6 +75,16 @@ plot(elev_euro_0.5_diff)
 #                    "variable_manipulation/variable_outputs/elevation_max.tif")
 # terra::writeRaster(elev_euro_0.5_diff, 
 #                    "variable_manipulation/variable_outputs/elevation_diff.tif")
+
+# terra::writeRaster(elev_euro_0.5_min,
+#                    "variable_manipulation/variable_outputs/elevation_min_10kres.tif")
+# terra::writeRaster(elev_euro_0.5_max,
+#                    "variable_manipulation/variable_outputs/elevation_max_10kres.tif")
+# terra::writeRaster(elev_euro_0.5_diff,
+#                    "variable_manipulation/variable_outputs/elevation_diff_10kres.tif")
+# terra::writeRaster(elev_euro_0.5_mode,
+#                    "variable_manipulation/variable_outputs/elevation_mode_10kres.tif")
+
 
 
 ### extract the data we want at the centre points of our grid

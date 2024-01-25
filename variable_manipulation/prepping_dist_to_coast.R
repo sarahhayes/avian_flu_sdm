@@ -17,14 +17,15 @@ euromap <- st_read("output/large_map.shp")
 # euromap <- euromap[which(euromap$NAME_ENGL %in% c("France", "Spain")),]
 # euromap <- euromap[which(euromap$NAME_ENGL %in% c("Denmark")),]
 
-plot(euromap)
+plot(euromap[1])
  
-# euromap
+euromap
 # The information that is printed when this is read in shows that the extent is the
 # same as the one we have set for our base raster - see bounding box. 
 # (2000000, 6000000, 1000000, 5500000)
 
-cell_size <- c(1000,1000)
+# cell_size <- c(1000,1000) # for 1km
+cell_size <- c(10000,10000) # for 10km res
 crs <- "epsg:3035"
 
 ##
@@ -103,7 +104,8 @@ ggplot(df, aes(X, Y, fill = dist)) + #variables
   theme(legend.position = "bottom") #legend position
 
 # save one that is only shown to the size we want
-png("plots/distance_to_coast_map.png")
+#png("plots/distance_to_coast_map.png")
+png("plots/distance_to_coast_map_10k.png")
 ggplot(df, aes(X, Y, fill = dist)) + #variables
   geom_tile()+ #geometry
   scale_fill_gradientn(colours = rev(col_dist))+ #colors for plotting the distance
@@ -125,7 +127,8 @@ dev.off()
 head(df) # we can use these XY coords to do the extraction
 
 # read in the reference raster
-shp_for_points <- terra::rast("output/euro_rast.tif")
+#shp_for_points <- terra::rast("output/euro_rast.tif")
+shp_for_points <- terra::rast("output/euro_rast_10k.tif")
 shp_for_points # shows us the extent of our reference area.
 
 res_dist_to_coast <- df %>%
@@ -139,7 +142,7 @@ head(res_dist_to_coast)
 res_dist_to_coast <- rename(res_dist_to_coast, "dist_to_coast_km" = "dist")
 range(res_dist_to_coast$dist_to_coast)
 
-# write.csv(res_dist_to_coast, "variable_manipulation/variable_outputs/dist_to_coast_output.csv")
+#write.csv(res_dist_to_coast, "variable_manipulation/variable_outputs/dist_to_coast_10kres.csv")
 
 
 

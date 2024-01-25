@@ -14,15 +14,16 @@ library(terra)
 library(luna)
 library(sf)
 
+## Once done this first bit once and retrieved the data, shouldn't need to do again unless there is an update
 
 # lists all products that are currently searchable
-prod <- getProducts()
-head(prod)
+#prod <- getProducts()
+#head(prod)
 
-modis <- getProducts("^MOD|^MYD|^MCD")
-head(modis)
-
-product <- "MCD12Q1"
+# modis <- getProducts("^MOD|^MYD|^MCD")
+# head(modis)
+# 
+# product <- "MCD12Q1"
 # product <- "MOD09A1"
 # To learn more about a specific product you can launch a webpage
 # productInfo(product)
@@ -31,8 +32,8 @@ product <- "MCD12Q1"
 # we define some parameters for the data we want: 
 # product name, start and end date, and area of interest.
 
-start <- "2022-01-01"
-end <- "2022-12-31"
+# start <- "2022-01-01"
+# end <- "2022-12-31"
 
 # To define the area of interest, we can define a spatial extent,
 # or use an object that has an extent. 
@@ -47,16 +48,18 @@ end <- "2022-12-31"
 # plot(map_boundary_euro)
 
 # we need to extent of the area we are interested in in long/lat. 
-map_rast <- terra::rast("output/euro_rast.tif")
+# map_rast <- terra::rast("output/euro_rast.tif") # 1k res
+map_rast <- terra::rast("output/euro_rast_10k.tif") # 10k res
+map_rast
 map_rast_lonlat <- terra::project(map_rast, "epsg:4326")
 map_rast_lonlat
 
 # Let’s now find out what MODIS data is available for this area. 
 # We can search the data available from a NASA server
 
-mf <- luna::getModis(product, start, end, aoi=map_rast_lonlat, 
-                     download = FALSE, version = "061")
-mf
+# mf <- luna::getModis(product, start, end, aoi=map_rast_lonlat, 
+#                      download = FALSE, version = "061")
+# mf
 
 
 # To download the tiles, usually you would download them to a folder 
@@ -65,9 +68,9 @@ mf
 datadir <- file.path("data/landcover_data/euro")
 dir.create(datadir, showWarnings=FALSE)
 
-lc_data <- luna::getModis(product, start, end, aoi=map_rast_lonlat, download=TRUE,
-                     path=datadir, version = "061",
-                     username="sarahhayes", password="NASATigtogs43!")
+#lc_data <- luna::getModis(product, start, end, aoi=map_rast_lonlat, download=TRUE,
+#                     path=datadir, version = "061",
+#                     username="sarahhayes", password="NASATigtogs43!")
 
 
 # Now that we have downloaded some MODIS data, we can explore and visualize it.
@@ -117,9 +120,17 @@ plot(dem)
 
 dem_fact <- terra::as.factor(dem)
 summary(dem_fact)
+dem_fact
 
 lc1_rast <- terra::project(dem_fact, map_rast)
+lc1_rast_nn <- terra::project(dem_fact, map_rast, method = "near") # i believe first one will use nearest neighbour by 
+# default as categorical, but just want to check
 lc1_rast
+lc1_rast == lc1_rast_nn
+
+summary(lc1_rast)
+table(values(lc1_rast))
+table(values(lc1_rast_nn))
 plot(lc1_rast)
 
 #lc1_factor <- terra::as.factor(lc1_rast)
@@ -129,9 +140,11 @@ plot(lc1_rast)
 # save this raster 
 #writeRaster(lc1_rast, "variable_manipulation/variable_outputs/landcover_output_full.tif",
 #            overwrite = T)
-writeRaster(lc1_rast, "variable_manipulation/variable_outputs/landcover_output_full_2022.tif",
-            overwrite = T)
+# writeRaster(lc1_rast, "variable_manipulation/variable_outputs/landcover_output_full_2022.tif",
+#             overwrite = T)
 
+# writeRaster(lc1_rast, "variable_manipulation/variable_outputs/landcover_output_full_2022_10kres.tif",
+#             overwrite = T)
 
 
 # make a points object using the centre of each pixel from the blank raster

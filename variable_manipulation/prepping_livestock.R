@@ -9,7 +9,7 @@ library(terra)
 chucks <- terra::rast("data/variables/livestock/chickens/6_Ch_2015_Aw.tif")
 chucks_2010 <- terra::rast("data/variables/livestock/chickens/6_Ch_2010_Aw.tif")
 
-chucks
+chucks # 0.083 degrees = 5 arc mins which is approx 9.28km at the equator
 plot(chucks)
 chucks_2010
 plot(chucks_2010)
@@ -23,15 +23,16 @@ plot(chucks_2010)
 # blank_3035
 
 # read in the reference raster
-blank_3035 <- terra::rast("output/euro_rast.tif")
+#blank_3035 <- terra::rast("output/euro_rast.tif") # for 1k res
+blank_3035 <- terra::rast("output/euro_rast_10k.tif") # for 10k res
 blank_3035
 plot(blank_3035)
 
-chucks_euro <- terra::project(x = chucks, y = blank_3035, method = "near")
+chucks_euro <- terra::project(x = chucks, y = blank_3035, method = "bilinear")
 chucks_euro
 plot(chucks_euro)
 
-chucks_euro_10 <- terra::project(x = chucks_2010, y = blank_3035, method = "near")
+chucks_euro_10 <- terra::project(x = chucks_2010, y = blank_3035, method = "bilinear")
 chucks_euro_10
 plot(chucks_euro_10)
 
@@ -58,9 +59,10 @@ ducks <- terra::rast("data/variables/livestock/ducks/6_Dk_2015_Aw.tif")
 ducks
 plot(ducks)
 
-ducks_euro_15 <- terra::project(x = ducks, y = blank_3035, method = "near")
+ducks_euro_15 <- terra::project(x = ducks, y = blank_3035, method = "bilinear")
 ducks_euro_15 # maximum value is smaller - as would expect at the different resolution
 
+#make points object
 tictoc::tic()
 duck_res_15 <- terra::extract(ducks_euro_15, points_3035, method = "simple", xy = T)
 tictoc::toc()
@@ -86,8 +88,9 @@ ducks_10 <- terra::rast("data/variables/livestock/ducks/6_Dk_2010_Aw.tif")
 ducks_10
 plot(ducks_10)
 
-ducks_euro_10 <- terra::project(x = ducks_10, y = blank_3035, method = "near")
-ducks_euro_10 # maximum value is smaller - as would expect at the different resolution
+ducks_euro_10 <- terra::project(x = ducks_10, y = blank_3035, method = "bilinear")
+ducks_euro_10 
+plot(ducks_euro_10)
 
 tictoc::tic()
 duck_res_10 <- terra::extract(ducks_euro_10, points_3035, method = "simple", xy = T)
@@ -131,3 +134,15 @@ write.csv(duck_chuck_res,
 #                   "variable_manipulation/variable_outputs/duck_density_2015.tif")
 # terra::writeRaster(ducks_euro_10,
 #                    "variable_manipulation/variable_outputs/duck_density_2010.tif")
+
+
+# also save the rasters
+ terra::writeRaster(chucks_euro,
+                   "variable_manipulation/variable_outputs/chicken_density_10kres.tif")
+ terra::writeRaster(chucks_euro_10,
+                   "variable_manipulation/variable_outputs/chicken_density_2010_10kres.tif")
+ terra::writeRaster(ducks_euro_15,
+                   "variable_manipulation/variable_outputs/duck_density_2015_10kres.tif")
+ terra::writeRaster(ducks_euro_10,
+                    "variable_manipulation/variable_outputs/duck_density_2010_10kres.tif")
+

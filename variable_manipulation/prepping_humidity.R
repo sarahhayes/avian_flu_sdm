@@ -14,13 +14,13 @@ library(raster)
 files_list <- list.files("data/variables/climate/humidity_raw", pattern="\\.nc$")
 files_list_full <- paste("data/variables/climate/humidity_raw/",files_list, sep = "")
 
-hum_stack <- terra::rast(files_list_full)
+hum_stack <- terra::rast(files_list_full) 
 hum_stack
 
 plot(hum_stack[[1]])
 hum_stack[[60]]
 
-# Split into the different quarters
+# Split into the different quarters as the raw data are daily 
 first_quart_stack <- hum_stack[[1:90]]
 first_quart_stack
 second_quart_stack <- hum_stack[[91:181]]
@@ -50,22 +50,25 @@ plot(mean_humidity_q4)
 # Still global extent , WGS 84 projection and 0.1 degree resolution so need to change to the resolution we want. 
 
 # Transforming the data
-blank_3035 <- terra::rast("output/euro_rast.tif")
+# blank_3035 <- terra::rast("output/euro_rast.tif") # 1k res
+blank_3035 <- terra::rast("output/euro_rast_10k.tif") # 10k res
+blank_3035
 
-mean_hum_q1_prj <- terra::project(mean_humidity_q1, blank_3035, method = "near")
-# using nearest neghbour as we are going from larger resolution to smaller. 
+# Resolution of the raw data is 0.1 degrees which is approximately 11.1km at the equator
+mean_hum_q1_prj <- terra::project(mean_humidity_q1, blank_3035, method = "bilinear")
+# using nearest neighbour as we are going from larger resolution to smaller. 
 mean_hum_q1_prj
 plot(mean_hum_q1_prj)
 
-mean_hum_q2_prj <- terra::project(mean_humidity_q2, blank_3035, method = "near")
+mean_hum_q2_prj <- terra::project(mean_humidity_q2, blank_3035, method = "bilinear")
 mean_hum_q2_prj
 plot(mean_hum_q2_prj)
 
-mean_hum_q3_prj <- terra::project(mean_humidity_q3, blank_3035, method = "near")
+mean_hum_q3_prj <- terra::project(mean_humidity_q3, blank_3035, method = "bilinear")
 mean_hum_q3_prj
 plot(mean_hum_q3_prj)
 
-mean_hum_q4_prj <- terra::project(mean_humidity_q4, blank_3035, method = "near")
+mean_hum_q4_prj <- terra::project(mean_humidity_q4, blank_3035, method = "bilinear")
 mean_hum_q4_prj
 plot(mean_hum_q4_prj)
 
@@ -74,6 +77,10 @@ plot(mean_hum_q4_prj)
 #terra::writeRaster(mean_hum_q3_prj, "variable_manipulation/variable_outputs/mean_relative_humidity_q3.tif")
 #terra::writeRaster(mean_hum_q4_prj, "variable_manipulation/variable_outputs/mean_relative_humidity_q4.tif")
 
+#terra::writeRaster(mean_hum_q1_prj, "variable_manipulation/variable_outputs/mean_relative_humidity_q1_10kres.tif")
+#terra::writeRaster(mean_hum_q2_prj, "variable_manipulation/variable_outputs/mean_relative_humidity_q2_10kres.tif")
+#terra::writeRaster(mean_hum_q3_prj, "variable_manipulation/variable_outputs/mean_relative_humidity_q3_10kres.tif")
+#terra::writeRaster(mean_hum_q4_prj, "variable_manipulation/variable_outputs/mean_relative_humidity_q4_10kres.tif")
 
 
 # This part is using data from the Met Office. But resolution is not great and we have missing data for some of our study area. 

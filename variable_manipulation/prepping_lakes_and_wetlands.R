@@ -20,14 +20,17 @@ crs <- "epsg:3035"
 # # thus I'm hoping that this makes it 1km res
 # blank_raster
 
-blank_raster <- terra::rast("output/euro_rast.tif")
+blank_raster <- terra::rast("output/euro_rast.tif") # 1k res
+blank_raster <- terra::rast("output/euro_rast_10k.tif") # 1k res
 blank_raster
 #terra::xyFromCell(blank_3035, 1) # coordinates of the centre of the first cell
 plot(blank_raster)
 
-glwd_crop_prj <- terra::project(x = glwd_rast, y = blank_raster, method = "near") 
+glwd_crop_prj <- terra::project(x = glwd_rast, y = blank_raster, method = "near") #use nearest neighbour as the 
+# numbers are categories rather than values
 glwd_crop_prj # we can see that this keeps the crs of the blank raster
 plot(glwd_crop_prj) 
+head(glwd_crop_prj)
 
 #plot over the top of the shapefile
 
@@ -38,7 +41,7 @@ plot(glwd_crop_prj, add = T, axes = F)
 
 # can we project and keep res of underlying glwd raster
 
-glwd_rast
+# glwd_rast
 # tryit <- terra::project(x = glwd_rast, y = crs, method = "near")
 # just projecting is crazy slow. 
 
@@ -66,7 +69,8 @@ glwd_crop_prj_combo <- terra::subst(glwd_crop_prj, from = c(1:8), to = c(rep(99,
 table(values(glwd_crop_prj_combo))
 sum(table(values(glwd_crop_prj_combo)))
 sum(table(values(glwd_crop_prj)))
-# diff of 9185 between these as there should be
+# when using 1k res diff of 9185 between these as there should be
+# diff of 99 with 10k res
 
 plot(glwd_crop_prj)
 plot(glwd_crop_prj_combo, col = "white", add = T)
@@ -89,7 +93,9 @@ plot(glwd_crop_prj_combo, add = T, axes = F, col = "blue", legend = F)
 small_extent <- terra::ext(5950000, 6000000, 5350000, 5400000) 
 
 # Create a blank raster with appropriate projection and extent
-blank_small <- rast(crs=crs, extent=small_extent, res = 1000) # the unit for epsg is metres
+#blank_small <- rast(crs=crs, extent=small_extent, res = 1000) # the unit for epsg is metres
+blank_small <- rast(crs=crs, extent=small_extent, res = 10000) # the unit for epsg is metres
+
 
 glwd_small <- terra::project(x = glwd_rast, y = blank_small, method = "near") 
 glwd_small # we can see that this keeps the crs of the blank raster
@@ -160,20 +166,24 @@ max(dnear)
 # Because this method uses all NA cells in the GLWD data, it includes all the oceans etc
 # read in the ref raster again, but with a different name
 
-euro_rast <- terra::rast("output/euro_rast.tif")
+#euro_rast <- terra::rast("output/euro_rast.tif")
+euro_rast <- terra::rast("output/euro_rast_10k.tif")
+
 blank_raster
 euro_rast
 
 masked <- terra::mask(blank_raster, euro_rast )
 plot(masked)
 
-png("plots/distance_to_water_m.png", width = 600, height = 400)
+#png("plots/distance_to_water_m.png", width = 600, height = 400)
 bp_500 <- c(1000,5000, 10000, 15000, 20000, 25000, 30000, 40000, 50000, 
             100000, 200000, 500000, 1000000)
+bp_500 <- bp_500*10 # if using 10k
 plot(masked, breaks = c(0, bp_500), 
      plg = list(title = "Distance in m"),
      col= c("white", viridis::viridis(14)), background = "light blue")
-dev.off()
+#plot(glwd_crop_prj_combo, add = T, axes = F, col = "red", legend = F)
+#dev.off()
 
 # ideally re-do this in km. 
 #pdf("plots/distance_to_water_masked.pdf", width = 7, height = 5)
@@ -195,12 +205,18 @@ tictoc::toc()
 
 head(dist_to_inland_water_res)
 range(dist_to_inland_water_res$layer)
+dist_to_inland_water_res$layer[400:440]
 
 dist_to_inland_water_res <- rename(dist_to_inland_water_res, "dist_to_water" = "layer")
 head(dist_to_inland_water_res)
 
 # write.csv(dist_to_inland_water_res,
 #          "variable_manipulation/variable_outputs/dist_to_water_output.csv",
+#          row.names = F)
+
+
+# write.csv(dist_to_inland_water_res,
+#          "variable_manipulation/variable_outputs/dist_to_water_output_10kres.csv",
 #          row.names = F)
 
 
