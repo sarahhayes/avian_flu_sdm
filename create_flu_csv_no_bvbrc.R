@@ -23,8 +23,8 @@ table(fao_data$Region)
 
 colnames(fao_data)
 # rename the date columns
-fao_data <-  dplyr::rename(fao_data, observation.date = "Observation.date..dd.mm.yyyy.")
-fao_data <-  dplyr::rename(fao_data, report.date = "Report.date..dd.mm.yyyy.")
+fao_data <-  dplyr::rename(fao_data, any_of(c(observation.date = "Observation.date..dd.mm.yyyy.",
+                                              report.date = "Report.date..dd.mm.yyyy.")))
 
 # There are rows with no entries for observation date so remove these
 fao_data <- fao_data[which(fao_data$observation.date != ""),]
@@ -271,7 +271,7 @@ ai_pos_birds <- no_dups_date_loc_serotype
 
 table(ai_pos_birds$serotype_HN)
 
-hpai <- ai_pos_birds
+hpai <- ai_pos_birds %>% mutate(geometry = as.character(geometry))
 # write.csv(hpai, "data/flu_data/prepped_data/hpai_pos_birds_nobvbrc.csv")
 
 # Add a year and month and year_month to the data
