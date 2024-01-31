@@ -584,15 +584,20 @@ if (PLOT_COUNTRY_VALIDATION){
   n_blocks <- floor((1/250) * nrow(training_coords))
   time_now <- Sys.time()
   cov_df <- data.frame(raster::extract(covstack, training_coords[1:250, 1:2]))
-  for (i in 2:n_blocks){cov_df <- rbind(cov_df,
-                  data.frame(
+  for (i in 2:n_blocks){
+                    new_block <- data.frame(
                     raster::extract(
                       covstack,
                       training_coords[(250*(i-1)+1:250*i), 1:2]
                     )
                   )
-  )
-  cat("nrow(cov_df)=",nrow(cov_df),"\n")
+                  cat("New block has",
+                      length(which(is.na(rowSums(new_block)))),
+                      "rows with NAs",
+                      "\n")
+                  print(head(new_block[which(is.na(rowSums(new_block))), ]))
+                  cov_df <- rbind(cov_df, new_block)
+  cat("nrow(cov_df) =",nrow(cov_df),"\n")
   }
   cov_df <- rbind(cov_df,
                   data.frame(
@@ -604,6 +609,19 @@ if (PLOT_COUNTRY_VALIDATION){
                   )
   cov_build_time <- as.numeric(difftime(Sys.time(), time_now, units="mins"))
 }
+
+# Try to plot out coordinates where we can't extract covariates:
+bad_rows <- which(is.na(rowSums(cov_df)))
+bad_pts <- terra::vect(training_coords[bad_rows, ], geom=c("X", "Y"),
+                       crs =  "+proj=longlat +ellps=WGS84 +datum=WGS84")
+plot(euro_map_crop,
+     col = "white",
+     background = "azure2",
+     axes = FALSE,
+     buffer = FALSE,
+     xmin = euro_ext@xmin,
+     mar = c(0, 0, 0, 0))
+plot(bad_pts, add = T, col = "red", pch = 16, cex = .3)
 
 n_pts <- nrow(training_coords)
 n_training <- round(.75 * n_pts)
