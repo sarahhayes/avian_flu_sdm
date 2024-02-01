@@ -689,8 +689,14 @@ invisible(sdm$fit$state)
 summary(sdm)
 if (SAVE_FITS){
   save(sdm,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_sdm_Q1.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/ri_sdm_Q1.rds", sep = ""))
 }
+
+# Eyeball RI terms:
+vs_ranef_means <- data.frame(name = names(sdm$ranef.mean),
+                          rem = unname(sdm$ranef.mean))
+p <- ggplot(vs_ranef_means) + geom_col(aes(rem, name)) + theme(axis.title=element_blank())
+p
 
 covstack_lores <- aggregate(covstack, fact = 10)
 
