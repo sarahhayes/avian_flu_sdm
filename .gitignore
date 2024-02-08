@@ -7,3 +7,5 @@ data
 LandCoverData
 data_offline/
 Z_old_or_unused_scripts/test_ebird_sightings.R
+plots/resampling/retired
+training_sets/raw

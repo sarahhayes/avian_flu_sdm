@@ -1,5 +1,0 @@
-"Positives" "Pseudoabsences"
-"1" 1925 NA
-"2" 866 NA
-"3" 509 NA
-"4" 963 NA
