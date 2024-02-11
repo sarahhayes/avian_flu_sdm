@@ -12,65 +12,69 @@ library(ggplot2)
 library(viridis)
 #library(rgdal)
 
+## Shouldn't need to run much of the first part of this script unless there is an update. 
+## The first part is getting data from MODIS and so is quite slow 
+
 ### using MODIS
 ### info found here: https://docs.ropensci.org/MODIStsp/articles/analyze.html
 ### and here: https://rspatialdata.github.io/vegetation.html
 
-MODIStsp_get_prodlayers("(M*D13A2)")
+# MODIStsp_get_prodlayers("(M*D13A2)")
 
 # Downloading the boundary 
 #map_boundary_euro <- rgeoboundaries::geoboundaries("Mongolia")
 map_boundary_terra <- terra::vect("output/euro_map.shp")
 ext(map_boundary_terra)
 
-rast <- terra::rast("output/euro_rast.tif")
+# rast <- terra::rast("output/euro_rast.tif") #1k res
+rast <- terra::rast("output/euro_rast_10k.tif")
 rast
 map_lonlat <- terra::project(rast, "epsg:4326")
 map_lonlat
 
-map_boundary <- st_read("output/euro_map.shp")
-plot(map_boundary)
+#map_boundary <- st_read("output/euro_map.shp")
+#plot(map_boundary)
 
 #map_boundary_lonlat <- st_transform(map_boundary, crs = crs(map_lonlat))
 
-eurounion <- st_union(map_boundary)
+#eurounion <- st_union(map_boundary)
 #eurounion <- st_union(map_boundary_lonlat)
-plot(eurounion)
-eurounion
+#plot(eurounion)
+#eurounion
 
-map_boundary_euro <- eurounion
-plot(map_boundary_euro)
+#map_boundary_euro <- eurounion
+#plot(map_boundary_euro)
 
 # Defining filepath to save downloaded spatial file
-spatial_filepath <- "data/vegetation_data/euro.shp"
+#spatial_filepath <- "data/vegetation_data/euro.shp"
 #spatial_filepath <- "data/vegetation_data/euro_lonlat.shp"
 
 # Saving downloaded spatial file on to our computer
-st_write(map_boundary_euro, paste0(spatial_filepath))
+#st_write(map_boundary_euro, paste0(spatial_filepath))
 
-MODIStsp_get_prodnames()
+#MODIStsp_get_prodnames()
 
 ## NB - as of 13/10/2023 the code below does not work with the updated version of R!!! 
 ## Can use bbox as the bounding box but hard to work with the MODIS projection. 
 ## As such this was run on my old laptop which has an old version of R on it.
-
-tictoc::tic()
-MODIStsp(gui             = FALSE,
-         out_folder      = "data/vegetation_data/vegetation_data_2022",
-         out_folder_mod  = "data/vegetation_data/vegetation_data_2022",
-         selprod = "Vegetation_Indexes_16Days_1Km (M*D13A2)",
-         bandsel = c("NDVI"),
-         user            = "sarahhayes" ,
-         prod_version    = "061",  
-         password        = "NASATigtogs43!",
-         start_date      = "2022.01.01", 
-         end_date        = "2022.12.31", 
-         verbose         = FALSE,
-         spatmeth        = "file",
-         spafile         = spatial_filepath,
-         output_proj = "epsg:3035",
-         out_format      = "GTiff")
-tictoc::toc()
+# 
+# tictoc::tic()
+# MODIStsp(gui             = FALSE,
+#          out_folder      = "data/vegetation_data/vegetation_data_2022",
+#          out_folder_mod  = "data/vegetation_data/vegetation_data_2022",
+#          selprod = "Vegetation_Indexes_16Days_1Km (M*D13A2)",
+#          bandsel = c("NDVI"),
+#          user            = "sarahhayes" ,
+#          prod_version    = "061",  
+#          password        = "NASATigtogs43!",
+#          start_date      = "2022.01.01", 
+#          end_date        = "2022.12.31", 
+#          verbose         = FALSE,
+#          spatmeth        = "file",
+#          spafile         = spatial_filepath,
+#          output_proj = "epsg:3035",
+#          out_format      = "GTiff")
+# tictoc::toc()
 
 
 # Reading in the downloaded NDVI raster data
@@ -144,17 +148,18 @@ fourth_stack_mean <- mean(fourth_stack, na.rm = T)
 plot(fourth_stack_mean)
 
 # Transforming the data
-blank_3035 <- terra::rast("output/euro_rast.tif")
+# blank_3035 <- terra::rast("output/euro_rast.tif")
+blank_3035 <- terra::rast("output/euro_rast_10k.tif")
 
-first_stack_prj <- terra::project(first_stack_mean, blank_3035)
+first_stack_prj <- terra::project(first_stack_mean, blank_3035, method = "bilinear")
 # as we haven't specified a method, the default will be bilinear interpolation as 
 # the value is numeric
 first_stack_prj
 plot(first_stack_prj)
 
-second_stack_prj <- terra::project(second_stack_mean, blank_3035)
-third_stack_prj <- terra::project(third_stack_mean, blank_3035)
-fourth_stack_prj <- terra::project(fourth_stack_mean, blank_3035)
+second_stack_prj <- terra::project(second_stack_mean, blank_3035, method = "bilinear")
+third_stack_prj <- terra::project(third_stack_mean, blank_3035, method = "bilinear")
+fourth_stack_prj <- terra::project(fourth_stack_mean, blank_3035, method = "bilinear")
 
 second_stack_mean
 plot(second_stack_prj)
@@ -185,15 +190,26 @@ NDVI", title.cex = 0.9, x = "right"),
 dev.off()
 
 
+# # save the rasters
+# terra::writeRaster(first_stack_prj, 
+#                     "variable_manipulation/variable_outputs/ndvi_first_quart_2022.tif")
+# terra::writeRaster(second_stack_prj, 
+#                     "variable_manipulation/variable_outputs/ndvi_second_quart_2022.tif")
+# terra::writeRaster(third_stack_prj, 
+#                     "variable_manipulation/variable_outputs/ndvi_third_quart_2022.tif")
+# terra::writeRaster(fourth_stack_prj, 
+#                     "variable_manipulation/variable_outputs/ndvi_fourth_quart_2022.tif")
+
+
 # save the rasters
-terra::writeRaster(first_stack_prj, 
-                    "variable_manipulation/variable_outputs/ndvi_first_quart_2022.tif")
-terra::writeRaster(second_stack_prj, 
-                    "variable_manipulation/variable_outputs/ndvi_second_quart_2022.tif")
-terra::writeRaster(third_stack_prj, 
-                    "variable_manipulation/variable_outputs/ndvi_third_quart_2022.tif")
-terra::writeRaster(fourth_stack_prj, 
-                    "variable_manipulation/variable_outputs/ndvi_fourth_quart_2022.tif")
+# terra::writeRaster(first_stack_prj, 
+#                    "variable_manipulation/variable_outputs/ndvi_first_quart_2022_10kres.tif")
+# terra::writeRaster(second_stack_prj, 
+#                    "variable_manipulation/variable_outputs/ndvi_second_quart_2022_10kres.tif")
+# terra::writeRaster(third_stack_prj, 
+#                    "variable_manipulation/variable_outputs/ndvi_third_quart_2022_10kres.tif")
+# terra::writeRaster(fourth_stack_prj, 
+#                    "variable_manipulation/variable_outputs/ndvi_fourth_quart_2022_10kres.tif")
 
 
 ## As don't use the points - below not updated for 2022. CSV is thus still 2019
