@@ -56,7 +56,6 @@ blank_3035
 
 # Resolution of the raw data is 0.1 degrees which is approximately 11.1km at the equator
 mean_hum_q1_prj <- terra::project(mean_humidity_q1, blank_3035, method = "bilinear")
-# using nearest neighbour as we are going from larger resolution to smaller. 
 mean_hum_q1_prj
 plot(mean_hum_q1_prj)
 
@@ -81,6 +80,18 @@ plot(mean_hum_q4_prj)
 #terra::writeRaster(mean_hum_q2_prj, "variable_manipulation/variable_outputs/mean_relative_humidity_q2_10kres.tif")
 #terra::writeRaster(mean_hum_q3_prj, "variable_manipulation/variable_outputs/mean_relative_humidity_q3_10kres.tif")
 #terra::writeRaster(mean_hum_q4_prj, "variable_manipulation/variable_outputs/mean_relative_humidity_q4_10kres.tif")
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # This part is using data from the Met Office. But resolution is not great and we have missing data for some of our study area. 
