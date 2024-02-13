@@ -8,6 +8,7 @@ PATH_TO_DATA <- "../../../OneDrive - The University of Liverpool/"
 
 library(tidyverse)
 library(dbarts)
+library(patchwork)
 
 varimp_summ <- list()
 
@@ -31,9 +32,9 @@ for(i in 1:4){
     relocate(var) %>%
     rename("mean" = "X1", "sd" = "X2")
   rownames(varimp_summ[[i]]) <- gsub(
-            "_first_quart.*$|_second_quart.*$|_third_quart.*$|_fourth_quart.*$",
-            "",
-            x = rownames(varimp_summ[[i]]))
+    "_first_quart.*$|_second_quart.*$|_third_quart.*$|_fourth_quart.*$",
+    "",
+    x = rownames(varimp_summ[[i]]))
   
 }  
 
@@ -90,7 +91,7 @@ df <- varimp_summ %>%
          ))
 ordered_var <- unique(as.character(df$var[order(df$mean, decreasing = TRUE)]))
 df <- df %>% mutate(var = fct_relevel(var, ordered_var),
-         upper = mean + sd, lower = mean - sd)
+                    upper = mean + sd, lower = mean - sd)
 
 fig_varimp <- ggplot(df, aes(x = var, y = mean, ymin = lower, ymax = upper, color = Q)) + 
   geom_errorbar(width=0, position=position_dodge(0.6)) + 
@@ -170,14 +171,13 @@ varimp_rank <- varimp_summ %>%
 # 
 # ggsave("plots/partial_dependence_quarterly.png", plot = fig_pd_best, width = 10, height = 4.5)
 
-# Calc and bind pd across all quarters for given variables by name
-# TO DO: catch cases where variables are binary (land cover)
+# Calc and bind pd across all quarters for given variables by name. All you need to do is set names of variables of interest (or don't do anything and let it plot all of them) :)
 
 if (ALL_VARS_FOR_PD){
   vars <- gsub("\\..*",
-            "",
-            x=rownames(df)) %>%
-          unique()
+               "",
+               x=rownames(df)) %>%
+    unique()
 }else{
   vars = c("species_richness", "dist_to_coast_km")
 }
@@ -192,50 +192,120 @@ for(i in 1:4){
                     ".rds",
                     sep = ""))
   
-  varimp_raw <- sdm$varcount %>% 
-    as.data.frame %>%
-    mutate(./rowSums(.)) %>%
-    mutate(./max(.))
-  
   for(j in 1:length(vars)){
     
     # Adapted from embarcadero::partial
     fullvarname <- sdm$fit$data@x %>% as.data.frame %>% dplyr::select(matches(vars[j])) %>% names
     if (length(fullvarname) == 1) {
-    raw <- sdm$fit$data@x[, fullvarname]
-    lev <- list(seq(min(raw), max(raw), ((max(raw) - min(raw))/15)))
-    pd <- pdbart(sdm, xind = fullvarname, levs = lev, pl = FALSE)
-    
-    pd_summ[[i]][[j]] <- data.frame(var = vars[j], 
-                                    x = unlist(lev), 
-                                    y = pd$fd[[1]] %>% apply(., 2, median) %>% pnorm,
-                                    upper = pd$fd[[1]] %>% apply(.,  2, quantile, probs = 0.025) %>% pnorm,
-                                    lower = pd$fd[[1]] %>% apply(.,  2, quantile, probs = 0.975) %>% pnorm,
-                                    Q = paste0("Q",i))
+      
+      # Check if the predictor variable is binary
+      if (all(sdm$fit$data@x[, fullvarname] %in% 0:1)){
+        raw <- sdm$fit$data@x[, fullvarname]
+        lev <- list(c(0,1))
+        pd <- pdbart(sdm, xind = fullvarname, levs = lev, pl = FALSE)
+        
+      } else {
+        raw <- sdm$fit$data@x[, fullvarname]
+        lev <- list(seq(min(raw), max(raw), ((max(raw) - min(raw))/15)))
+        pd <- pdbart(sdm, xind = fullvarname, levs = lev, pl = FALSE)
+        
+      }
+      
+      pd_summ[[i]][[j]] <- data.frame(var = vars[j], 
+                                      x = unlist(lev), 
+                                      y = pd$fd[[1]] %>% apply(., 2, median) %>% pnorm,
+                                      upper = pd$fd[[1]] %>% apply(.,  2, quantile, probs = 0.025) %>% pnorm,
+                                      lower = pd$fd[[1]] %>% apply(.,  2, quantile, probs = 0.975) %>% pnorm,
+                                      Q = paste0("Q",i))
     }
   }  
 }
 
-fig_pd_chosen <- pd_summ %>%
-  bind_rows %>%
-  mutate(var = gsub("_first_quart$|_second_quart$|_third_quart$|_fourth_quart$", "", var),
-         var = case_when(var == "species_richness" ~ "species richness",
-                         var == "dist_to_coast_km" ~ "distance to coast"),
-  ) %>%
-  ggplot(aes(x = x, y = y, ymin = lower, ymax = upper, fill = Q, color = Q)) +
-  geom_ribbon(alpha = 0.08, colour = NA) +
-  geom_line(lwd = 0.8, alpha = 0.4) +
-  scale_x_continuous(expand = c(0, 0)) +
-  scale_colour_manual("",
+# Make individual panels of a partial dependence plot, automatically assigning line or point depending on whether variable is continuous or binary
+
+panel_list <- vector("list", length(vars)) # initialise empty lists
+
+for(j in 1:length(vars)){
+  
+  df <- pd_summ %>%
+    bind_rows %>%
+    filter(var == vars[j]) %>%
+    mutate(var = gsub("_first_quart$|_second_quart$|_third_quart$|_fourth_quart$", "", var),
+           var = case_when(var == "around_surf" ~ "abundance: surface-feeders", 
+                           var == "below_surf" ~ "abundance: sub-surface feeders", 
+                           var == "plant" ~ "abundance: plant diet",
+                           var == "scav" ~ "abundance: scavengers",
+                           var == "vend" ~ "abundance: endotherm diet",
+                           var == "host_dist" ~ "avg. phylo dist to host", 
+                           var == "migr" ~ "abundance: migratory", 
+                           var == "cong" ~ "abundance: congregative", 
+                           var == "species_richness" ~ "species richness",
+                           var == "chicken_density_2010" ~ "chicken density", 
+                           var == "duck_density_2010" ~ "duck density", 
+                           var == "mean_relative_humidity" ~ "mean relative humidity",
+                           var == "mean_diff" ~ "temperature range", 
+                           var == "mean_temp" ~ "mean temperature",
+                           var == "mean_tmax" ~ "max temperature", 
+                           var == "mean_tmin" ~ "min temperature", 
+                           var == "variation_in_quarterly_mean_temp" ~ "temperature variation",
+                           var == "mean_prec" ~ "total rainfall", 
+                           var == "dist_to_coast_km" ~ "dist. to coast", 
+                           var == "dist_to_water" ~ "dist. to inland water", 
+                           var == "elev_min" ~ "min altitude", 
+                           var == "elev_max" ~ "max altitude",
+                           var == "elev_diff" ~ "altitude range",
+                           var == "ndvi" ~ "vegetation index", 
+                           var == "Water_bodies" ~ "water bodies",
+                           var == "Evergreen_Needleleaf_Forests" ~ "evergreen needleleaf forests",
+                           var == "Evergreen_Broadleaf_Forests" ~ "evergreen broadleaf forests",
+                           var == "Deciduous_Needleleaf_Forests" ~ "deciduous needleleaf forests",
+                           var == "Deciduous_Broadleaf_Forests" ~ "deciduous broadleaf forests",
+                           var == "Mixed_Forests" ~ "mixed forests",
+                           var == "Closed_Shrublands" ~ "closed shrublands",
+                           var == "Open_Shrublands" ~ "open_shrublands",
+                           var == "Woody_Savannas" ~ "woody savannas",
+                           var == "Savannas" ~ "savannas",
+                           var == "Grasslands" ~ "grasslands",
+                           var == "Permanent_Wetlands" ~ "permanent wetlands",
+                           var == "Croplands" ~ "croplands",
+                           var == "Urban_and_Built-up_Lands" ~ "urband and built-up lands",
+                           var == "Cropland/Natural_Vegetation_Mosaics" ~ "cropland/natural vegetation mosaics",
+                           var == "Non-Vegetated_Lands" ~ "non-vegetated lands",
+                           var == "Unclassified" ~ "unclassified land"
+           ))
+  
+  xlab <- unique(df$var)
+  
+  panel_list[[j]] <- df %>% 
+    ggplot(aes(x = x, y = y, ymin = lower, ymax = upper, fill = Q, color = Q)) +
+    {if(!(all(df$x %in% 0:1)))
+      list(
+        geom_ribbon(alpha = 0.08, colour = NA),
+        geom_line(lwd = 0.8, alpha = 0.4),
+        scale_x_continuous(expand = c(0, 0))
+      )} +
+    {if(all(df$x %in% 0:1)) 
+      list(
+        geom_pointrange(aes(x = factor(x)), size = 0.7, position = position_dodge(width = 0.5), alpha = 0.8)
+      )} +
+    scale_colour_manual("",
+                        breaks = c("Q1", "Q2", "Q3", "Q4"),
+                        values = pal) +
+    scale_fill_manual("",
                       breaks = c("Q1", "Q2", "Q3", "Q4"),
                       values = pal) +
-  scale_fill_manual("",
-                    breaks = c("Q1", "Q2", "Q3", "Q4"),
-                    values = pal) +
-  ylab("Probability") +
-  theme_bw() +
-  theme(axis.title.x=element_blank()) +
-  facet_wrap(~ var, scales = "free_x")
+    xlab(xlab) +
+    ylab("Probability") +
+    theme_bw() +
+    {if(all(df$x %in% 0:1)) 
+      list(
+        guides(colour = "none", fill = "none") 
+      )}
 
+}
 
-ggsave("plots/partial_dependence.png", plot = fig_pd_chosen, width = 6, height = 3)
+wrap_plots(panel_list, ncol = 3) +
+  plot_layout(guides = "collect", axis_titles = "collect") +
+  plot_annotation(tag_levels = 'A')
+
+ggsave("plots/partial_dependence.png", plot = fig_pd_chosen, width = 9, height = 3)
