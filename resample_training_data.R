@@ -69,6 +69,23 @@ bind_rows(train_A %>% mutate(df = "train_A"),
   ggplot(aes(x = date, fill = df)) +
   geom_histogram()
 
+pos_sites %>% 
+  mutate(serotype_HN = case_when(
+    serotype_HN == "H5N1" ~ "H5N1",
+    serotype_HN == "H5N8" ~ "H5N8",
+    serotype_HN == "H5N6" ~ "H5N6",
+    TRUE ~ "other"
+  )) %>%
+  ggplot(aes(x = date, fill = serotype_HN)) +
+  geom_histogram(bins = round(as.numeric((max(pos_sites$date)-min(pos_sites$date))/7)), position = "stack") +
+  geom_vline(xintercept = as.Date("2021-09-01")) +
+  geom_vline(xintercept = as.Date("2020-01-01")) +
+  scale_x_date(date_labels = "%Y", date_breaks = "2 year") +
+  ylab("Weekly cases") +
+  xlab("Date") +
+  labs(fill = "subtype") +
+  theme_bw()
+
 bind_rows(train_A %>% mutate(df = "train_A"),
           test_A %>% mutate(df = "test_A"),
           train_B %>% mutate(df = "train_B")
