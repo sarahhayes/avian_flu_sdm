@@ -117,13 +117,14 @@ plot(app(points_rast, function(x) log(x+1)), main = "log(eBird records, lat/long
 plot(spdf_world[1], add = TRUE, color = NA)
 dev.off()
 
+# ebird_amer <- read_sampling("data_offline/EBD/sampling/ebd_sampling_amer.txt")
+# ebird_amer %>% head %>% as.data.frame
+# ebird_amer %>% nrow
+# ebird_amer %<>% distinct(latitude, longitude, observation_date, observer_id)
+# ebird_amer %>% nrow()
+# ebird_amer %<>% group_by(latitude, longitude) %>% tally
 
-ebird_amer <- read_sampling("data_offline/EBD/sampling/ebd_sampling_amer.txt")
-ebird_amer %>% head %>% as.data.frame
-ebird_amer %>% nrow
-ebird_amer %<>% distinct(latitude, longitude, observation_date, observer_id)
-ebird_amer %>% nrow()
-ebird_amer %<>% group_by(latitude, longitude) %>% tally
+ebird_amer <- readRDS(file = "data_offline/EBD/sampling/ebird_amer.rds")
 
 # x %>% distinct(latitude, longitude, observation_date, time_observations_started) %>% nrow()
 # x %>% group_by(latitude, longitude, observation_date, time_observations_started) %>% tally %>% arrange(-n)
@@ -147,7 +148,7 @@ points_rast <- terra::rasterize(x = vect(points_sp),
 plot(points_rast)
 
 png(paste0("plots//ebird_records_amer.png"), width = 15, height = 10, units = "in", res = 600)
-plot(app(points_rast, function(x) log(x+1)), main = "log(eBird records, lat/long)")
+plot(app(points_rast, function(x) log(x+1)), main = "log(eBird records, lat/long)", xlim = c(-180,-25), ylim = c(-60,85))
 plot(spdf_world[1], add = TRUE, color = NA)
 dev.off()
 
