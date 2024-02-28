@@ -13,6 +13,20 @@ library(raster)
 library(terra)
 set.seed(12345)
 
+get_threshold <- function(object){
+  fitobj <- object$fit
+  
+  true.vector <- fitobj$data@y 
+  
+  pred <- prediction(colMeans(pnorm(object$yhat.train)), true.vector)
+  
+  perf.tss <- performance(pred,"sens","spec")
+  tss.list <- (perf.tss@x.values[[1]] + perf.tss@y.values[[1]] - 1)
+  tss.df <- data.frame(alpha=perf.tss@alpha.values[[1]],tss=tss.list)
+  thresh <- min(tss.df$alpha[which(tss.df$tss==max(tss.df$tss))])
+  return(thresh)
+}
+
 if (BUILD_COVS){
   # set the crs we want to use
   crs <- "epsg:3035"
@@ -161,21 +175,36 @@ covstack <- raster::stack(paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covar
 covstack <- dropLayer(covstack, "lc_17")
 
 
+# # Load training data
+# training_coords <- readRDS("training_sets/training_coords_A_Q1.RDS")
+# cov_df <- data.frame(raster::extract(covstack, training_coords[, 1:2]))
+# 
+# n_pts <- nrow(training_coords)
+# n_training <- round(.75 * n_pts)
+# 
+# training <- sample(1:nrow(cov_df), n_training)
+# xtrain <- cov_df[training, ]
+# ytrain <- training_coords$pos[training]
+# xtest <- cov_df[-training, ]
+# ytest <- training_coords$pos[-training]
+
 # Load training data
-training_coords <- readRDS("training_sets/training_coords_Q1.RDS")
-cov_df <- data.frame(raster::extract(covstack, training_coords[, 1:2]))
+training_coords <- readRDS("training_sets/training_coords_A_Q1.RDS")
+ytrain <- training_coords$pos
+xtrain <- data.frame(raster::extract(covstack, training_coords[, 1:2]))
+bad_rows <- which(is.na(rowSums(xtrain)))
+xtrain <- xtrain[-bad_rows, ]
+ytrain <- ytrain[-bad_rows]
 
-n_pts <- nrow(training_coords)
-n_training <- round(.75 * n_pts)
-
-training <- sample(1:nrow(cov_df), n_training)
-xtrain <- cov_df[training, ]
-ytrain <- training_coords$pos[training]
-xtest <- cov_df[-training, ]
-ytest <- training_coords$pos[-training]
+test_coords <- readRDS("training_sets/test_coords_A_Q2.RDS")
+ytest <- test_coords$const
+xtest <- data.frame(raster::extract(covstack, test_coords[, 1:2]))
+bad_rows <- which(is.na(rowSums(xtest)))
+xtest <- xtest[-bad_rows, ]
+ytest <- ytest[-bad_rows]
 
 if (SAVE_FITS){
-  save(xtrain, ytrain, xtest, ytest, file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/q1_train_test_data.rds", sep = ""))
+  save(xtrain, ytrain, xtest, ytest, file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/A_q1_train_test_data.rds", sep = ""))
 }
 
 # Initialise model
@@ -186,9 +215,12 @@ basic_model <- bart(xtrain,
 invisible(basic_model$fit$state)
 summary(basic_model)
 
+ypred <- colMeans(pnorm(basic_model$yhat.test))
+basic_model_prec <- length(which(ypred>get_threshold(basic_model))) / length(ypred)
+
 if (SAVE_FITS){
   save(basic_model,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/basic_model_Q1.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/basic_model_A_Q1.rds", sep = ""))
 }
 
 sdm <- bart.step(x.data = xtrain,
@@ -199,7 +231,7 @@ invisible(sdm$fit$state)
 summary(sdm)
 if (SAVE_FITS){
   save(sdm,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/sdm_Q1.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/sdm_A_Q1.rds", sep = ""))
 }
 
 covstack_lores <- aggregate(covstack, fact = 10)
@@ -284,7 +316,7 @@ summary(basic_model)
 
 if (SAVE_FITS){
   save(basic_model,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/basic_model_Q2.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/basic_model_A_Q2.rds", sep = ""))
 }
 
 sdm <- bart.step(x.data = xtrain,
@@ -295,7 +327,7 @@ invisible(sdm$fit$state)
 summary(sdm)
 if (SAVE_FITS){
   save(sdm,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/sdm_Q2.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/sdm_A_Q2.rds", sep = ""))
 }
 
 covstack_lores <- aggregate(covstack, fact = 10)
@@ -380,7 +412,7 @@ summary(basic_model)
 
 if (SAVE_FITS){
   save(basic_model,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/basic_model_Q3.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/basic_model_A_Q3.rds", sep = ""))
 }
 
 sdm <- bart.step(x.data = xtrain,
@@ -391,7 +423,7 @@ invisible(sdm$fit$state)
 summary(sdm)
 if (SAVE_FITS){
   save(sdm,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/sdm_Q3.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/sdm_A_Q3.rds", sep = ""))
 }
 
 covstack_lores <- aggregate(covstack, fact = 10)
@@ -476,7 +508,7 @@ summary(basic_model)
 
 if (SAVE_FITS){
   save(basic_model,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/basic_model_Q4.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/basic_model_A_Q4.rds", sep = ""))
 }
 
 sdm <- bart.step(x.data = xtrain,
@@ -487,7 +519,7 @@ invisible(sdm$fit$state)
 summary(sdm)
 if (SAVE_FITS){
   save(sdm,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/sdm_Q4.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/sdm_A_Q4.rds", sep = ""))
 }
 
 covstack_lores <- aggregate(covstack, fact = 10)
