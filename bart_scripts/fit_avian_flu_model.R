@@ -196,7 +196,7 @@ bad_rows <- which(is.na(rowSums(xtrain)))
 xtrain <- xtrain[-bad_rows, ]
 ytrain <- ytrain[-bad_rows]
 
-test_coords <- readRDS("training_sets/test_coords_A_Q2.RDS")
+test_coords <- readRDS("training_sets/test_coords_A_Q1.RDS")
 ytest <- test_coords$const
 xtest <- data.frame(raster::extract(covstack, test_coords[, 1:2]))
 bad_rows <- which(is.na(rowSums(xtest)))
@@ -234,14 +234,16 @@ if (SAVE_FITS){
        file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/sdm_A_Q1.rds", sep = ""))
 }
 
-covstack_lores <- aggregate(covstack, fact = 10)
+
 
 # Generate risk map
 pred_layer <- predict(object = sdm,
-                      x.layers = covstack_lores,
+                      x.layers = covstack,
                       quantiles = c(0.025, 0.975),
                       splitby = 20
                       )
+ypred <- raster::extract(pred_layer[[2]], test_coords[-bad_rows, 1:2])
+sdm_prec <- length(which(ypred>get_threshold(sdm))) / length(ypred)
 if (SAVE_FITS){
   save(pred_layer,
        file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/prediction_Q1.rds", sep = ""))
@@ -330,11 +332,11 @@ if (SAVE_FITS){
        file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/sdm_A_Q2.rds", sep = ""))
 }
 
-covstack_lores <- aggregate(covstack, fact = 10)
+
 
 # Generate risk map
 pred_layer <- predict(object = sdm,
-                      x.layers = covstack_lores,
+                      x.layers = covstack,
                       quantiles = c(0.025, 0.975),
                       splitby = 20
 )
@@ -426,11 +428,11 @@ if (SAVE_FITS){
        file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/sdm_A_Q3.rds", sep = ""))
 }
 
-covstack_lores <- aggregate(covstack, fact = 10)
+
 
 # Generate risk map
 pred_layer <- predict(object = sdm,
-                      x.layers = covstack_lores,
+                      x.layers = covstack,
                       quantiles = c(0.025, 0.975),
                       splitby = 20
 )
@@ -522,11 +524,11 @@ if (SAVE_FITS){
        file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/sdm_A_Q4.rds", sep = ""))
 }
 
-covstack_lores <- aggregate(covstack, fact = 10)
+
 
 # Generate risk map
 pred_layer <- predict(object = sdm,
-                      x.layers = covstack_lores,
+                      x.layers = covstack,
                       quantiles = c(0.025, 0.975),
                       splitby = 20
 )
