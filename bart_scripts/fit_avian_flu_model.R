@@ -1,7 +1,7 @@
  # In this script we train a BART model to classify sites for avian flu
 # presence/absence based on environmental and species abundance factors
 
-SAVE_FITS <- FALSE
+SAVE_FITS <- TRUE
 SAVE_PLOTS <- FALSE
 BUILD_COVS <- FALSE
 BUILD_DATA <- FALSE
@@ -555,6 +555,389 @@ summary(sdm)
 if (SAVE_FITS){
   save(sdm,
        file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/sdm_A_Q4.rds", sep = ""))
+}
+
+# Only do projections here if we have built the dataset and have covstack in workspace
+if (BUILD_DATA){
+  
+  # Generate risk map
+  pred_layer <- predict(object = sdm,
+                        x.layers = covstack,
+                        quantiles = c(0.025, 0.975),
+                        splitby = 20
+  )
+  ypred <- raster::extract(pred_layer[[2]], test_coords[-bad_rows, 1:2])
+  sdm_prec <- length(which(ypred>get_threshold(sdm))) / length(ypred)
+  if (SAVE_FITS){
+    save(pred_layer,
+         file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/prediction_Q4.rds", sep = ""))
+  }
+  
+  if (SAVE_PLOTS){
+    png(filename = "../../bartfit-plots/q4_map.png")
+  }
+  # Plot map
+  plot(pred_layer[[1]],
+       box = FALSE,
+       axes = FALSE,
+       main = 'Mean prediction, Q4')
+  if (SAVE_PLOTS){
+    dev.off()
+  }
+  
+  if (SAVE_PLOTS){
+    png(filename = "../../bartfit-plots/q4_lbound.png")
+  }
+  plot(pred_layer[[2]],
+       box = FALSE,
+       axes = FALSE,
+       main = '2.5% posterior bound, Q4')
+  if (SAVE_PLOTS){
+    dev.off()
+  }
+  
+  if (SAVE_PLOTS){
+    png(filename = "../../bartfit-plots/q4_ubound.png")
+  }
+  plot(pred_layer[[3]],
+       box = FALSE,
+       axes = FALSE,
+       main = '97.5% posterior bound, Q4')
+  if (SAVE_PLOTS){
+    dev.off()
+  }}
+
+################################################################################
+# Do the B Q1 analysis
+
+if (BUILD_DATA){
+  covstack <- raster::stack(paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covariates/q1_covs_10k.tif", sep = ""))
+  
+  # Drop unclassified land layer
+  covstack <- dropLayer(covstack, "lc_17")
+  
+  # Load training data
+  training_coords <- readRDS("training_sets/training_coords_B_Q1.RDS")
+  ytrain <- training_coords$pos
+  xtrain <- data.frame(raster::extract(covstack, training_coords[, 1:2]))
+  bad_rows <- which(is.na(rowSums(xtrain)))
+  xtrain <- xtrain[-bad_rows, ]
+  ytrain <- ytrain[-bad_rows]
+}else{
+  training_data <- read.csv("training_sets/training_data_B_Q1.csv")
+  xtrain <- training_data[, names(training_data) != "y"]
+  ytrain <- training_data$y
+}
+
+# Initialise model
+basic_model <- bart(xtrain,
+                    ytrain,
+                    keeptrees = TRUE)
+invisible(basic_model$fit$state)
+summary(basic_model)
+
+if (SAVE_FITS){
+  save(basic_model,
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/basic_model_B_Q1.rds", sep = ""))
+}
+
+sdm <- bart.step(x.data = xtrain,
+                 y.data = ytrain,
+                 full = TRUE,
+                 quiet = TRUE)
+invisible(sdm$fit$state)
+summary(sdm)
+if (SAVE_FITS){
+  save(sdm,
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/sdm_B_Q1.rds", sep = ""))
+}
+
+# Only do projections here if we have built the dataset and have covstack in workspace
+if (BUILD_DATA){
+  
+  # Generate risk map
+  pred_layer <- predict(object = sdm,
+                        x.layers = covstack,
+                        quantiles = c(0.025, 0.975),
+                        splitby = 20
+  )
+  ypred <- raster::extract(pred_layer[[2]], test_coords[-bad_rows, 1:2])
+  sdm_prec <- length(which(ypred>get_threshold(sdm))) / length(ypred)
+  if (SAVE_FITS){
+    save(pred_layer,
+         file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/prediction_Q1.rds", sep = ""))
+  }
+  
+  if (SAVE_PLOTS){
+    png(filename = "../../bartfit-plots/q1_map.png")
+  }
+  # Plot map
+  plot(pred_layer[[1]],
+       box = FALSE,
+       axes = FALSE,
+       main = 'Mean prediction, Q1')
+  if (SAVE_PLOTS){
+    dev.off()
+  }
+  
+  if (SAVE_PLOTS){
+    png(filename = "../../bartfit-plots/q1_lbound.png")
+  }
+  plot(pred_layer[[2]],
+       box = FALSE,
+       axes = FALSE,
+       main = '2.5% posterior bound, Q1')
+  if (SAVE_PLOTS){
+    dev.off()
+  }
+  
+  if (SAVE_PLOTS){
+    png(filename = "../../bartfit-plots/q1_ubound.png")
+  }
+  plot(pred_layer[[3]],
+       box = FALSE,
+       axes = FALSE,
+       main = '97.5% posterior bound, Q1')
+  if (SAVE_PLOTS){
+    dev.off()
+  }}
+
+
+################################################################################
+# Do the B Q2 analysis
+
+if (BUILD_DATA){
+  covstack <- raster::stack(paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covariates/q2_covs_10k.tif", sep = ""))
+  
+  # Drop unclassified land layer
+  covstack <- dropLayer(covstack, "lc_17")
+  
+  # Load training data
+  training_coords <- readRDS("training_sets/training_coords_B_Q2.RDS")
+  ytrain <- training_coords$pos
+  xtrain <- data.frame(raster::extract(covstack, training_coords[, 1:2]))
+  bad_rows <- which(is.na(rowSums(xtrain)))
+  xtrain <- xtrain[-bad_rows, ]
+  ytrain <- ytrain[-bad_rows]
+}else{
+  training_data <- read.csv("training_sets/training_data_B_Q2.csv")
+  xtrain <- training_data[, names(training_data) != "y"]
+  ytrain <- training_data$y
+}
+
+# Initialise model
+basic_model <- bart(xtrain,
+                    ytrain,
+                    keeptrees = TRUE)
+invisible(basic_model$fit$state)
+summary(basic_model)
+
+if (SAVE_FITS){
+  save(basic_model,
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/basic_model_B_Q2.rds", sep = ""))
+}
+
+sdm <- bart.step(x.data = xtrain,
+                 y.data = ytrain,
+                 full = TRUE,
+                 quiet = TRUE)
+invisible(sdm$fit$state)
+summary(sdm)
+if (SAVE_FITS){
+  save(sdm,
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/sdm_B_Q2.rds", sep = ""))
+}
+
+# Only do projections here if we have built the dataset and have covstack in workspace
+if (BUILD_DATA){
+  
+  # Generate risk map
+  pred_layer <- predict(object = sdm,
+                        x.layers = covstack,
+                        quantiles = c(0.025, 0.975),
+                        splitby = 20
+  )
+  ypred <- raster::extract(pred_layer[[2]], test_coords[-bad_rows, 1:2])
+  sdm_prec <- length(which(ypred>get_threshold(sdm))) / length(ypred)
+  if (SAVE_FITS){
+    save(pred_layer,
+         file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/prediction_Q2.rds", sep = ""))
+  }
+  
+  if (SAVE_PLOTS){
+    png(filename = "../../bartfit-plots/q2_map.png")
+  }
+  # Plot map
+  plot(pred_layer[[1]],
+       box = FALSE,
+       axes = FALSE,
+       main = 'Mean prediction, Q2')
+  if (SAVE_PLOTS){
+    dev.off()
+  }
+  
+  if (SAVE_PLOTS){
+    png(filename = "../../bartfit-plots/q2_lbound.png")
+  }
+  plot(pred_layer[[2]],
+       box = FALSE,
+       axes = FALSE,
+       main = '2.5% posterior bound, Q2')
+  if (SAVE_PLOTS){
+    dev.off()
+  }
+  
+  if (SAVE_PLOTS){
+    png(filename = "../../bartfit-plots/q2_ubound.png")
+  }
+  plot(pred_layer[[3]],
+       box = FALSE,
+       axes = FALSE,
+       main = '97.5% posterior bound, Q2')
+  if (SAVE_PLOTS){
+    dev.off()
+  }}
+
+
+################################################################################
+# Do the B Q3 analysis
+
+if (BUILD_DATA){
+  covstack <- raster::stack(paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covariates/q3_covs_10k.tif", sep = ""))
+  
+  # Drop unclassified land layer
+  covstack <- dropLayer(covstack, "lc_17")
+  
+  # Load training data
+  training_coords <- readRDS("training_sets/training_coords_B_Q3.RDS")
+  ytrain <- training_coords$pos
+  xtrain <- data.frame(raster::extract(covstack, training_coords[, 1:2]))
+  bad_rows <- which(is.na(rowSums(xtrain)))
+  xtrain <- xtrain[-bad_rows, ]
+  ytrain <- ytrain[-bad_rows]
+}else{
+  training_data <- read.csv("training_sets/training_data_B_Q3.csv")
+  xtrain <- training_data[, names(training_data) != "y"]
+  ytrain <- training_data$y
+}
+
+# Initialise model
+basic_model <- bart(xtrain,
+                    ytrain,
+                    keeptrees = TRUE)
+invisible(basic_model$fit$state)
+summary(basic_model)
+
+if (SAVE_FITS){
+  save(basic_model,
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/basic_model_B_Q3.rds", sep = ""))
+}
+
+sdm <- bart.step(x.data = xtrain,
+                 y.data = ytrain,
+                 full = TRUE,
+                 quiet = TRUE)
+invisible(sdm$fit$state)
+summary(sdm)
+if (SAVE_FITS){
+  save(sdm,
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/sdm_B_Q3.rds", sep = ""))
+}
+
+# Only do projections here if we have built the dataset and have covstack in workspace
+if (BUILD_DATA){
+  
+  # Generate risk map
+  pred_layer <- predict(object = sdm,
+                        x.layers = covstack,
+                        quantiles = c(0.025, 0.975),
+                        splitby = 20
+  )
+  ypred <- raster::extract(pred_layer[[2]], test_coords[-bad_rows, 1:2])
+  sdm_prec <- length(which(ypred>get_threshold(sdm))) / length(ypred)
+  if (SAVE_FITS){
+    save(pred_layer,
+         file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/prediction_Q3.rds", sep = ""))
+  }
+  
+  if (SAVE_PLOTS){
+    png(filename = "../../bartfit-plots/q3_map.png")
+  }
+  # Plot map
+  plot(pred_layer[[1]],
+       box = FALSE,
+       axes = FALSE,
+       main = 'Mean prediction, Q3')
+  if (SAVE_PLOTS){
+    dev.off()
+  }
+  
+  if (SAVE_PLOTS){
+    png(filename = "../../bartfit-plots/q3_lbound.png")
+  }
+  plot(pred_layer[[2]],
+       box = FALSE,
+       axes = FALSE,
+       main = '2.5% posterior bound, Q3')
+  if (SAVE_PLOTS){
+    dev.off()
+  }
+  
+  if (SAVE_PLOTS){
+    png(filename = "../../bartfit-plots/q3_ubound.png")
+  }
+  plot(pred_layer[[3]],
+       box = FALSE,
+       axes = FALSE,
+       main = '97.5% posterior bound, Q3')
+  if (SAVE_PLOTS){
+    dev.off()
+  }}
+
+
+################################################################################
+# Do the B Q4 analysis
+
+if (BUILD_DATA){
+  covstack <- raster::stack(paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covariates/q4_covs_10k.tif", sep = ""))
+  
+  # Drop unclassified land layer
+  covstack <- dropLayer(covstack, "lc_17")
+  
+  # Load training data
+  training_coords <- readRDS("training_sets/training_coords_B_Q4.RDS")
+  ytrain <- training_coords$pos
+  xtrain <- data.frame(raster::extract(covstack, training_coords[, 1:2]))
+  bad_rows <- which(is.na(rowSums(xtrain)))
+  xtrain <- xtrain[-bad_rows, ]
+  ytrain <- ytrain[-bad_rows]
+}else{
+  training_data <- read.csv("training_sets/training_data_B_Q4.csv")
+  xtrain <- training_data[, names(training_data) != "y"]
+  ytrain <- training_data$y
+}
+
+# Initialise model
+basic_model <- bart(xtrain,
+                    ytrain,
+                    keeptrees = TRUE)
+invisible(basic_model$fit$state)
+summary(basic_model)
+
+if (SAVE_FITS){
+  save(basic_model,
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/basic_model_B_Q4.rds", sep = ""))
+}
+
+sdm <- bart.step(x.data = xtrain,
+                 y.data = ytrain,
+                 full = TRUE,
+                 quiet = TRUE)
+invisible(sdm$fit$state)
+summary(sdm)
+if (SAVE_FITS){
+  save(sdm,
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/sdm_B_Q4.rds", sep = ""))
 }
 
 # Only do projections here if we have built the dataset and have covstack in workspace
