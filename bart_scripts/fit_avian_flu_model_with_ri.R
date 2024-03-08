@@ -5,55 +5,86 @@
 SAVE_FITS <- FALSE
 SAVE_PLOTS <- FALSE
 BUILD_COVS <- FALSE
-PLOT_COUNTRY_VALIDATION <- FALSE
+PLOT_COUNTRY_VALIDATION <- TRUE
 
 # Set path to folder containing data, and where output will be stored
 PATH_TO_DATA <- "../../../OneDrive - The University of Liverpool/"
 
 library(dbarts)
+library(rasterVis)
 library(embarcadero)
 library(raster)
+library(sp)
 library(terra)
+library(rworldmap)
 set.seed(12345)
 
 ################################################################################
-# Snippet adapted from
-# https://stackoverflow.com/questions/14334970/convert-latitude-and-longitude-coordinates-to-country-name-in-r
-library(sp)
-library(rworldmap)
+# Try making raster of country idx's, adapted from
+# https://gis.stackexchange.com/questions/44139/convert-a-spatialpolygonsdataframe-to-raster-using-rasterize-function
 
-# The single argument to this function, points, is a data.frame in which:
-#   - column 1 contains the longitude in degrees
-#   - column 2 contains the latitude in degrees
-coords2country = function(sample_data)
-{  
-  # Convert from EPSG to lat long decimal:
-  coordinates(sample_data) <- c("X", "Y")
-  proj4string(sample_data) <- CRS("epsg:3035")
-  sample_data <- spTransform(sample_data, CRS("+init=epsg:4326")) %>% as.data.frame()
-  
-  # Extract coordinates as dataframe with appropriate labels:
-  points <- data.frame(lon = sample_data$coords.x1, lat = sample_data$coords.x2)
-  countriesSP <- getMap(resolution='high')
-  #countriesSP <- getMap(resolution='high') #you could use high res map from rworldxtra if you were concerned about detail
-  
-  # convert our list of points to a SpatialPoints object
-  
-  # pointsSP = SpatialPoints(points, proj4string=CRS(" +proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0"))
-  
-  #setting CRS directly to that from rworldmap
-  pointsSP = SpatialPoints(points, proj4string=CRS(proj4string(countriesSP)))
-  
-  
-  # use 'over' to get indices of the Polygons object containing each point 
-  indices = over(pointsSP, countriesSP)
-  
-  # return the ADMIN names of each country
-  indices$ADMIN  
-  #indices$ISO3 # returns the ISO3 code 
-  #indices$continent   # returns the continent (6 continent model)
-  #indices$REGION   # returns the continent (7 continent model)
-}
+
+# Create a blank raster with appropriate projection and extent
+blank_3035 <- terra::rast("output/euro_rast_10k.tif")
+euro_ext <- ext(blank_3035)
+crs <- "epsg:3035"
+
+countriesSP <- getMap(resolution='low') %>% spTransform(CRS(crs))
+countriesSP$Grd_ranks <- rank(countriesSP$ADMIN)
+country_lookup <- data.frame(country=countriesSP$ADMIN,
+                             val=rank(countriesSP$Grd_ranks))
+
+r <- rast(nlyrs=1,
+          crs=crs,
+          extent=extent(countriesSP),
+          res=res(blank_3035)) %>% raster()
+
+country_rast <- rasterize(countriesSP, r, field="Grd_ranks", fun="first") %>%
+                terra::rast() %>%
+                crop(euro_ext)
+# country_fact <- as.factor(country_rast)
+# tar<-levels(country_fact)[[1]]
+# tar[["Country"]]<-country_lookup$country[as.numeric(freq(country_fact)$value)]
+# levels(country_fact)<-tar
+# levelplot(country_fact)
+
+# ################################################################################
+# # Snippet adapted from
+# # https://stackoverflow.com/questions/14334970/convert-latitude-and-longitude-coordinates-to-country-name-in-r
+# 
+# 
+# # The single argument to this function, points, is a data.frame in which:
+# #   - column 1 contains the longitude in degrees
+# #   - column 2 contains the latitude in degrees
+# coords2country = function(sample_data)
+# {  
+#   # Convert from EPSG to lat long decimal:
+#   coordinates(sample_data) <- c("X", "Y")
+#   proj4string(sample_data) <- CRS("epsg:3035")
+#   sample_data <- spTransform(sample_data, CRS("+init=epsg:4326")) %>% as.data.frame()
+#   
+#   # Extract coordinates as dataframe with appropriate labels:
+#   points <- data.frame(lon = sample_data$coords.x1, lat = sample_data$coords.x2)
+#   countriesSP <- getMap(resolution='high')
+#   #countriesSP <- getMap(resolution='high') #you could use high res map from rworldxtra if you were concerned about detail
+#   
+#   # convert our list of points to a SpatialPoints object
+#   
+#   # pointsSP = SpatialPoints(points, proj4string=CRS(" +proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0"))
+#   
+#   #setting CRS directly to that from rworldmap
+#   pointsSP = SpatialPoints(points, proj4string=CRS(proj4string(countriesSP)))
+#   
+#   
+#   # use 'over' to get indices of the Polygons object containing each point 
+#   indices = over(pointsSP, countriesSP)
+#   
+#   # return the ADMIN names of each country
+#   indices$ADMIN  
+#   #indices$ISO3 # returns the ISO3 code 
+#   #indices$continent   # returns the continent (6 continent model)
+#   #indices$REGION   # returns the continent (7 continent model)
+# }
 
 ################################################################################
 
@@ -524,13 +555,14 @@ covstack <- raster::stack(paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covar
 covstack <- dropLayer(covstack, "lc_17")
 
 # Load training data
-training_coords <- readRDS("training_sets/training_coords_Q1.RDS")
-training_coords$country <- coords2country(training_coords)
-
-# Identify and plot samples where a country could not be assigned - should find
-# it's all on-water samples.
-
-mismatch_samples <- which(is.na(training_coords$country))
+training_coords <- readRDS("training_sets/training_coords_A_Q1.RDS")
+# training_coords$country <- coords2country(training_coords)
+# 
+# # Identify and plot samples where a country could not be assigned - should find
+# # it's all on-water samples.
+# 
+country_df <- data.frame(raster::extract(country_rast, training_coords[, 1:2]))
+mismatch_samples <- which(is.na(rowSums(country_df)))
 mismatch_pts <- terra::vect(training_coords[mismatch_samples, ], geom=c("X", "Y"),
                             crs =  "+proj=longlat +ellps=WGS84 +datum=WGS84")
 zipmap <- terra::vect(x = "data/gis_europe/CNTR_RG_03M_2020_4326.shp.zip",
@@ -538,21 +570,21 @@ zipmap <- terra::vect(x = "data/gis_europe/CNTR_RG_03M_2020_4326.shp.zip",
 crs <- "epsg:3035"
 euro_ext <- extent(covstack[[1]])
 
-# change projection and extent. 
-# using quite a generous extent whilst plotting as looking at where to set the boundaries
-euro_map <- terra::project(x = zipmap, y = crs) 
+# # change projection and extent. 
+# # using quite a generous extent whilst plotting as looking at where to set the boundaries
+euro_map <- terra::project(x = zipmap, y = crs)
 euro_map_crop <- terra::crop(euro_map, euro_ext)
 plot(euro_map_crop,
      col = "white",
      background = "azure2",
      axes = FALSE,
      buffer = FALSE,
-     xmin = euro_ext@xmin,
      mar = c(0, 0, 0, 0))
-plot(mismatch_pts, add = T, col = "red", pch = 16, cex = .3)
-
-# Remove NA's from data - although we should think about how to fix this
+plot(mismatch_pts, add = T, col = "red", pch = 16, cex = 1.)
+# 
+# # Remove NA's from data - although we should think about how to fix this
 training_coords <- training_coords[-mismatch_samples,]
+country_df <- country_df[-mismatch_samples,]
 
 cov_df <- data.frame(raster::extract(covstack, training_coords[, 1:2]))
 
@@ -571,13 +603,17 @@ if (PLOT_COUNTRY_VALIDATION){
     pts_pos <- terra::vect(training_coords[pts_to_plot[i], ], geom=c("X", "Y"),
                            crs =  "+proj=longlat +ellps=WGS84 +datum=WGS84")
     plot(pts_pos, add = T, col = "red", pch = 16, cex = .3)
-    text(pts_pos, labels=training_coords$country[pts_to_plot[i]])
+    this_country <- country_lookup$country[which(country_lookup$val==country_df$layer[pts_to_plot[i]])]
+    text(pts_pos, labels=this_country)
     cat("This point is in",
-        training_coords$country[pts_to_plot[i]],
+        this_country,
         ".\n")
     Sys.sleep(1)
   }
 }
+
+# FROM https://stackoverflow.com/questions/27562076/if-raster-value-na-search-and-extract-the-nearest-non-na-pixel
+sampled = apply(X = training_coords[, 1:2], MARGIN = 1, FUN = function(xy) r@data@values[which.min(replace(distanceFromPoints(r, xy), is.na(r), NA))])
 
 # # Breaking construction of cov_df into steps speeds up execution time - this
 # # appears to be a quirk of how raster extraction and/or data frame construction
@@ -621,13 +657,14 @@ plot(euro_map_crop,
      background = "azure2",
      axes = FALSE,
      buffer = FALSE,
-     xmin = euro_ext@xmin,
      mar = c(0, 0, 0, 0))
 plot(bad_pts, add = T, col = "red", pch = 16, cex = .3)
 
 # Remove bad points
 cov_df <- cov_df[-bad_rows, ]
 training_coords <- training_coords[-bad_rows, ]
+# Just redraw countries:
+country_df <- data.frame(raster::extract(country_rast, training_coords[, 1:2]))
 
 n_pts <- nrow(training_coords)
 n_training <- round(.75 * n_pts)
@@ -637,18 +674,20 @@ xtrain <- cov_df[training, ]
 ytrain <- training_coords$pos[training]
 xtest <- cov_df[-training, ]
 ytest <- training_coords$pos[-training]
-countrytrain <- training_coords$country[training]
-countrytest <- training_coords$country[-training]
+countrytrain <- country_df$layer[training]
+countrytest <- country_df$layer[-training]
 
 combined_data <- cov_df
 combined_data$pos <- training_coords$pos
-combined_data$country <- training_coords$country
+combined_data$country <- sapply(1:nrow(combined_data),
+                                FUN=function(i){
+                                  country_lookup$country[which(country_lookup$val==country_df$layer[i])]})
 
 df_train <- combined_data[training, ]
 df_test <- combined_data[-training, ]
 
 if (SAVE_FITS){
-  save(xtrain, ytrain, xtest, ytest, file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/q1_train_test_data.rds", sep = ""))
+  save(xtrain, ytrain, xtest, ytest, file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/q1_train_test_data_ri.rds", sep = ""))
 }
 
 # Initialise model
@@ -698,11 +737,14 @@ vs_ranef_means <- data.frame(name = names(sdm$ranef.mean),
 p <- ggplot(vs_ranef_means) + geom_col(aes(rem, name)) + theme(axis.title=element_blank())
 p
 
-covstack_lores <- aggregate(covstack, fact = 10)
+covstack <- aggregate(covstack, fact = 10)
+gc()
 
 # Generate risk map
 pred_layer <- predict(object = sdm,
-                      x.layers = covstack_lores,
+                      x.layers = covstack,
+                      ri.data = country_rast,
+                      ri.name = "country_rast",
                       quantiles = c(0.025, 0.975),
                       splitby = 20
                       )
