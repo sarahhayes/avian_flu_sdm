@@ -612,9 +612,6 @@ if (PLOT_COUNTRY_VALIDATION){
   }
 }
 
-# FROM https://stackoverflow.com/questions/27562076/if-raster-value-na-search-and-extract-the-nearest-non-na-pixel
-sampled = apply(X = training_coords[, 1:2], MARGIN = 1, FUN = function(xy) r@data@values[which.min(replace(distanceFromPoints(r, xy), is.na(r), NA))])
-
 # # Breaking construction of cov_df into steps speeds up execution time - this
 # # appears to be a quirk of how raster extraction and/or data frame construction
 # # is done.
@@ -660,9 +657,39 @@ plot(euro_map_crop,
      mar = c(0, 0, 0, 0))
 plot(bad_pts, add = T, col = "red", pch = 16, cex = .3)
 
+# Try replacing NA pixels with nearest non-NA
+cd_shift <- cov_df
+for (i in bad_rows){
+  bad_fields <- which(is.na(cov_df[i, ]))
+  # Adapted from https://stackoverflow.com/questions/27562076/if-raster-value-na-search-and-extract-the-nearest-non-na-pixel
+  candidate_pts <- covstack[which.min(replace(distanceFromPoints(covstack[[bad_fields[1]]], training_coords[i, 1:2]), is.na(covstack[[bad_fields[1]]]), NA))]
+  bad_candidates <- which(is.na(rowSums(candidate_pts)))
+  if (length(bad_candidates>0)){
+    candidate_pts <- candidate_pts[-bad_candidates, ]
+  }
+  if (nrow(candidate_pts)<4){
+    cd_shift[i, ] <- candidate_pts[1, ]
+  }
+}
+
+# Check if this has worked:
+bad_rows <- which(is.na(rowSums(cd_shift)))
+if (length(bad_rows)>0){
+  bad_pts <- terra::vect(training_coords[bad_rows, ], geom=c("X", "Y"),
+                         crs =  "+proj=longlat +ellps=WGS84 +datum=WGS84")
+  plot(euro_map_crop,
+       col = "white",
+       background = "azure2",
+       axes = FALSE,
+       buffer = FALSE,
+       mar = c(0, 0, 0, 0))
+  plot(bad_pts, add = T, col = "red", pch = 16, cex = .3)
+}else{
+  print("Shifting to nearest pixel removed all NA values")
+}
+
 # Remove bad points
-cov_df <- cov_df[-bad_rows, ]
-training_coords <- training_coords[-bad_rows, ]
+cov_df <- cd_shift
 # Just redraw countries:
 country_df <- data.frame(raster::extract(country_rast, training_coords[, 1:2]))
 
