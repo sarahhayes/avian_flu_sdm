@@ -590,7 +590,7 @@ for (i in mismatch_samples){
   if (length(bad_candidates>0)){
     candidate_pts <- candidate_pts[-bad_candidates, ]
   }
-  if (length(candidate_pts)<4){
+  if (length(candidate_pts)>0){
     country_shift[i, 1] <- candidate_pts[1]
   }
 }
@@ -606,7 +606,11 @@ if (length(bad_rows)>0){
        axes = FALSE,
        buffer = FALSE,
        mar = c(0, 0, 0, 0))
-  plot(bad_pts, add = T, col = "red", pch = 16, cex = .3)
+  plot(bad_pts, add = T, col = "red", pch = 16, cex = 1.)
+  
+  cat("Removing ", length(bad_rows), " datapoints with NA covariates.")
+  country_shift <- country_shift[-bad_rows, ]
+  training_coords <- training_coords[-bad_rows, ]
 }else{
   print("Shifting to nearest pixel removed all NA values")
 }
@@ -630,7 +634,7 @@ if (PLOT_COUNTRY_VALIDATION){
   for (i in 1:25){
     pts_pos <- terra::vect(training_coords[pts_to_plot[i], ], geom=c("X", "Y"),
                            crs =  "+proj=longlat +ellps=WGS84 +datum=WGS84")
-    plot(pts_pos, add = T, col = "red", pch = 16, cex = .3)
+    plot(pts_pos, add = T, col = "red", pch = 16, cex = 1.)
     this_country <- country_lookup$country[which(country_lookup$val==country_df$country[pts_to_plot[i]])]
     text(pts_pos, labels=this_country)
     cat("This point is in",
@@ -651,7 +655,7 @@ if (PLOT_COUNTRY_VALIDATION){
   for (i in mismatch_samples){
     pts_pos <- terra::vect(training_coords[i, ], geom=c("X", "Y"),
                            crs =  "+proj=longlat +ellps=WGS84 +datum=WGS84")
-    plot(pts_pos, add = T, col = "red", pch = 16, cex = .3)
+    plot(pts_pos, add = T, col = "red", pch = 16, cex = 1.)
     this_country <- country_lookup$country[which(country_lookup$val==country_df$country[i])]
     text(pts_pos, labels=this_country)
     cat("This point is in",
@@ -704,7 +708,7 @@ plot(euro_map_crop,
      axes = FALSE,
      buffer = FALSE,
      mar = c(0, 0, 0, 0))
-plot(bad_pts, add = T, col = "red", pch = 16, cex = .3)
+plot(bad_pts, add = T, col = "red", pch = 16, cex = 1.)
 
 # Try replacing NA pixels with nearest non-NA
 cd_shift <- cov_df
@@ -716,7 +720,7 @@ for (i in bad_rows){
   if (length(bad_candidates>0)){
     candidate_pts <- candidate_pts[-bad_candidates, ]
   }
-  if (nrow(candidate_pts)<4){
+  if (nrow(candidate_pts)>0){
     cd_shift[i, ] <- candidate_pts[1, ]
   }
 }
@@ -725,22 +729,25 @@ for (i in bad_rows){
 bad_rows <- which(is.na(rowSums(cd_shift)))
 if (length(bad_rows)>0){
   bad_pts <- terra::vect(training_coords[bad_rows, ], geom=c("X", "Y"),
-                         crs =  "+proj=longlat +ellps=WGS84 +datum=WGS84")
+                         crs =  crs)
   plot(euro_map_crop,
        col = "white",
        background = "azure2",
        axes = FALSE,
        buffer = FALSE,
        mar = c(0, 0, 0, 0))
-  plot(bad_pts, add = T, col = "red", pch = 16, cex = .3)
+  plot(bad_pts, add = T, col = "red", pch = 16, cex = 1.)
+  
+  cat("Removing ", length(bad_rows), " datapoints with NA covariates.")
+  cd_shift <- cd_shift[-bad_rows, ]
+  training_coords <- training_coords[-bad_rows, ]
+  country_df <- country_df[-bad_rows, ]
 }else{
   print("Shifting to nearest pixel removed all NA values")
 }
 
-# Remove bad points
+# Replace with shifted covariates
 cov_df <- cd_shift
-# Just redraw countries:
-country_df <- data.frame(raster::extract(country_rast, training_coords[, 1:2]))
 
 n_pts <- nrow(training_coords)
 n_training <- round(.75 * n_pts)

@@ -1,6 +1,8 @@
 # In this script we use pre-assembled covariates and testing and training data
 # coordinates to construct training and testing datasets which we save as csv's.
 
+PLOT_COUNTRY_VALIDATION <- TRUE
+
 PATH_TO_DATA <- "../../../OneDrive - The University of Liverpool/"
 
 library(embarcadero)
@@ -18,7 +20,7 @@ blank_3035 <- terra::rast("output/euro_rast_10k.tif")
 euro_ext <- ext(blank_3035)
 crs <- "epsg:3035"
 
-countriesSP <- getMap(resolution='high') %>% spTransform(CRS(crs))
+countriesSP <- getMap(resolution='low') %>% spTransform(CRS(crs))
 countriesSP$Grd_ranks <- rank(countriesSP$ADMIN)
 country_lookup <- data.frame(country=countriesSP$ADMIN,
                              val=rank(countriesSP$Grd_ranks))
@@ -28,9 +30,7 @@ r <- rast(nlyrs=1,
           extent=extent(countriesSP),
           res=res(blank_3035)) %>% raster()
 
-country_rast <- rasterize(countriesSP, r, field="Grd_ranks", fun="first") %>%
-  terra::rast() %>%
-  crop(euro_ext)
+country_rast <- raster::rasterize(countriesSP, r, field="Grd_ranks", fun="first")
 
 
 ################################################################################
@@ -43,9 +43,12 @@ covstack <- dropLayer(covstack, "lc_17")
 
 # Load training data
 training_coords <- readRDS("training_sets/training_coords_A_Q1.RDS")
-
-country_df <- data.frame(raster::extract(country_rast, training_coords[, 1:2]))
-mismatch_samples <- which(is.na(rowSums(country_df)))
+# # Identify and plot samples where a country could not be assigned - should find
+# # it's all on-water samples.
+# 
+ri_train <- data.frame(raster::extract(country_rast, training_coords[, 1:2]))
+names(ri_train) <- c("country")
+mismatch_samples <- which(is.na(rowSums(ri_train)))
 mismatch_pts <- terra::vect(training_coords[mismatch_samples, ], geom=c("X", "Y"),
                             crs =  "+proj=longlat +ellps=WGS84 +datum=WGS84")
 zipmap <- terra::vect(x = "data/gis_europe/CNTR_RG_03M_2020_4326.shp.zip",
@@ -63,10 +66,44 @@ plot(euro_map_crop,
      axes = FALSE,
      buffer = FALSE,
      mar = c(0, 0, 0, 0))
-plot(mismatch_pts, add = T, col = "red", pch = 16, cex = .3)
-# 
-# # Remove NA's from data - although we should think about how to fix this
-training_coords <- training_coords[-mismatch_samples,]
+plot(mismatch_pts, add = T, col = "red", pch = 16, cex = 1.)
+
+# Try replacing NA pixels with nearest non-NA
+country_shift <- ri_train
+for (i in mismatch_samples){
+  # Adapted from https://stackoverflow.com/questions/27562076/if-raster-value-na-search-and-extract-the-nearest-non-na-pixel
+  candidate_pts <- country_rast[which.min(replace(distanceFromPoints(country_rast, training_coords[i, 1:2]), is.na(country_rast), NA))]
+  bad_candidates <- which(is.na(candidate_pts))
+  if (length(bad_candidates>0)){
+    candidate_pts <- candidate_pts[-bad_candidates, ]
+  }
+  if (length(candidate_pts)>0){
+    country_shift[i, 1] <- candidate_pts[1]
+  }
+}
+
+# Check if this has worked:
+bad_rows <- which(is.na(rowSums(country_shift)))
+if (length(bad_rows)>0){
+  bad_pts <- terra::vect(training_coords[bad_rows, ], geom=c("X", "Y"),
+                         crs =  "+proj=longlat +ellps=WGS84 +datum=WGS84")
+  plot(euro_map_crop,
+       col = "white",
+       background = "azure2",
+       axes = FALSE,
+       buffer = FALSE,
+       mar = c(0, 0, 0, 0))
+  plot(bad_pts, add = T, col = "red", pch = 16, cex = 1.)
+  
+  cat("Removing ", length(bad_rows), " datapoints with NA covariates.")
+  country_shift <- country_shift[-bad_rows, ]
+  training_coords <- training_coords[-bad_rows, ]
+}else{
+  print("Shifting to nearest pixel removed all NA values")
+}
+
+# Replace mismatches with shifted versions:
+ri_train <- country_shift
 
 if (PLOT_COUNTRY_VALIDATION){
   # Quick digression to validate coords2country function:
@@ -82,18 +119,42 @@ if (PLOT_COUNTRY_VALIDATION){
   for (i in 1:25){
     pts_pos <- terra::vect(training_coords[pts_to_plot[i], ], geom=c("X", "Y"),
                            crs =  "+proj=longlat +ellps=WGS84 +datum=WGS84")
-    plot(pts_pos, add = T, col = "red", pch = 16, cex = .3)
-    this_country <- country_lookup$country[which(country_lookup$val==country_df$layer[pts_to_plot[i]])]
+    plot(pts_pos, add = T, col = "red", pch = 16, cex = 1.)
+    this_country <- country_lookup$country[which(country_lookup$val==ri_train$country[pts_to_plot[i]])]
     text(pts_pos, labels=this_country)
     cat("This point is in",
-        this_country,
+        as.character(this_country),
+        ".\n")
+    Sys.sleep(1)
+  }
+  
+  # Also specifically check mismatches:
+  plot(euro_map_crop,
+       col = "white",
+       background = "azure2",
+       axes = FALSE,
+       buffer = FALSE,
+       xmin = euro_ext@xmin,
+       mar = c(0, 0, 0, 0))
+  pts_to_plot <- sample(1:nrow(training_coords), 25)
+  for (i in mismatch_samples){
+    pts_pos <- terra::vect(training_coords[i, ], geom=c("X", "Y"),
+                           crs =  "+proj=longlat +ellps=WGS84 +datum=WGS84")
+    plot(pts_pos, add = T, col = "red", pch = 16, cex = 1.)
+    this_country <- country_lookup$country[which(country_lookup$val==ri_train$country[i])]
+    text(pts_pos, labels=this_country)
+    cat("This point is in",
+        as.character(this_country),
         ".\n")
     Sys.sleep(1)
   }
 }
 
+# Now do covariates
+xtrain <- data.frame(raster::extract(covstack, training_coords[, 1:2]))
+
 # Try to plot out coordinates where we can't extract covariates:
-bad_rows <- which(is.na(rowSums(cov_df)))
+bad_rows <- which(is.na(rowSums(xtrain)))
 bad_pts <- terra::vect(training_coords[bad_rows, ], geom=c("X", "Y"),
                        crs =  "+proj=longlat +ellps=WGS84 +datum=WGS84")
 plot(euro_map_crop,
@@ -102,26 +163,215 @@ plot(euro_map_crop,
      axes = FALSE,
      buffer = FALSE,
      mar = c(0, 0, 0, 0))
-plot(bad_pts, add = T, col = "red", pch = 16, cex = .3)
+plot(bad_pts, add = T, col = "red", pch = 16, cex = 1.)
 
-# Remove bad points
-training_coords <- training_coords[-bad_rows, ]
-# Just redraw countries:
-country_df <- data.frame(raster::extract(country_rast, training_coords[, 1:2]))
+# Try replacing NA pixels with nearest non-NA
+xtrain_shifted <- xtrain
+for (i in bad_rows){
+  bad_fields <- which(is.na(xtrain[i, ]))
+  # Adapted from https://stackoverflow.com/questions/27562076/if-raster-value-na-search-and-extract-the-nearest-non-na-pixel
+  candidate_pts <- covstack[which.min(replace(distanceFromPoints(covstack[[bad_fields[1]]], training_coords[i, 1:2]), is.na(covstack[[bad_fields[1]]]), NA))]
+  non_na_candidates <- which(!is.na(rowSums(candidate_pts)))
+  if (length(non_na_candidates>0)){
+    xtrain_shifted[i, ] <- candidate_pts[non_na_candidates[1], ]
+  }
+}
 
-ytrain <- training_coords$pos
-xtrain <- data.frame(raster::extract(covstack, training_coords[, 1:2]))
-bad_rows <- which(is.na(rowSums(xtrain)))
-training_data <- xtrain[-bad_rows, ]
-training_data$y <- ytrain[-bad_rows]
+# Check if this has worked:
+bad_rows <- which(is.na(rowSums(xtrain_shifted)))
+if (length(bad_rows)>0){
+  bad_pts <- terra::vect(training_coords[bad_rows, ], geom=c("X", "Y"),
+                         crs =  crs)
+  plot(euro_map_crop,
+       col = "white",
+       background = "azure2",
+       axes = FALSE,
+       buffer = FALSE,
+       mar = c(0, 0, 0, 0))
+  plot(bad_pts, add = T, col = "red", pch = 16, cex = 1.)
+  
+  cat("Removing ", length(bad_rows), " datapoints with NA covariates.")
+  xtrain_shifted <- xtrain_shifted[-bad_rows, ]
+  training_coords <- training_coords[-bad_rows, ]
+  ri_train <- ri_train[-bad_rows, ]
+}else{
+  print("Shifting to nearest pixel removed all NA values")
+}
+
+# Replace with shifted covariates
+xtrain <- xtrain_shifted
+
+# Assemble training data
+training_data <- xtrain
+training_data$y <- training_coords$pos
+training_data$ri <- ri_train
 write.csv(training_data, "training_sets/training_data_A_Q1.csv", row.names = FALSE)
 
+
+# Testing
 test_coords <- readRDS("training_sets/test_coords_A_Q1.RDS")
-ytest <- test_coords$const
+# # Identify and plot samples where a country could not be assigned - should find
+# # it's all on-water samples.
+# 
+ri_test <- data.frame(raster::extract(country_rast, test_coords[, 1:2]))
+names(ri_test) <- c("country")
+mismatch_samples <- which(is.na(rowSums(ri_test)))
+mismatch_pts <- terra::vect(test_coords[mismatch_samples, ], geom=c("X", "Y"),
+                            crs =  "+proj=longlat +ellps=WGS84 +datum=WGS84")
+zipmap <- terra::vect(x = "data/gis_europe/CNTR_RG_03M_2020_4326.shp.zip",
+                      layer = "CNTR_RG_03M_2020_4326")
+crs <- "epsg:3035"
+euro_ext <- extent(covstack[[1]])
+
+# # change projection and extent. 
+# # using quite a generous extent whilst plotting as looking at where to set the boundaries
+euro_map <- terra::project(x = zipmap, y = crs)
+euro_map_crop <- terra::crop(euro_map, euro_ext)
+plot(euro_map_crop,
+     col = "white",
+     background = "azure2",
+     axes = FALSE,
+     buffer = FALSE,
+     mar = c(0, 0, 0, 0))
+plot(mismatch_pts, add = T, col = "red", pch = 16, cex = 1.)
+
+# Try replacing NA pixels with nearest non-NA
+country_shift <- ri_test
+for (i in mismatch_samples){
+  # Adapted from https://stackoverflow.com/questions/27562076/if-raster-value-na-search-and-extract-the-nearest-non-na-pixel
+  candidate_pts <- country_rast[which.min(replace(distanceFromPoints(country_rast, test_coords[i, 1:2]), is.na(country_rast), NA))]
+  bad_candidates <- which(is.na(candidate_pts))
+  if (length(bad_candidates>0)){
+    candidate_pts <- candidate_pts[-bad_candidates, ]
+  }
+  if (length(candidate_pts)>0){
+    country_shift[i, 1] <- candidate_pts[1]
+  }
+}
+
+# Check if this has worked:
+bad_rows <- which(is.na(rowSums(country_shift)))
+if (length(bad_rows)>0){
+  bad_pts <- terra::vect(test_coords[bad_rows, ], geom=c("X", "Y"),
+                         crs =  "+proj=longlat +ellps=WGS84 +datum=WGS84")
+  plot(euro_map_crop,
+       col = "white",
+       background = "azure2",
+       axes = FALSE,
+       buffer = FALSE,
+       mar = c(0, 0, 0, 0))
+  plot(bad_pts, add = T, col = "red", pch = 16, cex = 1.)
+  
+  cat("Removing ", length(bad_rows), " datapoints with NA covariates.")
+  country_shift <- country_shift[-bad_rows, ]
+  test_coords <- test_coords[-bad_rows, ]
+}else{
+  print("Shifting to nearest pixel removed all NA values")
+}
+
+# Replace mismatches with shifted versions:
+ri_test <- country_shift
+
+if (PLOT_COUNTRY_VALIDATION){
+  # Quick digression to validate coords2country function:
+  
+  plot(euro_map_crop,
+       col = "white",
+       background = "azure2",
+       axes = FALSE,
+       buffer = FALSE,
+       xmin = euro_ext@xmin,
+       mar = c(0, 0, 0, 0))
+  pts_to_plot <- sample(1:nrow(test_coords), 25)
+  for (i in 1:25){
+    pts_pos <- terra::vect(test_coords[pts_to_plot[i], ], geom=c("X", "Y"),
+                           crs =  "+proj=longlat +ellps=WGS84 +datum=WGS84")
+    plot(pts_pos, add = T, col = "red", pch = 16, cex = 1.)
+    this_country <- country_lookup$country[which(country_lookup$val==ri_test$country[pts_to_plot[i]])]
+    text(pts_pos, labels=this_country)
+    cat("This point is in",
+        as.character(this_country),
+        ".\n")
+    Sys.sleep(1)
+  }
+  
+  # Also specifically check mismatches:
+  plot(euro_map_crop,
+       col = "white",
+       background = "azure2",
+       axes = FALSE,
+       buffer = FALSE,
+       xmin = euro_ext@xmin,
+       mar = c(0, 0, 0, 0))
+  pts_to_plot <- sample(1:nrow(test_coords), 25)
+  for (i in mismatch_samples){
+    pts_pos <- terra::vect(test_coords[i, ], geom=c("X", "Y"),
+                           crs =  "+proj=longlat +ellps=WGS84 +datum=WGS84")
+    plot(pts_pos, add = T, col = "red", pch = 16, cex = 1.)
+    this_country <- country_lookup$country[which(country_lookup$val==ri_test$country[i])]
+    text(pts_pos, labels=this_country)
+    cat("This point is in",
+        as.character(this_country),
+        ".\n")
+    Sys.sleep(1)
+  }
+}
+
+# Now do covariates
 xtest <- data.frame(raster::extract(covstack, test_coords[, 1:2]))
+
+# Try to plot out coordinates where we can't extract covariates:
 bad_rows <- which(is.na(rowSums(xtest)))
-test_data <- xtest[-bad_rows, ]
-test_data$y <- ytest[-bad_rows]
+bad_pts <- terra::vect(test_coords[bad_rows, ], geom=c("X", "Y"),
+                       crs =  "+proj=longlat +ellps=WGS84 +datum=WGS84")
+plot(euro_map_crop,
+     col = "white",
+     background = "azure2",
+     axes = FALSE,
+     buffer = FALSE,
+     mar = c(0, 0, 0, 0))
+plot(bad_pts, add = T, col = "red", pch = 16, cex = 1.)
+
+# Try replacing NA pixels with nearest non-NA
+xtest_shifted <- xtest
+for (i in bad_rows){
+  bad_fields <- which(is.na(xtest[i, ]))
+  # Adapted from https://stackoverflow.com/questions/27562076/if-raster-value-na-search-and-extract-the-nearest-non-na-pixel
+  candidate_pts <- covstack[which.min(replace(distanceFromPoints(covstack[[bad_fields[1]]], test_coords[i, 1:2]), is.na(covstack[[bad_fields[1]]]), NA))]
+  non_na_candidates <- which(!is.na(rowSums(candidate_pts)))
+  if (length(non_na_candidates>0)){
+    xtest_shifted[i, ] <- candidate_pts[non_na_candidates[1], ]
+  }
+}
+
+# Check if this has worked:
+bad_rows <- which(is.na(rowSums(xtest_shifted)))
+if (length(bad_rows)>0){
+  bad_pts <- terra::vect(test_coords[bad_rows, ], geom=c("X", "Y"),
+                         crs =  crs)
+  plot(euro_map_crop,
+       col = "white",
+       background = "azure2",
+       axes = FALSE,
+       buffer = FALSE,
+       mar = c(0, 0, 0, 0))
+  plot(bad_pts, add = T, col = "red", pch = 16, cex = 1.)
+  
+  cat("Removing ", length(bad_rows), " datapoints with NA covariates.")
+  xtest_shifted <- xtest_shifted[-bad_rows, ]
+  test_coords <- test_coords[-bad_rows, ]
+  ri_test <- ri_test[-bad_rows, ]
+}else{
+  print("Shifting to nearest pixel removed all NA values")
+}
+
+# Replace with shifted covariates
+xtest <- xtest_shifted
+
+# Assemble testing data
+test_data <- xtest
+test_data$y <- test_coords$pos
+test_data$ri <- ri_test
 write.csv(test_data, "training_sets/test_data_A_Q1.csv", row.names = FALSE)
 
 ################################################################################
