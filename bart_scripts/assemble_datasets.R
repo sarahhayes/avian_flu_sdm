@@ -208,7 +208,7 @@ if (length(bad_rows)>0){
 # Assemble training data
 training_data <- xtrain
 training_data$y <- training_coords$pos
-training_data$ri <- ri_train
+training_data$ri <- sapply(ri_train, FUN=function(i){country_lookup$country[country_lookup$val==i]})
 write.csv(training_data, "training_sets/training_data_A_Q1.csv", row.names = FALSE)
 
 #### Now do testing ####
@@ -377,7 +377,7 @@ if (length(bad_rows)>0){
 # Assemble test data
 test_data <- xtest
 test_data$y <- test_coords$pos
-test_data$ri <- ri_test
+test_data$ri <- sapply(ri_test, FUN=function(i){country_lookup$country[country_lookup$val==i]})
 write.csv(test_data, "training_sets/test_data_A_Q1.csv", row.names = FALSE)
 
 ################################################################################
@@ -552,7 +552,7 @@ if (length(bad_rows>0)){
 # Assemble training data
 training_data <- xtrain
 training_data$y <- training_coords$pos
-training_data$ri <- ri_train
+training_data$ri <- sapply(ri_train, FUN=function(i){country_lookup$country[country_lookup$val==i]})
 write.csv(training_data, "training_sets/training_data_A_Q2.csv", row.names = FALSE)
 
 #### Now do testing ####
@@ -720,7 +720,7 @@ if (length(bad_rows)>0){
 # Assemble test data
 test_data <- xtest
 test_data$y <- test_coords$pos
-test_data$ri <- ri_test
+test_data$ri <- sapply(ri_test, FUN=function(i){country_lookup$country[country_lookup$val==i]})
 write.csv(test_data, "training_sets/test_data_A_Q2.csv", row.names = FALSE)
 
 ################################################################################
@@ -895,7 +895,7 @@ if (length(bad_rows)>0){
 # Assemble training data
 training_data <- xtrain
 training_data$y <- training_coords$pos
-training_data$ri <- ri_train
+training_data$ri <- sapply(ri_train, FUN=function(i){country_lookup$country[country_lookup$val==i]})
 write.csv(training_data, "training_sets/training_data_A_Q3.csv", row.names = FALSE)
 
 #### Now do testing ####
@@ -1063,7 +1063,7 @@ if (length(bad_rows)>0){
 # Assemble test data
 test_data <- xtest
 test_data$y <- test_coords$pos
-test_data$ri <- ri_test
+test_data$ri <- sapply(ri_test, FUN=function(i){country_lookup$country[country_lookup$val==i]})
 write.csv(test_data, "training_sets/test_data_A_Q3.csv", row.names = FALSE)
 
 ################################################################################
@@ -1238,7 +1238,7 @@ if (length(bad_rows)>0){
 # Assemble training data
 training_data <- xtrain
 training_data$y <- training_coords$pos
-training_data$ri <- ri_train
+training_data$ri <- sapply(ri_train, FUN=function(i){country_lookup$country[country_lookup$val==i]})
 write.csv(training_data, "training_sets/training_data_A_Q4.csv", row.names = FALSE)
 
 #### Now do testing ####
@@ -1406,7 +1406,7 @@ if (length(bad_rows)>0){
 # Assemble test data
 test_data <- xtest
 test_data$y <- test_coords$pos
-test_data$ri <- ri_test
+test_data$ri <- sapply(ri_test, FUN=function(i){country_lookup$country[country_lookup$val==i]})
 write.csv(test_data, "training_sets/test_data_A_Q4.csv", row.names = FALSE)
 
 ################################################################################
@@ -1581,7 +1581,7 @@ if (length(bad_rows)>0){
 # Assemble training data
 training_data <- xtrain
 training_data$y <- training_coords$pos
-training_data$ri <- ri_train
+training_data$ri <- sapply(ri_train, FUN=function(i){country_lookup$country[country_lookup$val==i]})
 write.csv(training_data, "training_sets/training_data_B_Q1.csv", row.names = FALSE)
 
 ################################################################################
@@ -1756,7 +1756,7 @@ if (length(bad_rows)>0){
 # Assemble training data
 training_data <- xtrain
 training_data$y <- training_coords$pos
-training_data$ri <- ri_train
+training_data$ri <- sapply(ri_train, FUN=function(i){country_lookup$country[country_lookup$val==i]})
 write.csv(training_data, "training_sets/training_data_B_Q2.csv", row.names = FALSE)
 
 ################################################################################
@@ -1931,7 +1931,7 @@ if (length(bad_rows)>0){
 # Assemble training data
 training_data <- xtrain
 training_data$y <- training_coords$pos
-training_data$ri <- ri_train
+training_data$ri <- sapply(ri_train, FUN=function(i){country_lookup$country[country_lookup$val==i]})
 write.csv(training_data, "training_sets/training_data_B_Q3.csv", row.names = FALSE)
 
 ################################################################################
@@ -2106,5 +2106,5 @@ if (length(bad_rows)>0){
 # Assemble training data
 training_data <- xtrain
 training_data$y <- training_coords$pos
-training_data$ri <- ri_train
+training_data$ri <- sapply(ri_train, FUN=function(i){country_lookup$country[country_lookup$val==i]})
 write.csv(training_data, "training_sets/training_data_B_Q4.csv", row.names = FALSE)
