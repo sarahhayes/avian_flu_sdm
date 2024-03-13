@@ -47,7 +47,7 @@ ggplot(ranef_means) + geom_col(aes(rem, name)) + theme(axis.title=element_blank(
 
 if (SAVE_FITS){
   save(basic_model,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/basic_model_Q1.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/ri_model_Q1.rds", sep = ""))
 }
 
 # retuned_model <- retune(basic_model)
@@ -163,7 +163,7 @@ summary(basic_model)
 
 if (SAVE_FITS){
   save(basic_model,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/basic_model_Q2.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/ri_model_Q2.rds", sep = ""))
 }
 
 retuned_model <- retune(basic_model)
@@ -269,7 +269,7 @@ summary(basic_model)
 
 if (SAVE_FITS){
   save(basic_model,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/basic_model_Q3.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/ri_model_Q3.rds", sep = ""))
 }
 
 retuned_model <- retune(basic_model)
@@ -375,7 +375,7 @@ summary(basic_model)
 
 if (SAVE_FITS){
   save(basic_model,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/basic_model_Q4.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/ri_model_Q4.rds", sep = ""))
 }
 
 retuned_model <- retune(basic_model)
