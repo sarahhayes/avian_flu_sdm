@@ -539,9 +539,22 @@ for (i in 1:4){
 # Combine presences and pseudoabsences into test sets
 
 for (i in 1:4){
-  bind_rows(
+ df <- bind_rows(
     test_A %>% filter(Q == paste0("Q",i)) %>% select(X, Y, pos),
     pseudoabs_test_A %>% filter(Q == paste0("Q",i)) %>% rename(pos = pr_ab) %>% select(X, Y, pos) # Add in test pseudoabsences
-    ) %>%
-      saveRDS(paste0("training_sets//test_coords_A_Q", i, ".RDS"))
+    ) 
+ 
+ png(paste0("plots//resampling//test//test_A_Q", i, ".png"), width = 10, height = 10, units = "in", res = 600)
+ plot(base_map, col = "gray95", main = paste0("test set A, Q",i," (pos = green, pseudoabs = red)"))
+ points(df %>% filter(pos == 1) %>% pull(X),
+        df %>% filter(pos == 1) %>% pull(Y), 
+        pch=16, cex=0.2, col = "green3")
+ points(df %>% filter(pos == 0) %>% pull(X),
+        df %>% filter(pos == 0) %>% pull(Y), 
+        pch=16, cex=0.2, col = "firebrick1")
+ dev.off()
+ 
+ df %>% saveRDS(paste0("training_sets//test_coords_A_Q", i, ".RDS"))
 }
+
+
