@@ -30,7 +30,7 @@ library(stringr)
 library(terra)
 
 # Bring in AVONET to see if we can fix the missing species using AVONET IDs
-AVONET_df <- read_excel("data/eco_phylo_data/AVONETSupplementarydataset1.xlsx",
+AVONET_df <- read_excel("../../../OneDrive - The University of Liverpool/eco_phylo_data/AVONETSupplementarydataset1.xlsx",
                         sheet = "AVONET_Raw_Data")
 AVONET_df <- AVONET_df[,
                        c("Avibase.ID",
@@ -570,7 +570,7 @@ if (PLOT){
   p + coord_flip() + 
     scale_x_discrete(limits=order_case_counts$HostOrder) + 
     xlab("Host order") +
-    ylab("Number of cases")
+    ylab("Count")
 }
 
 if (PLOT){
@@ -583,7 +583,7 @@ if (PLOT){
   p + coord_flip() + 
     scale_x_discrete(limits=plot_lims) + 
     xlab("Host family") +
-    ylab("Number of cases")
+    ylab("Count")
 }
 
 if (PLOT){
@@ -596,7 +596,7 @@ if (PLOT){
   p + coord_flip() + 
     scale_x_discrete(limits=plot_lims) + 
     xlab("Host genus") +
-    ylab("Number of cases")
+    ylab("Count")
 }
 
 # Get species ID's of species in CLOVER
