@@ -30,7 +30,7 @@ library(stringr)
 library(terra)
 
 # Bring in AVONET to see if we can fix the missing species using AVONET IDs
-AVONET_df <- read_excel("../../../OneDrive - The University of Liverpool/eco_phylo_data/AVONETSupplementarydataset1.xlsx",
+AVONET_df <- read_excel("../../../AI_S2_SDM_storage/OneDrive - The University of Liverpool/eco_phylo_data/AVONETSupplementarydataset1.xlsx",
                         sheet = "AVONET_Raw_Data")
 AVONET_df <- AVONET_df[,
                        c("Avibase.ID",
