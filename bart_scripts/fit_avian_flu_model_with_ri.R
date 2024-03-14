@@ -29,7 +29,7 @@ ytest <- test_data$y
 countrytest <- test_data$ri
 
 # Initialise model
-basic_model <- rbart_vi(y ~ . - ri,
+my_model <- rbart_vi(y ~ . - ri,
                     training_data,
                     group.by = ri,
                     group.by.test = ri,
