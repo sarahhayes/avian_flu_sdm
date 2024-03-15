@@ -18,6 +18,43 @@ library(terra)
 library(rworldmap)
 set.seed(12345)
 
+crossvalidate_from_known_folds <- function(data,
+                                           folds,
+                                           k_vals,
+                                           power_vals,
+                                           base_vals){
+  cv_results <- data.frame(k=numeric(),
+                           power=numeric(),
+                           base=numeric(),
+                           k1=numeric(),
+                           k2=numeric(),
+                           k3=numeric(),
+                           k4=numeric(),
+                           k5=numeric())
+  cv_results[1:length(k_vals)*length(power_vals)*length(base_vals), ] <- 0
+  for (i in 1:length(k_vals)){
+    for (j in 1:length(power_vals)){
+      for (k in 1:length(base_vals)){
+      }
+        for (fold in folds){
+          model <- rbart_vi(y ~ . - ri,
+                                  data[-fold,], # THIS NEEDS TO BE CHANGED!
+                                  group.by = ri,
+                                  group.by.test = ri,
+                                  test = data[fold,], # AND THIS!
+                                  k = k_vals[i],
+                                  power = power_vals[j],
+                                  base = base_vals[k],
+                                  n.chains = 1L,
+                                  n.threads = 1L,
+                                  keepTrees = TRUE)
+          mean_err <- mean(model$residuals)
+          
+        }
+      }
+    }
+}
+
 #### Period A Q1 ####
 
 training_data <- read.csv("training_sets/training_data_A_Q1.csv")
