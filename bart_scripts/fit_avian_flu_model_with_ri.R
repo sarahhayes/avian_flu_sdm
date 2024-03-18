@@ -335,22 +335,19 @@ bart.step <- function(x.data, y.data, ri.data=NULL,
 
 training_data <- read.csv("training_sets/training_data_A_Q1.csv")
 
-#### Sketch of fold construction ####
-fold_order <- sample(1:nrow(training_data), nrow(training_data))
-reordered_training_data <- training_data[fold_order,]
-split_pts <- c(0,
-               as.integer(floor(nrow(training_data)/5)),
-               as.integer(floor(2*nrow(training_data)/5)),
-               as.integer(floor(3*nrow(training_data)/5)),
-               as.integer(floor(4*nrow(training_data)/5)),
-               nrow(training_data))
-folds <- lapply(1:5,
+# Fold construction
+
+fold_ids <- caret::createFolds(paste0(training_data$ri, training_data$y), k = 5)
+
+folds <- lapply(1:length(fold_ids),
                 FUN = function(i){
-                  reordered_training_data[(split_pts[i]+1):split_pts[i+1],]})
-antifolds <- lapply(1:length(folds),
+                  training_data[-fold_ids[[i]],]})
+antifolds <- lapply(1:length(fold_ids),
                     FUN = function(i){
-                      bind_rows(folds[c(-i)])
-                    })
+                      training_data[fold_ids[[i]],]})
+
+## Check training representation
+# lapply(folds, function(x) with(x, table(ri,y)))
 
 
 k_vals = c(1, 2, 3)
