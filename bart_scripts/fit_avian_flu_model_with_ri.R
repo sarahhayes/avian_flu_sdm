@@ -334,11 +334,51 @@ bart.step <- function(x.data, y.data, ri.data=NULL,
   invisible(best.model)
 }
 
+get_threshold <- function(object){
+  fitobj <- object$fit[[1]]
+  
+  true.vector <- fitobj$data@y 
+  
+  pred <- prediction(colMeans(pnorm(object$yhat.train)), true.vector)
+  
+  perf.tss <- performance(pred,"sens","spec")
+  tss.list <- (perf.tss@x.values[[1]] + perf.tss@y.values[[1]] - 1)
+  tss.df <- data.frame(alpha=perf.tss@alpha.values[[1]],tss=tss.list)
+  thresh <- min(tss.df$alpha[which(tss.df$tss==max(tss.df$tss))])
+  return(thresh)
+}
+
+get_sens_and_spec <- function(sdm, xtest, ytest, ri, cutoff){
+  pred <- xtest[which(complete.cases(xtest)), ] %>%
+    stats::predict(object=sdm, type = "bart", group.by=ri) %>%
+    pnorm() %>%
+    colMeans() %>%
+    prediction(labels = ytest[which(complete.cases(xtest))])
+  perf <-  performance(pred, measure = "sens", x.measure = "spec")
+  tss_list <- (perf@x.values[[1]] + perf@y.values[[1]] - 1)
+  tss_df <- data.frame(alpha=perf@alpha.values[[1]],tss=tss_list)
+  # cutoff <- min(tss_df$alpha[which(tss_df$tss==max(tss_df$tss))])
+  sens <- perf@x.values[[1]][which.min(abs(perf@alpha.values[[1]]-cutoff))]
+  spec <- perf@y.values[[1]][which.min(abs(perf@alpha.values[[1]]-cutoff))]
+  tss <- tss_df[which.min(abs(tss_df$alpha-cutoff)),'tss']
+  auc <- performance(pred,"auc")@y.values[[1]]
+  return(pairlist("pred"=pred,
+                  "perf"=perf,
+                  "sens"=sens,
+                  "spec"=spec,
+                  "tss"=tss,
+                  "auc"=auc))
+}
+
 
 
 #### Period A Q1 ####
 
 training_data <- read.csv("training_sets/training_data_A_Q1.csv")
+xtrain <- training_data %>% dplyr::select(!("y"|"ri"))
+ytrain <- training_data$y
+countrytrain <- training_data$ri
+
 
 # Fold construction
 
@@ -356,19 +396,19 @@ antifolds <- lapply(1:length(fold_ids),
 
 
 k_vals = c(1, 2, 3)
-power_vals = c(1.5,1.7,1.9)
-base_vals = c(0.7,0.8,0.9)
+power_vals = c(1.5, 1.6, 1.7, 1.8, 1.9, 2)
+base_vals = c(0.75, 0.8, 0.85, 0.9, 0.95)
 kl <- length(k_vals)
 pl <- length(power_vals)
 bl <- length(base_vals)
 cv_results <- data.frame(k=numeric(),
                          power=numeric(),
                          base=numeric(),
-                         err1=numeric(),
-                         err2=numeric(),
-                         err3=numeric(),
-                         err4=numeric(),
-                         err5=numeric())
+                         auc1=numeric(),
+                         auc2=numeric(),
+                         auc3=numeric(),
+                         auc4=numeric(),
+                         auc5=numeric())
 cv_results[1:kl*pl*bl, ] <- 0
 for (i in 1:length(k_vals)){
   k_val <- k_vals[i]
@@ -390,12 +430,17 @@ for (i in 1:length(k_vals)){
                           k = k_val,
                           power = power_val,
                           base = base_val,
+                          n.trees = 200,
                           n.chains = 1L,
                           n.threads = 1L,
                           keepTrees = TRUE,
                           verbose = FALSE)
-        mean_err <- model %>% residuals %>% abs %>% mean
-        cv_results[idx, 3+fold_no] <- mean_err
+        antifold_x <- subset(antifolds[[fold_no]], select=-c(y, ri))
+        antifold_y <- antifolds[[fold_no]]$y
+        antifold_ri <- antifolds[[fold_no]]$ri
+        cutoff <- get_threshold(model)
+        auc <- get_sens_and_spec(model, antifold_x, antifold_y, antifold_ri, cutoff)$auc
+        cv_results[idx, 3+fold_no] <- auc
         rm(model)
       }
     }
@@ -404,11 +449,11 @@ for (i in 1:length(k_vals)){
 
 cv_results <- cv_results %>%
               rowwise() %>%
-              mutate(mean_err = mean(err1,
-                                     err2,
-                                     err3,
-                                     err4,
-                                     err5))
+              mutate(mean_err = mean(auc1,
+                                     auc2,
+                                     auc3,
+                                     auc4,
+                                     auc5))
 argmin <- which.min(cv_results$mean_err)
 K_OPT <- cv_results$k[argmin]
 power_opt <- cv_results$power[argmin]
