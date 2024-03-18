@@ -454,7 +454,7 @@ cv_results <- cv_results %>%
                                      auc3,
                                      auc4,
                                      auc5))
-argmin <- which.min(cv_results$mean_err)
+argmin <- which.max(cv_results$mean_err)
 K_OPT <- cv_results$k[argmin]
 power_opt <- cv_results$power[argmin]
 base_opt <- cv_results$base[argmin]
