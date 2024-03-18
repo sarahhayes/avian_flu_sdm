@@ -5,6 +5,9 @@
 SAVE_FITS <- FALSE
 SAVE_PLOTS <- FALSE
 
+# Global storing optimised k value for BART - which may be updated
+K_OPT <- 2
+
 # Set path to folder containing data, and where output will be stored
 PATH_TO_DATA <- "../../../OneDrive - The University of Liverpool/"
 
@@ -20,7 +23,6 @@ bart.flex <- function(x.data, y.data, ri.data = NULL,
                       y.name = NULL, ri.name = NULL,
                       n.trees = 200,
                       k = 2.0, power = 2.0, base = 0.95) {
-  
   if(is.null(ri.data)) {
     train <- cbind(y.data, x.data) 
     if(!is.null(y.name)) {colnames(train)[1] <- y.name}
@@ -37,18 +39,21 @@ bart.flex <- function(x.data, y.data, ri.data = NULL,
                           colnames(train)[ncol(train)], sep=' - '))
     
     train <- na.omit(train) 
+    # default(rbart_vi)$k <- k
+    # default(rbart_vi)$power <- power
+    # default(rbart_vi)$base <- base
     model <- rbart_vi(f, 
                       group.by=train[,ncol(train)],
                       data=train,
                       n.samples=1000,
                       n.burn=100,
-                      n.chains=1,
-                      n.threads=1,
                       n.trees = n.trees,
-                      keepTrees = TRUE,
-                      k = k,
+                      k = K_OPT,
                       power = power,
-                      base = base) 
+                      base = base,
+                      keepTrees = TRUE,
+                      n.chains=1,
+                      n.threads=1) 
   }
   return(model)
 }
@@ -335,22 +340,19 @@ bart.step <- function(x.data, y.data, ri.data=NULL,
 
 training_data <- read.csv("training_sets/training_data_A_Q1.csv")
 
-#### Sketch of fold construction ####
-fold_order <- sample(1:nrow(training_data), nrow(training_data))
-reordered_training_data <- training_data[fold_order,]
-split_pts <- c(0,
-               as.integer(floor(nrow(training_data)/5)),
-               as.integer(floor(2*nrow(training_data)/5)),
-               as.integer(floor(3*nrow(training_data)/5)),
-               as.integer(floor(4*nrow(training_data)/5)),
-               nrow(training_data))
-folds <- lapply(1:5,
+# Fold construction
+
+fold_ids <- caret::createFolds(paste0(training_data$ri, training_data$y), k = 5)
+
+folds <- lapply(1:length(fold_ids),
                 FUN = function(i){
-                  reordered_training_data[(split_pts[i]+1):split_pts[i+1],]})
-antifolds <- lapply(1:length(folds),
+                  training_data[-fold_ids[[i]],]})
+antifolds <- lapply(1:length(fold_ids),
                     FUN = function(i){
-                      bind_rows(folds[c(-i)])
-                    })
+                      training_data[fold_ids[[i]],]})
+
+## Check training representation
+# lapply(folds, function(x) with(x, table(ri,y)))
 
 
 k_vals = c(1, 2, 3)
@@ -369,11 +371,11 @@ cv_results <- data.frame(k=numeric(),
                          err5=numeric())
 cv_results[1:kl*pl*bl, ] <- 0
 for (i in 1:length(k_vals)){
-  k_val <- eval(k_vals[i])
+  k_val <- k_vals[i]
   for (j in 1:length(power_vals)){
-    power_val <- eval(power_vals[j])
+    power_val <- power_vals[j]
     for (m in 1:length(base_vals)){
-      base_val <- eval(base_vals[m])
+      base_val <- base_vals[m]
       idx <- (i-1)*pl*bl + (j-1)*bl + m
       cat("idx=", idx, "\n")
       cv_results$k[idx] <- k_val
@@ -394,6 +396,7 @@ for (i in 1:length(k_vals)){
                           verbose = FALSE)
         mean_err <- model %>% residuals %>% abs %>% mean
         cv_results[idx, 3+fold_no] <- mean_err
+        rm(model)
       }
     }
   }
@@ -407,15 +410,11 @@ cv_results <- cv_results %>%
                                      err4,
                                      err5))
 argmin <- which.min(cv_results$mean_err)
-k_opt <- cv_results$k[argmin]
+K_OPT <- cv_results$k[argmin]
 power_opt <- cv_results$power[argmin]
 base_opt <- cv_results$base[argmin]
 
 ########
-
-xtrain <- training_data %>% dplyr::select(!("y"|"ri"))
-ytrain <- training_data$y
-countrytrain <- training_data$ri
 
 test_data <- read.csv("training_sets/test_data_A_Q1.csv")
 xtest <- test_data %>% dplyr::select(!("y"|"ri"))
@@ -423,20 +422,13 @@ ytest <- test_data$y
 countrytest <- test_data$ri
 
 # Initialise model
-basic_model <- rbart_vi(y ~ . - ri,
-                    training_data,
-                    group.by = ri,
-                    group.by.test = ri,
-                    test = test_data,
-                    k = k_opt,
-                    power = power_opt,
-                    base = base_opt,
-                    n.chains = 1L,
-                    n.threads = 1L,
-                    keepTrees = TRUE)
+basic_model <- bart.flex(x.data = xtrain,
+                         y.data = ytrain,
+                         ri.data = countrytrain,
+                         power = power_opt,
+                         base = base_opt)
 invisible(basic_model$fit$state)
 summary(basic_model)
-
 
 if (SAVE_FITS){
   save(basic_model,
@@ -445,8 +437,7 @@ if (SAVE_FITS){
 
 sdm <- bart.step(x.data = xtrain,
                  y.data = ytrain,
-                 ri.data = training_data$ri,
-                 k = k_opt,
+                 ri.data = countrytrain,
                  power = power_opt,
                  base = base_opt,
                  full = TRUE,
@@ -456,324 +447,4 @@ summary(sdm)
 if (SAVE_FITS){
   save(sdm,
        file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/ri_model_with_vs_A_Q1.rds", sep = ""))
-}
-
-
-#### Period A Q2 ####
-
-training_data <- read.csv("training_sets/training_data_A_Q2.csv")
-xtrain <- training_data %>% select(!("y"|"ri"))
-ytrain <- training_data$y
-countrytrain <- training_data$ri
-
-test_data <- read.csv("training_sets/test_data_A_Q2.csv")
-xtest <- test_data %>% select(!("y"|"ri"))
-ytest <- test_data$y
-countrytest <- test_data$ri
-
-# Initialise model
-basic_model <- rbart_vi(y ~ . - ri,
-                        training_data,
-                        group.by = ri,
-                        group.by.test = ri,
-                        test = test_data,
-                        n.chains = 1L,
-                        n.threads = 1L,
-                        keepTrees = TRUE)
-invisible(basic_model$fit$state)
-summary(basic_model)
-
-
-if (SAVE_FITS){
-  save(basic_model,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/ri_model_A_Q2.rds", sep = ""))
-}
-
-sdm <- bart.step(x.data = xtrain,
-                 y.data = ytrain,
-                 ri.data = training_data$ri,
-                 k = k_opt,
-                 power = power_opt,
-                 base = base_opt,
-                 full = TRUE,
-                 quiet = TRUE)
-invisible(sdm$fit$state)
-summary(sdm)
-if (SAVE_FITS){
-  save(sdm,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/ri_model_with_vs_A_Q2.rds", sep = ""))
-}
-
-#### Period A Q3 ####
-
-training_data <- read.csv("training_sets/training_data_A_Q3.csv")
-xtrain <- training_data %>% select(!("y"|"ri"))
-ytrain <- training_data$y
-countrytrain <- training_data$ri
-
-test_data <- read.csv("training_sets/test_data_A_Q3.csv")
-xtest <- test_data %>% select(!("y"|"ri"))
-ytest <- test_data$y
-countrytest <- test_data$ri
-
-# Initialise model
-basic_model <- rbart_vi(y ~ . - ri,
-                        training_data,
-                        group.by = ri,
-                        group.by.test = ri,
-                        test = test_data,
-                        n.chains = 1L,
-                        n.threads = 1L,
-                        keepTrees = TRUE)
-invisible(basic_model$fit$state)
-summary(basic_model)
-
-
-if (SAVE_FITS){
-  save(basic_model,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/ri_model_A_Q3.rds", sep = ""))
-}
-
-sdm <- bart.step(x.data = xtrain,
-                 y.data = ytrain,
-                 ri.data = training_data$ri,
-                 # k = k_retune,
-                 # power = power_retune,
-                 # base = base_retune,
-                 full = TRUE,
-                 quiet = TRUE)
-invisible(sdm$fit$state)
-summary(sdm)
-if (SAVE_FITS){
-  save(sdm,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/ri_model_with_vs_A_Q3.rds", sep = ""))
-}
-
-#### Period A Q4 ####
-
-training_data <- read.csv("training_sets/training_data_A_Q4.csv")
-xtrain <- training_data %>% select(!("y"|"ri"))
-ytrain <- training_data$y
-countrytrain <- training_data$ri
-
-test_data <- read.csv("training_sets/test_data_A_Q4.csv")
-xtest <- test_data %>% select(!("y"|"ri"))
-ytest <- test_data$y
-countrytest <- test_data$ri
-
-# Initialise model
-basic_model <- rbart_vi(y ~ . - ri,
-                        training_data,
-                        group.by = ri,
-                        group.by.test = ri,
-                        test = test_data,
-                        n.chains = 1L,
-                        n.threads = 1L,
-                        keepTrees = TRUE)
-invisible(basic_model$fit$state)
-summary(basic_model)
-
-
-if (SAVE_FITS){
-  save(basic_model,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/ri_model_A_Q4.rds", sep = ""))
-}
-
-sdm <- bart.step(x.data = xtrain,
-                 y.data = ytrain,
-                 ri.data = training_data$ri,
-                 # k = k_retune,
-                 # power = power_retune,
-                 # base = base_retune,
-                 full = TRUE,
-                 quiet = TRUE)
-invisible(sdm$fit$state)
-summary(sdm)
-if (SAVE_FITS){
-  save(sdm,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/ri_model_with_vs_A_Q4.rds", sep = ""))
-}
-
-#### Period B Q1 ####
-
-training_data <- read.csv("training_sets/training_data_B_Q1.csv")
-xtrain <- training_data %>% select(!("y"|"ri"))
-ytrain <- training_data$y
-countrytrain <- training_data$ri
-
-test_data <- read.csv("training_sets/test_data_B_Q1.csv")
-xtest <- test_data %>% select(!("y"|"ri"))
-ytest <- test_data$y
-countrytest <- test_data$ri
-
-# Initialise model
-basic_model <- rbart_vi(y ~ . - ri,
-                        training_data,
-                        group.by = ri,
-                        group.by.test = ri,
-                        test = test_data,
-                        n.chains = 1L,
-                        n.threads = 1L,
-                        keepTrees = TRUE)
-invisible(basic_model$fit$state)
-summary(basic_model)
-
-
-if (SAVE_FITS){
-  save(basic_model,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/ri_model_B_Q1.rds", sep = ""))
-}
-
-sdm <- bart.step(x.data = xtrain,
-                 y.data = ytrain,
-                 ri.data = training_data$ri,
-                 # k = k_retune,
-                 # power = power_retune,
-                 # base = base_retune,
-                 full = TRUE,
-                 quiet = TRUE)
-invisible(sdm$fit$state)
-summary(sdm)
-if (SAVE_FITS){
-  save(sdm,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/ri_model_with_vs_B_Q1.rds", sep = ""))
-}
-
-
-
-#### Period B Q2 ####
-
-training_data <- read.csv("training_sets/training_data_B_Q2.csv")
-xtrain <- training_data %>% select(!("y"|"ri"))
-ytrain <- training_data$y
-countrytrain <- training_data$ri
-
-test_data <- read.csv("training_sets/test_data_B_Q2.csv")
-xtest <- test_data %>% select(!("y"|"ri"))
-ytest <- test_data$y
-countrytest <- test_data$ri
-
-# Initialise model
-basic_model <- rbart_vi(y ~ . - ri,
-                        training_data,
-                        group.by = ri,
-                        group.by.test = ri,
-                        test = test_data,
-                        n.chains = 1L,
-                        n.threads = 1L,
-                        keepTrees = TRUE)
-invisible(basic_model$fit$state)
-summary(basic_model)
-
-
-if (SAVE_FITS){
-  save(basic_model,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/ri_model_B_Q2.rds", sep = ""))
-}
-
-sdm <- bart.step(x.data = xtrain,
-                 y.data = ytrain,
-                 ri.data = training_data$ri,
-                 # k = k_retune,
-                 # power = power_retune,
-                 # base = base_retune,
-                 full = TRUE,
-                 quiet = TRUE)
-invisible(sdm$fit$state)
-summary(sdm)
-if (SAVE_FITS){
-  save(sdm,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/ri_model_with_vs_B_Q2.rds", sep = ""))
-}
-
-
-#### Period B Q3 ####
-
-training_data <- read.csv("training_sets/training_data_B_Q3.csv")
-xtrain <- training_data %>% select(!("y"|"ri"))
-ytrain <- training_data$y
-countrytrain <- training_data$ri
-
-test_data <- read.csv("training_sets/test_data_B_Q3.csv")
-xtest <- test_data %>% select(!("y"|"ri"))
-ytest <- test_data$y
-countrytest <- test_data$ri
-
-# Initialise model
-basic_model <- rbart_vi(y ~ . - ri,
-                        training_data,
-                        group.by = ri,
-                        group.by.test = ri,
-                        test = test_data,
-                        n.chains = 1L,
-                        n.threads = 1L,
-                        keepTrees = TRUE)
-invisible(basic_model$fit$state)
-summary(basic_model)
-
-
-if (SAVE_FITS){
-  save(basic_model,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/ri_model_B_Q3.rds", sep = ""))
-}
-
-sdm <- bart.step(x.data = xtrain,
-                 y.data = ytrain,
-                 ri.data = training_data$ri,
-                 # k = k_retune,
-                 # power = power_retune,
-                 # base = base_retune,
-                 full = TRUE,
-                 quiet = TRUE)
-invisible(sdm$fit$state)
-summary(sdm)
-if (SAVE_FITS){
-  save(sdm,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/ri_model_with_vs_B_Q3.rds", sep = ""))
-}
-
-
-#### Period B Q4 ####
-
-training_data <- read.csv("training_sets/training_data_B_Q4.csv")
-xtrain <- training_data %>% select(!("y"|"ri"))
-ytrain <- training_data$y
-countrytrain <- training_data$ri
-
-test_data <- read.csv("training_sets/test_data_B_Q4.csv")
-xtest <- test_data %>% select(!("y"|"ri"))
-ytest <- test_data$y
-countrytest <- test_data$ri
-
-# Initialise model
-basic_model <- rbart_vi(y ~ . - ri,
-                        training_data,
-                        group.by = ri,
-                        group.by.test = ri,
-                        test = test_data,
-                        n.chains = 1L,
-                        n.threads = 1L,
-                        keepTrees = TRUE)
-invisible(basic_model$fit$state)
-summary(basic_model)
-
-
-if (SAVE_FITS){
-  save(basic_model,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/ri_model_B_Q4.rds", sep = ""))
-}
-
-sdm <- bart.step(x.data = xtrain,
-                 y.data = ytrain,
-                 ri.data = training_data$ri,
-                 # k = k_retune,
-                 # power = power_retune,
-                 # base = base_retune,
-                 full = TRUE,
-                 quiet = TRUE)
-invisible(sdm$fit$state)
-summary(sdm)
-if (SAVE_FITS){
-  save(sdm,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/ri_model_with_vs_B_Q4.rds", sep = ""))
 }
