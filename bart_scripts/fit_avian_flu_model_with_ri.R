@@ -396,8 +396,8 @@ antifolds <- lapply(1:length(fold_ids),
 
 
 k_vals = c(1, 2, 3)
-power_vals = c(1.5, 1.6, 1.7, 1.8, 1.9, 2)
-base_vals = c(0.75, 0.8, 0.85, 0.9, 0.95)
+power_vals = c(1.6, 1.8, 2)
+base_vals = c(0.75, 0.85, 0.95)
 kl <- length(k_vals)
 pl <- length(power_vals)
 bl <- length(base_vals)
@@ -459,8 +459,6 @@ K_OPT <- cv_results$k[argmin]
 power_opt <- cv_results$power[argmin]
 base_opt <- cv_results$base[argmin]
 
-########
-
 test_data <- read.csv("training_sets/test_data_A_Q1.csv")
 xtest <- test_data %>% dplyr::select(!("y"|"ri"))
 ytest <- test_data$y
@@ -492,4 +490,120 @@ summary(sdm)
 if (SAVE_FITS){
   save(sdm,
        file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/ri_model_with_vs_A_Q1.rds", sep = ""))
+}
+
+
+#### Period B Q1 ####
+
+training_data <- read.csv("training_sets/training_data_B_Q1.csv")
+xtrain <- training_data %>% dplyr::select(!("y"|"ri"))
+ytrain <- training_data$y
+countrytrain <- training_data$ri
+
+
+# Fold construction
+
+fold_ids <- caret::createFolds(paste0(training_data$ri, training_data$y), k = 5)
+
+folds <- lapply(1:length(fold_ids),
+                FUN = function(i){
+                  training_data[-fold_ids[[i]],]})
+antifolds <- lapply(1:length(fold_ids),
+                    FUN = function(i){
+                      training_data[fold_ids[[i]],]})
+
+## Check training representation
+# lapply(folds, function(x) with(x, table(ri,y)))
+
+
+k_vals = c(1, 2, 3)
+power_vals = c(1.6, 1.8, 2)
+base_vals = c(0.75, 0.85, 0.95)
+kl <- length(k_vals)
+pl <- length(power_vals)
+bl <- length(base_vals)
+cv_results <- data.frame(k=numeric(),
+                         power=numeric(),
+                         base=numeric(),
+                         auc1=numeric(),
+                         auc2=numeric(),
+                         auc3=numeric(),
+                         auc4=numeric(),
+                         auc5=numeric())
+cv_results[1:kl*pl*bl, ] <- 0
+for (i in 1:length(k_vals)){
+  k_val <- k_vals[i]
+  for (j in 1:length(power_vals)){
+    power_val <- power_vals[j]
+    for (m in 1:length(base_vals)){
+      base_val <- base_vals[m]
+      idx <- (i-1)*pl*bl + (j-1)*bl + m
+      cat("idx=", idx, "\n")
+      cv_results$k[idx] <- k_val
+      cv_results$power[idx] <- power_val
+      cv_results$base[idx] <- base_val
+      for (fold_no in 1:length(folds)){
+        model <- rbart_vi(y ~ . - ri,
+                          folds[[fold_no]],
+                          group.by = ri,
+                          group.by.test = ri,
+                          test = antifolds[[fold_no]],
+                          k = k_val,
+                          power = power_val,
+                          base = base_val,
+                          n.trees = 200,
+                          n.chains = 1L,
+                          n.threads = 1L,
+                          keepTrees = TRUE,
+                          verbose = FALSE)
+        antifold_x <- subset(antifolds[[fold_no]], select=-c(y, ri))
+        antifold_y <- antifolds[[fold_no]]$y
+        antifold_ri <- antifolds[[fold_no]]$ri
+        cutoff <- get_threshold(model)
+        auc <- get_sens_and_spec(model, antifold_x, antifold_y, antifold_ri, cutoff)$auc
+        cv_results[idx, 3+fold_no] <- auc
+        rm(model)
+      }
+    }
+  }
+}
+
+cv_results <- cv_results %>%
+  rowwise() %>%
+  mutate(mean_err = mean(auc1,
+                         auc2,
+                         auc3,
+                         auc4,
+                         auc5))
+argmin <- which.max(cv_results$mean_err)
+K_OPT <- cv_results$k[argmin]
+power_opt <- cv_results$power[argmin]
+base_opt <- cv_results$base[argmin]
+
+# Initialise model
+basic_model <- bart.flex(x.data = xtrain,
+                         y.data = ytrain,
+                         ri.data = countrytrain,
+                         power = power_opt,
+                         base = base_opt)
+invisible(basic_model$fit$state)
+summary(basic_model)
+
+if (SAVE_FITS){
+  save(basic_model,
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/ri_model_B_Q1.rds", sep = ""))
+}
+
+sdm <- bart.step(x.data = xtrain,
+                 y.data = ytrain,
+                 ri.data = countrytrain,
+                 power = power_opt,
+                 base = base_opt,
+                 full = TRUE,
+                 quiet = TRUE)
+invisible(sdm$fit$state)
+summary(sdm)
+if (SAVE_FITS){
+  save(sdm,
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/ri_model_with_vs_B_Q1.rds", sep = ""))
 }
