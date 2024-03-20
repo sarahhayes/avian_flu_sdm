@@ -3,7 +3,6 @@
 # This script includes cross-validation of BART parameters.
 
 SAVE_FITS <- FALSE
-SAVE_PLOTS <- FALSE
 
 # Global storing optimised k value for BART - which may be updated
 K_OPT <- 2
@@ -19,46 +18,24 @@ set.seed(12345)
 
 #### EMBARCADERO FUNCTIONS ADJUSTED TO ALLOW CUSTOM BART PARAMETERS: ####
 
-bart.flex <- function(x.data, y.data, ri.data = NULL,
-                      y.name = NULL, ri.name = NULL,
+bart.flex <- function(x.data, y.data,
+                      y.name = NULL,
                       n.trees = 200,
                       k = 2.0, power = 2.0, base = 0.95) {
-  if(is.null(ri.data)) {
-    train <- cbind(y.data, x.data) 
-    if(!is.null(y.name)) {colnames(train)[1] <- y.name}
-    train <- na.omit(train)
-    model <- bart(y.train = train[,1], 
-                  x.train = train[,2:ncol(train)], 
-                  ntree = n.trees, keeptrees=TRUE)
-  } else { 
-    train <- cbind(y.data, x.data, ri.data) 
-    if(!is.null(y.name)) {colnames(train)[1] <- y.name}
-    if(!is.null(ri.name)) {colnames(train)[ncol(train)] <- ri.name}
-    f <- as.formula(paste(paste(colnames(train)[1],paste(colnames(train)[2:(ncol(train)-1)], 
-                                                         collapse=' + '), sep = ' ~ '), 
-                          colnames(train)[ncol(train)], sep=' - '))
-    
-    train <- na.omit(train) 
-    # default(rbart_vi)$k <- k
-    # default(rbart_vi)$power <- power
-    # default(rbart_vi)$base <- base
-    model <- rbart_vi(f, 
-                      group.by=train[,ncol(train)],
-                      data=train,
-                      n.samples=1000,
-                      n.burn=100,
-                      n.trees = n.trees,
-                      k = K_OPT,
-                      power = power,
-                      base = base,
-                      keepTrees = TRUE,
-                      n.chains=1,
-                      n.threads=1) 
-  }
+  
+  train <- cbind(y.data, x.data) 
+  if(!is.null(y.name)) {colnames(train)[1] <- y.name}
+  train <- na.omit(train)
+  model <- bart(y.train = train[,1], 
+                x.train = train[,2:ncol(train)], 
+                k = k,
+                power = power,
+                base = base,
+                ntree = n.trees, keeptrees=TRUE)
   return(model)
 }
 
-varimp.diag <- function(x.data, y.data, ri.data=NULL, iter=50, quiet=FALSE,
+varimp.diag <- function(x.data, y.data, iter=50, quiet=FALSE,
                         k = 2.0, power = 2.0, base = 0.95) {
   
   nvars <- ncol(x.data)
@@ -76,7 +53,6 @@ varimp.diag <- function(x.data, y.data, ri.data=NULL, iter=50, quiet=FALSE,
   # auto-drops 
   
   quietly(model.0 <- bart.flex(x.data = x.data, y.data = y.data, 
-                               ri.data = ri.data,
                                n.trees = 200,
                                k = k,
                                power = power,
@@ -108,7 +84,6 @@ varimp.diag <- function(x.data, y.data, ri.data=NULL, iter=50, quiet=FALSE,
     
     for(index in 1:iter) {
       quietly(model.j <- bart.flex(x.data = x.data[,varnums], y.data = y.data, 
-                                   ri.data = ri.data,
                                    n.trees = n.trees,
                                    k = k,
                                    power = power,
@@ -146,7 +121,7 @@ varimp.diag <- function(x.data, y.data, ri.data=NULL, iter=50, quiet=FALSE,
   
 }
 
-variable.step <- function(x.data, y.data, ri.data=NULL, n.trees=10, iter=50, quiet=FALSE,
+variable.step <- function(x.data, y.data, n.trees=10, iter=50, quiet=FALSE,
                           k = 2.0, power = 2.0, base = 0.95) {
   
   quietly <- function(x) {
@@ -168,7 +143,6 @@ variable.step <- function(x.data, y.data, ri.data=NULL, n.trees=10, iter=50, qui
   # auto-drops 
   
   quietly(model.0 <- bart.flex(x.data = x.data, y.data = y.data, 
-                               ri.data = ri.data,
                                n.trees = 200,
                                k = k,
                                power = power,
@@ -212,7 +186,6 @@ variable.step <- function(x.data, y.data, ri.data=NULL, n.trees=10, iter=50, qui
     if(!quiet){pb <- txtProgressBar(min = 0, max = iter, style = 3)}
     for(index in 1:iter) {
       quietly(model.j <- bart.flex(x.data = x.data[,varnums], y.data = y.data, 
-                                   ri.data = ri.data,
                                    n.trees = n.trees,
                                    k = k,
                                    power = power,
@@ -268,7 +241,7 @@ variable.step <- function(x.data, y.data, ri.data=NULL, n.trees=10, iter=50, qui
   invisible(varlist.final)
 }
 
-bart.step <- function(x.data, y.data, ri.data=NULL,
+bart.step <- function(x.data, y.data,
                       iter.step=100, tree.step=10,
                       iter.plot=100,
                       k = 2.0, power = 2.0, base = 0.95,
@@ -286,7 +259,6 @@ bart.step <- function(x.data, y.data, ri.data=NULL,
   }  # THANKS HADLEY
   
   quietly(model.0 <- bart.flex(x.data = x.data, y.data = y.data, 
-                               ri.data = ri.data,
                                n.trees = 200,
                                k = k,
                                power = power,
@@ -316,13 +288,12 @@ bart.step <- function(x.data, y.data, ri.data=NULL,
   if(full==TRUE){varimp.diag(x.data, y.data, ri.data, iter=iter.plot, quiet=quiet2)}
   vs <- variable.step(x.data,
                       y.data,
-                      ri.data,
                       n.trees=tree.step,
                       iter=iter.step,
                       quiet=quiet2)
   
   invisible(best.model <- bart.flex(x.data = x.data[,vs], y.data = y.data, 
-                                    ri.data = ri.data, n.trees=200,
+                                    n.trees=200,
                                     k = k,
                                     power = power,
                                     base = base))
@@ -462,12 +433,15 @@ xtest <- test_data %>% dplyr::select(!("y"|"ri"))
 ytest <- test_data$y
 
 # Initialise model
-basic_model <- bart.flex(x.data = xtrain,
-                         y.data = ytrain,
+basic_model <- bart( xtrain,
+                         ytrain,
+                     x.test = xtest,
+                         k = K_OPT,
                          power = power_opt,
-                         base = base_opt)
+                         base = base_opt,
+                     keeptrees = TRUE)
 invisible(basic_model$fit$state)
-summary(basic_model)
+
 
 if (SAVE_FITS){
   save(basic_model,
@@ -481,10 +455,365 @@ sdm <- bart.step(x.data = xtrain,
                  full = TRUE,
                  quiet = TRUE)
 invisible(sdm$fit$state)
-summary(sdm)
+
 if (SAVE_FITS){
   save(sdm,
        file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_model_with_vs_A_Q1.rds", sep = ""))
+}
+
+
+
+
+#### Period A Q2 ####
+
+training_data <- read.csv("training_sets/training_data_A_Q2.csv")
+xtrain <- training_data %>% dplyr::select(!("y"|"ri"))
+ytrain <- training_data$y
+
+
+# Fold construction
+
+fold_ids <- caret::createFolds(paste0(training_data$ri, training_data$y), k = 5)
+
+folds <- lapply(1:length(fold_ids),
+                FUN = function(i){
+                  training_data[-fold_ids[[i]],]})
+antifolds <- lapply(1:length(fold_ids),
+                    FUN = function(i){
+                      training_data[fold_ids[[i]],]})
+
+## Check training representation
+# lapply(folds, function(x) with(x, table(ri,y)))
+
+
+k_vals = c(1, 2, 3)
+power_vals = c(1.6, 1.8, 2)
+base_vals = c(0.75, 0.85, 0.95)
+kl <- length(k_vals)
+pl <- length(power_vals)
+bl <- length(base_vals)
+cv_results <- data.frame(k=numeric(),
+                         power=numeric(),
+                         base=numeric(),
+                         auc1=numeric(),
+                         auc2=numeric(),
+                         auc3=numeric(),
+                         auc4=numeric(),
+                         auc5=numeric())
+cv_results[1:kl*pl*bl, ] <- 0
+for (i in 1:length(k_vals)){
+  k_val <- k_vals[i]
+  for (j in 1:length(power_vals)){
+    power_val <- power_vals[j]
+    for (m in 1:length(base_vals)){
+      base_val <- base_vals[m]
+      idx <- (i-1)*pl*bl + (j-1)*bl + m
+      cat("idx=", idx, "\n")
+      cv_results$k[idx] <- k_val
+      cv_results$power[idx] <- power_val
+      cv_results$base[idx] <- base_val
+      for (fold_no in 1:length(folds)){
+        model <- bart2(y ~ . - ri,
+                       folds[[fold_no]],
+                       test = antifolds[[fold_no]],
+                       k = k_val,
+                       power = power_val,
+                       base = base_val,
+                       n.trees = 200,
+                       n.chains = 1L,
+                       n.threads = 1L,
+                       keepTrees = TRUE,
+                       verbose = FALSE)
+        antifold_x <- subset(antifolds[[fold_no]], select=-c(y, ri))
+        antifold_y <- antifolds[[fold_no]]$y
+        antifold_ri <- antifolds[[fold_no]]$ri
+        cutoff <- get_threshold(model)
+        auc <- get_sens_and_spec(model, antifold_x, antifold_y, antifold_ri, cutoff)$auc
+        cv_results[idx, 3+fold_no] <- auc
+        rm(model)
+      }
+    }
+  }
+}
+
+cv_results <- cv_results %>%
+  rowwise() %>%
+  mutate(mean_err = mean(auc1,
+                         auc2,
+                         auc3,
+                         auc4,
+                         auc5))
+argmin <- which.max(cv_results$mean_err)
+K_OPT <- cv_results$k[argmin]
+power_opt <- cv_results$power[argmin]
+base_opt <- cv_results$base[argmin]
+
+
+test_data <- read.csv("training_sets/test_data_A_Q2.csv")
+xtest <- test_data %>% dplyr::select(!("y"|"ri"))
+ytest <- test_data$y
+
+# Initialise model
+basic_model <- bart(x.data = xtrain,
+                         y.data = ytrain,
+                    k = K_OPT,
+                         power = power_opt,
+                         base = base_opt)
+invisible(basic_model$fit$state)
+
+
+if (SAVE_FITS){
+  save(basic_model,
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_model_A_Q2.rds", sep = ""))
+}
+
+sdm <- bart.step(x.data = xtrain,
+                 y.data = ytrain,
+                 power = power_opt,
+                 base = base_opt,
+                 full = TRUE,
+                 quiet = TRUE)
+invisible(sdm$fit$state)
+
+if (SAVE_FITS){
+  save(sdm,
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_model_with_vs_A_Q2.rds", sep = ""))
+}
+
+
+
+#### Period A Q3 ####
+
+training_data <- read.csv("training_sets/training_data_A_Q3.csv")
+xtrain <- training_data %>% dplyr::select(!("y"|"ri"))
+ytrain <- training_data$y
+
+
+# Fold construction
+
+fold_ids <- caret::createFolds(paste0(training_data$ri, training_data$y), k = 5)
+
+folds <- lapply(1:length(fold_ids),
+                FUN = function(i){
+                  training_data[-fold_ids[[i]],]})
+antifolds <- lapply(1:length(fold_ids),
+                    FUN = function(i){
+                      training_data[fold_ids[[i]],]})
+
+## Check training representation
+# lapply(folds, function(x) with(x, table(ri,y)))
+
+
+k_vals = c(1, 2, 3)
+power_vals = c(1.6, 1.8, 2)
+base_vals = c(0.75, 0.85, 0.95)
+kl <- length(k_vals)
+pl <- length(power_vals)
+bl <- length(base_vals)
+cv_results <- data.frame(k=numeric(),
+                         power=numeric(),
+                         base=numeric(),
+                         auc1=numeric(),
+                         auc2=numeric(),
+                         auc3=numeric(),
+                         auc4=numeric(),
+                         auc5=numeric())
+cv_results[1:kl*pl*bl, ] <- 0
+for (i in 1:length(k_vals)){
+  k_val <- k_vals[i]
+  for (j in 1:length(power_vals)){
+    power_val <- power_vals[j]
+    for (m in 1:length(base_vals)){
+      base_val <- base_vals[m]
+      idx <- (i-1)*pl*bl + (j-1)*bl + m
+      cat("idx=", idx, "\n")
+      cv_results$k[idx] <- k_val
+      cv_results$power[idx] <- power_val
+      cv_results$base[idx] <- base_val
+      for (fold_no in 1:length(folds)){
+        model <- bart2(y ~ . - ri,
+                       folds[[fold_no]],
+                       test = antifolds[[fold_no]],
+                       k = k_val,
+                       power = power_val,
+                       base = base_val,
+                       n.trees = 200,
+                       n.chains = 1L,
+                       n.threads = 1L,
+                       keepTrees = TRUE,
+                       verbose = FALSE)
+        antifold_x <- subset(antifolds[[fold_no]], select=-c(y, ri))
+        antifold_y <- antifolds[[fold_no]]$y
+        antifold_ri <- antifolds[[fold_no]]$ri
+        cutoff <- get_threshold(model)
+        auc <- get_sens_and_spec(model, antifold_x, antifold_y, antifold_ri, cutoff)$auc
+        cv_results[idx, 3+fold_no] <- auc
+        rm(model)
+      }
+    }
+  }
+}
+
+cv_results <- cv_results %>%
+  rowwise() %>%
+  mutate(mean_err = mean(auc1,
+                         auc2,
+                         auc3,
+                         auc4,
+                         auc5))
+argmin <- which.max(cv_results$mean_err)
+K_OPT <- cv_results$k[argmin]
+power_opt <- cv_results$power[argmin]
+base_opt <- cv_results$base[argmin]
+
+
+test_data <- read.csv("training_sets/test_data_A_Q3.csv")
+xtest <- test_data %>% dplyr::select(!("y"|"ri"))
+ytest <- test_data$y
+
+# Initialise model
+basic_model <- bart(x.data = xtrain,
+                         y.data = ytrain,
+                    k = K_OPT,
+                         power = power_opt,
+                         base = base_opt)
+invisible(basic_model$fit$state)
+
+
+if (SAVE_FITS){
+  save(basic_model,
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_model_A_Q3.rds", sep = ""))
+}
+
+sdm <- bart.step(x.data = xtrain,
+                 y.data = ytrain,
+                 power = power_opt,
+                 base = base_opt,
+                 full = TRUE,
+                 quiet = TRUE)
+invisible(sdm$fit$state)
+
+if (SAVE_FITS){
+  save(sdm,
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_model_with_vs_A_Q3.rds", sep = ""))
+}
+
+
+
+#### Period A Q4 ####
+
+training_data <- read.csv("training_sets/training_data_A_Q4.csv")
+xtrain <- training_data %>% dplyr::select(!("y"|"ri"))
+ytrain <- training_data$y
+
+
+# Fold construction
+
+fold_ids <- caret::createFolds(paste0(training_data$ri, training_data$y), k = 5)
+
+folds <- lapply(1:length(fold_ids),
+                FUN = function(i){
+                  training_data[-fold_ids[[i]],]})
+antifolds <- lapply(1:length(fold_ids),
+                    FUN = function(i){
+                      training_data[fold_ids[[i]],]})
+
+## Check training representation
+# lapply(folds, function(x) with(x, table(ri,y)))
+
+
+k_vals = c(1, 2, 3)
+power_vals = c(1.6, 1.8, 2)
+base_vals = c(0.75, 0.85, 0.95)
+kl <- length(k_vals)
+pl <- length(power_vals)
+bl <- length(base_vals)
+cv_results <- data.frame(k=numeric(),
+                         power=numeric(),
+                         base=numeric(),
+                         auc1=numeric(),
+                         auc2=numeric(),
+                         auc3=numeric(),
+                         auc4=numeric(),
+                         auc5=numeric())
+cv_results[1:kl*pl*bl, ] <- 0
+for (i in 1:length(k_vals)){
+  k_val <- k_vals[i]
+  for (j in 1:length(power_vals)){
+    power_val <- power_vals[j]
+    for (m in 1:length(base_vals)){
+      base_val <- base_vals[m]
+      idx <- (i-1)*pl*bl + (j-1)*bl + m
+      cat("idx=", idx, "\n")
+      cv_results$k[idx] <- k_val
+      cv_results$power[idx] <- power_val
+      cv_results$base[idx] <- base_val
+      for (fold_no in 1:length(folds)){
+        model <- bart2(y ~ . - ri,
+                       folds[[fold_no]],
+                       test = antifolds[[fold_no]],
+                       k = k_val,
+                       power = power_val,
+                       base = base_val,
+                       n.trees = 200,
+                       n.chains = 1L,
+                       n.threads = 1L,
+                       keepTrees = TRUE,
+                       verbose = FALSE)
+        antifold_x <- subset(antifolds[[fold_no]], select=-c(y, ri))
+        antifold_y <- antifolds[[fold_no]]$y
+        antifold_ri <- antifolds[[fold_no]]$ri
+        cutoff <- get_threshold(model)
+        auc <- get_sens_and_spec(model, antifold_x, antifold_y, antifold_ri, cutoff)$auc
+        cv_results[idx, 3+fold_no] <- auc
+        rm(model)
+      }
+    }
+  }
+}
+
+cv_results <- cv_results %>%
+  rowwise() %>%
+  mutate(mean_err = mean(auc1,
+                         auc2,
+                         auc3,
+                         auc4,
+                         auc5))
+argmin <- which.max(cv_results$mean_err)
+K_OPT <- cv_results$k[argmin]
+power_opt <- cv_results$power[argmin]
+base_opt <- cv_results$base[argmin]
+
+
+test_data <- read.csv("training_sets/test_data_A_Q4.csv")
+xtest <- test_data %>% dplyr::select(!("y"|"ri"))
+ytest <- test_data$y
+
+# Initialise model
+basic_model <- bart(x.data = xtrain,
+                         y.data = ytrain,
+                    k = K_OPT,
+                         power = power_opt,
+                         base = base_opt)
+invisible(basic_model$fit$state)
+
+
+if (SAVE_FITS){
+  save(basic_model,
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_model_A_Q4.rds", sep = ""))
+}
+
+sdm <- bart.step(x.data = xtrain,
+                 y.data = ytrain,
+                 power = power_opt,
+                 base = base_opt,
+                 full = TRUE,
+                 quiet = TRUE)
+invisible(sdm$fit$state)
+
+if (SAVE_FITS){
+  save(sdm,
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_model_with_vs_A_Q4.rds", sep = ""))
 }
 
 
@@ -574,12 +903,13 @@ power_opt <- cv_results$power[argmin]
 base_opt <- cv_results$base[argmin]
 
 # Initialise model
-basic_model <- bart.flex(x.data = xtrain,
+basic_model <- bart(x.data = xtrain,
                          y.data = ytrain,
+                    k = K_OPT,
                          power = power_opt,
                          base = base_opt)
 invisible(basic_model$fit$state)
-summary(basic_model)
+
 
 if (SAVE_FITS){
   save(basic_model,
@@ -593,8 +923,344 @@ sdm <- bart.step(x.data = xtrain,
                  full = TRUE,
                  quiet = TRUE)
 invisible(sdm$fit$state)
-summary(sdm)
+
 if (SAVE_FITS){
   save(sdm,
        file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_model_with_vs_B_Q1.rds", sep = ""))
+}
+
+
+#### Period B Q2 ####
+
+training_data <- read.csv("training_sets/training_data_B_Q2.csv")
+xtrain <- training_data %>% dplyr::select(!("y"|"ri"))
+ytrain <- training_data$y
+
+
+# Fold construction
+
+fold_ids <- caret::createFolds(paste0(training_data$ri, training_data$y), k = 5)
+
+folds <- lapply(1:length(fold_ids),
+                FUN = function(i){
+                  training_data[-fold_ids[[i]],]})
+antifolds <- lapply(1:length(fold_ids),
+                    FUN = function(i){
+                      training_data[fold_ids[[i]],]})
+
+## Check training representation
+# lapply(folds, function(x) with(x, table(ri,y)))
+
+
+k_vals = c(1, 2, 3)
+power_vals = c(1.6, 1.8, 2)
+base_vals = c(0.75, 0.85, 0.95)
+kl <- length(k_vals)
+pl <- length(power_vals)
+bl <- length(base_vals)
+cv_results <- data.frame(k=numeric(),
+                         power=numeric(),
+                         base=numeric(),
+                         auc1=numeric(),
+                         auc2=numeric(),
+                         auc3=numeric(),
+                         auc4=numeric(),
+                         auc5=numeric())
+cv_results[1:kl*pl*bl, ] <- 0
+for (i in 1:length(k_vals)){
+  k_val <- k_vals[i]
+  for (j in 1:length(power_vals)){
+    power_val <- power_vals[j]
+    for (m in 1:length(base_vals)){
+      base_val <- base_vals[m]
+      idx <- (i-1)*pl*bl + (j-1)*bl + m
+      cat("idx=", idx, "\n")
+      cv_results$k[idx] <- k_val
+      cv_results$power[idx] <- power_val
+      cv_results$base[idx] <- base_val
+      for (fold_no in 1:length(folds)){
+        model <- bart2(y ~ . - ri,
+                       folds[[fold_no]],
+                       test = antifolds[[fold_no]],
+                       k = k_val,
+                       power = power_val,
+                       base = base_val,
+                       n.trees = 200,
+                       n.chains = 1L,
+                       n.threads = 1L,
+                       keepTrees = TRUE,
+                       verbose = FALSE)
+        antifold_x <- subset(antifolds[[fold_no]], select=-c(y, ri))
+        antifold_y <- antifolds[[fold_no]]$y
+        antifold_ri <- antifolds[[fold_no]]$ri
+        cutoff <- get_threshold(model)
+        auc <- get_sens_and_spec(model, antifold_x, antifold_y, antifold_ri, cutoff)$auc
+        cv_results[idx, 3+fold_no] <- auc
+        rm(model)
+      }
+    }
+  }
+}
+
+cv_results <- cv_results %>%
+  rowwise() %>%
+  mutate(mean_err = mean(auc1,
+                         auc2,
+                         auc3,
+                         auc4,
+                         auc5))
+argmin <- which.max(cv_results$mean_err)
+K_OPT <- cv_results$k[argmin]
+power_opt <- cv_results$power[argmin]
+base_opt <- cv_results$base[argmin]
+
+# Initialise model
+basic_model <- bart(x.data = xtrain,
+                         y.data = ytrain,
+                    k = K_OPT,
+                         power = power_opt,
+                         base = base_opt)
+invisible(basic_model$fit$state)
+
+
+if (SAVE_FITS){
+  save(basic_model,
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_model_B_Q2.rds", sep = ""))
+}
+
+sdm <- bart.step(x.data = xtrain,
+                 y.data = ytrain,
+                 power = power_opt,
+                 base = base_opt,
+                 full = TRUE,
+                 quiet = TRUE)
+invisible(sdm$fit$state)
+
+if (SAVE_FITS){
+  save(sdm,
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_model_with_vs_B_Q2.rds", sep = ""))
+}
+
+
+#### Period B Q3 ####
+
+training_data <- read.csv("training_sets/training_data_B_Q3.csv")
+xtrain <- training_data %>% dplyr::select(!("y"|"ri"))
+ytrain <- training_data$y
+
+
+# Fold construction
+
+fold_ids <- caret::createFolds(paste0(training_data$ri, training_data$y), k = 5)
+
+folds <- lapply(1:length(fold_ids),
+                FUN = function(i){
+                  training_data[-fold_ids[[i]],]})
+antifolds <- lapply(1:length(fold_ids),
+                    FUN = function(i){
+                      training_data[fold_ids[[i]],]})
+
+## Check training representation
+# lapply(folds, function(x) with(x, table(ri,y)))
+
+
+k_vals = c(1, 2, 3)
+power_vals = c(1.6, 1.8, 2)
+base_vals = c(0.75, 0.85, 0.95)
+kl <- length(k_vals)
+pl <- length(power_vals)
+bl <- length(base_vals)
+cv_results <- data.frame(k=numeric(),
+                         power=numeric(),
+                         base=numeric(),
+                         auc1=numeric(),
+                         auc2=numeric(),
+                         auc3=numeric(),
+                         auc4=numeric(),
+                         auc5=numeric())
+cv_results[1:kl*pl*bl, ] <- 0
+for (i in 1:length(k_vals)){
+  k_val <- k_vals[i]
+  for (j in 1:length(power_vals)){
+    power_val <- power_vals[j]
+    for (m in 1:length(base_vals)){
+      base_val <- base_vals[m]
+      idx <- (i-1)*pl*bl + (j-1)*bl + m
+      cat("idx=", idx, "\n")
+      cv_results$k[idx] <- k_val
+      cv_results$power[idx] <- power_val
+      cv_results$base[idx] <- base_val
+      for (fold_no in 1:length(folds)){
+        model <- bart2(y ~ . - ri,
+                       folds[[fold_no]],
+                       test = antifolds[[fold_no]],
+                       k = k_val,
+                       power = power_val,
+                       base = base_val,
+                       n.trees = 200,
+                       n.chains = 1L,
+                       n.threads = 1L,
+                       keepTrees = TRUE,
+                       verbose = FALSE)
+        antifold_x <- subset(antifolds[[fold_no]], select=-c(y, ri))
+        antifold_y <- antifolds[[fold_no]]$y
+        antifold_ri <- antifolds[[fold_no]]$ri
+        cutoff <- get_threshold(model)
+        auc <- get_sens_and_spec(model, antifold_x, antifold_y, antifold_ri, cutoff)$auc
+        cv_results[idx, 3+fold_no] <- auc
+        rm(model)
+      }
+    }
+  }
+}
+
+cv_results <- cv_results %>%
+  rowwise() %>%
+  mutate(mean_err = mean(auc1,
+                         auc2,
+                         auc3,
+                         auc4,
+                         auc5))
+argmin <- which.max(cv_results$mean_err)
+K_OPT <- cv_results$k[argmin]
+power_opt <- cv_results$power[argmin]
+base_opt <- cv_results$base[argmin]
+
+# Initialise model
+basic_model <- bart(x.data = xtrain,
+                         y.data = ytrain,
+                    k = K_OPT,
+                         power = power_opt,
+                         base = base_opt)
+invisible(basic_model$fit$state)
+
+
+if (SAVE_FITS){
+  save(basic_model,
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_model_B_Q3.rds", sep = ""))
+}
+
+sdm <- bart.step(x.data = xtrain,
+                 y.data = ytrain,
+                 power = power_opt,
+                 base = base_opt,
+                 full = TRUE,
+                 quiet = TRUE)
+invisible(sdm$fit$state)
+
+if (SAVE_FITS){
+  save(sdm,
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_model_with_vs_B_Q3.rds", sep = ""))
+}
+
+
+#### Period B Q4 ####
+
+training_data <- read.csv("training_sets/training_data_B_Q4.csv")
+xtrain <- training_data %>% dplyr::select(!("y"|"ri"))
+ytrain <- training_data$y
+
+
+# Fold construction
+
+fold_ids <- caret::createFolds(paste0(training_data$ri, training_data$y), k = 5)
+
+folds <- lapply(1:length(fold_ids),
+                FUN = function(i){
+                  training_data[-fold_ids[[i]],]})
+antifolds <- lapply(1:length(fold_ids),
+                    FUN = function(i){
+                      training_data[fold_ids[[i]],]})
+
+## Check training representation
+# lapply(folds, function(x) with(x, table(ri,y)))
+
+
+k_vals = c(1, 2, 3)
+power_vals = c(1.6, 1.8, 2)
+base_vals = c(0.75, 0.85, 0.95)
+kl <- length(k_vals)
+pl <- length(power_vals)
+bl <- length(base_vals)
+cv_results <- data.frame(k=numeric(),
+                         power=numeric(),
+                         base=numeric(),
+                         auc1=numeric(),
+                         auc2=numeric(),
+                         auc3=numeric(),
+                         auc4=numeric(),
+                         auc5=numeric())
+cv_results[1:kl*pl*bl, ] <- 0
+for (i in 1:length(k_vals)){
+  k_val <- k_vals[i]
+  for (j in 1:length(power_vals)){
+    power_val <- power_vals[j]
+    for (m in 1:length(base_vals)){
+      base_val <- base_vals[m]
+      idx <- (i-1)*pl*bl + (j-1)*bl + m
+      cat("idx=", idx, "\n")
+      cv_results$k[idx] <- k_val
+      cv_results$power[idx] <- power_val
+      cv_results$base[idx] <- base_val
+      for (fold_no in 1:length(folds)){
+        model <- bart2(y ~ . - ri,
+                       folds[[fold_no]],
+                       test = antifolds[[fold_no]],
+                       k = k_val,
+                       power = power_val,
+                       base = base_val,
+                       n.trees = 200,
+                       n.chains = 1L,
+                       n.threads = 1L,
+                       keepTrees = TRUE,
+                       verbose = FALSE)
+        antifold_x <- subset(antifolds[[fold_no]], select=-c(y, ri))
+        antifold_y <- antifolds[[fold_no]]$y
+        antifold_ri <- antifolds[[fold_no]]$ri
+        cutoff <- get_threshold(model)
+        auc <- get_sens_and_spec(model, antifold_x, antifold_y, antifold_ri, cutoff)$auc
+        cv_results[idx, 3+fold_no] <- auc
+        rm(model)
+      }
+    }
+  }
+}
+
+cv_results <- cv_results %>%
+  rowwise() %>%
+  mutate(mean_err = mean(auc1,
+                         auc2,
+                         auc3,
+                         auc4,
+                         auc5))
+argmin <- which.max(cv_results$mean_err)
+K_OPT <- cv_results$k[argmin]
+power_opt <- cv_results$power[argmin]
+base_opt <- cv_results$base[argmin]
+
+# Initialise model
+basic_model <- bart(x.data = xtrain,
+                         y.data = ytrain,
+                    k = K_OPT,
+                         power = power_opt,
+                         base = base_opt)
+invisible(basic_model$fit$state)
+
+
+if (SAVE_FITS){
+  save(basic_model,
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_model_B_Q4.rds", sep = ""))
+}
+
+sdm <- bart.step(x.data = xtrain,
+                 y.data = ytrain,
+                 power = power_opt,
+                 base = base_opt,
+                 full = TRUE,
+                 quiet = TRUE)
+invisible(sdm$fit$state)
+
+if (SAVE_FITS){
+  save(sdm,
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_model_with_vs_B_Q4.rds", sep = ""))
 }
