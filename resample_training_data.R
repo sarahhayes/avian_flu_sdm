@@ -9,6 +9,7 @@ library(magrittr)
 library(flexsdm)
 library(ibis.iSDM)
 library(terra)
+library(sf)
 
 # Read in extent of Europe mapped
 base_map <- terra::rast("output/euro_rast_10k.tif")
@@ -35,37 +36,32 @@ pos_sites %>% pull(Q) %>% table
 pos_sites %>% pull(serotype_HN) %>% table
 
 # Training set A: all AI before 2020/21 H5N8 outbreak (which includes a H5N8 outbreak in 2017)
-train_A <- pos_sites %>% filter(date < as.Date("2020-01-01"))
-
-# Training set A: 2020/21 H5N8 outbreak
-test_A <- pos_sites %>% filter(date > as.Date("2020-01-01") & serotype_HN == "H5N8")
+# Test set A: 2020/21 H5N8 outbreak
+df_A <- pos_sites %>% filter(date < as.Date("2020-01-01")|date > as.Date("2020-01-01") & serotype_HN == "H5N8") %>%
+  mutate(df = case_when(date < as.Date("2020-01-01") ~ "train_A",
+                        date > as.Date("2020-01-01") & serotype_HN == "H5N8" ~ "test_A"))
 
 # Training set B: all AI after 2020/2021 H5N8 outbreak (almost all H5N1)
-train_B <- pos_sites %>% filter(date > as.Date("2021-09-01")) 
+df_B <- pos_sites %>% filter(date > as.Date("2021-09-01")) %>% mutate(df = "train_B")
 
 # How many per quarter
-bind_rows(train_A %>% mutate(df = "train_A"),
-          test_A %>% mutate(df = "test_A"),
-          train_B %>% mutate(df = "train_B")
-) %>% with(., table(df, Q))
+pre_table <- bind_rows(df_A, df_B) %>% with(., table(df, Q))
+pre_table
 
 # # Plot over time
-# train_A %>% 
+# df_A %>% filter(grepl("train", df)) %>%
 #   ggplot(aes(x = date)) +
 #   geom_histogram(fill = "#00BA38")
 # 
-# test_A %>% 
+# df_A %>% filter(grepl("test", df)) %>%
 #   ggplot(aes(x = date)) +
 #   geom_histogram(fill = "#F8766D")
 # 
-# train_B %>% 
+# df_B %>% filter(grepl("train", df)) %>%
 #   ggplot(aes(x = date)) +
 #   geom_histogram(fill = "#619CFF")
 
-bind_rows(train_A %>% mutate(df = "train_A"),
-          test_A %>% mutate(df = "test_A"),
-          train_B %>% mutate(df = "train_B")
-) %>% 
+bind_rows(df_A, df_B) %>% 
   ggplot(aes(x = date, fill = df)) +
   geom_histogram()
 
@@ -86,13 +82,55 @@ pos_sites %>%
   labs(fill = "subtype") +
   theme_bw()
 
-bind_rows(train_A %>% mutate(df = "train_A"),
-          test_A %>% mutate(df = "test_A"),
-          train_B %>% mutate(df = "train_B")
-) %>% 
+bind_rows(df_A, df_B)  %>% 
   ggplot(aes(x = date, fill = df)) +
   geom_histogram() +
   facet_wrap(~ df, scales = "free")
+
+# Assign to 10km grid cells by quarter (so that overlapping points can still count for individual quarters)
+rast_train_A_list <- list()
+rast_test_A_list <- list()
+rast_train_B_list <- list()
+
+for (i in 1:4){
+  
+  rast_train_A_list[[i]] <- df_A %>% filter(df == "train_A") %>%
+    filter(Q == paste0("Q", i)) %>%
+    st_as_sf(coords = c("X", "Y"), crs = "EPSG:3035") %>%  # Map to 10km grid
+    rasterize(y = base_map, fun = "max") %>%  # Consider positives as 1 no matter how many records in the cell
+    as.data.frame(xy = TRUE) %>%  # Convert back to data frame
+    filter(complete.cases(.)) %>%  # Select only cells with presences
+    set_names(c("X", "Y", "pos")) %>% 
+    mutate(Q = paste0("Q",i), df = "train_A")
+  
+  rast_test_A_list[[i]] <- df_A %>% filter(df == "test_A") %>%
+    filter(Q == paste0("Q", i)) %>%
+    st_as_sf(coords = c("X", "Y"), crs = "EPSG:3035") %>%  # Map to 10km grid
+    rasterize(y = base_map, fun = "max") %>%  # Consider positives as 1 no matter how many records in the cell
+    as.data.frame(xy = TRUE) %>%  # Convert back to data frame
+    filter(complete.cases(.)) %>%  # Select only cells with presences
+    set_names(c("X", "Y", "pos")) %>% 
+    mutate(Q = paste0("Q",i), df = "test_A")
+  
+  rast_train_B_list[[i]] <- df_B %>% filter(df == "train_B") %>%
+    filter(Q == paste0("Q", i)) %>%
+    st_as_sf(coords = c("X", "Y"), crs = "EPSG:3035") %>%  # Map to 10km grid
+    rasterize(y = base_map, fun = "max") %>%  # Consider positives as 1 no matter how many records in the cell
+    as.data.frame(xy = TRUE) %>%  # Convert back to data frame
+    filter(complete.cases(.)) %>%  # Select only cells with presences
+    set_names(c("X", "Y", "pos")) %>% 
+    mutate(Q = paste0("Q",i), df = "train_B")
+  
+}
+
+df_A <- bind_rows(rast_train_A_list, rast_test_A_list)
+df_B <- bind_rows(rast_train_B_list)
+
+# How many per quarter after counting at grid cell level?
+post_table <- bind_rows(df_A, df_B) %>% with(., table(df, Q))
+
+pre_table
+post_table
 
 #######################
 # One-time processing #
@@ -186,14 +224,8 @@ pseudoabs_gen <- function (maindf){
   
   for (i in 1:4){
     
-    # Assign positives to 10km grid cells
-    rast_df <- maindf %>% filter(Q == paste0("Q", i)) %>%
-      st_as_sf(coords = c("X", "Y"), crs = "EPSG:3035") %>%
-      rasterize(y = base_map, 
-                fun = "max")
-    
-    # Convert back to data frame
-    df <- as.data.frame(rast_df, xy = TRUE) %>% filter(complete.cases(.)) %>% set_names(c("X", "Y", "const"))
+    # Select quarter
+    df <- maindf %>% filter(Q == paste0("Q",i))
     
     # Define buffer area around positive points as the spatial area to sample pseudoabsences from
     ca <- calib_area(
@@ -236,7 +268,7 @@ pseudoabs_gen <- function (maindf){
                                                                            bias = weight_layer))
     
     
-    png(paste0("plots//resampling//weighted//", dfname, "_Q", i, "_pseudoabs_", layername %>% gsub(" ", "", .), "_lim.png"), width = 10, height = 10, units = "in", res = 600)
+    png(paste0("plots//resampling//weighted_pseudoabs//", dfname, "_Q", i, "_pseudoabs_", layername %>% gsub(" ", "", .), "_lim.png"), width = 10, height = 10, units = "in", res = 600)
     plot(base_map, col = "gray95",  main = paste0(layername, "-weighted pseudoabsences (75km limit, no buffer) [flexsdm]"))
     plot(ca, add = TRUE)
     points(df %>% pull(X),
@@ -247,10 +279,10 @@ pseudoabs_gen <- function (maindf){
            pch=16, cex=0.2, col = "magenta3")
     dev.off()
     
-    saveRDS(pseudoabs_dens, paste0("plots//resampling//weighted//", dfname, "_Q", i, "_pseudoabs_", layername %>% gsub(" ", "", .), "_lim.RDS"))
+    saveRDS(pseudoabs_dens, paste0("plots//resampling//weighted_pseudoabs//", dfname, "_Q", i, "_pseudoabs_", layername %>% gsub(" ", "", .), "_lim.RDS"))
     
     
-    png(paste0("plots//resampling//weighted//", dfname, "_Q", i, "_pseudoabs_", layername %>% gsub(" ", "", .), "_nolim.png"), width = 10, height = 10, units = "in", res = 600)
+    png(paste0("plots//resampling//weighted_pseudoabs//", dfname, "_Q", i, "_pseudoabs_", layername %>% gsub(" ", "", .), "_nolim.png"), width = 10, height = 10, units = "in", res = 600)
     plot(base_map, col = "gray95",  main = paste0(layername, "-weighted pseudoabsences (no limit, no buffer) [flexsdm]"))
     #plot(ca, add = TRUE)
     points(df %>% pull(X),
@@ -261,9 +293,9 @@ pseudoabs_gen <- function (maindf){
            pch=16, cex=0.2, col = "magenta3")
     dev.off()
     
-    saveRDS(pseudoabs_dens_nolim, paste0("plots//resampling//weighted//", dfname, "_Q", i, "_pseudoabs_", layername %>% gsub(" ", "", .), "_nolim.RDS"))
+    saveRDS(pseudoabs_dens_nolim, paste0("plots//resampling//weighted_pseudoabs//", dfname, "_Q", i, "_pseudoabs_", layername %>% gsub(" ", "", .), "_nolim.RDS"))
     
-    png(paste0("plots//resampling//weighted//", dfname, "_Q", i, "_pseudoabs_", layername %>% gsub(" ", "", .), "_buff.png"), width = 10, height = 10, units = "in", res = 600)
+    png(paste0("plots//resampling//weighted_pseudoabs//", dfname, "_Q", i, "_pseudoabs_", layername %>% gsub(" ", "", .), "_buff.png"), width = 10, height = 10, units = "in", res = 600)
     plot(base_map, col = "gray95",  main = paste0(layername, "-weighted pseudoabsences (no limit, 25km buffer) [ibis]"))
     #plot(ca, add = TRUE)
     points(pseudoabs_dens_buff %>% filter(pr_ab == 1) %>% pull(x),
@@ -275,8 +307,12 @@ pseudoabs_gen <- function (maindf){
     dev.off()
     
     saveRDS(pseudoabs_dens_buff %>% 
-              filter(pr_ab == 0) %>% as.data.frame() %>% select(x, y, pr_ab) %>% rename(X = x, Y = y),
-            paste0("plots//resampling//weighted//", dfname, "_Q", i, "_pseudoabs_", layername %>% gsub(" ", "", .), "_buff.RDS"))
+              as.data.frame() %>% 
+              filter(pr_ab == 0) %>%  
+              select(x, y, pr_ab) %>% 
+              rename(X = x, Y = y) %>% 
+              set_rownames(NULL),
+            paste0("plots//resampling//weighted_pseudoabs//", dfname, "_Q", i, "_pseudoabs_", layername %>% gsub(" ", "", .), "_buff.RDS"))
     
     
     gc()
@@ -285,9 +321,9 @@ pseudoabs_gen <- function (maindf){
 }
 
 set.seed(1047)
-pseudoabs_gen(train_A)
+pseudoabs_gen(df_A)
 set.seed(1047)
-pseudoabs_gen(train_B)
+pseudoabs_gen(df_B)
 
 ###########################
 # Data filtering/thinning #
@@ -299,18 +335,54 @@ env_vars_Q2 <- terra::rast("data_offline\\combi_rasters\\env_vars_Q2.tif")
 env_vars_Q3 <- terra::rast("data_offline\\combi_rasters\\env_vars_Q3.tif")
 env_vars_Q4 <- terra::rast("data_offline\\combi_rasters\\env_vars_Q4.tif")
 
-# Read pseudoabsences back in - selected pseudoabs weighted by eBird records
-pseudoabs_A <- bind_rows(readRDS(paste0("plots//resampling//weighted//train_A_Q1_pseudoabs_eBirdrecord_buff.RDS")) %>% mutate(Q = "Q1"),
-                         readRDS(paste0("plots//resampling//weighted//train_A_Q2_pseudoabs_eBirdrecord_buff.RDS")) %>% mutate(Q = "Q2"),
-                         readRDS(paste0("plots//resampling//weighted//train_A_Q3_pseudoabs_eBirdrecord_buff.RDS")) %>% mutate(Q = "Q3"),
-                         readRDS(paste0("plots//resampling//weighted//train_A_Q4_pseudoabs_eBirdrecord_buff.RDS")) %>% mutate(Q = "Q4")
-)
+# Separate training data from test data, each accompanied by same ratio of pseudoabsences
+set.seed(1102)
 
-pseudoabs_B <- bind_rows(readRDS(paste0("plots//resampling//weighted//train_B_Q1_pseudoabs_eBirdrecord_buff.RDS")) %>% mutate(Q = "Q1"),
-                         readRDS(paste0("plots//resampling//weighted//train_B_Q2_pseudoabs_eBirdrecord_buff.RDS")) %>% mutate(Q = "Q2"),
-                         readRDS(paste0("plots//resampling//weighted//train_B_Q3_pseudoabs_eBirdrecord_buff.RDS")) %>% mutate(Q = "Q3"),
-                         readRDS(paste0("plots//resampling//weighted//train_B_Q4_pseudoabs_eBirdrecord_buff.RDS")) %>% mutate(Q = "Q4")
-)
+train_A <- df_A %>% filter(df == "train_A")
+test_A <- df_A %>% filter(df == "test_A")
+train_B <- df_B %>% filter(df == "train_B")
+test_B <- df_B %>% filter(df == "test_B")
+
+pseudoabs_train_A <- list()
+pseudoabs_test_A <- list()
+pseudoabs_train_B <- list()
+pseudoabs_test_B <- list()
+
+for (i in 1:4){
+  
+  # Selected pseudoabs weighted by eBird records
+  pseudoabs <- readRDS(paste0("plots//resampling//weighted_pseudoabs//df_A_Q",i,"_pseudoabs_eBirdrecord_buff.RDS")) %>% mutate(Q = paste0("Q",i))
+  
+  pseudoabs_rows <- pseudoabs %>% nrow
+  train_rows <- train_A %>% filter(Q == paste0("Q",i)) %>% nrow
+  train_plus_test_rows <- df_A %>% filter(Q == paste0("Q",i)) %>% nrow
+  
+  train_index <- sample(1:pseudoabs_rows, 
+                        size = round(pseudoabs_rows*train_rows/train_plus_test_rows),
+                        replace=FALSE)
+  
+  pseudoabs_train_A[[i]] <- pseudoabs %>% filter(Q == paste0("Q",i)) %>% .[train_index,]
+  pseudoabs_test_A[[i]] <- pseudoabs %>% filter(Q == paste0("Q",i)) %>% .[-train_index,]
+  
+  pseudoabs <- readRDS(paste0("plots//resampling//weighted_pseudoabs//df_B_Q",i,"_pseudoabs_eBirdrecord_buff.RDS")) %>% mutate(Q = paste0("Q",i))
+  
+  pseudoabs_rows <- pseudoabs %>% filter(Q == paste0("Q",i)) %>% nrow
+  train_rows <- train_B %>% filter(Q == paste0("Q",i)) %>% nrow
+  train_plus_test_rows <- df_B %>% filter(Q == paste0("Q",i)) %>% nrow
+  
+  train_index <- sample(1:pseudoabs_rows, 
+                        size = round(pseudoabs_rows*train_rows/train_plus_test_rows),
+                        replace=FALSE)
+  
+  pseudoabs_train_B[[i]] <- pseudoabs %>% filter(Q == paste0("Q",i)) %>% .[train_index,]
+  # pseudoabs_test_B[[i]] <- pseudoabs %>% filter(Q == paste0("Q",i)) %>% .[-train_index,] ## No pseudoabsences for data set B?
+  
+}
+
+pseudoabs_train_A %<>% bind_rows
+pseudoabs_test_A %<>% bind_rows
+pseudoabs_train_B %<>% bind_rows
+# pseudoabs_test_B %<>% bind_rows
 
 # Conduct thinning
 thinner <- function (maindf, nbins){
@@ -320,16 +392,10 @@ thinner <- function (maindf, nbins){
   
   for (i in 1:4){
     
-    # Assign positives to 10km grid cells
-    rast_df <- maindf %>% filter(Q == paste0("Q", i)) %>%
-      st_as_sf(coords = c("X", "Y"), crs = "EPSG:3035") %>%
-      rasterize(y = base_map, 
-                fun = "max")
+    # Select quarter
+    df <- maindf %>% filter(Q == paste0("Q",i))
     
-    # Convert back to data frame
-    df <- as.data.frame(rast_df, xy = TRUE) %>% filter(complete.cases(.)) %>% set_names(c("X", "Y", "const"))
-    
-    # Thin data randomly
+    # Thin data randomly (n = 1000 initially)
     
     thinned_rand <- df %>% 
       slice_sample(n = min(1000, nrow(df)))
@@ -390,8 +456,6 @@ thinner <- function (maindf, nbins){
     
   }
   
-  dev.off()
-  
   colnames(n_thinned) <- c("none", "rand", "env")
   rownames(n_thinned) <- c("Q1", "Q2", "Q3", "Q4")
   return(n_thinned)
@@ -404,18 +468,18 @@ for (j in c(4,6,8,10)){
   n_thinned_train_A <- thinner(train_A, nbins = j)
   
   set.seed(1650)
-  n_thinned_pseudoabs_A <- thinner(pseudoabs_A, nbins = j)
+  n_thinned_pseudoabs_A <- thinner(pseudoabs_train_A, nbins = j)
   
   set.seed(1650)
   n_thinned_train_B <- thinner(train_B, nbins = j)
   
   set.seed(1650)
-  n_thinned_pseudoabs_B <- thinner(pseudoabs_B, nbins = j)
+  n_thinned_pseudoabs_B <- thinner(pseudoabs_train_B, nbins = j)
   
   bind_rows(n_thinned_train_A %>% reshape2::melt() %>% mutate(set = "train_A"),
-            n_thinned_pseudoabs_A %>% reshape2::melt() %>% mutate(set = "pseudoabs_A"),
+            n_thinned_pseudoabs_A %>% reshape2::melt() %>% mutate(set = "pseudoabs_train_A"),
             n_thinned_train_B %>% reshape2::melt() %>% mutate(set = "train_B"),
-            n_thinned_pseudoabs_B %>% reshape2::melt() %>% mutate(set = "pseudoabs_B")) %>% mutate(nbins = j) %>%
+            n_thinned_pseudoabs_B %>% reshape2::melt() %>% mutate(set = "pseudoabs_train_B")) %>% mutate(nbins = j) %>%
     write.csv(paste0("training_sets\\n_thinned_", j, "bins.csv"))
   
 }
@@ -433,7 +497,7 @@ thin_df <- list.files("training_sets\\", pattern = "bins.csv", full.names = TRUE
 thin_df %>% 
   filter(strat != "rand") %>% 
   reshape2::dcast(set+nbins ~ Q) %>% 
-  mutate(set = factor(set, levels = c("train_A", "pseudoabs_A", "train_B", "pseudoabs_B"))) %>%
+  mutate(set = factor(set, levels = c("train_A", "pseudoabs_train_A", "train_B", "pseudoabs_train_B"))) %>%
   filter(grepl("_A", set)) %>%
   arrange(nbins, set) %>%
   write.csv("training_sets\\thin_summary_A.csv")
@@ -441,7 +505,7 @@ thin_df %>%
 thin_df %>% 
   filter(strat != "rand") %>% 
   reshape2::dcast(set+nbins ~ Q) %>% 
-  mutate(set = factor(set, levels = c("train_A", "pseudoabs_A", "train_B", "pseudoabs_B"))) %>%
+  mutate(set = factor(set, levels = c("train_A", "pseudoabs_train_A", "train_B", "pseudoabs_train_B"))) %>%
   filter(grepl("_B", set)) %>%
   arrange(nbins, set) %>%
   write.csv("training_sets\\thin_summary_B.csv")
@@ -460,28 +524,37 @@ thin_df %>%
 
 selectedbins <- 6
 
-# Combine presences and pseudoabsences into training sets
+# Combine thinned presences and thinned pseudoabsences into training sets
 
 for (i in 1:4){
-  bind_rows(readRDS(paste0("training_sets//raw//pseudoabs_A_thinned_env_", selectedbins, "_Q", i, ".RDS")) %>% mutate(pos = 0) %>% select(-id),
-            readRDS(paste0("training_sets//raw//train_A_thinned_env_", selectedbins, "_Q", i, ".RDS")) %>% mutate(pos = 1) %>% select(-id)) %>%
+  bind_rows(readRDS(paste0("training_sets//raw//pseudoabs_train_A_Q",i,"_thinned_env_",selectedbins,".RDS")) %>% mutate(pos = 0) %>% select(-id),
+            readRDS(paste0("training_sets//raw//train_A_Q",i,"_thinned_env_",selectedbins,".RDS")) %>% mutate(pos = 1) %>% select(-id)) %>% as.data.frame %>%
     saveRDS(paste0("training_sets//training_coords_A_Q", i, ".RDS"))
   
-  bind_rows(readRDS(paste0("training_sets//raw//pseudoabs_B_thinned_env_", selectedbins, "_Q", i, ".RDS")) %>% mutate(pos = 0) %>% select(-id),
-            readRDS(paste0("training_sets//raw//train_B_thinned_env_", selectedbins, "_Q", i, ".RDS")) %>% mutate(pos = 1) %>% select(-id)) %>%
+  bind_rows(readRDS(paste0("training_sets//raw//pseudoabs_train_B_Q",i,"_thinned_env_",selectedbins,".RDS")) %>% mutate(pos = 0) %>% select(-id),
+            readRDS(paste0("training_sets//raw//train_B_Q",i,"_thinned_env_",selectedbins,".RDS")) %>% mutate(pos = 1) %>% select(-id)) %>% as.data.frame %>%
     saveRDS(paste0("training_sets//training_coords_B_Q", i, ".RDS"))
 }
 
-# Map test sets to 10km grid for compatibility
+# Combine presences and pseudoabsences into test sets
 
 for (i in 1:4){
-  # Assign positives to 10km grid cells
-  rast_df <- test_A %>% filter(Q == paste0("Q", i)) %>%
-    st_as_sf(coords = c("X", "Y"), crs = "EPSG:3035") %>%
-    rasterize(y = base_map, 
-              fun = "max")
-  
-  # Convert back to data frame
-  rast_df %>% as.data.frame(xy = TRUE) %>% filter(complete.cases(.)) %>% set_names(c("X", "Y", "const")) %>%
-    saveRDS(paste0("training_sets//test_coords_A_Q", i, ".RDS"))
+ df <- bind_rows(
+    test_A %>% filter(Q == paste0("Q",i)) %>% select(X, Y, pos),
+    pseudoabs_test_A %>% filter(Q == paste0("Q",i)) %>% rename(pos = pr_ab) %>% select(X, Y, pos) # Add in test pseudoabsences
+    ) 
+ 
+ png(paste0("plots//resampling//test//test_A_Q", i, ".png"), width = 10, height = 10, units = "in", res = 600)
+ plot(base_map, col = "gray95", main = paste0("test set A, Q",i," (pos = green, pseudoabs = red)"))
+ points(df %>% filter(pos == 1) %>% pull(X),
+        df %>% filter(pos == 1) %>% pull(Y), 
+        pch=16, cex=0.2, col = "green3")
+ points(df %>% filter(pos == 0) %>% pull(X),
+        df %>% filter(pos == 0) %>% pull(Y), 
+        pch=16, cex=0.2, col = "firebrick1")
+ dev.off()
+ 
+ df %>% saveRDS(paste0("training_sets//test_coords_A_Q", i, ".RDS"))
 }
+
+

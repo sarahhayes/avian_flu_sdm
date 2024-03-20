@@ -4,23 +4,25 @@
 
 SAVE_FITS <- FALSE
 SAVE_PLOTS <- FALSE
-BUILD_COVS <- FALSE
+
+# Global storing optimised k value for BART - which may be updated
+K_OPT <- 2
 
 # Set path to folder containing data, and where output will be stored
 PATH_TO_DATA <- "../../../OneDrive - The University of Liverpool/"
 
+library(dplyr)
 library(embarcadero)
 library(raster)
 library(terra)
 set.seed(12345)
 
-# EMBARCADERO FUNCTIONS ADJUSTED TO ALLOW CUSTOM BART PARAMETERS:
+#### EMBARCADERO FUNCTIONS ADJUSTED TO ALLOW CUSTOM BART PARAMETERS: ####
 
 bart.flex <- function(x.data, y.data, ri.data = NULL,
                       y.name = NULL, ri.name = NULL,
                       n.trees = 200,
                       k = 2.0, power = 2.0, base = 0.95) {
-  
   if(is.null(ri.data)) {
     train <- cbind(y.data, x.data) 
     if(!is.null(y.name)) {colnames(train)[1] <- y.name}
@@ -37,18 +39,21 @@ bart.flex <- function(x.data, y.data, ri.data = NULL,
                           colnames(train)[ncol(train)], sep=' - '))
     
     train <- na.omit(train) 
+    # default(rbart_vi)$k <- k
+    # default(rbart_vi)$power <- power
+    # default(rbart_vi)$base <- base
     model <- rbart_vi(f, 
                       group.by=train[,ncol(train)],
                       data=train,
                       n.samples=1000,
                       n.burn=100,
-                      n.chains=1,
-                      n.threads=1,
                       n.trees = n.trees,
-                      keepTrees = TRUE,
-                      k = k,
+                      k = K_OPT,
                       power = power,
-                      base = base) 
+                      base = base,
+                      keepTrees = TRUE,
+                      n.chains=1,
+                      n.threads=1) 
   }
   return(model)
 }
@@ -329,569 +334,267 @@ bart.step <- function(x.data, y.data, ri.data=NULL,
   invisible(best.model)
 }
 
-if (BUILD_COVS){
-  # set the crs we want to use
-  crs <- "epsg:3035"
+get_threshold <- function(object){
+  fitobj <- object$fit
   
-  euro_ext <- terra::ext(2000000, 6000000, 1000000, 5500000) # swap to base raster later
+  true.vector <- fitobj$data@y 
   
-  eco_paths <- list.files(paste(PATH_TO_DATA, "AI_S2_SDM_storage/Eco-Rasters", sep = ""),
-                          pattern = "*.tif",
-                          full.names = TRUE)
-  eco_lyrnames <- eco_paths %>%
-    sub(pattern = paste(PATH_TO_DATA, "AI_S2_SDM_storage/Eco-Rasters/", sep = ""),
-        replacement = "") %>%
-    sub(pattern = "_rast.tif",
-        replacement = "")
+  pred <- prediction(colMeans(pnorm(object$yhat.train)), true.vector)
   
-  eco_layers <- rast(lapply(eco_paths, rast))
-  
-  # Separate by quarters:
-  q1_eco_layers <- eco_layers[[seq(1, nlyr(eco_layers), 4)]]
-  q2_eco_layers <- eco_layers[[seq(2, nlyr(eco_layers), 4)]]
-  q3_eco_layers <- eco_layers[[seq(3, nlyr(eco_layers), 4)]]
-  q4_eco_layers <- eco_layers[[seq(4, nlyr(eco_layers), 4)]]
-  set.names(q1_eco_layers, eco_lyrnames)
-  set.names(q2_eco_layers, eco_lyrnames)
-  set.names(q3_eco_layers, eco_lyrnames)
-  set.names(q4_eco_layers, eco_lyrnames)
-  
-  # Now do environmental:
-  env_paths <- list.files(paste(PATH_TO_DATA, "AI_S2_SDM_storage/Environmental rasters", sep = ""),
-                          pattern = "*.tif",
-                          full.names = TRUE)
-  env_paths <- env_paths[-grep("landcover_output_full", env_paths)]
-  env_paths <- env_paths[-grep("chicken_density_2015", env_paths)]
-  env_paths <- env_paths[-grep("duck_density_2015", env_paths)]
-  env_paths <- env_paths[-grep("mean_tmax", env_paths)]
-  env_paths <- env_paths[-grep("mean_tmin", env_paths)]
-  env_lyrnames <- env_paths %>%
-    sub(pattern = paste(PATH_TO_DATA, "AI_S2_SDM_storage/Environmental rasters/", sep = ""),
-        replacement = "") %>%
-    sub(pattern = ".tif",
-        replacement = "")
-  
-  env_layers <- rast(lapply(env_paths, rast))
-  names(env_layers) <- env_lyrnames
-  
-  all_excludes <- grep("quart", env_lyrnames, value = TRUE)
-  q1_excludes <- grep("first", all_excludes, value = TRUE, invert = TRUE)
-  q2_excludes <- grep("second", all_excludes, value = TRUE, invert = TRUE)
-  q3_excludes <- grep("third", all_excludes, value = TRUE, invert = TRUE)
-  q4_excludes <- grep("fourth", all_excludes, value = TRUE, invert = TRUE)
-  
-  q1_env_layers <- subset(env_layers, setdiff(env_lyrnames, q1_excludes))
-  q2_env_layers <- subset(env_layers, setdiff(env_lyrnames, q2_excludes))
-  q3_env_layers <- subset(env_layers, setdiff(env_lyrnames, q3_excludes))
-  q4_env_layers <- subset(env_layers, setdiff(env_lyrnames, q4_excludes))
-  
-  cov_coast <- read.csv(paste(PATH_TO_DATA, "AI_S2_SDM_storage/Environmental variable csvs/dist_to_coast_output.csv", sep = "")) %>%
-    rename(x = X, y = Y) %>%
-    select(-X.1) %>% 
-    relocate(x,y) %>%
-    rast(type = "xyz", crs = "epsg:3035")
-  cov_water <- read.csv(paste(PATH_TO_DATA, "AI_S2_SDM_storage/Environmental variable csvs/dist_to_water_output.csv", sep = "")) %>%
-    select(-ID) %>% 
-    relocate(x,y) %>%
-    rast(type = "xyz", crs = "epsg:3035")
-  cov_alt <- read.csv(paste(PATH_TO_DATA, "AI_S2_SDM_storage/Environmental variable csvs/elevation_outputs.csv", sep = "")) %>%
-    select(-ID, -X) %>% 
-    relocate(x,y) %>%
-    rast(type = "xyz", crs = "epsg:3035")
-  
-  landcover_rast <- rast(paste(PATH_TO_DATA, "AI_S2_SDM_storage/Environmental rasters/landcover_output_full.tif", sep = ""))
-  n_landtypes <- 17
-  landcover_layers <- lapply(1:n_landtypes,
-                             FUN = function(i){landcover_rast == i}) %>%
-    rast()
-  names(landcover_layers) <- lapply(1:n_landtypes,
-                                    FUN = function(i){paste("lc_", i, sep = "")})
-  lc_lookup <- pairlist("lc_1" = "Water_bodies",
-                        "lc_2" = "Evergreen_Needleleaf_Forests",
-                        "lc_3" = "Evergreen_Broadleaf_Forests",
-                        "lc_4" = "Deciduous_Needleleaf_Forests",
-                        "lc_5" = "Deciduous_Broadleaf_Forests",
-                        "lc_6" = "Mixed_Forests",
-                        "lc_7" = "Closed_Shrublands",
-                        "lc_8" = "Open_Shrublands",
-                        "lc_9" = "Woody_Savannas",
-                        "lc_10" = "Savannas",
-                        "lc_11" = "Grasslands",
-                        "lc_12" = "Permanent_Wetlands",
-                        "lc_13" = "Croplands",
-                        "lc_14" = "Urban_and_Built-up_Lands",
-                        "lc_15" = "Cropland/Natural_Vegetation_Mosaics",
-                        "lc_16" = "Non-Vegetated_Lands",
-                        "lc_17" = "Unclassified")
-  names(landcover_layers) <- lapply(names(landcover_layers),
-                                    FUN = function(n){lc_lookup[[n]]})
-  # Remove layers that are either all True or all False:
-  hom_layers <- sapply(1:n_landtypes,
-                       FUN = function(i){diff(minmax(landcover_layers[[i]]))==0}) %>%
-    which()
-  if (length(hom_layers)>0){
-    landcover_layers <- landcover_layers[[-hom_layers]]
+  perf.tss <- performance(pred,"sens","spec")
+  tss.list <- (perf.tss@x.values[[1]] + perf.tss@y.values[[1]] - 1)
+  tss.df <- data.frame(alpha=perf.tss@alpha.values[[1]],tss=tss.list)
+  thresh <- min(tss.df$alpha[which(tss.df$tss==max(tss.df$tss))])
+  return(thresh)
+}
+
+get_sens_and_spec <- function(sdm, xtest, ytest, ri, cutoff){
+  pred <- xtest[which(complete.cases(xtest)), ] %>%
+    stats::predict(object=sdm, type = "bart", group.by=ri) %>%
+    pnorm() %>%
+    colMeans() %>%
+    prediction(labels = ytest[which(complete.cases(xtest))])
+  perf <-  performance(pred, measure = "sens", x.measure = "spec")
+  tss_list <- (perf@x.values[[1]] + perf@y.values[[1]] - 1)
+  tss_df <- data.frame(alpha=perf@alpha.values[[1]],tss=tss_list)
+  # cutoff <- min(tss_df$alpha[which(tss_df$tss==max(tss_df$tss))])
+  sens <- perf@x.values[[1]][which.min(abs(perf@alpha.values[[1]]-cutoff))]
+  spec <- perf@y.values[[1]][which.min(abs(perf@alpha.values[[1]]-cutoff))]
+  tss <- tss_df[which.min(abs(tss_df$alpha-cutoff)),'tss']
+  auc <- performance(pred,"auc")@y.values[[1]]
+  return(pairlist("pred"=pred,
+                  "perf"=perf,
+                  "sens"=sens,
+                  "spec"=spec,
+                  "tss"=tss,
+                  "auc"=auc))
+}
+
+
+
+#### Period A Q1 ####
+
+training_data <- read.csv("training_sets/training_data_A_Q1.csv")
+xtrain <- training_data %>% dplyr::select(!("y"|"ri"))
+ytrain <- training_data$y
+
+
+# Fold construction
+
+fold_ids <- caret::createFolds(paste0(training_data$ri, training_data$y), k = 5)
+
+folds <- lapply(1:length(fold_ids),
+                FUN = function(i){
+                  training_data[-fold_ids[[i]],]})
+antifolds <- lapply(1:length(fold_ids),
+                    FUN = function(i){
+                      training_data[fold_ids[[i]],]})
+
+## Check training representation
+# lapply(folds, function(x) with(x, table(ri,y)))
+
+
+k_vals = c(1, 2, 3)
+power_vals = c(1.6, 1.8, 2)
+base_vals = c(0.75, 0.85, 0.95)
+kl <- length(k_vals)
+pl <- length(power_vals)
+bl <- length(base_vals)
+cv_results <- data.frame(k=numeric(),
+                         power=numeric(),
+                         base=numeric(),
+                         auc1=numeric(),
+                         auc2=numeric(),
+                         auc3=numeric(),
+                         auc4=numeric(),
+                         auc5=numeric())
+cv_results[1:kl*pl*bl, ] <- 0
+for (i in 1:length(k_vals)){
+  k_val <- k_vals[i]
+  for (j in 1:length(power_vals)){
+    power_val <- power_vals[j]
+    for (m in 1:length(base_vals)){
+      base_val <- base_vals[m]
+      idx <- (i-1)*pl*bl + (j-1)*bl + m
+      cat("idx=", idx, "\n")
+      cv_results$k[idx] <- k_val
+      cv_results$power[idx] <- power_val
+      cv_results$base[idx] <- base_val
+      for (fold_no in 1:length(folds)){
+        model <- bart2(y ~ . - ri,
+                          folds[[fold_no]],
+                          test = antifolds[[fold_no]],
+                          k = k_val,
+                          power = power_val,
+                          base = base_val,
+                          n.trees = 200,
+                          n.chains = 1L,
+                          n.threads = 1L,
+                          keepTrees = TRUE,
+                          verbose = FALSE)
+        antifold_x <- subset(antifolds[[fold_no]], select=-c(y, ri))
+        antifold_y <- antifolds[[fold_no]]$y
+        antifold_ri <- antifolds[[fold_no]]$ri
+        cutoff <- get_threshold(model)
+        auc <- get_sens_and_spec(model, antifold_x, antifold_y, antifold_ri, cutoff)$auc
+        cv_results[idx, 3+fold_no] <- auc
+        rm(model)
+      }
+    }
   }
-  
-  q1_covs <- c(resample(q1_eco_layers, env_layers, method = "near"),
-               q1_env_layers,
-               landcover_layers,
-               cov_coast,
-               cov_water,
-               cov_alt)  
-  writeRaster(q1_covs, paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covariates/q1_covs.tif", sep = ""), overwrite = TRUE)
-  rm(q1_covs)
-  gc()
-  q2_covs <- c(resample(q2_eco_layers, env_layers, method = "near"),
-               q2_env_layers,
-               landcover_layers,
-               cov_coast,
-               cov_water,
-               cov_alt)
-  writeRaster(q2_covs, paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covariates/q2_covs.tif", sep = ""), overwrite = TRUE)
-  rm(q2_covs)
-  gc()
-  q3_covs <- c(resample(q3_eco_layers, env_layers, method = "near"),
-               q3_env_layers,
-               landcover_layers,
-               cov_coast,
-               cov_water,
-               cov_alt)
-  writeRaster(q3_covs, paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covariates/q3_covs.tif", sep = ""), overwrite = TRUE)
-  rm(q3_covs)
-  gc()
-  q4_covs <- c(resample(q4_eco_layers, env_layers, method = "near"),
-               q4_env_layers,
-               landcover_layers,
-               cov_coast,
-               cov_water,
-               cov_alt)
-  writeRaster(q4_covs, paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covariates/q4_covs.tif", sep = ""), overwrite = TRUE)
-  rm(q4_covs)
-  gc()
-  
 }
 
-################################################################################
-# Do the Q1 analysis
+cv_results <- cv_results %>%
+  rowwise() %>%
+  mutate(mean_err = mean(auc1,
+                         auc2,
+                         auc3,
+                         auc4,
+                         auc5))
+argmin <- which.max(cv_results$mean_err)
+K_OPT <- cv_results$k[argmin]
+power_opt <- cv_results$power[argmin]
+base_opt <- cv_results$base[argmin]
 
-covstack <- raster::stack(paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covariates/q1_covs.tif", sep = ""))
 
-# Drop unclassified land layer
-covstack <- dropLayer(covstack, "lc_17")
-
-
-# Load training data
-training_coords <- readRDS("training_sets/training_coords_Q1.RDS")
-cov_df <- data.frame(raster::extract(covstack, training_coords[, 1:2]))
-
-n_pts <- nrow(training_coords)
-n_training <- round(.75 * n_pts)
-
-training <- sample(1:nrow(cov_df), n_training)
-xtrain <- cov_df[training, ]
-ytrain <- training_coords$pos[training]
-xtest <- cov_df[-training, ]
-ytest <- training_coords$pos[-training]
-
-if (SAVE_FITS){
-  save(xtrain, ytrain, xtest, ytest, file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/q1_train_test_data.rds", sep = ""))
-}
+test_data <- read.csv("training_sets/test_data_A_Q1.csv")
+xtest <- test_data %>% dplyr::select(!("y"|"ri"))
+ytest <- test_data$y
 
 # Initialise model
-basic_model <- bart(xtrain,
-                    ytrain,
-                    x.test = xtest,
-                    keeptrees = TRUE)
+basic_model <- bart.flex(x.data = xtrain,
+                         y.data = ytrain,
+                         power = power_opt,
+                         base = base_opt)
 invisible(basic_model$fit$state)
 summary(basic_model)
 
 if (SAVE_FITS){
   save(basic_model,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/basic_model_Q1.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_model_A_Q1.rds", sep = ""))
 }
-
-retuned_model <- retune(basic_model)
-
-k_retune = retuned_model$fit$model@node.hyperprior@k
-power_retune = retuned_model$fit$model@tree.prior@power
-base_retune = retuned_model$fit$model@tree.prior@base
 
 sdm <- bart.step(x.data = xtrain,
                  y.data = ytrain,
-                 k = k_retune,
-                 power = power_retune,
-                 base = base_retune,
+                 power = power_opt,
+                 base = base_opt,
                  full = TRUE,
                  quiet = TRUE)
 invisible(sdm$fit$state)
 summary(sdm)
 if (SAVE_FITS){
   save(sdm,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_sdm_Q1.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_model_with_vs_A_Q1.rds", sep = ""))
 }
 
-covstack_lores <- aggregate(covstack, fact = 10)
 
-# Generate risk map
-pred_layer <- predict(object = sdm,
-                      x.layers = covstack_lores,
-                      quantiles = c(0.025, 0.975),
-                      splitby = 20
-)
-if (SAVE_FITS){
-  save(pred_layer,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_prediction_Q1.rds", sep = ""))
+
+#### Period B Q1 ####
+
+training_data <- read.csv("training_sets/training_data_B_Q1.csv")
+xtrain <- training_data %>% dplyr::select(!("y"|"ri"))
+ytrain <- training_data$y
+
+
+# Fold construction
+
+fold_ids <- caret::createFolds(paste0(training_data$ri, training_data$y), k = 5)
+
+folds <- lapply(1:length(fold_ids),
+                FUN = function(i){
+                  training_data[-fold_ids[[i]],]})
+antifolds <- lapply(1:length(fold_ids),
+                    FUN = function(i){
+                      training_data[fold_ids[[i]],]})
+
+## Check training representation
+# lapply(folds, function(x) with(x, table(ri,y)))
+
+
+k_vals = c(1, 2, 3)
+power_vals = c(1.6, 1.8, 2)
+base_vals = c(0.75, 0.85, 0.95)
+kl <- length(k_vals)
+pl <- length(power_vals)
+bl <- length(base_vals)
+cv_results <- data.frame(k=numeric(),
+                         power=numeric(),
+                         base=numeric(),
+                         auc1=numeric(),
+                         auc2=numeric(),
+                         auc3=numeric(),
+                         auc4=numeric(),
+                         auc5=numeric())
+cv_results[1:kl*pl*bl, ] <- 0
+for (i in 1:length(k_vals)){
+  k_val <- k_vals[i]
+  for (j in 1:length(power_vals)){
+    power_val <- power_vals[j]
+    for (m in 1:length(base_vals)){
+      base_val <- base_vals[m]
+      idx <- (i-1)*pl*bl + (j-1)*bl + m
+      cat("idx=", idx, "\n")
+      cv_results$k[idx] <- k_val
+      cv_results$power[idx] <- power_val
+      cv_results$base[idx] <- base_val
+      for (fold_no in 1:length(folds)){
+        model <- bart2(y ~ . - ri,
+                       folds[[fold_no]],
+                       test = antifolds[[fold_no]],
+                       k = k_val,
+                       power = power_val,
+                       base = base_val,
+                       n.trees = 200,
+                       n.chains = 1L,
+                       n.threads = 1L,
+                       keepTrees = TRUE,
+                       verbose = FALSE)
+        antifold_x <- subset(antifolds[[fold_no]], select=-c(y, ri))
+        antifold_y <- antifolds[[fold_no]]$y
+        antifold_ri <- antifolds[[fold_no]]$ri
+        cutoff <- get_threshold(model)
+        auc <- get_sens_and_spec(model, antifold_x, antifold_y, antifold_ri, cutoff)$auc
+        cv_results[idx, 3+fold_no] <- auc
+        rm(model)
+      }
+    }
+  }
 }
 
-if (SAVE_PLOTS){
-  png(filename = "../../bartfit-plots/cv_q1_map.png")
-}
-# Plot map
-plot(pred_layer[[1]],
-     box = FALSE,
-     axes = FALSE,
-     main = 'Mean prediction, Q1')
-if (SAVE_PLOTS){
-  dev.off()
-}
-
-if (SAVE_PLOTS){
-  png(filename = "../../bartfit-plots/cv_q1_lbound.png")
-}
-plot(pred_layer[[2]],
-     box = FALSE,
-     axes = FALSE,
-     main = '2.5% posterior bound, Q1')
-if (SAVE_PLOTS){
-  dev.off()
-}
-
-if (SAVE_PLOTS){
-  png(filename = "../../bartfit-plots/cv_q1_ubound.png")
-}
-plot(pred_layer[[3]],
-     box = FALSE,
-     axes = FALSE,
-     main = '97.5% posterior bound, Q1')
-if (SAVE_PLOTS){
-  dev.off()
-}
-
-################################################################################
-# Do the Q2 analysis
-
-covstack <- raster::stack(paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covariates/q2_covs.tif", sep = ""))
-
-# Drop unclassified land layer
-covstack <- dropLayer(covstack, "lc_17")
-
-
-# Load training data
-training_coords <- readRDS("training_sets/training_coords_Q2.RDS")
-cov_df <- data.frame(raster::extract(covstack, training_coords[, 1:2]))
-
-n_pts <- nrow(training_coords)
-n_training <- round(.75 * n_pts)
-
-training <- sample(1:nrow(cov_df), n_training)
-xtrain <- cov_df[training, ]
-ytrain <- training_coords$pos[training]
-xtest <- cov_df[-training, ]
-ytest <- training_coords$pos[-training]
-
-if (SAVE_FITS){
-  save(xtrain, ytrain, xtest, ytest, file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/q2_train_test_data.rds", sep = ""))
-}
+cv_results <- cv_results %>%
+  rowwise() %>%
+  mutate(mean_err = mean(auc1,
+                         auc2,
+                         auc3,
+                         auc4,
+                         auc5))
+argmin <- which.max(cv_results$mean_err)
+K_OPT <- cv_results$k[argmin]
+power_opt <- cv_results$power[argmin]
+base_opt <- cv_results$base[argmin]
 
 # Initialise model
-basic_model <- bart(xtrain,
-                    ytrain,
-                    x.test = xtest,
-                    keeptrees = TRUE)
+basic_model <- bart.flex(x.data = xtrain,
+                         y.data = ytrain,
+                         power = power_opt,
+                         base = base_opt)
 invisible(basic_model$fit$state)
 summary(basic_model)
 
 if (SAVE_FITS){
   save(basic_model,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/basic_model_Q2.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_model_B_Q1.rds", sep = ""))
 }
-
-retuned_model <- retune(basic_model)
-
-k_retune = retuned_model$fit$model@node.hyperprior@k
-power_retune = retuned_model$fit$model@tree.prior@power
-base_retune = retuned_model$fit$model@tree.prior@base
 
 sdm <- bart.step(x.data = xtrain,
                  y.data = ytrain,
-                 k = k_retune,
-                 power = power_retune,
-                 base = base_retune,
+                 power = power_opt,
+                 base = base_opt,
                  full = TRUE,
                  quiet = TRUE)
 invisible(sdm$fit$state)
 summary(sdm)
 if (SAVE_FITS){
   save(sdm,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_sdm_Q2.rds", sep = ""))
-}
-
-covstack_lores <- aggregate(covstack, fact = 10)
-
-# Generate risk map
-pred_layer <- predict(object = sdm,
-                      x.layers = covstack_lores,
-                      quantiles = c(0.025, 0.975),
-                      splitby = 20
-)
-if (SAVE_FITS){
-  save(pred_layer,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_prediction_Q2.rds", sep = ""))
-}
-
-if (SAVE_PLOTS){
-  png(filename = "../../bartfit-plots/cv_q2_map.png")
-}
-# Plot map
-plot(pred_layer[[1]],
-     box = FALSE,
-     axes = FALSE,
-     main = 'Mean prediction, Q2')
-if (SAVE_PLOTS){
-  dev.off()
-}
-
-if (SAVE_PLOTS){
-  png(filename = "../../bartfit-plots/cv_q2_lbound.png")
-}
-plot(pred_layer[[2]],
-     box = FALSE,
-     axes = FALSE,
-     main = '2.5% posterior bound, Q2')
-if (SAVE_PLOTS){
-  dev.off()
-}
-
-if (SAVE_PLOTS){
-  png(filename = "../../bartfit-plots/cv_q2_ubound.png")
-}
-plot(pred_layer[[3]],
-     box = FALSE,
-     axes = FALSE,
-     main = '97.5% posterior bound, Q2')
-if (SAVE_PLOTS){
-  dev.off()
-}
-
-################################################################################
-# Do the Q3 analysis
-
-covstack <- raster::stack(paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covariates/q3_covs.tif", sep = ""))
-
-# Drop unclassified land layer
-covstack <- dropLayer(covstack, "lc_17")
-
-
-# Load training data
-training_coords <- readRDS("training_sets/training_coords_Q3.RDS")
-cov_df <- data.frame(raster::extract(covstack, training_coords[, 1:2]))
-
-n_pts <- nrow(training_coords)
-n_training <- round(.75 * n_pts)
-
-training <- sample(1:nrow(cov_df), n_training)
-xtrain <- cov_df[training, ]
-ytrain <- training_coords$pos[training]
-xtest <- cov_df[-training, ]
-ytest <- training_coords$pos[-training]
-
-if (SAVE_FITS){
-  save(xtrain, ytrain, xtest, ytest, file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/q3_train_test_data.rds", sep = ""))
-}
-
-# Initialise model
-basic_model <- bart(xtrain,
-                    ytrain,
-                    x.test = xtest,
-                    keeptrees = TRUE)
-invisible(basic_model$fit$state)
-summary(basic_model)
-
-if (SAVE_FITS){
-  save(basic_model,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/basic_model_Q3.rds", sep = ""))
-}
-
-retuned_model <- retune(basic_model)
-
-k_retune = retuned_model$fit$model@node.hyperprior@k
-power_retune = retuned_model$fit$model@tree.prior@power
-base_retune = retuned_model$fit$model@tree.prior@base
-
-sdm <- bart.step(x.data = xtrain,
-                 y.data = ytrain,
-                 k = k_retune,
-                 power = power_retune,
-                 base = base_retune,
-                 full = TRUE,
-                 quiet = TRUE)
-invisible(sdm$fit$state)
-summary(sdm)
-if (SAVE_FITS){
-  save(sdm,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_sdm_Q3.rds", sep = ""))
-}
-
-covstack_lores <- aggregate(covstack, fact = 10)
-
-# Generate risk map
-pred_layer <- predict(object = sdm,
-                      x.layers = covstack_lores,
-                      quantiles = c(0.025, 0.975),
-                      splitby = 20
-)
-if (SAVE_FITS){
-  save(pred_layer,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_prediction_Q3.rds", sep = ""))
-}
-
-if (SAVE_PLOTS){
-  png(filename = "../../bartfit-plots/cv_q3_map.png")
-}
-# Plot map
-plot(pred_layer[[1]],
-     box = FALSE,
-     axes = FALSE,
-     main = 'Mean prediction, Q3')
-if (SAVE_PLOTS){
-  dev.off()
-}
-
-if (SAVE_PLOTS){
-  png(filename = "../../bartfit-plots/cv_q3_lbound.png")
-}
-plot(pred_layer[[2]],
-     box = FALSE,
-     axes = FALSE,
-     main = '2.5% posterior bound, Q3')
-if (SAVE_PLOTS){
-  dev.off()
-}
-
-if (SAVE_PLOTS){
-  png(filename = "../../bartfit-plots/cv_q3_ubound.png")
-}
-plot(pred_layer[[3]],
-     box = FALSE,
-     axes = FALSE,
-     main = '97.5% posterior bound, Q3')
-if (SAVE_PLOTS){
-  dev.off()
-}
-
-################################################################################
-# Do the Q4 analysis
-
-covstack <- raster::stack(paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covariates/q4_covs.tif", sep = ""))
-
-# Drop unclassified land layer
-covstack <- dropLayer(covstack, "lc_17")
-
-
-# Load training data
-training_coords <- readRDS("training_sets/training_coords_Q4.RDS")
-cov_df <- data.frame(raster::extract(covstack, training_coords[, 1:2]))
-
-n_pts <- nrow(training_coords)
-n_training <- round(.75 * n_pts)
-
-training <- sample(1:nrow(cov_df), n_training)
-xtrain <- cov_df[training, ]
-ytrain <- training_coords$pos[training]
-xtest <- cov_df[-training, ]
-ytest <- training_coords$pos[-training]
-
-if (SAVE_FITS){
-  save(xtrain, ytrain, xtest, ytest, file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/q4_train_test_data.rds", sep = ""))
-}
-
-# Initialise model
-basic_model <- bart(xtrain,
-                    ytrain,
-                    x.test = xtest,
-                    keeptrees = TRUE)
-invisible(basic_model$fit$state)
-summary(basic_model)
-
-if (SAVE_FITS){
-  save(basic_model,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/basic_model_Q4.rds", sep = ""))
-}
-
-retuned_model <- retune(basic_model)
-
-k_retune = retuned_model$fit$model@node.hyperprior@k
-power_retune = retuned_model$fit$model@tree.prior@power
-base_retune = retuned_model$fit$model@tree.prior@base
-
-sdm <- bart.step(x.data = xtrain,
-                 y.data = ytrain,
-                 k = k_retune,
-                 power = power_retune,
-                 base = base_retune,
-                 full = TRUE,
-                 quiet = TRUE)
-invisible(sdm$fit$state)
-summary(sdm)
-if (SAVE_FITS){
-  save(sdm,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_sdm_Q4.rds", sep = ""))
-}
-
-covstack_lores <- aggregate(covstack, fact = 10)
-
-# Generate risk map
-pred_layer <- predict(object = sdm,
-                      x.layers = covstack_lores,
-                      quantiles = c(0.025, 0.975),
-                      splitby = 20
-)
-if (SAVE_FITS){
-  save(pred_layer,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_prediction_Q4.rds", sep = ""))
-}
-
-if (SAVE_PLOTS){
-  png(filename = "../../bartfit-plots/cv_q4_map.png")
-}
-# Plot map
-plot(pred_layer[[1]],
-     box = FALSE,
-     axes = FALSE,
-     main = 'Mean prediction, Q4')
-if (SAVE_PLOTS){
-  dev.off()
-}
-
-if (SAVE_PLOTS){
-  png(filename = "../../bartfit-plots/cv_q4_lbound.png")
-}
-plot(pred_layer[[2]],
-     box = FALSE,
-     axes = FALSE,
-     main = '2.5% posterior bound, Q4')
-if (SAVE_PLOTS){
-  dev.off()
-}
-
-if (SAVE_PLOTS){
-  png(filename = "../../bartfit-plots/cv_q4_ubound.png")
-}
-plot(pred_layer[[3]],
-     box = FALSE,
-     axes = FALSE,
-     main = '97.5% posterior bound, Q4')
-if (SAVE_PLOTS){
-  dev.off()
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_model_with_vs_B_Q1.rds", sep = ""))
 }

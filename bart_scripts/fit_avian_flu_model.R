@@ -224,7 +224,7 @@ invisible(sdm$fit$state)
 summary(sdm)
 if (SAVE_FITS){
   save(sdm,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/sdm_A_Q1.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/basic_model_with_vs_A_Q1.rds", sep = ""))
 }
 
 # Only do projections here if we have built the dataset and have covstack in workspace
@@ -334,7 +334,7 @@ invisible(sdm$fit$state)
 summary(sdm)
 if (SAVE_FITS){
   save(sdm,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/sdm_A_Q2.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/basic_model_with_vs_A_Q2.rds", sep = ""))
 }
 
 # Only do projections here if we have built the dataset and have covstack in workspace
@@ -444,7 +444,7 @@ invisible(sdm$fit$state)
 summary(sdm)
 if (SAVE_FITS){
   save(sdm,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/sdm_A_Q3.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/basic_model_with_vs_A_Q3.rds", sep = ""))
 }
 
 # Only do projections here if we have built the dataset and have covstack in workspace
@@ -554,7 +554,7 @@ invisible(sdm$fit$state)
 summary(sdm)
 if (SAVE_FITS){
   save(sdm,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/sdm_A_Q4.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/basic_model_with_vs_A_Q4.rds", sep = ""))
 }
 
 # Only do projections here if we have built the dataset and have covstack in workspace
@@ -649,7 +649,7 @@ invisible(sdm$fit$state)
 summary(sdm)
 if (SAVE_FITS){
   save(sdm,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/sdm_B_Q1.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/basic_model_with_vs_B_Q1.rds", sep = ""))
 }
 
 # Only do projections here if we have built the dataset and have covstack in workspace
@@ -745,7 +745,7 @@ invisible(sdm$fit$state)
 summary(sdm)
 if (SAVE_FITS){
   save(sdm,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/sdm_B_Q2.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/basic_model_with_vs_B_Q2.rds", sep = ""))
 }
 
 # Only do projections here if we have built the dataset and have covstack in workspace
@@ -841,7 +841,7 @@ invisible(sdm$fit$state)
 summary(sdm)
 if (SAVE_FITS){
   save(sdm,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/sdm_B_Q3.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/basic_model_with_vs_B_Q3.rds", sep = ""))
 }
 
 # Only do projections here if we have built the dataset and have covstack in workspace
@@ -937,7 +937,7 @@ invisible(sdm$fit$state)
 summary(sdm)
 if (SAVE_FITS){
   save(sdm,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/sdm_B_Q4.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/basic_model_with_vs_B_Q4.rds", sep = ""))
 }
 
 # Only do projections here if we have built the dataset and have covstack in workspace

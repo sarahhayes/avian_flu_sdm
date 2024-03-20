@@ -30,7 +30,7 @@ library(stringr)
 library(terra)
 
 # Bring in AVONET to see if we can fix the missing species using AVONET IDs
-AVONET_df <- read_excel("data/eco_phylo_data/AVONETSupplementarydataset1.xlsx",
+AVONET_df <- read_excel("../../../OneDrive - The University of Liverpool/AI_S2_SDM_storage/eco_phylo_data/AVONETSupplementarydataset1.xlsx",
                         sheet = "AVONET_Raw_Data")
 AVONET_df <- AVONET_df[,
                        c("Avibase.ID",
@@ -514,7 +514,7 @@ sp_df$synonyms <- EltonTraits_syns
 
 # Load data
 CLOVER_df <- read.csv(
-  "data/eco_phylo_data/CLOVER_1.0_Viruses_AssociationsFlatFile.csv")
+  "../../../OneDrive - The University of Liverpool/AI_S2_SDM_storage/eco_phylo_data/CLOVER_1.0_Viruses_AssociationsFlatFile.csv")
 # Restrict attention to samples from birds
 CLOVER_df <- CLOVER_df[which(CLOVER_df$HostClass == "aves"), ]
 # All pathogen species names are in lower case. Filtering for rows where this
@@ -570,7 +570,7 @@ if (PLOT){
   p + coord_flip() + 
     scale_x_discrete(limits=order_case_counts$HostOrder) + 
     xlab("Host order") +
-    ylab("Number of cases")
+    ylab("Count")
 }
 
 if (PLOT){
@@ -583,7 +583,7 @@ if (PLOT){
   p + coord_flip() + 
     scale_x_discrete(limits=plot_lims) + 
     xlab("Host family") +
-    ylab("Number of cases")
+    ylab("Count")
 }
 
 if (PLOT){
@@ -596,7 +596,7 @@ if (PLOT){
   p + coord_flip() + 
     scale_x_discrete(limits=plot_lims) + 
     xlab("Host genus") +
-    ylab("Number of cases")
+    ylab("Count")
 }
 
 # Get species ID's of species in CLOVER
@@ -636,8 +636,8 @@ sp_df$host_indicator <- host_indicator
 # Incorporate additional ecological data from IUCN
 
 IUCN_df <- rbind(
-  read.csv("data/eco_phylo_data/iucn-data-vol1/all_other_fields.csv"),
-  read.csv("data/eco_phylo_data/iucn-data-vol2/all_other_fields.csv"))
+  read.csv("../../../OneDrive - The University of Liverpool/AI_S2_SDM_storage/eco_phylo_data/iucn-data-vol1/all_other_fields.csv"),
+  read.csv("../../../OneDrive - The University of Liverpool/AI_S2_SDM_storage/eco_phylo_data/iucn-data-vol2/all_other_fields.csv"))
 IUCN_df <- distinct(IUCN_df)
 IUCN_df$scientificName <- sapply(IUCN_df$scientificName, tolower)
 
@@ -727,9 +727,9 @@ sp_df <- cbind(sp_df, IUCN_by_species)
 # distances across ABC samples.
 
 {
-  if (!file.exists("data/eco_phylo_data/mean_phylo_distances.rds")){
+  if (!file.exists("../../../OneDrive - The University of Liverpool/AI_S2_SDM_storage/eco_phylo_data/mean_phylo_distances.rds")){
     # Attempt to load in BirdTree data
-    bird_tree <- read.tree("data/eco_phylo_data/BirdzillaHackett10.tre")
+    bird_tree <- read.tree("../../../OneDrive - The University of Liverpool/AI_S2_SDM_storage/eco_phylo_data/BirdzillaHackett10.tre")
     
     for (i in seq_along(bird_tree)){
       bird_tree[[i]]$tip.label <- tolower(bird_tree[[i]]$tip.label)
@@ -749,10 +749,10 @@ sp_df <- cbind(sp_df, IUCN_by_species)
     rownames(dmat_mean) <- gsub("_", " ", rownames(dmat_mean))
     colnames(dmat_mean) <- gsub("_", " ", colnames(dmat_mean))
     
-    saveRDS(dmat_mean, "data/eco_phylo_data/mean_phylo_distances.rds")
+    saveRDS(dmat_mean, "../../../OneDrive - The University of Liverpool/AI_S2_SDM_storage/eco_phylo_data/mean_phylo_distances.rds")
   }
   else{
-    dmat_mean <- readRDS("data/eco_phylo_data/mean_phylo_distances.rds")
+    dmat_mean <- readRDS("../../../OneDrive - The University of Liverpool/AI_S2_SDM_storage/eco_phylo_data/mean_phylo_distances.rds")
   }
 }
 
