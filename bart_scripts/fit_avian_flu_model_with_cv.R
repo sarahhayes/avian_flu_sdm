@@ -285,7 +285,7 @@ bart.step <- function(x.data, y.data,
   ###############
   
   quiet2 <- quiet
-  if(full==TRUE){varimp.diag(x.data, y.data, ri.data, iter=iter.plot, quiet=quiet2)}
+  if(full==TRUE){varimp.diag(x.data, y.data, iter=iter.plot, quiet=quiet2)}
   vs <- variable.step(x.data,
                       y.data,
                       n.trees=tree.step,
@@ -352,7 +352,7 @@ ytrain <- training_data$y
 
 # Fold construction
 
-fold_ids <- caret::createFolds(paste0(training_data$ri, training_data$y), k = 5)
+fold_ids <- caret::createFolds(training_data$y, k = 5)
 
 folds <- lapply(1:length(fold_ids),
                 FUN = function(i){
@@ -473,7 +473,7 @@ ytrain <- training_data$y
 
 # Fold construction
 
-fold_ids <- caret::createFolds(paste0(training_data$ri, training_data$y), k = 5)
+fold_ids <- caret::createFolds(training_data$y, k = 5)
 
 folds <- lapply(1:length(fold_ids),
                 FUN = function(i){
@@ -591,7 +591,7 @@ ytrain <- training_data$y
 
 # Fold construction
 
-fold_ids <- caret::createFolds(paste0(training_data$ri, training_data$y), k = 5)
+fold_ids <- caret::createFolds(training_data$y, k = 5)
 
 folds <- lapply(1:length(fold_ids),
                 FUN = function(i){
@@ -709,7 +709,7 @@ ytrain <- training_data$y
 
 # Fold construction
 
-fold_ids <- caret::createFolds(paste0(training_data$ri, training_data$y), k = 5)
+fold_ids <- caret::createFolds(training_data$y, k = 5)
 
 folds <- lapply(1:length(fold_ids),
                 FUN = function(i){
@@ -827,7 +827,7 @@ ytrain <- training_data$y
 
 # Fold construction
 
-fold_ids <- caret::createFolds(paste0(training_data$ri, training_data$y), k = 5)
+fold_ids <- caret::createFolds(training_data$y, k = 5)
 
 folds <- lapply(1:length(fold_ids),
                 FUN = function(i){
@@ -939,7 +939,7 @@ ytrain <- training_data$y
 
 # Fold construction
 
-fold_ids <- caret::createFolds(paste0(training_data$ri, training_data$y), k = 5)
+fold_ids <- caret::createFolds(training_data$y, k = 5)
 
 folds <- lapply(1:length(fold_ids),
                 FUN = function(i){
@@ -1051,7 +1051,7 @@ ytrain <- training_data$y
 
 # Fold construction
 
-fold_ids <- caret::createFolds(paste0(training_data$ri, training_data$y), k = 5)
+fold_ids <- caret::createFolds(training_data$y, k = 5)
 
 folds <- lapply(1:length(fold_ids),
                 FUN = function(i){
@@ -1163,7 +1163,7 @@ ytrain <- training_data$y
 
 # Fold construction
 
-fold_ids <- caret::createFolds(paste0(training_data$ri, training_data$y), k = 5)
+fold_ids <- caret::createFolds(training_data$y, k = 5)
 
 folds <- lapply(1:length(fold_ids),
                 FUN = function(i){
