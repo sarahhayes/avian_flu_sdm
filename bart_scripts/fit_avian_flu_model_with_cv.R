@@ -2,7 +2,7 @@
 # presence/absence based on environmental and species abundance factors.
 # This script includes cross-validation of BART parameters.
 
-SAVE_FITS <- FALSE
+SAVE_FITS <- TRUE
 
 # Global storing optimised k value for BART - which may be updated
 K_OPT <- 2
@@ -450,6 +450,7 @@ if (SAVE_FITS){
 
 sdm <- bart.step(x.data = xtrain,
                  y.data = ytrain,
+                 k = K_OPT,
                  power = power_opt,
                  base = base_opt,
                  full = TRUE,
@@ -554,8 +555,8 @@ xtest <- test_data %>% dplyr::select(!("y"|"ri"))
 ytest <- test_data$y
 
 # Initialise model
-basic_model <- bart(x.data = xtrain,
-                         y.data = ytrain,
+basic_model <- bart(xtrain,
+                    ytrain,
                     k = K_OPT,
                          power = power_opt,
                          base = base_opt)
@@ -569,6 +570,7 @@ if (SAVE_FITS){
 
 sdm <- bart.step(x.data = xtrain,
                  y.data = ytrain,
+                 k = K_OPT,
                  power = power_opt,
                  base = base_opt,
                  full = TRUE,
@@ -672,8 +674,8 @@ xtest <- test_data %>% dplyr::select(!("y"|"ri"))
 ytest <- test_data$y
 
 # Initialise model
-basic_model <- bart(x.data = xtrain,
-                         y.data = ytrain,
+basic_model <- bart(xtrain,
+                    ytrain,
                     k = K_OPT,
                          power = power_opt,
                          base = base_opt)
@@ -687,6 +689,7 @@ if (SAVE_FITS){
 
 sdm <- bart.step(x.data = xtrain,
                  y.data = ytrain,
+                 k = K_OPT,
                  power = power_opt,
                  base = base_opt,
                  full = TRUE,
@@ -790,8 +793,8 @@ xtest <- test_data %>% dplyr::select(!("y"|"ri"))
 ytest <- test_data$y
 
 # Initialise model
-basic_model <- bart(x.data = xtrain,
-                         y.data = ytrain,
+basic_model <- bart(xtrain,
+                    ytrain,
                     k = K_OPT,
                          power = power_opt,
                          base = base_opt)
@@ -805,6 +808,7 @@ if (SAVE_FITS){
 
 sdm <- bart.step(x.data = xtrain,
                  y.data = ytrain,
+                 k = K_OPT,
                  power = power_opt,
                  base = base_opt,
                  full = TRUE,
@@ -903,8 +907,8 @@ power_opt <- cv_results$power[argmin]
 base_opt <- cv_results$base[argmin]
 
 # Initialise model
-basic_model <- bart(x.data = xtrain,
-                         y.data = ytrain,
+basic_model <- bart(xtrain,
+                    ytrain,
                     k = K_OPT,
                          power = power_opt,
                          base = base_opt)
@@ -918,6 +922,7 @@ if (SAVE_FITS){
 
 sdm <- bart.step(x.data = xtrain,
                  y.data = ytrain,
+                 k = K_OPT,
                  power = power_opt,
                  base = base_opt,
                  full = TRUE,
@@ -1015,8 +1020,8 @@ power_opt <- cv_results$power[argmin]
 base_opt <- cv_results$base[argmin]
 
 # Initialise model
-basic_model <- bart(x.data = xtrain,
-                         y.data = ytrain,
+basic_model <- bart(xtrain,
+                    ytrain,
                     k = K_OPT,
                          power = power_opt,
                          base = base_opt)
@@ -1030,6 +1035,7 @@ if (SAVE_FITS){
 
 sdm <- bart.step(x.data = xtrain,
                  y.data = ytrain,
+                 k = K_OPT,
                  power = power_opt,
                  base = base_opt,
                  full = TRUE,
@@ -1127,8 +1133,8 @@ power_opt <- cv_results$power[argmin]
 base_opt <- cv_results$base[argmin]
 
 # Initialise model
-basic_model <- bart(x.data = xtrain,
-                         y.data = ytrain,
+basic_model <- bart(xtrain,
+                    ytrain,
                     k = K_OPT,
                          power = power_opt,
                          base = base_opt)
@@ -1142,6 +1148,7 @@ if (SAVE_FITS){
 
 sdm <- bart.step(x.data = xtrain,
                  y.data = ytrain,
+                 k = K_OPT,
                  power = power_opt,
                  base = base_opt,
                  full = TRUE,
@@ -1239,8 +1246,8 @@ power_opt <- cv_results$power[argmin]
 base_opt <- cv_results$base[argmin]
 
 # Initialise model
-basic_model <- bart(x.data = xtrain,
-                         y.data = ytrain,
+basic_model <- bart(xtrain,
+                    ytrain,
                     k = K_OPT,
                          power = power_opt,
                          base = base_opt)
@@ -1254,6 +1261,7 @@ if (SAVE_FITS){
 
 sdm <- bart.step(x.data = xtrain,
                  y.data = ytrain,
+                 k = K_OPT,
                  power = power_opt,
                  base = base_opt,
                  full = TRUE,

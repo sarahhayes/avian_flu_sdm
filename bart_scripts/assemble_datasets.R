@@ -1,8 +1,8 @@
 # In this script we use pre-assembled covariates and testing and training data
 # coordinates to construct training and testing datasets which we save as csv's.
 
-PLOT_COUNTRY_VALIDATION <- TRUE
-PLOT_PROBLEM_SAMPLES <- TRUE
+PLOT_COUNTRY_VALIDATION <- FALSE
+PLOT_PROBLEM_SAMPLES <- FALSE
 
 PATH_TO_DATA <- "../../../OneDrive - The University of Liverpool/"
 
@@ -100,7 +100,7 @@ if (length(bad_rows)>0){
          main = "Points missing country data after imputation, A Q1 training")
     plot(bad_pts, add = T, col = "red", pch = 16, cex = 1.)
   }
-  cat("Removing ", length(bad_rows), " datapoints with NA covariates.")
+  cat("Removing ", length(bad_rows), " datapoints with NA covariates.\n")
   country_shift <- country_shift[-bad_rows, ]
   training_coords <- training_coords[-bad_rows, ]
 }else{
@@ -194,10 +194,10 @@ if (length(bad_rows)>0){
       plot(bad_pts, add = T, col = "red", pch = 16, cex = 1.)
     }
     
-    cat("Removing ", length(bad_rows), " datapoints with NA covariates.")
+    cat("Removing ", length(bad_rows), " datapoints with NA covariates.\n")
     xtrain_shifted <- xtrain_shifted[-bad_rows, ]
     training_coords <- training_coords[-bad_rows, ]
-    ri_train <- ri_train[-bad_rows, ]
+    ri_train <- ri_train[-bad_rows, , drop=FALSE]
   }else{
     print("Shifting to nearest pixel removed all NA values")
   }
@@ -208,7 +208,7 @@ if (length(bad_rows)>0){
 # Assemble training data
 training_data <- xtrain
 training_data$y <- training_coords$pos
-training_data$ri <- sapply(ri_train, FUN=function(i){country_lookup$country[country_lookup$val==i]})
+training_data$ri <- sapply(ri_train$country, FUN=function(i){country_lookup$country[country_lookup$val==i]})
 write.csv(training_data, "training_sets/training_data_A_Q1.csv", row.names = FALSE)
 
 #### Now do testing ####
@@ -268,7 +268,7 @@ if (length(bad_rows)>0){
          main = "Points missing country data after imputation, A Q1 test")
     plot(bad_pts, add = T, col = "red", pch = 16, cex = 1.)
   }
-  cat("Removing ", length(bad_rows), " datapoints with NA covariates.")
+  cat("Removing ", length(bad_rows), " datapoints with NA covariates.\n")
   country_shift <- country_shift[-bad_rows, ]
   test_coords <- test_coords[-bad_rows, ]
 }else{
@@ -362,7 +362,7 @@ if (length(bad_rows)>0){
       plot(bad_pts, add = T, col = "red", pch = 16, cex = 1.)
     }
     
-    cat("Removing ", length(bad_rows), " datapoints with NA covariates.")
+    cat("Removing ", length(bad_rows), " datapoints with NA covariates.\n")
     xtest_shifted <- xtest_shifted[-bad_rows, ]
     test_coords <- test_coords[-bad_rows, ]
     ri_test <- ri_test[-bad_rows, ]
@@ -444,7 +444,7 @@ if (length(bad_rows)>0){
          main = "Points missing country data after imputation, A Q2 training")
     plot(bad_pts, add = T, col = "red", pch = 16, cex = 1.)
   }
-  cat("Removing ", length(bad_rows), " datapoints with NA covariates.")
+  cat("Removing ", length(bad_rows), " datapoints with NA covariates.\n")
   country_shift <- country_shift[-bad_rows, ]
   training_coords <- training_coords[-bad_rows, ]
 }else{
@@ -538,10 +538,10 @@ if (length(bad_rows>0)){
       plot(bad_pts, add = T, col = "red", pch = 16, cex = 1.)
     }
     
-    cat("Removing ", length(bad_rows), " datapoints with NA covariates.")
+    cat("Removing ", length(bad_rows), " datapoints with NA covariates.\n")
     xtrain_shifted <- xtrain_shifted[-bad_rows, ]
     training_coords <- training_coords[-bad_rows, ]
-    ri_train <- ri_train[-bad_rows, ]
+    ri_train <- ri_train[-bad_rows, , drop=FALSE]
   }else{
     print("Shifting to nearest pixel removed all NA values")
   }
@@ -552,7 +552,7 @@ if (length(bad_rows>0)){
 # Assemble training data
 training_data <- xtrain
 training_data$y <- training_coords$pos
-training_data$ri <- sapply(ri_train, FUN=function(i){country_lookup$country[country_lookup$val==i]})
+training_data$ri <- sapply(ri_train$country, FUN=function(i){country_lookup$country[country_lookup$val==i]})
 write.csv(training_data, "training_sets/training_data_A_Q2.csv", row.names = FALSE)
 
 #### Now do testing ####
@@ -612,7 +612,7 @@ if (length(bad_rows)>0){
          main = "Points missing country data after imputation, A Q2 test")
     plot(bad_pts, add = T, col = "red", pch = 16, cex = 1.)
   }
-  cat("Removing ", length(bad_rows), " datapoints with NA covariates.")
+  cat("Removing ", length(bad_rows), " datapoints with NA covariates.\n")
   country_shift <- country_shift[-bad_rows, ]
   test_coords <- test_coords[-bad_rows, ]
 }else{
@@ -706,7 +706,7 @@ if (length(bad_rows)>0){
       plot(bad_pts, add = T, col = "red", pch = 16, cex = 1.)
     }
     
-    cat("Removing ", length(bad_rows), " datapoints with NA covariates.")
+    cat("Removing ", length(bad_rows), " datapoints with NA covariates.\n")
     xtest_shifted <- xtest_shifted[-bad_rows, ]
     test_coords <- test_coords[-bad_rows, ]
     ri_test <- ri_test[-bad_rows, ]
@@ -787,7 +787,7 @@ if (length(bad_rows)>0){
          main = "Points missing country data after imputation, A Q3 training")
     plot(bad_pts, add = T, col = "red", pch = 16, cex = 1.)
   }
-  cat("Removing ", length(bad_rows), " datapoints with NA covariates.")
+  cat("Removing ", length(bad_rows), " datapoints with NA covariates.\n")
   country_shift <- country_shift[-bad_rows, ]
   training_coords <- training_coords[-bad_rows, ]
 }else{
@@ -881,10 +881,10 @@ if (length(bad_rows)>0){
       plot(bad_pts, add = T, col = "red", pch = 16, cex = 1.)
     }
     
-    cat("Removing ", length(bad_rows), " datapoints with NA covariates.")
+    cat("Removing ", length(bad_rows), " datapoints with NA covariates.\n")
     xtrain_shifted <- xtrain_shifted[-bad_rows, ]
     training_coords <- training_coords[-bad_rows, ]
-    ri_train <- ri_train[-bad_rows, ]
+    ri_train <- ri_train[-bad_rows, , drop=FALSE]
   }else{
     print("Shifting to nearest pixel removed all NA values")
   }
@@ -895,7 +895,7 @@ if (length(bad_rows)>0){
 # Assemble training data
 training_data <- xtrain
 training_data$y <- training_coords$pos
-training_data$ri <- sapply(ri_train, FUN=function(i){country_lookup$country[country_lookup$val==i]})
+training_data$ri <- sapply(ri_train$country, FUN=function(i){country_lookup$country[country_lookup$val==i]})
 write.csv(training_data, "training_sets/training_data_A_Q3.csv", row.names = FALSE)
 
 #### Now do testing ####
@@ -955,7 +955,7 @@ if (length(bad_rows)>0){
          main = "Points missing country data after imputation, A Q3 test")
     plot(bad_pts, add = T, col = "red", pch = 16, cex = 1.)
   }
-  cat("Removing ", length(bad_rows), " datapoints with NA covariates.")
+  cat("Removing ", length(bad_rows), " datapoints with NA covariates.\n")
   country_shift <- country_shift[-bad_rows, ]
   test_coords <- test_coords[-bad_rows, ]
 }else{
@@ -1049,7 +1049,7 @@ if (length(bad_rows)>0){
       plot(bad_pts, add = T, col = "red", pch = 16, cex = 1.)
     }
     
-    cat("Removing ", length(bad_rows), " datapoints with NA covariates.")
+    cat("Removing ", length(bad_rows), " datapoints with NA covariates.\n")
     xtest_shifted <- xtest_shifted[-bad_rows, ]
     test_coords <- test_coords[-bad_rows, ]
     ri_test <- ri_test[-bad_rows, ]
@@ -1130,7 +1130,7 @@ if (length(bad_rows)>0){
          main = "Points missing country data after imputation, A Q4 training")
     plot(bad_pts, add = T, col = "red", pch = 16, cex = 1.)
   }
-  cat("Removing ", length(bad_rows), " datapoints with NA covariates.")
+  cat("Removing ", length(bad_rows), " datapoints with NA covariates.\n")
   country_shift <- country_shift[-bad_rows, ]
   training_coords <- training_coords[-bad_rows, ]
 }else{
@@ -1224,10 +1224,10 @@ if (length(bad_rows)>0){
       plot(bad_pts, add = T, col = "red", pch = 16, cex = 1.)
     }
     
-    cat("Removing ", length(bad_rows), " datapoints with NA covariates.")
+    cat("Removing ", length(bad_rows), " datapoints with NA covariates.\n")
     xtrain_shifted <- xtrain_shifted[-bad_rows, ]
     training_coords <- training_coords[-bad_rows, ]
-    ri_train <- ri_train[-bad_rows, ]
+    ri_train <- ri_train[-bad_rows, , drop=FALSE]
   }else{
     print("Shifting to nearest pixel removed all NA values")
   }
@@ -1238,7 +1238,7 @@ if (length(bad_rows)>0){
 # Assemble training data
 training_data <- xtrain
 training_data$y <- training_coords$pos
-training_data$ri <- sapply(ri_train, FUN=function(i){country_lookup$country[country_lookup$val==i]})
+training_data$ri <- sapply(ri_train$country, FUN=function(i){country_lookup$country[country_lookup$val==i]})
 write.csv(training_data, "training_sets/training_data_A_Q4.csv", row.names = FALSE)
 
 #### Now do testing ####
@@ -1298,7 +1298,7 @@ if (length(bad_rows)>0){
          main = "Points missing country data after imputation, A Q4 test")
     plot(bad_pts, add = T, col = "red", pch = 16, cex = 1.)
   }
-  cat("Removing ", length(bad_rows), " datapoints with NA covariates.")
+  cat("Removing ", length(bad_rows), " datapoints with NA covariates.\n")
   country_shift <- country_shift[-bad_rows, ]
   test_coords <- test_coords[-bad_rows, ]
 }else{
@@ -1392,7 +1392,7 @@ if (length(bad_rows)>0){
       plot(bad_pts, add = T, col = "red", pch = 16, cex = 1.)
     }
     
-    cat("Removing ", length(bad_rows), " datapoints with NA covariates.")
+    cat("Removing ", length(bad_rows), " datapoints with NA covariates.\n")
     xtest_shifted <- xtest_shifted[-bad_rows, ]
     test_coords <- test_coords[-bad_rows, ]
     ri_test <- ri_test[-bad_rows, ]
@@ -1473,7 +1473,7 @@ if (length(bad_rows)>0){
          main = "Points missing country data after imputation, B Q1 training")
     plot(bad_pts, add = T, col = "red", pch = 16, cex = 1.)
   }
-  cat("Removing ", length(bad_rows), " datapoints with NA covariates.")
+  cat("Removing ", length(bad_rows), " datapoints with NA covariates.\n")
   country_shift <- country_shift[-bad_rows, ]
   training_coords <- training_coords[-bad_rows, ]
 }else{
@@ -1567,10 +1567,10 @@ if (length(bad_rows)>0){
       plot(bad_pts, add = T, col = "red", pch = 16, cex = 1.)
     }
     
-    cat("Removing ", length(bad_rows), " datapoints with NA covariates.")
+    cat("Removing ", length(bad_rows), " datapoints with NA covariates.\n")
     xtrain_shifted <- xtrain_shifted[-bad_rows, ]
     training_coords <- training_coords[-bad_rows, ]
-    ri_train <- ri_train[-bad_rows, ]
+    ri_train <- ri_train[-bad_rows, , drop=FALSE]
   }else{
     print("Shifting to nearest pixel removed all NA values")
   }
@@ -1581,7 +1581,7 @@ if (length(bad_rows)>0){
 # Assemble training data
 training_data <- xtrain
 training_data$y <- training_coords$pos
-training_data$ri <- sapply(ri_train, FUN=function(i){country_lookup$country[country_lookup$val==i]})
+training_data$ri <- sapply(ri_train$country, FUN=function(i){country_lookup$country[country_lookup$val==i]})
 write.csv(training_data, "training_sets/training_data_B_Q1.csv", row.names = FALSE)
 
 ################################################################################
@@ -1648,7 +1648,7 @@ if (length(bad_rows)>0){
          main = "Points missing country data after imputation, B Q2 training")
     plot(bad_pts, add = T, col = "red", pch = 16, cex = 1.)
   }
-  cat("Removing ", length(bad_rows), " datapoints with NA covariates.")
+  cat("Removing ", length(bad_rows), " datapoints with NA covariates.\n")
   country_shift <- country_shift[-bad_rows, ]
   training_coords <- training_coords[-bad_rows, ]
 }else{
@@ -1742,10 +1742,10 @@ if (length(bad_rows)>0){
       plot(bad_pts, add = T, col = "red", pch = 16, cex = 1.)
     }
     
-    cat("Removing ", length(bad_rows), " datapoints with NA covariates.")
+    cat("Removing ", length(bad_rows), " datapoints with NA covariates.\n")
     xtrain_shifted <- xtrain_shifted[-bad_rows, ]
     training_coords <- training_coords[-bad_rows, ]
-    ri_train <- ri_train[-bad_rows, ]
+    ri_train <- ri_train[-bad_rows, , drop=FALSE]
   }else{
     print("Shifting to nearest pixel removed all NA values")
   }
@@ -1756,7 +1756,7 @@ if (length(bad_rows)>0){
 # Assemble training data
 training_data <- xtrain
 training_data$y <- training_coords$pos
-training_data$ri <- sapply(ri_train, FUN=function(i){country_lookup$country[country_lookup$val==i]})
+training_data$ri <- sapply(ri_train$country, FUN=function(i){country_lookup$country[country_lookup$val==i]})
 write.csv(training_data, "training_sets/training_data_B_Q2.csv", row.names = FALSE)
 
 ################################################################################
@@ -1823,7 +1823,7 @@ if (length(bad_rows)>0){
          main = "Points missing country data after imputation, B Q3 training")
     plot(bad_pts, add = T, col = "red", pch = 16, cex = 1.)
   }
-  cat("Removing ", length(bad_rows), " datapoints with NA covariates.")
+  cat("Removing ", length(bad_rows), " datapoints with NA covariates.\n")
   country_shift <- country_shift[-bad_rows, ]
   training_coords <- training_coords[-bad_rows, ]
 }else{
@@ -1917,10 +1917,10 @@ if (length(bad_rows)>0){
       plot(bad_pts, add = T, col = "red", pch = 16, cex = 1.)
     }
     
-    cat("Removing ", length(bad_rows), " datapoints with NA covariates.")
+    cat("Removing ", length(bad_rows), " datapoints with NA covariates.\n")
     xtrain_shifted <- xtrain_shifted[-bad_rows, ]
     training_coords <- training_coords[-bad_rows, ]
-    ri_train <- ri_train[-bad_rows, ]
+    ri_train <- ri_train[-bad_rows, , drop=FALSE]
   }else{
     print("Shifting to nearest pixel removed all NA values")
   }
@@ -1931,7 +1931,7 @@ if (length(bad_rows)>0){
 # Assemble training data
 training_data <- xtrain
 training_data$y <- training_coords$pos
-training_data$ri <- sapply(ri_train, FUN=function(i){country_lookup$country[country_lookup$val==i]})
+training_data$ri <- sapply(ri_train$country, FUN=function(i){country_lookup$country[country_lookup$val==i]})
 write.csv(training_data, "training_sets/training_data_B_Q3.csv", row.names = FALSE)
 
 ################################################################################
@@ -1998,7 +1998,7 @@ if (length(bad_rows)>0){
          main = "Points missing country data after imputation, B Q4 training")
     plot(bad_pts, add = T, col = "red", pch = 16, cex = 1.)
   }
-  cat("Removing ", length(bad_rows), " datapoints with NA covariates.")
+  cat("Removing ", length(bad_rows), " datapoints with NA covariates.\n")
   country_shift <- country_shift[-bad_rows, ]
   training_coords <- training_coords[-bad_rows, ]
 }else{
@@ -2092,10 +2092,10 @@ if (length(bad_rows)>0){
       plot(bad_pts, add = T, col = "red", pch = 16, cex = 1.)
     }
     
-    cat("Removing ", length(bad_rows), " datapoints with NA covariates.")
+    cat("Removing ", length(bad_rows), " datapoints with NA covariates.\n")
     xtrain_shifted <- xtrain_shifted[-bad_rows, ]
     training_coords <- training_coords[-bad_rows, ]
-    ri_train <- ri_train[-bad_rows, ]
+    ri_train <- ri_train[-bad_rows, , drop=FALSE]
   }else{
     print("Shifting to nearest pixel removed all NA values")
   }
@@ -2106,5 +2106,5 @@ if (length(bad_rows)>0){
 # Assemble training data
 training_data <- xtrain
 training_data$y <- training_coords$pos
-training_data$ri <- sapply(ri_train, FUN=function(i){country_lookup$country[country_lookup$val==i]})
+training_data$ri <- sapply(ri_train$country, FUN=function(i){country_lookup$country[country_lookup$val==i]})
 write.csv(training_data, "training_sets/training_data_B_Q4.csv", row.names = FALSE)
