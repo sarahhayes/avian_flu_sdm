@@ -485,7 +485,7 @@ sdm <- bart.step(x.data = xtrain,
                  base = base_opt,
                  full = TRUE,
                  quiet = TRUE)
-invisible(sdm$fit$state)
+invisible(sdm$fit[[1]]$state)
 summary(sdm)
 if (SAVE_FITS){
   save(sdm,
@@ -606,7 +606,7 @@ sdm <- bart.step(x.data = xtrain,
                  base = base_opt,
                  full = TRUE,
                  quiet = TRUE)
-invisible(sdm$fit$state)
+invisible(sdm$fit[[1]]$state)
 summary(sdm)
 if (SAVE_FITS){
   save(sdm,
@@ -728,7 +728,7 @@ sdm <- bart.step(x.data = xtrain,
                  base = base_opt,
                  full = TRUE,
                  quiet = TRUE)
-invisible(sdm$fit$state)
+invisible(sdm$fit[[1]]$state)
 summary(sdm)
 if (SAVE_FITS){
   save(sdm,
@@ -849,7 +849,7 @@ sdm <- bart.step(x.data = xtrain,
                  base = base_opt,
                  full = TRUE,
                  quiet = TRUE)
-invisible(sdm$fit$state)
+invisible(sdm$fit[[1]]$state)
 summary(sdm)
 if (SAVE_FITS){
   save(sdm,
@@ -965,7 +965,7 @@ sdm <- bart.step(x.data = xtrain,
                  base = base_opt,
                  full = TRUE,
                  quiet = TRUE)
-invisible(sdm$fit$state)
+invisible(sdm$fit[[1]]$state)
 summary(sdm)
 if (SAVE_FITS){
   save(sdm,
@@ -1080,7 +1080,7 @@ sdm <- bart.step(x.data = xtrain,
                  base = base_opt,
                  full = TRUE,
                  quiet = TRUE)
-invisible(sdm$fit$state)
+invisible(sdm$fit[[1]]$state)
 summary(sdm)
 if (SAVE_FITS){
   save(sdm,
@@ -1196,7 +1196,7 @@ sdm <- bart.step(x.data = xtrain,
                  base = base_opt,
                  full = TRUE,
                  quiet = TRUE)
-invisible(sdm$fit$state)
+invisible(sdm$fit[[1]]$state)
 summary(sdm)
 if (SAVE_FITS){
   save(sdm,
@@ -1312,7 +1312,7 @@ sdm <- bart.step(x.data = xtrain,
                  base = base_opt,
                  full = TRUE,
                  quiet = TRUE)
-invisible(sdm$fit$state)
+invisible(sdm$fit[[1]]$state)
 summary(sdm)
 if (SAVE_FITS){
   save(sdm,
