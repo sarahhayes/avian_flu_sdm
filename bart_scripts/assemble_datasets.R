@@ -35,14 +35,16 @@ r <- rast(nlyrs=1,
 
 country_rast <- raster::rasterize(countriesSP, r, field="Grd_ranks", fun="first")
 
+#### Bring in year-round covariates ####
 
-################################################################################
-# Dataset A Q1
-
-covstack <- raster::stack(paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covariates/q1_covs_10k.tif", sep = ""))
+covstack <- raster::stack(paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covariates/all_q_covs_10k.tif", sep = ""))
 
 # Drop unclassified land layer
 covstack <- dropLayer(covstack, "lc_17")
+
+
+################################################################################
+# Dataset A Q1
 
 # Load training data
 training_coords <- readRDS("training_sets/training_coords_A_Q1.RDS")
@@ -383,11 +385,6 @@ write.csv(test_data, "training_sets/test_data_A_Q1.csv", row.names = FALSE)
 ################################################################################
 # Dataset A Q2
 
-covstack <- raster::stack(paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covariates/q2_covs_10k.tif", sep = ""))
-
-# Drop unclassified land layer
-covstack <- dropLayer(covstack, "lc_17")
-
 # Load training data
 training_coords <- readRDS("training_sets/training_coords_A_Q2.RDS")
 # # Identify and plot samples where a country could not be assigned - should find
@@ -725,11 +722,6 @@ write.csv(test_data, "training_sets/test_data_A_Q2.csv", row.names = FALSE)
 
 ################################################################################
 # Dataset A Q3
-
-covstack <- raster::stack(paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covariates/q3_covs_10k.tif", sep = ""))
-
-# Drop unclassified land layer
-covstack <- dropLayer(covstack, "lc_17")
 
 # Load training data
 training_coords <- readRDS("training_sets/training_coords_A_Q3.RDS")
@@ -1069,11 +1061,6 @@ write.csv(test_data, "training_sets/test_data_A_Q3.csv", row.names = FALSE)
 ################################################################################
 # Dataset A Q4
 
-covstack <- raster::stack(paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covariates/q4_covs_10k.tif", sep = ""))
-
-# Drop unclassified land layer
-covstack <- dropLayer(covstack, "lc_17")
-
 # Load training data
 training_coords <- readRDS("training_sets/training_coords_A_Q4.RDS")
 # # Identify and plot samples where a country could not be assigned - should find
@@ -1412,11 +1399,6 @@ write.csv(test_data, "training_sets/test_data_A_Q4.csv", row.names = FALSE)
 ################################################################################
 # Dataset B Q1
 
-covstack <- raster::stack(paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covariates/q1_covs_10k.tif", sep = ""))
-
-# Drop unclassified land layer
-covstack <- dropLayer(covstack, "lc_17")
-
 # Load training data
 training_coords <- readRDS("training_sets/training_coords_B_Q1.RDS")
 # # Identify and plot samples where a country could not be assigned - should find
@@ -1586,11 +1568,6 @@ write.csv(training_data, "training_sets/training_data_B_Q1.csv", row.names = FAL
 
 ################################################################################
 # Dataset B Q2
-
-covstack <- raster::stack(paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covariates/q2_covs_10k.tif", sep = ""))
-
-# Drop unclassified land layer
-covstack <- dropLayer(covstack, "lc_17")
 
 # Load training data
 training_coords <- readRDS("training_sets/training_coords_B_Q2.RDS")
@@ -1762,11 +1739,6 @@ write.csv(training_data, "training_sets/training_data_B_Q2.csv", row.names = FAL
 ################################################################################
 # Dataset B Q3
 
-covstack <- raster::stack(paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covariates/q3_covs_10k.tif", sep = ""))
-
-# Drop unclassified land layer
-covstack <- dropLayer(covstack, "lc_17")
-
 # Load training data
 training_coords <- readRDS("training_sets/training_coords_B_Q3.RDS")
 # # Identify and plot samples where a country could not be assigned - should find
@@ -1936,11 +1908,6 @@ write.csv(training_data, "training_sets/training_data_B_Q3.csv", row.names = FAL
 
 ################################################################################
 # Dataset B Q4
-
-covstack <- raster::stack(paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covariates/q4_covs_10k.tif", sep = ""))
-
-# Drop unclassified land layer
-covstack <- dropLayer(covstack, "lc_17")
 
 # Load training data
 training_coords <- readRDS("training_sets/training_coords_B_Q4.RDS")

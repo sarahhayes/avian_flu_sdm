@@ -2,6 +2,8 @@
 # presence/absence based on environmental and species abundance factors.
 # This script includes cross-validation of BART parameters.
 
+INCLUDE_CROSS_QUARTER_COVS <- TRUE # Indicator for whether to include seasonal covariates for Quarter m=/=n in the model for Quarter n.
+
 SAVE_FITS <- TRUE
 
 # Global storing optimised k value for BART - which may be updated
@@ -346,6 +348,11 @@ get_sens_and_spec <- function(sdm, xtest, ytest, ri, cutoff){
 #### Period A Q1 ####
 
 training_data <- read.csv("training_sets/training_data_A_Q1.csv")
+if (!INCLUDE_CROSS_QUARTER_COVS){
+  all_excludes <- grep("quart|_q", colnames(training_data), value = TRUE)
+  q1_excludes <- grep("first|q1", all_excludes, value = TRUE, invert = TRUE)
+  training_data <- training_data[, setdiff(colnames(training_data), q1_excludes)]
+}
 xtrain <- training_data %>% dplyr::select(!("y"|"ri"))
 ytrain <- training_data$y
 
@@ -417,15 +424,15 @@ for (i in 1:length(k_vals)){
 
 cv_results <- cv_results %>%
   rowwise() %>%
-  mutate(mean_err = mean(auc1,
+  mutate(mean_auc = mean(auc1,
                          auc2,
                          auc3,
                          auc4,
                          auc5))
-argmin <- which.max(cv_results$mean_err)
-K_OPT <- cv_results$k[argmin]
-power_opt <- cv_results$power[argmin]
-base_opt <- cv_results$base[argmin]
+argmax <- which.max(cv_results$mean_auc)
+K_OPT <- cv_results$k[argmax]
+power_opt <- cv_results$power[argmax]
+base_opt <- cv_results$base[argmax]
 
 
 test_data <- read.csv("training_sets/test_data_A_Q1.csv")
@@ -468,6 +475,11 @@ if (SAVE_FITS){
 #### Period A Q2 ####
 
 training_data <- read.csv("training_sets/training_data_A_Q2.csv")
+if (!INCLUDE_CROSS_QUARTER_COVS){
+  all_excludes <- grep("quart|_q", colnames(training_data), value = TRUE)
+  q2_excludes <- grep("second|q2", all_excludes, value = TRUE, invert = TRUE)
+  training_data <- training_data[, setdiff(colnames(training_data), q2_excludes)]
+}
 xtrain <- training_data %>% dplyr::select(!("y"|"ri"))
 ytrain <- training_data$y
 
@@ -539,15 +551,15 @@ for (i in 1:length(k_vals)){
 
 cv_results <- cv_results %>%
   rowwise() %>%
-  mutate(mean_err = mean(auc1,
+  mutate(mean_auc = mean(auc1,
                          auc2,
                          auc3,
                          auc4,
                          auc5))
-argmin <- which.max(cv_results$mean_err)
-K_OPT <- cv_results$k[argmin]
-power_opt <- cv_results$power[argmin]
-base_opt <- cv_results$base[argmin]
+argmax <- which.max(cv_results$mean_auc)
+K_OPT <- cv_results$k[argmax]
+power_opt <- cv_results$power[argmax]
+base_opt <- cv_results$base[argmax]
 
 
 test_data <- read.csv("training_sets/test_data_A_Q2.csv")
@@ -587,6 +599,11 @@ if (SAVE_FITS){
 #### Period A Q3 ####
 
 training_data <- read.csv("training_sets/training_data_A_Q3.csv")
+if (!INCLUDE_CROSS_QUARTER_COVS){
+  all_excludes <- grep("quart|_q", colnames(training_data), value = TRUE)
+  q3_excludes <- grep("third|q3", all_excludes, value = TRUE, invert = TRUE)
+  training_data <- training_data[, setdiff(colnames(training_data), q3_excludes)]
+}
 xtrain <- training_data %>% dplyr::select(!("y"|"ri"))
 ytrain <- training_data$y
 
@@ -658,15 +675,15 @@ for (i in 1:length(k_vals)){
 
 cv_results <- cv_results %>%
   rowwise() %>%
-  mutate(mean_err = mean(auc1,
+  mutate(mean_auc = mean(auc1,
                          auc2,
                          auc3,
                          auc4,
                          auc5))
-argmin <- which.max(cv_results$mean_err)
-K_OPT <- cv_results$k[argmin]
-power_opt <- cv_results$power[argmin]
-base_opt <- cv_results$base[argmin]
+argmax <- which.max(cv_results$mean_auc)
+K_OPT <- cv_results$k[argmax]
+power_opt <- cv_results$power[argmax]
+base_opt <- cv_results$base[argmax]
 
 
 test_data <- read.csv("training_sets/test_data_A_Q3.csv")
@@ -706,6 +723,11 @@ if (SAVE_FITS){
 #### Period A Q4 ####
 
 training_data <- read.csv("training_sets/training_data_A_Q4.csv")
+if (!INCLUDE_CROSS_QUARTER_COVS){
+  all_excludes <- grep("quart|_q", colnames(training_data), value = TRUE)
+  q4_excludes <- grep("fourth|q4", all_excludes, value = TRUE, invert = TRUE)
+  training_data <- training_data[, setdiff(colnames(training_data), q4_excludes)]
+}
 xtrain <- training_data %>% dplyr::select(!("y"|"ri"))
 ytrain <- training_data$y
 
@@ -777,15 +799,15 @@ for (i in 1:length(k_vals)){
 
 cv_results <- cv_results %>%
   rowwise() %>%
-  mutate(mean_err = mean(auc1,
+  mutate(mean_auc = mean(auc1,
                          auc2,
                          auc3,
                          auc4,
                          auc5))
-argmin <- which.max(cv_results$mean_err)
-K_OPT <- cv_results$k[argmin]
-power_opt <- cv_results$power[argmin]
-base_opt <- cv_results$base[argmin]
+argmax <- which.max(cv_results$mean_auc)
+K_OPT <- cv_results$k[argmax]
+power_opt <- cv_results$power[argmax]
+base_opt <- cv_results$base[argmax]
 
 
 test_data <- read.csv("training_sets/test_data_A_Q4.csv")
@@ -825,6 +847,11 @@ if (SAVE_FITS){
 #### Period B Q1 ####
 
 training_data <- read.csv("training_sets/training_data_B_Q1.csv")
+if (!INCLUDE_CROSS_QUARTER_COVS){
+  all_excludes <- grep("quart|_q", colnames(training_data), value = TRUE)
+  q1_excludes <- grep("first|q1", all_excludes, value = TRUE, invert = TRUE)
+  training_data <- training_data[, setdiff(colnames(training_data), q1_excludes)]
+}
 xtrain <- training_data %>% dplyr::select(!("y"|"ri"))
 ytrain <- training_data$y
 
@@ -896,15 +923,15 @@ for (i in 1:length(k_vals)){
 
 cv_results <- cv_results %>%
   rowwise() %>%
-  mutate(mean_err = mean(auc1,
+  mutate(mean_auc = mean(auc1,
                          auc2,
                          auc3,
                          auc4,
                          auc5))
-argmin <- which.max(cv_results$mean_err)
-K_OPT <- cv_results$k[argmin]
-power_opt <- cv_results$power[argmin]
-base_opt <- cv_results$base[argmin]
+argmax <- which.max(cv_results$mean_auc)
+K_OPT <- cv_results$k[argmax]
+power_opt <- cv_results$power[argmax]
+base_opt <- cv_results$base[argmax]
 
 # Initialise model
 basic_model <- bart(xtrain,
@@ -938,6 +965,11 @@ if (SAVE_FITS){
 #### Period B Q2 ####
 
 training_data <- read.csv("training_sets/training_data_B_Q2.csv")
+if (!INCLUDE_CROSS_QUARTER_COVS){
+  all_excludes <- grep("quart|_q", colnames(training_data), value = TRUE)
+  q2_excludes <- grep("second|q2", all_excludes, value = TRUE, invert = TRUE)
+  training_data <- training_data[, setdiff(colnames(training_data), q2_excludes)]
+}
 xtrain <- training_data %>% dplyr::select(!("y"|"ri"))
 ytrain <- training_data$y
 
@@ -1009,15 +1041,15 @@ for (i in 1:length(k_vals)){
 
 cv_results <- cv_results %>%
   rowwise() %>%
-  mutate(mean_err = mean(auc1,
+  mutate(mean_auc = mean(auc1,
                          auc2,
                          auc3,
                          auc4,
                          auc5))
-argmin <- which.max(cv_results$mean_err)
-K_OPT <- cv_results$k[argmin]
-power_opt <- cv_results$power[argmin]
-base_opt <- cv_results$base[argmin]
+argmax <- which.max(cv_results$mean_auc)
+K_OPT <- cv_results$k[argmax]
+power_opt <- cv_results$power[argmax]
+base_opt <- cv_results$base[argmax]
 
 # Initialise model
 basic_model <- bart(xtrain,
@@ -1051,6 +1083,11 @@ if (SAVE_FITS){
 #### Period B Q3 ####
 
 training_data <- read.csv("training_sets/training_data_B_Q3.csv")
+if (!INCLUDE_CROSS_QUARTER_COVS){
+  all_excludes <- grep("quart|_q", colnames(training_data), value = TRUE)
+  q3_excludes <- grep("third|q3", all_excludes, value = TRUE, invert = TRUE)
+  training_data <- training_data[, setdiff(colnames(training_data), q3_excludes)]
+}
 xtrain <- training_data %>% dplyr::select(!("y"|"ri"))
 ytrain <- training_data$y
 
@@ -1122,15 +1159,15 @@ for (i in 1:length(k_vals)){
 
 cv_results <- cv_results %>%
   rowwise() %>%
-  mutate(mean_err = mean(auc1,
+  mutate(mean_auc = mean(auc1,
                          auc2,
                          auc3,
                          auc4,
                          auc5))
-argmin <- which.max(cv_results$mean_err)
-K_OPT <- cv_results$k[argmin]
-power_opt <- cv_results$power[argmin]
-base_opt <- cv_results$base[argmin]
+argmax <- which.max(cv_results$mean_auc)
+K_OPT <- cv_results$k[argmax]
+power_opt <- cv_results$power[argmax]
+base_opt <- cv_results$base[argmax]
 
 # Initialise model
 basic_model <- bart(xtrain,
@@ -1164,6 +1201,11 @@ if (SAVE_FITS){
 #### Period B Q4 ####
 
 training_data <- read.csv("training_sets/training_data_B_Q4.csv")
+if (!INCLUDE_CROSS_QUARTER_COVS){
+  all_excludes <- grep("quart|_q", colnames(training_data), value = TRUE)
+  q4_excludes <- grep("fourth|q4", all_excludes, value = TRUE, invert = TRUE)
+  training_data <- training_data[, setdiff(colnames(training_data), q4_excludes)]
+}
 xtrain <- training_data %>% dplyr::select(!("y"|"ri"))
 ytrain <- training_data$y
 
@@ -1235,15 +1277,15 @@ for (i in 1:length(k_vals)){
 
 cv_results <- cv_results %>%
   rowwise() %>%
-  mutate(mean_err = mean(auc1,
+  mutate(mean_auc = mean(auc1,
                          auc2,
                          auc3,
                          auc4,
                          auc5))
-argmin <- which.max(cv_results$mean_err)
-K_OPT <- cv_results$k[argmin]
-power_opt <- cv_results$power[argmin]
-base_opt <- cv_results$base[argmin]
+argmax <- which.max(cv_results$mean_auc)
+K_OPT <- cv_results$k[argmax]
+power_opt <- cv_results$power[argmax]
+base_opt <- cv_results$base[argmax]
 
 # Initialise model
 basic_model <- bart(xtrain,
