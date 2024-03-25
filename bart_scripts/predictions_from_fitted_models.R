@@ -1,6 +1,10 @@
 # In this script we load the fitted models, calculate performance metrics, and
 # perform Europe-wide predictions.
 
+SAVE_OUTPUTS <- TRUE
+
+B_TEST_DATA_AVAILABLE <- FALSE # Set to TRUE if we have test data for dataset B, otherwise this should be FALSE
+
 # Set path to folder containing data, and where output will be stored
 PATH_TO_DATA <- "../../../OneDrive - The University of Liverpool/"
 
@@ -53,7 +57,15 @@ get_sens_and_spec <- function(sdm, xtest, ytest, ri, cutoff){
                   "auc"=auc))
 }
 
-#### Quarter 1 without random intercept ####
+
+#### Bring in year-round covariates ####
+
+covstack <- raster::stack(paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covariates/all_q_covs_10k.tif", sep = ""))
+
+# Drop unclassified land layer
+covstack <- dropLayer(covstack, "lc_17")
+
+#### Dataset A Q1 ####
 
 test_data <- read.csv("training_sets/test_data_A_Q1.csv")
 xtest <- test_data %>% dplyr::select(!("y"|"ri"))
@@ -61,30 +73,37 @@ ytest <- test_data$y
 countrytest <- test_data$ri
 
 load(file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_model_with_vs_A_Q1.rds", sep = ""))
-q1_no_ri_sdm <- sdm
+sdm_A_Q1 <- sdm
 cutoff <- get_threshold(sdm)
-metrics_Q1_no_ri <- get_sens_and_spec(sdm, xtest, ytest, NULL, cutoff)
-cat("Q1, no RI: sens=",
-    metrics_Q1_no_ri$sens,
-    "spec=",
-    metrics_Q1_no_ri$spec,
-    "AUC=",
-    metrics_Q1_no_ri$auc)
+metrics_A_Q1 <- get_sens_and_spec(sdm, xtest, ytest, NULL, cutoff)
+cat("Dataset A Q1, test metrics: sens =",
+    metrics_A_Q1$sens,
+    ", spec =",
+    metrics_A_Q1$spec,
+    ", AUC =",
+    metrics_A_Q1$auc, "\n")
 
-#### Quarter 1 with random intercept ####
+if (SAVE_OUTPUTS){
+  save(metrics_A_Q1,
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/metrics_A_Q1.rds", sep = ""))
+}
 
-load(file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/ri_model_with_vs_A_Q1.rds", sep = ""))
-q1_ri_sdm <- sdm
-cutoff <- get_threshold(sdm)
-metrics_Q1_ri <- get_sens_and_spec(sdm, xtest, ytest, countrytest, cutoff)
-cat("Q1, with RI: sens=",
-    metrics_Q1_ri$sens,
-    "spec=",
-    metrics_Q1_ri$spec,
-    "AUC=",
-    metrics_Q1_ri$auc)
+# Generate risk map with percentiles
+pred_layers_A_Q1 <- predict(object = sdm,
+                      x.layers = covstack,
+                      quantiles = c(0.025, 0.975),
+                      splitby = 20
+)
+names(pred_layers_A_Q1) <- c("Mean",
+                             "Lower 95 percent confidence bound",
+                             "Upper 95 percent confidence bound")
+if (SAVE_OUTPUTS){
+  save(pred_layers_A_Q1,
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/predictions_A_Q1.rds", sep = ""))
+}
 
-#### Quarter 2 without random intercept ####
+
+#### Dataset A Q2 ####
 
 test_data <- read.csv("training_sets/test_data_A_Q2.csv")
 xtest <- test_data %>% dplyr::select(!("y"|"ri"))
@@ -92,25 +111,277 @@ ytest <- test_data$y
 countrytest <- test_data$ri
 
 load(file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_model_with_vs_A_Q2.rds", sep = ""))
-q2_no_ri_sdm <- sdm
+sdm_A_Q2 <- sdm
 cutoff <- get_threshold(sdm)
-metrics_Q2_no_ri <- get_sens_and_spec(sdm, xtest, ytest, NULL, cutoff)
-cat("Q2, no RI: sens=",
-    metrics_Q2_no_ri$sens,
-    "spec=",
-    metrics_Q2_no_ri$spec,
-    "AUC=",
-    metrics_Q2_no_ri$auc)
+metrics_A_Q2 <- get_sens_and_spec(sdm, xtest, ytest, NULL, cutoff)
+cat("Dataset A Q2, test metrics: sens =",
+    metrics_A_Q2$sens,
+    ", spec =",
+    metrics_A_Q2$spec,
+    ", AUC =",
+    metrics_A_Q2$auc, "\n")
 
-#### Quarter 2 with random intercept ####
+if (SAVE_OUTPUTS){
+  save(metrics_A_Q2,
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/metrics_A_Q2.rds", sep = ""))
+}
 
-load(file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/ri_model_with_vs_A_Q2.rds", sep = ""))
-q2_ri_sdm <- sdm
+# Generate risk map with percentiles
+pred_layers_A_Q2 <- predict(object = sdm,
+                            x.layers = covstack,
+                            quantiles = c(0.025, 0.975),
+                            splitby = 20
+)
+names(pred_layers_A_Q2) <- c("Mean",
+                             "Lower 95 percent confidence bound",
+                             "Upper 95 percent confidence bound")
+if (SAVE_OUTPUTS){
+  save(pred_layers_A_Q2,
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/predictions_A_Q2.rds", sep = ""))
+}
+
+
+#### Dataset A Q3 ####
+
+test_data <- read.csv("training_sets/test_data_A_Q3.csv")
+xtest <- test_data %>% dplyr::select(!("y"|"ri"))
+ytest <- test_data$y
+countrytest <- test_data$ri
+
+load(file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_model_with_vs_A_Q3.rds", sep = ""))
+sdm_A_Q3 <- sdm
 cutoff <- get_threshold(sdm)
-metrics_Q2_ri <- get_sens_and_spec(sdm, xtest, ytest, countrytest, cutoff)
-cat("Q2, with RI: sens=",
-    metrics_Q2_ri$sens,
-    "spec=",
-    metrics_Q2_ri$spec,
-    "AUC=",
-    metrics_Q2_ri$auc)
+metrics_A_Q3 <- get_sens_and_spec(sdm, xtest, ytest, NULL, cutoff)
+cat("Dataset A Q3, test metrics: sens =",
+    metrics_A_Q3$sens,
+    ", spec =",
+    metrics_A_Q3$spec,
+    ", AUC =",
+    metrics_A_Q3$auc, "\n")
+
+if (SAVE_OUTPUTS){
+  save(metrics_A_Q3,
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/metrics_A_Q3.rds", sep = ""))
+}
+
+# Generate risk map with percentiles
+pred_layers_A_Q3 <- predict(object = sdm,
+                            x.layers = covstack,
+                            quantiles = c(0.025, 0.975),
+                            splitby = 20
+)
+names(pred_layers_A_Q3) <- c("Mean",
+                             "Lower 95 percent confidence bound",
+                             "Upper 95 percent confidence bound")
+if (SAVE_OUTPUTS){
+  save(pred_layers_A_Q3,
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/predictions_A_Q3.rds", sep = ""))
+}
+
+
+#### Dataset A Q4 ####
+
+test_data <- read.csv("training_sets/test_data_A_Q4.csv")
+xtest <- test_data %>% dplyr::select(!("y"|"ri"))
+ytest <- test_data$y
+countrytest <- test_data$ri
+
+load(file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_model_with_vs_A_Q4.rds", sep = ""))
+sdm_A_Q4 <- sdm
+cutoff <- get_threshold(sdm)
+metrics_A_Q4 <- get_sens_and_spec(sdm, xtest, ytest, NULL, cutoff)
+cat("Dataset A Q4, test metrics: sens =",
+    metrics_A_Q4$sens,
+    ", spec =",
+    metrics_A_Q4$spec,
+    ", AUC =",
+    metrics_A_Q4$auc, "\n")
+
+if (SAVE_OUTPUTS){
+  save(metrics_A_Q4,
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/metrics_A_Q4.rds", sep = ""))
+}
+
+# Generate risk map with percentiles
+pred_layers_A_Q4 <- predict(object = sdm,
+                            x.layers = covstack,
+                            quantiles = c(0.025, 0.975),
+                            splitby = 20
+)
+names(pred_layers_A_Q4) <- c("Mean",
+                             "Lower 95 percent confidence bound",
+                             "Upper 95 percent confidence bound")
+if (SAVE_OUTPUTS){
+  save(pred_layers_A_Q4,
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/predictions_A_Q4.rds", sep = ""))
+}
+
+
+#### Dataset B Q1 ####
+
+load(file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_model_with_vs_B_Q1.rds", sep = ""))
+sdm_B_Q1 <- sdm
+
+if (B_TEST_DATA_AVAILABLE){
+  test_data <- read.csv("training_sets/test_data_B_Q1.csv")
+  xtest <- test_data %>% dplyr::select(!("y"|"ri"))
+  ytest <- test_data$y
+  countrytest <- test_data$ri
+  cutoff <- get_threshold(sdm)
+  metrics_B_Q1 <- get_sens_and_spec(sdm, xtest, ytest, NULL, cutoff)
+  cat("Dataset B Q1, test metrics: sens =",
+      metrics_B_Q1$sens,
+      ", spec =",
+      metrics_B_Q1$spec,
+      ", AUC =",
+      metrics_B_Q1$auc, "\n")
+  
+  if (SAVE_OUTPUTS){
+    save(metrics_B_Q1,
+         file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/metrics_B_Q1.rds", sep = ""))
+  }
+}
+
+# Generate risk map with percentiles
+pred_layers_B_Q1 <- predict(object = sdm,
+                            x.layers = covstack,
+                            quantiles = c(0.025, 0.975),
+                            splitby = 20
+)
+names(pred_layers_B_Q1) <- c("Mean",
+                             "Lower 95 percent confidence bound",
+                             "Upper 95 percent confidence bound")
+if (SAVE_OUTPUTS){
+  save(pred_layers_B_Q1,
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/predictions_B_Q1.rds", sep = ""))
+}
+
+
+
+
+#### Dataset B Q2 ####
+
+load(file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_model_with_vs_B_Q2.rds", sep = ""))
+sdm_B_Q2 <- sdm
+
+if (B_TEST_DATA_AVAILABLE){
+  test_data <- read.csv("training_sets/test_data_B_Q2.csv")
+  xtest <- test_data %>% dplyr::select(!("y"|"ri"))
+  ytest <- test_data$y
+  countrytest <- test_data$ri
+  cutoff <- get_threshold(sdm)
+  metrics_B_Q2 <- get_sens_and_spec(sdm, xtest, ytest, NULL, cutoff)
+  cat("Dataset B Q2, test metrics: sens =",
+      metrics_B_Q2$sens,
+      ", spec =",
+      metrics_B_Q2$spec,
+      ", AUC =",
+      metrics_B_Q2$auc, "\n")
+  
+  if (SAVE_OUTPUTS){
+    save(metrics_B_Q2,
+         file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/metrics_B_Q2.rds", sep = ""))
+  }
+}
+
+# Generate risk map with percentiles
+pred_layers_B_Q2 <- predict(object = sdm,
+                            x.layers = covstack,
+                            quantiles = c(0.025, 0.975),
+                            splitby = 20
+)
+names(pred_layers_B_Q2) <- c("Mean",
+                             "Lower 95 percent confidence bound",
+                             "Upper 95 percent confidence bound")
+if (SAVE_OUTPUTS){
+  save(pred_layers_B_Q2,
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/predictions_B_Q2.rds", sep = ""))
+}
+
+
+
+
+
+#### Dataset B Q3 ####
+
+load(file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_model_with_vs_B_Q3.rds", sep = ""))
+sdm_B_Q3 <- sdm
+
+if (B_TEST_DATA_AVAILABLE){
+  test_data <- read.csv("training_sets/test_data_B_Q3.csv")
+  xtest <- test_data %>% dplyr::select(!("y"|"ri"))
+  ytest <- test_data$y
+  countrytest <- test_data$ri
+  cutoff <- get_threshold(sdm)
+  metrics_B_Q3 <- get_sens_and_spec(sdm, xtest, ytest, NULL, cutoff)
+  cat("Dataset B Q3, test metrics: sens =",
+      metrics_B_Q3$sens,
+      ", spec =",
+      metrics_B_Q3$spec,
+      ", AUC =",
+      metrics_B_Q3$auc, "\n")
+  
+  if (SAVE_OUTPUTS){
+    save(metrics_B_Q3,
+         file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/metrics_B_Q3.rds", sep = ""))
+  }
+}
+
+# Generate risk map with percentiles
+pred_layers_B_Q3 <- predict(object = sdm,
+                            x.layers = covstack,
+                            quantiles = c(0.025, 0.975),
+                            splitby = 20
+)
+names(pred_layers_B_Q3) <- c("Mean",
+                             "Lower 95 percent confidence bound",
+                             "Upper 95 percent confidence bound")
+if (SAVE_OUTPUTS){
+  save(pred_layers_B_Q3,
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/predictions_B_Q3.rds", sep = ""))
+}
+
+
+
+
+
+#### Dataset B Q4 ####
+
+load(file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_model_with_vs_B_Q4.rds", sep = ""))
+sdm_B_Q4 <- sdm
+
+if (B_TEST_DATA_AVAILABLE){
+  test_data <- read.csv("training_sets/test_data_B_Q4.csv")
+  xtest <- test_data %>% dplyr::select(!("y"|"ri"))
+  ytest <- test_data$y
+  countrytest <- test_data$ri
+  cutoff <- get_threshold(sdm)
+  metrics_B_Q4 <- get_sens_and_spec(sdm, xtest, ytest, NULL, cutoff)
+  cat("Dataset B Q4, test metrics: sens =",
+      metrics_B_Q4$sens,
+      ", spec =",
+      metrics_B_Q4$spec,
+      ", AUC =",
+      metrics_B_Q4$auc, "\n")
+  
+  if (SAVE_OUTPUTS){
+    save(metrics_B_Q4,
+         file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/metrics_B_Q4.rds", sep = ""))
+  }
+}
+
+# Generate risk map with percentiles
+pred_layers_B_Q4 <- predict(object = sdm,
+                            x.layers = covstack,
+                            quantiles = c(0.025, 0.975),
+                            splitby = 20
+)
+names(pred_layers_B_Q4) <- c("Mean",
+                             "Lower 95 percent confidence bound",
+                             "Upper 95 percent confidence bound")
+if (SAVE_OUTPUTS){
+  save(pred_layers_B_Q4,
+       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/predictions_B_Q4.rds", sep = ""))
+}
+
+
