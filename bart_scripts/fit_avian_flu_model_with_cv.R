@@ -2,15 +2,28 @@
 # presence/absence based on environmental and species abundance factors.
 # This script includes cross-validation of BART parameters.
 
-INCLUDE_CROSS_QUARTER_COVS <- TRUE # Indicator for whether to include seasonal covariates for Quarter m=/=n in the model for Quarter n.
-
-SAVE_FITS <- TRUE
 
 # Global storing optimised k value for BART - which may be updated
 K_OPT <- 2
 
-# Set path to folder containing data, and where output will be stored
-PATH_TO_DATA <- "../../../OneDrive - The University of Liverpool/"
+# Optional command line arguments, must be passed as strings:
+args <- commandArgs(trailingOnly = T)
+if (length(args)<3){
+  SAVE_FITS <- TRUE
+}else{
+  SAVE_FITS <- as.logical(args[3])
+}
+if (length(args)<2){
+  INCLUDE_CROSS_QUARTER_COVS <- TRUE # Indicator for whether to include seasonal covariates for Quarter m=/=n in the model for Quarter n.
+}else{
+  INCLUDE_CROSS_QUARTER_COVS <- as.logical(args[2])
+}
+if (length(args)<1){
+  # Set path to folder containing data, and where output will be stored
+  PATH_TO_DATA <- "../../../OneDrive - The University of Liverpool/"
+}else{
+  PATH_TO_DATA <- args[1]
+}
 
 library(dplyr)
 library(embarcadero)
