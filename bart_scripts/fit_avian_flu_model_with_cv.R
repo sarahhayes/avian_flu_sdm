@@ -2,7 +2,6 @@
 # presence/absence based on environmental and species abundance factors.
 # This script includes cross-validation of BART parameters.
 
-
 # Global storing optimised k value for BART - which may be updated
 K_OPT <- 2
 
@@ -20,11 +19,14 @@ if (length(args)<2){
 }
 if (length(args)<1){
   # Set path to folder containing data, and where output will be stored
-  PATH_TO_DATA <- "../../../OneDrive - The University of Liverpool/"
+  PATH_TO_DATA <- ""
 }else{
   PATH_TO_DATA <- args[1]
 }
 
+dir.create(file.path(PATH_TO_DATA, "fitted-BART-models/"), showWarnings = FALSE)
+
+library(caret)
 library(dplyr)
 library(embarcadero)
 library(raster)
@@ -360,7 +362,7 @@ get_sens_and_spec <- function(sdm, xtest, ytest, ri, cutoff){
 
 #### Period A Q1 ####
 
-training_data <- read.csv("training_sets/training_data_A_Q1.csv")
+training_data <- read.csv(paste(PATH_TO_DATA, "training_sets/training_data_A_Q1.csv", sep=""))
 if (!INCLUDE_CROSS_QUARTER_COVS){
   all_excludes <- grep("quart|_q", colnames(training_data), value = TRUE)
   q1_excludes <- grep("first|q1", all_excludes, value = TRUE, invert = TRUE)
@@ -407,7 +409,7 @@ for (i in 1:length(k_vals)){
     for (m in 1:length(base_vals)){
       base_val <- base_vals[m]
       idx <- (i-1)*pl*bl + (j-1)*bl + m
-      cat("idx=", idx, "\n")
+      # cat("idx=", idx, "\n")
       cv_results$k[idx] <- k_val
       cv_results$power[idx] <- power_val
       cv_results$base[idx] <- base_val
@@ -448,7 +450,7 @@ power_opt <- cv_results$power[argmax]
 base_opt <- cv_results$base[argmax]
 
 
-test_data <- read.csv("training_sets/test_data_A_Q1.csv")
+test_data <- read.csv(paste(PATH_TO_DATA, "training_sets/test_data_A_Q1.csv", sep=""))
 xtest <- test_data %>% dplyr::select(!("y"|"ri"))
 ytest <- test_data$y
 
@@ -465,7 +467,7 @@ invisible(basic_model$fit$state)
 
 if (SAVE_FITS){
   save(basic_model,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_model_A_Q1.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "fitted-BART-models/cv_model_A_Q1.rds", sep = ""))
 }
 
 sdm <- bart.step(x.data = xtrain,
@@ -479,15 +481,15 @@ invisible(sdm$fit$state)
 
 if (SAVE_FITS){
   save(sdm,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_model_with_vs_A_Q1.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "fitted-BART-models/cv_model_with_vs_A_Q1.rds", sep = ""))
 }
 
 
 
-
+# 
 #### Period A Q2 ####
 
-training_data <- read.csv("training_sets/training_data_A_Q2.csv")
+training_data <- read.csv(paste(PATH_TO_DATA, "training_sets/training_data_A_Q2.csv", sep=""))
 if (!INCLUDE_CROSS_QUARTER_COVS){
   all_excludes <- grep("quart|_q", colnames(training_data), value = TRUE)
   q2_excludes <- grep("second|q2", all_excludes, value = TRUE, invert = TRUE)
@@ -575,7 +577,7 @@ power_opt <- cv_results$power[argmax]
 base_opt <- cv_results$base[argmax]
 
 
-test_data <- read.csv("training_sets/test_data_A_Q2.csv")
+test_data <- read.csv(paste(PATH_TO_DATA, "training_sets/test_data_A_Q2.csv", sep=""))
 xtest <- test_data %>% dplyr::select(!("y"|"ri"))
 ytest <- test_data$y
 
@@ -590,7 +592,7 @@ invisible(basic_model$fit$state)
 
 if (SAVE_FITS){
   save(basic_model,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_model_A_Q2.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "fitted-BART-models/cv_model_A_Q2.rds", sep = ""))
 }
 
 sdm <- bart.step(x.data = xtrain,
@@ -604,14 +606,14 @@ invisible(sdm$fit$state)
 
 if (SAVE_FITS){
   save(sdm,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_model_with_vs_A_Q2.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "fitted-BART-models/cv_model_with_vs_A_Q2.rds", sep = ""))
 }
 
 
 
 #### Period A Q3 ####
 
-training_data <- read.csv("training_sets/training_data_A_Q3.csv")
+training_data <- read.csv(paste(PATH_TO_DATA, "training_sets/training_data_A_Q3.csv", sep=""))
 if (!INCLUDE_CROSS_QUARTER_COVS){
   all_excludes <- grep("quart|_q", colnames(training_data), value = TRUE)
   q3_excludes <- grep("third|q3", all_excludes, value = TRUE, invert = TRUE)
@@ -699,7 +701,7 @@ power_opt <- cv_results$power[argmax]
 base_opt <- cv_results$base[argmax]
 
 
-test_data <- read.csv("training_sets/test_data_A_Q3.csv")
+test_data <- read.csv(paste(PATH_TO_DATA, "training_sets/test_data_A_Q3.csv", sep=""))
 xtest <- test_data %>% dplyr::select(!("y"|"ri"))
 ytest <- test_data$y
 
@@ -714,7 +716,7 @@ invisible(basic_model$fit$state)
 
 if (SAVE_FITS){
   save(basic_model,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_model_A_Q3.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "fitted-BART-models/cv_model_A_Q3.rds", sep = ""))
 }
 
 sdm <- bart.step(x.data = xtrain,
@@ -728,14 +730,14 @@ invisible(sdm$fit$state)
 
 if (SAVE_FITS){
   save(sdm,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_model_with_vs_A_Q3.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "fitted-BART-models/cv_model_with_vs_A_Q3.rds", sep = ""))
 }
 
 
 
 #### Period A Q4 ####
 
-training_data <- read.csv("training_sets/training_data_A_Q4.csv")
+training_data <- read.csv(paste(PATH_TO_DATA, "training_sets/training_data_A_Q4.csv", sep=""))
 if (!INCLUDE_CROSS_QUARTER_COVS){
   all_excludes <- grep("quart|_q", colnames(training_data), value = TRUE)
   q4_excludes <- grep("fourth|q4", all_excludes, value = TRUE, invert = TRUE)
@@ -823,7 +825,7 @@ power_opt <- cv_results$power[argmax]
 base_opt <- cv_results$base[argmax]
 
 
-test_data <- read.csv("training_sets/test_data_A_Q4.csv")
+test_data <- read.csv(paste(PATH_TO_DATA, "training_sets/test_data_A_Q4.csv", sep=""))
 xtest <- test_data %>% dplyr::select(!("y"|"ri"))
 ytest <- test_data$y
 
@@ -838,7 +840,7 @@ invisible(basic_model$fit$state)
 
 if (SAVE_FITS){
   save(basic_model,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_model_A_Q4.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "fitted-BART-models/cv_model_A_Q4.rds", sep = ""))
 }
 
 sdm <- bart.step(x.data = xtrain,
@@ -852,14 +854,14 @@ invisible(sdm$fit$state)
 
 if (SAVE_FITS){
   save(sdm,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_model_with_vs_A_Q4.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "fitted-BART-models/cv_model_with_vs_A_Q4.rds", sep = ""))
 }
 
 
 
 #### Period B Q1 ####
 
-training_data <- read.csv("training_sets/training_data_B_Q1.csv")
+training_data <- read.csv(paste(PATH_TO_DATA, "training_sets/training_data_B_Q1.csv", sep=""))
 if (!INCLUDE_CROSS_QUARTER_COVS){
   all_excludes <- grep("quart|_q", colnames(training_data), value = TRUE)
   q1_excludes <- grep("first|q1", all_excludes, value = TRUE, invert = TRUE)
@@ -957,7 +959,7 @@ invisible(basic_model$fit$state)
 
 if (SAVE_FITS){
   save(basic_model,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_model_B_Q1.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "fitted-BART-models/cv_model_B_Q1.rds", sep = ""))
 }
 
 sdm <- bart.step(x.data = xtrain,
@@ -971,13 +973,13 @@ invisible(sdm$fit$state)
 
 if (SAVE_FITS){
   save(sdm,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_model_with_vs_B_Q1.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "fitted-BART-models/cv_model_with_vs_B_Q1.rds", sep = ""))
 }
 
 
 #### Period B Q2 ####
 
-training_data <- read.csv("training_sets/training_data_B_Q2.csv")
+training_data <- read.csv(paste(PATH_TO_DATA, "training_sets/training_data_B_Q2.csv", sep=""))
 if (!INCLUDE_CROSS_QUARTER_COVS){
   all_excludes <- grep("quart|_q", colnames(training_data), value = TRUE)
   q2_excludes <- grep("second|q2", all_excludes, value = TRUE, invert = TRUE)
@@ -1075,7 +1077,7 @@ invisible(basic_model$fit$state)
 
 if (SAVE_FITS){
   save(basic_model,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_model_B_Q2.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "fitted-BART-models/cv_model_B_Q2.rds", sep = ""))
 }
 
 sdm <- bart.step(x.data = xtrain,
@@ -1089,13 +1091,13 @@ invisible(sdm$fit$state)
 
 if (SAVE_FITS){
   save(sdm,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_model_with_vs_B_Q2.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "fitted-BART-models/cv_model_with_vs_B_Q2.rds", sep = ""))
 }
 
 
 #### Period B Q3 ####
 
-training_data <- read.csv("training_sets/training_data_B_Q3.csv")
+training_data <- read.csv(paste(PATH_TO_DATA, "training_sets/training_data_B_Q3.csv", sep=""))
 if (!INCLUDE_CROSS_QUARTER_COVS){
   all_excludes <- grep("quart|_q", colnames(training_data), value = TRUE)
   q3_excludes <- grep("third|q3", all_excludes, value = TRUE, invert = TRUE)
@@ -1193,7 +1195,7 @@ invisible(basic_model$fit$state)
 
 if (SAVE_FITS){
   save(basic_model,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_model_B_Q3.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "fitted-BART-models/cv_model_B_Q3.rds", sep = ""))
 }
 
 sdm <- bart.step(x.data = xtrain,
@@ -1207,13 +1209,13 @@ invisible(sdm$fit$state)
 
 if (SAVE_FITS){
   save(sdm,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_model_with_vs_B_Q3.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "fitted-BART-models/cv_model_with_vs_B_Q3.rds", sep = ""))
 }
 
 
 #### Period B Q4 ####
 
-training_data <- read.csv("training_sets/training_data_B_Q4.csv")
+training_data <- read.csv(paste(PATH_TO_DATA, "training_sets/training_data_B_Q4.csv", sep=""))
 if (!INCLUDE_CROSS_QUARTER_COVS){
   all_excludes <- grep("quart|_q", colnames(training_data), value = TRUE)
   q4_excludes <- grep("fourth|q4", all_excludes, value = TRUE, invert = TRUE)
@@ -1311,7 +1313,7 @@ invisible(basic_model$fit$state)
 
 if (SAVE_FITS){
   save(basic_model,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_model_B_Q4.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "fitted-BART-models/cv_model_B_Q4.rds", sep = ""))
 }
 
 sdm <- bart.step(x.data = xtrain,
@@ -1325,5 +1327,5 @@ invisible(sdm$fit$state)
 
 if (SAVE_FITS){
   save(sdm,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/cv_model_with_vs_B_Q4.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "fitted-BART-models/cv_model_with_vs_B_Q4.rds", sep = ""))
 }

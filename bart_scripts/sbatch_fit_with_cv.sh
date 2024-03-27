@@ -4,12 +4,12 @@
 # Use the current environment for this job.
 #SBATCH --export=ALL
 # Define job name
-#SBATCH -J ebird
+#SBATCH -J bart_fits_with_cv
 # Define a standard output file. When the job is running, %u will be replaced by user name,
 # %N will be replaced by the name of the node that runs the batch script, and %j will be replaced by job id number.
-#SBATCH -o ebird.%u.%N.%j.out
+#SBATCH -o bart_fits_with_cv.%u.%N.%j.out
 # Define a standard error file
-#SBATCH -e ebird.%u.%N.%j.err
+#SBATCH -e bart_fits_with_cv.%u.%N.%j.err
 # Request the partition
 ##SBATCH -p bioinfo
 # Request the number of nodes
@@ -38,6 +38,7 @@ module load compilers/gcc/11.2.0
 module load libs/geos/3.8.1/gcc-11.2.0
 module load libs/proj/9.0.1/gcc-11.2.0+sqlite-3.35.4
 module load libs/gdal/3.5.1/gcc-11.2.0+proj-9.0.1
+module load apps/cmake/3.16.1
 module load apps/R/4.2.2/gcc-11.2.0+lapack-3.5.0+blas-3.6.0
 
 export R_LIBS_USER=~/volatile/R_libs/4.2.2
@@ -79,7 +80,7 @@ echo
 echo "Running R job:"
 echo   
 
-Rscript volatile/bart_scripts/fit_avian_flu_model_with_cv.R "volatile/" "FALSE" "TRUE"
+Rscript bart_scripts/fit_avian_flu_model_with_cv.R "volatile/" "FALSE" "TRUE"
 
 # the ret flag is the return code, so you can spot easily if your code failed.
 ret=$?
