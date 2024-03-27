@@ -950,6 +950,14 @@ if (PLOT){
   dev.off()
 }
 
+migr_by_family <- table(sp_df$BLFamilyLatin,
+                        sp_df$is_migratory,
+                        dnn = c("Family", "Migratory")) %>%
+  addmargins() %>%
+  as.data.frame.matrix()
+migr_by_family$percent_migr <- 100 * (migr_by_family$`TRUE`) / (migr_by_family$Sum)
+write_csv(migr_by_family, "data/migr_by_family.csv")
+
 ################################################################################
 # Work out proximity to key taxa
 
