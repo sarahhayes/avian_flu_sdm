@@ -30,6 +30,7 @@ library(caret)
 library(dplyr)
 library(embarcadero)
 library(raster)
+library(reshape)
 library(terra)
 set.seed(12345)
 
@@ -217,9 +218,6 @@ variable.step <- function(x.data, y.data, n.trees=10, iter=50, quiet=FALSE,
       
       pred.p <- colMeans(pnorm(model.j$yhat.train))[y.data==1]
       pred.a <- colMeans(pnorm(model.j$yhat.train))[y.data==0]
-      #e <- evaluate(p=pred.p,
-      #              a=pred.a)
-      #aucs <- rbind(aucs,c(var.j,e@auc)); colnames(aucs) <- c('Vars','AUC')
       
       pred.c <- c(pred.p, pred.a)
       true.c <- c(rep(1,length(pred.p)), rep(0,length(pred.a)))
@@ -322,6 +320,8 @@ bart.step <- function(x.data, y.data,
   invisible(best.model)
 }
 
+#### Next two functions are adaptations of stuff for calculating metrics done inside embarcadero::summary ####
+
 get_threshold <- function(object){
   fitobj <- object$fit
   
@@ -345,7 +345,6 @@ get_sens_and_spec <- function(sdm, xtest, ytest, ri, cutoff){
   perf <-  performance(pred, measure = "sens", x.measure = "spec")
   tss_list <- (perf@x.values[[1]] + perf@y.values[[1]] - 1)
   tss_df <- data.frame(alpha=perf@alpha.values[[1]],tss=tss_list)
-  # cutoff <- min(tss_df$alpha[which(tss_df$tss==max(tss_df$tss))])
   sens <- perf@x.values[[1]][which.min(abs(perf@alpha.values[[1]]-cutoff))]
   spec <- perf@y.values[[1]][which.min(abs(perf@alpha.values[[1]]-cutoff))]
   tss <- tss_df[which.min(abs(tss_df$alpha-cutoff)),'tss']
@@ -379,14 +378,12 @@ fold_ids <- caret::createFolds(training_data$y, k = 5)
 folds <- lapply(1:length(fold_ids),
                 FUN = function(i){
                   training_data[-fold_ids[[i]],]})
+# Complements to the folds, i.e. test sets for model trained on that fold
 antifolds <- lapply(1:length(fold_ids),
                     FUN = function(i){
                       training_data[fold_ids[[i]],]})
 
-## Check training representation
-# lapply(folds, function(x) with(x, table(ri,y)))
-
-
+# Now cycle over possible parameter values
 k_vals = c(1, 2, 3)
 power_vals = c(1.6, 1.8, 2)
 base_vals = c(0.75, 0.85, 0.95)
@@ -409,11 +406,11 @@ for (i in 1:length(k_vals)){
     for (m in 1:length(base_vals)){
       base_val <- base_vals[m]
       idx <- (i-1)*pl*bl + (j-1)*bl + m
-      # cat("idx=", idx, "\n")
+      # cat("Crossvalidating parameter set ", idx, " of ", kl*pl*bl,"\n") # Uncomment to print where we are in the cycle
       cv_results$k[idx] <- k_val
       cv_results$power[idx] <- power_val
       cv_results$base[idx] <- base_val
-      for (fold_no in 1:length(folds)){
+      for (fold_no in 1:length(folds)){ # For each fold, fit a model and calculate test AUC
         model <- bart2(y ~ . - ri,
                           folds[[fold_no]],
                           test = antifolds[[fold_no]],
@@ -437,6 +434,7 @@ for (i in 1:length(k_vals)){
   }
 }
 
+# Calculate fold-wise mean AUC associated with each parameter set and choose optimum parameters based on maximum AUC
 cv_results <- cv_results %>%
   rowwise() %>%
   mutate(mean_auc = mean(auc1,
@@ -454,7 +452,7 @@ test_data <- read.csv(paste(PATH_TO_DATA, "training_sets/test_data_A_Q1.csv", se
 xtest <- test_data %>% dplyr::select(!("y"|"ri"))
 ytest <- test_data$y
 
-# Initialise model
+# Basic all-parameter model
 basic_model <- bart( xtrain,
                          ytrain,
                      x.test = xtest,
@@ -470,6 +468,7 @@ if (SAVE_FITS){
        file = paste(PATH_TO_DATA, "fitted-BART-models/cv_model_A_Q1.rds", sep = ""))
 }
 
+# Perform variable selection
 sdm <- bart.step(x.data = xtrain,
                  y.data = ytrain,
                  k = K_OPT,
@@ -510,8 +509,8 @@ antifolds <- lapply(1:length(fold_ids),
                     FUN = function(i){
                       training_data[fold_ids[[i]],]})
 
-## Check training representation
-# lapply(folds, function(x) with(x, table(ri,y)))
+
+
 
 
 k_vals = c(1, 2, 3)
@@ -536,7 +535,7 @@ for (i in 1:length(k_vals)){
     for (m in 1:length(base_vals)){
       base_val <- base_vals[m]
       idx <- (i-1)*pl*bl + (j-1)*bl + m
-      cat("idx=", idx, "\n")
+      #cat("Crossvalidating parameter set ", idx, " of ", kl*pl*bl,"\n")
       cv_results$k[idx] <- k_val
       cv_results$power[idx] <- power_val
       cv_results$base[idx] <- base_val
@@ -581,7 +580,7 @@ test_data <- read.csv(paste(PATH_TO_DATA, "training_sets/test_data_A_Q2.csv", se
 xtest <- test_data %>% dplyr::select(!("y"|"ri"))
 ytest <- test_data$y
 
-# Initialise model
+# Basic all-parameter model
 basic_model <- bart(xtrain,
                     ytrain,
                     k = K_OPT,
@@ -634,8 +633,8 @@ antifolds <- lapply(1:length(fold_ids),
                     FUN = function(i){
                       training_data[fold_ids[[i]],]})
 
-## Check training representation
-# lapply(folds, function(x) with(x, table(ri,y)))
+
+
 
 
 k_vals = c(1, 2, 3)
@@ -660,7 +659,7 @@ for (i in 1:length(k_vals)){
     for (m in 1:length(base_vals)){
       base_val <- base_vals[m]
       idx <- (i-1)*pl*bl + (j-1)*bl + m
-      cat("idx=", idx, "\n")
+      #cat("Crossvalidating parameter set ", idx, " of ", kl*pl*bl,"\n")
       cv_results$k[idx] <- k_val
       cv_results$power[idx] <- power_val
       cv_results$base[idx] <- base_val
@@ -705,7 +704,7 @@ test_data <- read.csv(paste(PATH_TO_DATA, "training_sets/test_data_A_Q3.csv", se
 xtest <- test_data %>% dplyr::select(!("y"|"ri"))
 ytest <- test_data$y
 
-# Initialise model
+# Basic all-parameter model
 basic_model <- bart(xtrain,
                     ytrain,
                     k = K_OPT,
@@ -758,8 +757,8 @@ antifolds <- lapply(1:length(fold_ids),
                     FUN = function(i){
                       training_data[fold_ids[[i]],]})
 
-## Check training representation
-# lapply(folds, function(x) with(x, table(ri,y)))
+
+
 
 
 k_vals = c(1, 2, 3)
@@ -784,7 +783,7 @@ for (i in 1:length(k_vals)){
     for (m in 1:length(base_vals)){
       base_val <- base_vals[m]
       idx <- (i-1)*pl*bl + (j-1)*bl + m
-      cat("idx=", idx, "\n")
+      #cat("Crossvalidating parameter set ", idx, " of ", kl*pl*bl,"\n")
       cv_results$k[idx] <- k_val
       cv_results$power[idx] <- power_val
       cv_results$base[idx] <- base_val
@@ -829,7 +828,7 @@ test_data <- read.csv(paste(PATH_TO_DATA, "training_sets/test_data_A_Q4.csv", se
 xtest <- test_data %>% dplyr::select(!("y"|"ri"))
 ytest <- test_data$y
 
-# Initialise model
+# Basic all-parameter model
 basic_model <- bart(xtrain,
                     ytrain,
                     k = K_OPT,
@@ -882,8 +881,8 @@ antifolds <- lapply(1:length(fold_ids),
                     FUN = function(i){
                       training_data[fold_ids[[i]],]})
 
-## Check training representation
-# lapply(folds, function(x) with(x, table(ri,y)))
+
+
 
 
 k_vals = c(1, 2, 3)
@@ -908,7 +907,7 @@ for (i in 1:length(k_vals)){
     for (m in 1:length(base_vals)){
       base_val <- base_vals[m]
       idx <- (i-1)*pl*bl + (j-1)*bl + m
-      cat("idx=", idx, "\n")
+      #cat("Crossvalidating parameter set ", idx, " of ", kl*pl*bl,"\n")
       cv_results$k[idx] <- k_val
       cv_results$power[idx] <- power_val
       cv_results$base[idx] <- base_val
@@ -948,7 +947,7 @@ K_OPT <- cv_results$k[argmax]
 power_opt <- cv_results$power[argmax]
 base_opt <- cv_results$base[argmax]
 
-# Initialise model
+# Basic all-parameter model
 basic_model <- bart(xtrain,
                     ytrain,
                     k = K_OPT,
@@ -1000,8 +999,8 @@ antifolds <- lapply(1:length(fold_ids),
                     FUN = function(i){
                       training_data[fold_ids[[i]],]})
 
-## Check training representation
-# lapply(folds, function(x) with(x, table(ri,y)))
+
+
 
 
 k_vals = c(1, 2, 3)
@@ -1026,7 +1025,7 @@ for (i in 1:length(k_vals)){
     for (m in 1:length(base_vals)){
       base_val <- base_vals[m]
       idx <- (i-1)*pl*bl + (j-1)*bl + m
-      cat("idx=", idx, "\n")
+      #cat("Crossvalidating parameter set ", idx, " of ", kl*pl*bl,"\n")
       cv_results$k[idx] <- k_val
       cv_results$power[idx] <- power_val
       cv_results$base[idx] <- base_val
@@ -1066,7 +1065,7 @@ K_OPT <- cv_results$k[argmax]
 power_opt <- cv_results$power[argmax]
 base_opt <- cv_results$base[argmax]
 
-# Initialise model
+# Basic all-parameter model
 basic_model <- bart(xtrain,
                     ytrain,
                     k = K_OPT,
@@ -1118,8 +1117,8 @@ antifolds <- lapply(1:length(fold_ids),
                     FUN = function(i){
                       training_data[fold_ids[[i]],]})
 
-## Check training representation
-# lapply(folds, function(x) with(x, table(ri,y)))
+
+
 
 
 k_vals = c(1, 2, 3)
@@ -1144,7 +1143,7 @@ for (i in 1:length(k_vals)){
     for (m in 1:length(base_vals)){
       base_val <- base_vals[m]
       idx <- (i-1)*pl*bl + (j-1)*bl + m
-      cat("idx=", idx, "\n")
+      #cat("Crossvalidating parameter set ", idx, " of ", kl*pl*bl,"\n")
       cv_results$k[idx] <- k_val
       cv_results$power[idx] <- power_val
       cv_results$base[idx] <- base_val
@@ -1184,7 +1183,7 @@ K_OPT <- cv_results$k[argmax]
 power_opt <- cv_results$power[argmax]
 base_opt <- cv_results$base[argmax]
 
-# Initialise model
+# Basic all-parameter model
 basic_model <- bart(xtrain,
                     ytrain,
                     k = K_OPT,
@@ -1236,8 +1235,8 @@ antifolds <- lapply(1:length(fold_ids),
                     FUN = function(i){
                       training_data[fold_ids[[i]],]})
 
-## Check training representation
-# lapply(folds, function(x) with(x, table(ri,y)))
+
+
 
 
 k_vals = c(1, 2, 3)
@@ -1262,7 +1261,7 @@ for (i in 1:length(k_vals)){
     for (m in 1:length(base_vals)){
       base_val <- base_vals[m]
       idx <- (i-1)*pl*bl + (j-1)*bl + m
-      cat("idx=", idx, "\n")
+      #cat("Crossvalidating parameter set ", idx, " of ", kl*pl*bl,"\n")
       cv_results$k[idx] <- k_val
       cv_results$power[idx] <- power_val
       cv_results$base[idx] <- base_val
@@ -1302,7 +1301,7 @@ K_OPT <- cv_results$k[argmax]
 power_opt <- cv_results$power[argmax]
 base_opt <- cv_results$base[argmax]
 
-# Initialise model
+# Basic all-parameter model
 basic_model <- bart(xtrain,
                     ytrain,
                     k = K_OPT,

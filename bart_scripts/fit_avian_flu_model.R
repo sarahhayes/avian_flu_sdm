@@ -1,3 +1,7 @@
+# NOTE: As of 27/03/24 this script has not been kept up to date with changes to
+# the model. Please use fit_avian_flu_model_with_cv.R as the "default" option
+# for model fitting.
+
  # In this script we train a BART model to classify sites for avian flu
 # presence/absence based on environmental and species abundance factors
 

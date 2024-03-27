@@ -10,7 +10,7 @@ QUALITY_METHOD <- "HQ_WEIGHTED" # Options are: "HQ_ONLY" to only use species wit
                   # weeks as zero (not currently implemented!); "ALL" to use all species including those with
                   # lower-quality abundance estimates.
 QUARTERLY <- TRUE # Generate quarterly (weeks 1-13 etc) rasters, otherwise do weekly
-SAVE_RAST <- TRUE # Save output rasters
+SAVE_RAST <- FALSE # Save output rasters
 
 if (QUARTERLY){
   nlyrs <- 4
@@ -40,8 +40,8 @@ library(sf)
 library(stringr)
 library(terra)
 
-# First get list of birds which appear in Europewith eBird species codes, along
-# with estimates of global population sizes.
+### First get list of birds which appear in Europe with eBird species codes, along
+# with estimates of global population sizes. ####
 
 # Get ebird species table
 sp_df <- ebirdst_runs
@@ -51,6 +51,9 @@ sp_df$scientific_name <- sapply(sp_df$scientific_name,
 
 # Get codes for species in Europe
 euro_bird_codes <- read.csv("ebird/codes_for_europe_clean.csv")
+
+# euro_bird_codes <- read.csv("ebird/species_europe_2024_after_pkg_update.csv")
+# euro_bird_codes <- euro_bird_codes[, c("common_name", "sci_code")]
 
 no_euro_birds <- nrow(euro_bird_codes)
 
@@ -950,6 +953,7 @@ euro_ext <- ext(blank_3035)
 # Foraging around water surface
 # Foraging >5cm below water surface
 # Phylogenetic distance to a confirmed host
+# Membership of known at-risk taxa
 
 cong_rast <- rast(nlyrs=nlyrs,
                   crs=crs,
@@ -983,7 +987,9 @@ host_dist_rast <- rast(nlyrs=nlyrs,
                         crs=crs,
                         extent=euro_ext,
                        res=res(blank_3035))
-pop_rast <- rast(nlyrs=nlyrs,
+# pop_rast stores population of "current" species in  over-species loop as part
+# of the species richness calculations, and is not a covariate layer to be saved
+pop_rast <- rast(nlyrs=nlyrs, 
                  crs=crs,
                  extent=euro_ext,
                  res=res(blank_3035))
@@ -1037,12 +1043,6 @@ for (i in 1:nlyrs){
 
 no_species <- nrow(sp_df)
 sample_idx <- 1:no_species
-
-# # Remove unmatched species from sp_df
-# sp_df <- sp_df[which(sp_df$Avibase_ID %in% matched_data$Avibase_ID), ]
-
-# set.seed(1)
-# sample_idx <- sample(1:nrow(sp_df), no_species)
 
 # Make sure timeout is set high enough so we can actually download the data
 # Ten minutes per dataset should be enough
@@ -1337,10 +1337,6 @@ if (PLOT){
 
 ################################################################################
 # Quick plot of surface feeder abundance for slides:
-
-spplot(log_around_surf_rast[[2]],
-       col.regions = c("#FFFFFF", rev(viridis_pal()(100))),
-       cex=0.8)
 
 at <- seq(0, 4, 0.1)
 labs <- as.character(10^at)

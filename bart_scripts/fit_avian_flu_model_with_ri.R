@@ -2,18 +2,35 @@
 # presence/absence based on environmental and species abundance factors.
 # This script includes cross-validation of BART parameters.
 
-SAVE_FITS <- TRUE
-SAVE_PLOTS <- FALSE
-
 # Global storing optimised k value for BART - which may be updated
 K_OPT <- 2
 
-# Set path to folder containing data, and where output will be stored
-PATH_TO_DATA <- "../../../OneDrive - The University of Liverpool/"
+# Optional command line arguments, must be passed as strings:
+args <- commandArgs(trailingOnly = T)
+if (length(args)<3){
+  SAVE_FITS <- TRUE
+}else{
+  SAVE_FITS <- as.logical(args[3])
+}
+if (length(args)<2){
+  INCLUDE_CROSS_QUARTER_COVS <- TRUE # Indicator for whether to include seasonal covariates for Quarter m=/=n in the model for Quarter n.
+}else{
+  INCLUDE_CROSS_QUARTER_COVS <- as.logical(args[2])
+}
+if (length(args)<1){
+  # Set path to folder containing data, and where output will be stored
+  PATH_TO_DATA <- ""
+}else{
+  PATH_TO_DATA <- args[1]
+}
 
+dir.create(file.path(PATH_TO_DATA, "fitted-BART-models/"), showWarnings = FALSE)
+
+library(caret)
 library(dplyr)
 library(embarcadero)
 library(raster)
+library(reshape)
 library(terra)
 set.seed(12345)
 
@@ -39,9 +56,6 @@ bart.flex <- function(x.data, y.data, ri.data = NULL,
                           colnames(train)[ncol(train)], sep=' - '))
     
     train <- na.omit(train) 
-    # default(rbart_vi)$k <- k
-    # default(rbart_vi)$power <- power
-    # default(rbart_vi)$base <- base
     model <- rbart_vi(f, 
                       group.by=train[,ncol(train)],
                       data=train,
@@ -227,9 +241,6 @@ variable.step <- function(x.data, y.data, ri.data=NULL, n.trees=10, iter=50, qui
       
       pred.p <- colMeans(pnorm(model.j$yhat.train))[y.data==1]
       pred.a <- colMeans(pnorm(model.j$yhat.train))[y.data==0]
-      #e <- evaluate(p=pred.p,
-      #              a=pred.a)
-      #aucs <- rbind(aucs,c(var.j,e@auc)); colnames(aucs) <- c('Vars','AUC')
       
       pred.c <- c(pred.p, pred.a)
       true.c <- c(rep(1,length(pred.p)), rep(0,length(pred.a)))
@@ -334,6 +345,7 @@ bart.step <- function(x.data, y.data, ri.data=NULL,
   invisible(best.model)
 }
 
+#### Next two functions are adaptations of stuff for calculating metrics done inside embarcadero::summary ####
 get_threshold <- function(object){
   fitobj <- object$fit[[1]]
   
@@ -357,7 +369,6 @@ get_sens_and_spec <- function(sdm, xtest, ytest, ri, cutoff){
   perf <-  performance(pred, measure = "sens", x.measure = "spec")
   tss_list <- (perf@x.values[[1]] + perf@y.values[[1]] - 1)
   tss_df <- data.frame(alpha=perf@alpha.values[[1]],tss=tss_list)
-  # cutoff <- min(tss_df$alpha[which(tss_df$tss==max(tss_df$tss))])
   sens <- perf@x.values[[1]][which.min(abs(perf@alpha.values[[1]]-cutoff))]
   spec <- perf@y.values[[1]][which.min(abs(perf@alpha.values[[1]]-cutoff))]
   tss <- tss_df[which.min(abs(tss_df$alpha-cutoff)),'tss']
@@ -374,7 +385,7 @@ get_sens_and_spec <- function(sdm, xtest, ytest, ri, cutoff){
 
 #### Period A Q1 ####
 
-training_data <- read.csv("training_sets/training_data_A_Q1.csv")
+training_data <- read.csv(paste(PATH_TO_DATA, "training_sets/training_data_A_Q1.csv", sep=""))
 xtrain <- training_data %>% dplyr::select(!("y"|"ri"))
 ytrain <- training_data$y
 countrytrain <- training_data$ri
@@ -387,14 +398,13 @@ fold_ids <- caret::createFolds(paste0(training_data$ri, training_data$y), k = 5)
 folds <- lapply(1:length(fold_ids),
                 FUN = function(i){
                   training_data[-fold_ids[[i]],]})
+# Complements to the folds, i.e. test sets for model trained on that fold
 antifolds <- lapply(1:length(fold_ids),
                     FUN = function(i){
                       training_data[fold_ids[[i]],]})
 
-## Check training representation
-# lapply(folds, function(x) with(x, table(ri,y)))
 
-
+# Now cycle over possible parameter values
 k_vals = c(1, 2, 3)
 power_vals = c(1.6, 1.8, 2)
 base_vals = c(0.75, 0.85, 0.95)
@@ -417,11 +427,11 @@ for (i in 1:length(k_vals)){
     for (m in 1:length(base_vals)){
       base_val <- base_vals[m]
       idx <- (i-1)*pl*bl + (j-1)*bl + m
-      cat("idx=", idx, "\n")
+#      cat("Crossvalidating parameter set ", idx, " of ", kl*pl*bl,"\n") # Uncomment to print where we are in the cycle
       cv_results$k[idx] <- k_val
       cv_results$power[idx] <- power_val
       cv_results$base[idx] <- base_val
-      for (fold_no in 1:length(folds)){
+      for (fold_no in 1:length(folds)){ # For each fold, fit a model and calculate test AUC
         model <- rbart_vi(y ~ . - ri,
                           folds[[fold_no]],
                           group.by = ri,
@@ -447,6 +457,7 @@ for (i in 1:length(k_vals)){
   }
 }
 
+# Calculate fold-wise mean AUC associated with each parameter set and choose optimum parameters based on maximum AUC
 cv_results <- cv_results %>%
               rowwise() %>%
               mutate(mean_err = mean(auc1,
@@ -459,12 +470,12 @@ K_OPT <- cv_results$k[argmin]
 power_opt <- cv_results$power[argmin]
 base_opt <- cv_results$base[argmin]
 
-test_data <- read.csv("training_sets/test_data_A_Q1.csv")
+test_data <- read.csv(paste(PATH_TO_DATA, "training_sets/test_data_A_Q1.csv", sep=""))
 xtest <- test_data %>% dplyr::select(!("y"|"ri"))
 ytest <- test_data$y
 countrytest <- test_data$ri
 
-# Initialise model
+# Basic all-parameter model
 basic_model <- bart.flex(x.data = xtrain,
                          y.data = ytrain,
                          ri.data = countrytrain,
@@ -475,9 +486,10 @@ summary(basic_model)
 
 if (SAVE_FITS){
   save(basic_model,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/ri_model_A_Q1.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "fitted-BART-models/ri_model_A_Q1.rds", sep = ""))
 }
 
+# Perform variable selection
 sdm <- bart.step(x.data = xtrain,
                  y.data = ytrain,
                  ri.data = countrytrain,
@@ -489,13 +501,13 @@ invisible(sdm$fit[[1]]$state)
 summary(sdm)
 if (SAVE_FITS){
   save(sdm,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/ri_model_with_vs_A_Q1.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "fitted-BART-models/ri_model_with_vs_A_Q1.rds", sep = ""))
 }
 
 
 #### Period A Q2 ####
 
-training_data <- read.csv("training_sets/training_data_A_Q2.csv")
+training_data <- read.csv(paste(PATH_TO_DATA, "training_sets/training_data_A_Q2.csv", sep=""))
 xtrain <- training_data %>% dplyr::select(!("y"|"ri"))
 ytrain <- training_data$y
 countrytrain <- training_data$ri
@@ -512,8 +524,8 @@ antifolds <- lapply(1:length(fold_ids),
                     FUN = function(i){
                       training_data[fold_ids[[i]],]})
 
-## Check training representation
-# lapply(folds, function(x) with(x, table(ri,y)))
+
+
 
 
 k_vals = c(1, 2, 3)
@@ -538,7 +550,7 @@ for (i in 1:length(k_vals)){
     for (m in 1:length(base_vals)){
       base_val <- base_vals[m]
       idx <- (i-1)*pl*bl + (j-1)*bl + m
-      cat("idx=", idx, "\n")
+#      cat("Crossvalidating parameter set ", idx, " of ", kl*pl*bl,"\n")
       cv_results$k[idx] <- k_val
       cv_results$power[idx] <- power_val
       cv_results$base[idx] <- base_val
@@ -580,12 +592,12 @@ K_OPT <- cv_results$k[argmin]
 power_opt <- cv_results$power[argmin]
 base_opt <- cv_results$base[argmin]
 
-test_data <- read.csv("training_sets/test_data_A_Q2.csv")
+test_data <- read.csv(paste(PATH_TO_DATA, "training_sets/test_data_A_Q2.csv", sep=""))
 xtest <- test_data %>% dplyr::select(!("y"|"ri"))
 ytest <- test_data$y
 countrytest <- test_data$ri
 
-# Initialise model
+# Basic all-parameter model
 basic_model <- bart.flex(x.data = xtrain,
                          y.data = ytrain,
                          ri.data = countrytrain,
@@ -596,7 +608,7 @@ summary(basic_model)
 
 if (SAVE_FITS){
   save(basic_model,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/ri_model_A_Q2.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "fitted-BART-models/ri_model_A_Q2.rds", sep = ""))
 }
 
 sdm <- bart.step(x.data = xtrain,
@@ -610,14 +622,14 @@ invisible(sdm$fit[[1]]$state)
 summary(sdm)
 if (SAVE_FITS){
   save(sdm,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/ri_model_with_vs_A_Q2.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "fitted-BART-models/ri_model_with_vs_A_Q2.rds", sep = ""))
 }
 
 
 
 #### Period A Q3 ####
 
-training_data <- read.csv("training_sets/training_data_A_Q3.csv")
+training_data <- read.csv(paste(PATH_TO_DATA, "training_sets/training_data_A_Q3.csv", sep=""))
 xtrain <- training_data %>% dplyr::select(!("y"|"ri"))
 ytrain <- training_data$y
 countrytrain <- training_data$ri
@@ -634,8 +646,8 @@ antifolds <- lapply(1:length(fold_ids),
                     FUN = function(i){
                       training_data[fold_ids[[i]],]})
 
-## Check training representation
-# lapply(folds, function(x) with(x, table(ri,y)))
+
+
 
 
 k_vals = c(1, 2, 3)
@@ -660,7 +672,7 @@ for (i in 1:length(k_vals)){
     for (m in 1:length(base_vals)){
       base_val <- base_vals[m]
       idx <- (i-1)*pl*bl + (j-1)*bl + m
-      cat("idx=", idx, "\n")
+#      cat("Crossvalidating parameter set ", idx, " of ", kl*pl*bl,"\n")
       cv_results$k[idx] <- k_val
       cv_results$power[idx] <- power_val
       cv_results$base[idx] <- base_val
@@ -702,12 +714,12 @@ K_OPT <- cv_results$k[argmin]
 power_opt <- cv_results$power[argmin]
 base_opt <- cv_results$base[argmin]
 
-test_data <- read.csv("training_sets/test_data_A_Q3.csv")
+test_data <- read.csv("training_sets/test_data_A_Q3.csv", sep=""))
 xtest <- test_data %>% dplyr::select(!("y"|"ri"))
 ytest <- test_data$y
 countrytest <- test_data$ri
 
-# Initialise model
+# Basic all-parameter model
 basic_model <- bart.flex(x.data = xtrain,
                          y.data = ytrain,
                          ri.data = countrytrain,
@@ -718,7 +730,7 @@ summary(basic_model)
 
 if (SAVE_FITS){
   save(basic_model,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/ri_model_A_Q3.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "fitted-BART-models/ri_model_A_Q3.rds", sep = ""))
 }
 
 sdm <- bart.step(x.data = xtrain,
@@ -732,13 +744,13 @@ invisible(sdm$fit[[1]]$state)
 summary(sdm)
 if (SAVE_FITS){
   save(sdm,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/ri_model_with_vs_A_Q3.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "fitted-BART-models/ri_model_with_vs_A_Q3.rds", sep = ""))
 }
 
 
 #### Period A Q4 ####
 
-training_data <- read.csv("training_sets/training_data_A_Q4.csv")
+training_data <- read.csv(paste(PATH_TO_DATA, "training_sets/training_data_A_Q4.csv", sep=""))
 xtrain <- training_data %>% dplyr::select(!("y"|"ri"))
 ytrain <- training_data$y
 countrytrain <- training_data$ri
@@ -755,8 +767,8 @@ antifolds <- lapply(1:length(fold_ids),
                     FUN = function(i){
                       training_data[fold_ids[[i]],]})
 
-## Check training representation
-# lapply(folds, function(x) with(x, table(ri,y)))
+
+
 
 
 k_vals = c(1, 2, 3)
@@ -781,7 +793,7 @@ for (i in 1:length(k_vals)){
     for (m in 1:length(base_vals)){
       base_val <- base_vals[m]
       idx <- (i-1)*pl*bl + (j-1)*bl + m
-      cat("idx=", idx, "\n")
+#      cat("Crossvalidating parameter set ", idx, " of ", kl*pl*bl,"\n")
       cv_results$k[idx] <- k_val
       cv_results$power[idx] <- power_val
       cv_results$base[idx] <- base_val
@@ -823,12 +835,12 @@ K_OPT <- cv_results$k[argmin]
 power_opt <- cv_results$power[argmin]
 base_opt <- cv_results$base[argmin]
 
-test_data <- read.csv("training_sets/test_data_A_Q4.csv")
+test_data <- read.csv("training_sets/test_data_A_Q4.csv", sep=""))
 xtest <- test_data %>% dplyr::select(!("y"|"ri"))
 ytest <- test_data$y
 countrytest <- test_data$ri
 
-# Initialise model
+# Basic all-parameter model
 basic_model <- bart.flex(x.data = xtrain,
                          y.data = ytrain,
                          ri.data = countrytrain,
@@ -839,7 +851,7 @@ summary(basic_model)
 
 if (SAVE_FITS){
   save(basic_model,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/ri_model_A_Q4.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "fitted-BART-models/ri_model_A_Q4.rds", sep = ""))
 }
 
 sdm <- bart.step(x.data = xtrain,
@@ -853,13 +865,13 @@ invisible(sdm$fit[[1]]$state)
 summary(sdm)
 if (SAVE_FITS){
   save(sdm,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/ri_model_with_vs_A_Q4.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "fitted-BART-models/ri_model_with_vs_A_Q4.rds", sep = ""))
 }
 
 
 #### Period B Q1 ####
 
-training_data <- read.csv("training_sets/training_data_B_Q1.csv")
+training_data <- read.csv(paste(PATH_TO_DATA, "training_sets/training_data_B_Q1.csv", sep=""))
 xtrain <- training_data %>% dplyr::select(!("y"|"ri"))
 ytrain <- training_data$y
 countrytrain <- training_data$ri
@@ -876,8 +888,8 @@ antifolds <- lapply(1:length(fold_ids),
                     FUN = function(i){
                       training_data[fold_ids[[i]],]})
 
-## Check training representation
-# lapply(folds, function(x) with(x, table(ri,y)))
+
+
 
 
 k_vals = c(1, 2, 3)
@@ -902,7 +914,7 @@ for (i in 1:length(k_vals)){
     for (m in 1:length(base_vals)){
       base_val <- base_vals[m]
       idx <- (i-1)*pl*bl + (j-1)*bl + m
-      cat("idx=", idx, "\n")
+#      cat("Crossvalidating parameter set ", idx, " of ", kl*pl*bl,"\n")
       cv_results$k[idx] <- k_val
       cv_results$power[idx] <- power_val
       cv_results$base[idx] <- base_val
@@ -944,7 +956,7 @@ K_OPT <- cv_results$k[argmin]
 power_opt <- cv_results$power[argmin]
 base_opt <- cv_results$base[argmin]
 
-# Initialise model
+# Basic all-parameter model
 basic_model <- bart.flex(x.data = xtrain,
                          y.data = ytrain,
                          ri.data = countrytrain,
@@ -955,7 +967,7 @@ summary(basic_model)
 
 if (SAVE_FITS){
   save(basic_model,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/ri_model_B_Q1.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "fitted-BART-models/ri_model_B_Q1.rds", sep = ""))
 }
 
 sdm <- bart.step(x.data = xtrain,
@@ -969,12 +981,12 @@ invisible(sdm$fit[[1]]$state)
 summary(sdm)
 if (SAVE_FITS){
   save(sdm,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/ri_model_with_vs_B_Q1.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "fitted-BART-models/ri_model_with_vs_B_Q1.rds", sep = ""))
 }
 
 #### Period B Q2 ####
 
-training_data <- read.csv("training_sets/training_data_B_Q2.csv")
+training_data <- read.csv(paste(PATH_TO_DATA, "training_sets/training_data_B_Q2.csv", sep=""))
 xtrain <- training_data %>% dplyr::select(!("y"|"ri"))
 ytrain <- training_data$y
 countrytrain <- training_data$ri
@@ -991,8 +1003,8 @@ antifolds <- lapply(1:length(fold_ids),
                     FUN = function(i){
                       training_data[fold_ids[[i]],]})
 
-## Check training representation
-# lapply(folds, function(x) with(x, table(ri,y)))
+
+
 
 
 k_vals = c(1, 2, 3)
@@ -1017,7 +1029,7 @@ for (i in 1:length(k_vals)){
     for (m in 1:length(base_vals)){
       base_val <- base_vals[m]
       idx <- (i-1)*pl*bl + (j-1)*bl + m
-      cat("idx=", idx, "\n")
+#      cat("Crossvalidating parameter set ", idx, " of ", kl*pl*bl,"\n")
       cv_results$k[idx] <- k_val
       cv_results$power[idx] <- power_val
       cv_results$base[idx] <- base_val
@@ -1059,7 +1071,7 @@ K_OPT <- cv_results$k[argmin]
 power_opt <- cv_results$power[argmin]
 base_opt <- cv_results$base[argmin]
 
-# Initialise model
+# Basic all-parameter model
 basic_model <- bart.flex(x.data = xtrain,
                          y.data = ytrain,
                          ri.data = countrytrain,
@@ -1070,7 +1082,7 @@ summary(basic_model)
 
 if (SAVE_FITS){
   save(basic_model,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/ri_model_B_Q2.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "fitted-BART-models/ri_model_B_Q2.rds", sep = ""))
 }
 
 sdm <- bart.step(x.data = xtrain,
@@ -1084,13 +1096,13 @@ invisible(sdm$fit[[1]]$state)
 summary(sdm)
 if (SAVE_FITS){
   save(sdm,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/ri_model_with_vs_B_Q2.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "fitted-BART-models/ri_model_with_vs_B_Q2.rds", sep = ""))
 }
 
 
 #### Period B Q3 ####
 
-training_data <- read.csv("training_sets/training_data_B_Q3.csv")
+training_data <- read.csv(paste(PATH_TO_DATA, "training_sets/training_data_B_Q3.csv", sep=""))
 xtrain <- training_data %>% dplyr::select(!("y"|"ri"))
 ytrain <- training_data$y
 countrytrain <- training_data$ri
@@ -1107,8 +1119,8 @@ antifolds <- lapply(1:length(fold_ids),
                     FUN = function(i){
                       training_data[fold_ids[[i]],]})
 
-## Check training representation
-# lapply(folds, function(x) with(x, table(ri,y)))
+
+
 
 
 k_vals = c(1, 2, 3)
@@ -1133,7 +1145,7 @@ for (i in 1:length(k_vals)){
     for (m in 1:length(base_vals)){
       base_val <- base_vals[m]
       idx <- (i-1)*pl*bl + (j-1)*bl + m
-      cat("idx=", idx, "\n")
+#      cat("Crossvalidating parameter set ", idx, " of ", kl*pl*bl,"\n")
       cv_results$k[idx] <- k_val
       cv_results$power[idx] <- power_val
       cv_results$base[idx] <- base_val
@@ -1175,7 +1187,7 @@ K_OPT <- cv_results$k[argmin]
 power_opt <- cv_results$power[argmin]
 base_opt <- cv_results$base[argmin]
 
-# Initialise model
+# Basic all-parameter model
 basic_model <- bart.flex(x.data = xtrain,
                          y.data = ytrain,
                          ri.data = countrytrain,
@@ -1186,7 +1198,7 @@ summary(basic_model)
 
 if (SAVE_FITS){
   save(basic_model,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/ri_model_B_Q3.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "fitted-BART-models/ri_model_B_Q3.rds", sep = ""))
 }
 
 sdm <- bart.step(x.data = xtrain,
@@ -1200,13 +1212,13 @@ invisible(sdm$fit[[1]]$state)
 summary(sdm)
 if (SAVE_FITS){
   save(sdm,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/ri_model_with_vs_B_Q3.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "fitted-BART-models/ri_model_with_vs_B_Q3.rds", sep = ""))
 }
 
 
 #### Period B Q4 ####
 
-training_data <- read.csv("training_sets/training_data_B_Q4.csv")
+training_data <- read.csv(paste(PATH_TO_DATA, "training_sets/training_data_B_Q4.csv", sep=""))
 xtrain <- training_data %>% dplyr::select(!("y"|"ri"))
 ytrain <- training_data$y
 countrytrain <- training_data$ri
@@ -1223,8 +1235,8 @@ antifolds <- lapply(1:length(fold_ids),
                     FUN = function(i){
                       training_data[fold_ids[[i]],]})
 
-## Check training representation
-# lapply(folds, function(x) with(x, table(ri,y)))
+
+
 
 
 k_vals = c(1, 2, 3)
@@ -1249,7 +1261,7 @@ for (i in 1:length(k_vals)){
     for (m in 1:length(base_vals)){
       base_val <- base_vals[m]
       idx <- (i-1)*pl*bl + (j-1)*bl + m
-      cat("idx=", idx, "\n")
+#      cat("Crossvalidating parameter set ", idx, " of ", kl*pl*bl,"\n")
       cv_results$k[idx] <- k_val
       cv_results$power[idx] <- power_val
       cv_results$base[idx] <- base_val
@@ -1291,7 +1303,7 @@ K_OPT <- cv_results$k[argmin]
 power_opt <- cv_results$power[argmin]
 base_opt <- cv_results$base[argmin]
 
-# Initialise model
+# Basic all-parameter model
 basic_model <- bart.flex(x.data = xtrain,
                          y.data = ytrain,
                          ri.data = countrytrain,
@@ -1302,7 +1314,7 @@ summary(basic_model)
 
 if (SAVE_FITS){
   save(basic_model,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/ri_model_B_Q4.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "fitted-BART-models/ri_model_B_Q4.rds", sep = ""))
 }
 
 sdm <- bart.step(x.data = xtrain,
@@ -1316,5 +1328,5 @@ invisible(sdm$fit[[1]]$state)
 summary(sdm)
 if (SAVE_FITS){
   save(sdm,
-       file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/ri_model_with_vs_B_Q4.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "fitted-BART-models/ri_model_with_vs_B_Q4.rds", sep = ""))
 }
