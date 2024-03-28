@@ -5,12 +5,15 @@
 
 library(taxize)
 
-species_list <- as.data.frame(table(ai_data_prj_area$Species))
+#for Europe
+#species_list <- as.data.frame(table(ai_data_prj_area$Species))
+#for asia and americas
+species_list <- as.data.frame(table(americas_asia_data$Species))
 
 colnames(species_list) <- c("species", "freq")
 species_list$species <- as.character(species_list$species)
 
-for (i in 1:nrow(species_list)) {
+for (i in 410:nrow(species_list)) {
   species_list[i,"class"] <- tax_name(species_list[i,"species"],
                                       get = "class",
                                       db = "ncbi")$class
@@ -24,7 +27,7 @@ not_sp$species_edit <- not_sp$species
 not_sp$species_edit <- sub("\\(.*", "", not_sp$species_edit)
 not_sp$species_edit <- sub("\\:.*", "", not_sp$species_edit)
 
-for (i in 131:nrow(not_sp)) {
+for (i in 71:nrow(not_sp)) {
   not_sp[i,"class"] <- tax_name(not_sp[i,"species_edit"],
                                 get = "class",
                                 db = "ncbi")$class
@@ -43,10 +46,12 @@ species_list <- dplyr::select(species_list, c("species", "freq", "class"))
 
 species_list[which(species_list$species == "Peacock"),"class"] <- "Aves"
 
+
 # select the ones labelled "Mammalia" for removal
 # save the species list so don't have to generate every time'
 
 #write.csv(species_list, "avian_flu_scripts/detecting_mammals.csv", row.names = F)
+#write.csv(species_list, "avian_flu_scripts/detecting_mammals_asia_americas.csv", row.names = F)
 
 #####################################################################################
 
