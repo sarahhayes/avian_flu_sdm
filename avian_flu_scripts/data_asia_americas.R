@@ -45,8 +45,15 @@ inf_data <- wahis[which(wahis$disease_eng %in%
                             "Influenza A virus (Inf. with)",
                             "Influenza A viruses of high pathogenicity (Inf. with) (non-poultry including wild birds) (2017-)")),]
 
-inf_a_hpai <- dplyr::filter(inf_data, disease_eng == "Influenza A viruses of high pathogenicity (Inf. with) (non-poultry including wild birds) (2017-)" )
+
+inf_a_hpai <- dplyr::filter(inf_data, disease_eng %in% c("Influenza A viruses of high pathogenicity (Inf. with) (non-poultry including wild birds) (2017-)",
+                                           "High pathogenicity avian influenza viruses (poultry) (Inf. with)"))
+
 table(inf_a_hpai$region) # all regions represented
+
+# Quick look at Oceania
+Oceania <- inf_a_hpai %>% dplyr::filter(region == "Oceania")
+
 colnames(inf_a_hpai)
 table(inf_a_hpai$is_wild)
 table(inf_a_hpai$Epi_unit)
@@ -63,8 +70,11 @@ table(zoo_cases$wild_type) # this doesn't show the many NAs
 # so perhaps we should remove the zoo captives? So select all those that are wild and then remove those that
 # are captive 
 inf_a_hpai_wild <- inf_a_hpai[which(inf_a_hpai$is_wild == T),]
-inf_a_hpai_wild <- inf_a_hpai_wild[which(inf_a_hpai_wild$wild_type != "captive"),]
+#inf_a_hpai_wild <- inf_a_hpai_wild[which(inf_a_hpai_wild$wild_type != "captive"),] #10,328 observations as removes NAs
+inf_a_hpai_wild <- dplyr::filter(inf_a_hpai_wild, (wild_type != "captive"|is.na(wild_type))) #14,449 observations
+
 table(inf_a_hpai_wild$Epi_unit, inf_a_hpai_wild$is_wild)
+zoo_cases_wild <- inf_a_hpai_wild[which(inf_a_hpai_wild$Epi_unit == "Zoo"),]
 
 table(inf_a_hpai_wild$wild_type)
 
@@ -106,7 +116,7 @@ bv_pos_data_trim <- dplyr::select(pos_data, all_of(c("Collection.Date",
                                                      "Collection.Country",
                                                      "Subtype")))
 
-bv_pos_data_trim$source <- "bvbrc"
+bv_pos_data_trim$source <- "zbvbrc"
 bv_pos_data_trim$Collection.Date <- as.Date(bv_pos_data_trim$Collection.Date,
                                             "%Y-%m-%d")
 
@@ -116,20 +126,27 @@ americas_countries <- c("Argentina", "Brazil", "Canada", "Chile", "Colombia", "G
 asia_countries <- c("Bangladesh", "Bhutan", "Cambodia", "China", "Georgia", "Japan", "Lebanon", "Mongolia", 
                     "Oman", "Russia", "Sri Lanka", "Taiwan", "Thailand", "Turkey", "Viet Nam")
 
+oceania_countries <- c("Australia", "Papua New Guinea")
+
 bv_americas_asia <- bv_pos_data_trim %>% filter(Collection.Country %in% c(americas_countries, asia_countries)) 
 bv_americas_asia$Region <- "Asia"
 bv_americas_asia[which(bv_americas_asia$Collection.Country %in% americas_countries),"Region"] <- "Americas"
 
 table(bv_americas_asia$Region)
+table(bv_americas_asia$Region, bv_americas_asia$Collection.Country)
+
+# quick look at Oceania
+oceania_bvbrc <- bv_pos_data_trim %>% dplyr::filter(Collection.Country %in% oceania_countries)
+table(oceania_bvbrc$Subtype)
 
 ## we only want HPAI 
-table(bv_americas_asia$Serotype)
+table(bv_americas_asia$Subtype)
 # filter those that contain H5 or H7 - although these are not necessarily HPAI
 poss_hpai <- bv_americas_asia %>% filter(str_detect(Subtype,"H5") | str_detect(Subtype, "H7"))
 
-# We now have the trimmed data sets for all the sources. 
-# combine them and add a section for pos or neg
+table(poss_hpai$Subtype)
 
+# We now have the trimmed data sets for all the sources. 
 # first need all the names to match so we can rbind
 
 colnames(fao_data_trim_asia_americas)
@@ -158,18 +175,32 @@ sum(is.na(americas_asia_data$Longitude))
 americas_asia_data <- drop_na(americas_asia_data, Latitude)
 sum(is.na(americas_asia_data$Latitude))
 
-## Below is from the Europe code with a few obvious entries added - will need to be re-done if we do look at Asia and the Americas
+## Want to remove mammals
 
-unwanted_sp <- c("Unspecified Mammal", "Stone Marten", 
-                  "South American Coati (Nasua Nasua):Procyonidae-Carnivora",
-                  "Red Fox", "Polecat", "Polar Fox", "Nyctereutes Viverrinus (Japanese Racoon Dog)",
-                  "Mink", "Harbor Seal (Phoca Vitulina):Phocidae-Carnivora", 
-                  "Gray Seal (Halichoerus Grypus):Phocidae-Carnivora", "Fox",
-                  "European Pine Marten", "Civet", "Caspian Seal (Pusa Caspica)",
-                  "Halichoerus grypus", "Phoca vitulina", "Mustela putorius", 
-                  "Ursus americanus", "Ursus arctos", "Virginia Opossum (Didelphis Virginiana)",
-                 "Vulpes vulpes", "Wild Cat", "Wild Fox", "Procyon lotor", 
-                 "Chilean Dolphin (Cephalorhynchus Eutropia)")
+table(americas_asia_data$Species)
+
+species_list <- read.csv("avian_flu_scripts/detecting_mammals_asia_americas.csv")
+
+unwanted_sp <- species_list[which(species_list$class == "Mammalia"), "species"]
+
+## manually extract those not automatically done. 
+unwanted_sp_manual_ext <- c("Al indeterminatum fau",
+                            "Bottlenose Dolphin (Tursiops Truncatus)", 
+                            "Chilean Dolphin (Cephalorhynchus Eutropia)",
+                            "Civet", 
+                            "Coati (Gen. Nasua)",
+                            "Common Raccoon (Procyon Lotor)",
+                            "Cougar (Puma Concolor)",
+                            "Environmental",
+                            "Fox",
+                            "HieraaÃ«tus fasciatus",
+                            "Kodiak Grizzly Bear (Ursus Arctos Horribilis)",
+                            "Nyctereutes Viverrinus (Japanese Racoon Dog)",
+                            "Skunk (Mephitis Mephitis)",
+                            "Unspecified Mammal")
+
+
+unwanted_sp <- c(unwanted_sp, unwanted_sp_manual_ext)
 
 ## Remove from the data so just birds
 
@@ -180,8 +211,19 @@ ai_pos_birds <-
 
 table(ai_pos_birds$Serotype)
 # remove those which state LPAI
-
 ai_pos_birds <- ai_pos_birds %>% filter(!str_detect(Serotype, "LPAI"))
+table(ai_pos_birds$Serotype)
+table(ai_pos_birds$source)
+table(ai_pos_birds$Serotype, ai_pos_birds$source)
+
+# Produc a new column 
+ai_pos_birds$serotype_HN <- ai_pos_birds$Serotype
+# Now remove extra info
+ai_pos_birds$serotype_HN <-  gsub("HPAI","",as.character(ai_pos_birds$serotype_HN))
+ai_pos_birds$serotype_HN<-toupper(ai_pos_birds$serotype_HN) # so they match
+ai_pos_birds$serotype_HN <- trimws(ai_pos_birds$serotype_HN) # trim any white space in the entries to aid matching
+table(ai_pos_birds$serotype_HN)
+
 
 library(sf)
 # change into sf object so can change projection of point. 
@@ -207,11 +249,49 @@ point_data_df$week_num <- lubridate::isoweek(point_data_df$observation.date)
 
 range(point_data_df$observation.date)
 
+## Next I want to remove the duplicates that are present in the data 
 
+library(data.table)
+dt_pos <- data.table(point_data_df)
+
+table(dt_pos$Country) # a couple of different spellings for a number of the countries
+dt_pos[which(dt_pos$Country == "China (People's Rep. of)"), "Country"] <- "China"
+dt_pos[which(dt_pos$Country == "Taiwan (Province of China)"), "Country"] <- "Chinese Taipei"
+dt_pos[which(dt_pos$Country == "Hong Kong  SAR"), "Country"] <- "Hong Kong"
+dt_pos[which(dt_pos$Country == "Iran  (Islamic Republic of)"), "Country"] <- "Iran"
+dt_pos[which(dt_pos$Country == "Korea (Rep. of)"), "Country"] <- "Republic of Korea"
+dt_pos[which(dt_pos$Country == "United States of America"), "Country"] <- "USA"
+dt_pos[which(dt_pos$Country == "United States Of America"), "Country"] <- "USA"
+table(dt_pos$Country)
+
+
+no_duplicates_date_and_loc <- unique(dt_pos, by = c("X", "Y", "observation.date"))
+no_duplicates_all <- unique(dt_pos, by = c("X", "Y", "observation.date", "source", "Species", "Country"))
+no_dups_all_except_source <- unique(dt_pos, by = c("X", "Y", "observation.date", "Species", "Country"))
+no_dups_date_loc_serotype <- unique(dt_pos, by = c("X", "Y", "observation.date", "serotype_HN"))
+
+# The middle two are the same, suggesting that there are none that are the same for all details except source. 
+# The final one (no_dups_date_loc_serotype) contains 89 more than the one filtered just on date and location.
+# On inspection, these are indeed listed as different serotypes in the same location and same date. could be an error,
+# but no way to check
+## No duplicates_all will still have some that are the same place and time but different species. However, when looking
+## at these, there are instances where we have fao and woah reporting a same location and date but one has the common name
+## for the bird and one has the scientific name. I think we basically want to know if a location has AI in wild birds
+## so we don't mind which species. 
+## As such, no_dups_date_loc_serotype is probably the one to use. 
+
+## ideally, if we are removing duplicates, we want to remove the bv-brc ones as these are the ones we are less confident in. 
+## As we have labelled bvbrc with a z, these should be removed as they will be the last row. 
+
+
+no_dups_date_loc_serotype <- sf::st_as_sf(no_dups_date_loc_serotype)
 # split by the two regions
 
-asia_ai_birds <- point_data_df %>% filter(Region == "Asia")
-americas_ai_birds <- point_data_df %>% filter(Region == "Americas")
+asia_ai_birds <- no_dups_date_loc_serotype %>% filter(Region == "Asia")
+americas_ai_birds <- no_dups_date_loc_serotype %>% filter(Region == "Americas")
+
+table(asia_ai_birds$source)
+table(americas_ai_birds$source)
 
 ## make plots to show distribution
 library(rnaturalearth)
@@ -223,7 +303,7 @@ plot(americas_map)
 asia_map <- spdf_world %>% subset(., REGION_UN == "Asia")
 plot(asia_map)
 
-#png("plots/americas_pos_data.png", width = 480, height = 480)
+#png("plots/americas_pos_data_hpai.png", width = 480, height = 480)
 par(mar = c(0,0,0,0))
 plot(americas_map)
 plot(americas_ai_birds[which(americas_ai_birds$source == "fao"),], add = T, pch = 18, col = "red", cex = 0.6)
@@ -235,7 +315,7 @@ legend(-40,20, legend=c("FAO", "WOAH", "BV-BRC"),
 )
 #dev.off()
 
-#png("plots/asia_pos_data.png", width = 480, height = 480)
+#png("plots/asia_pos_data_hpai.png", width = 480, height = 480)
 par(mar = c(0,0,0,0))
 plot(asia_map)
 plot(asia_ai_birds[which(asia_ai_birds$source == "fao"),], add = T, pch = 18, col = "red", cex = 0.6)
@@ -247,6 +327,7 @@ legend(40,0, legend=c("FAO", "WOAH", "BV-BRC"),
 )
 #dev.off()
 
+
 ## Plot the timeseries
 ## Need to ensure that have all the weeks represented as currently misses out those with no cases 
 
@@ -254,6 +335,114 @@ legend(40,0, legend=c("FAO", "WOAH", "BV-BRC"),
 ## all the weeks and months,
 
 range(americas_ai_birds$observation.date)
+
+## start on 5th Jan 1987 as that's a Monday
+week_calendar_americas <- data.frame(date=seq(as.Date("1987-01-05"), as.Date("2023-07-27"), by="day")) %>% 
+  mutate(week_num=isoweek(date),year=year(date)) %>%
+  group_by(year,week_num) %>% 
+  summarise(weekdate=min(date)) 
+week_calendar_americas$week_of_study <- seq(1, nrow(week_calendar_americas), by = 1)
+
+# combine with the data
+dates_americas <- merge(americas_ai_birds, week_calendar_americas)
+
+# plot directly
+ggplot(dates_americas, aes(x=weekdate)) + geom_histogram(bins = nrow(week_calendar_americas), col = "blue") + 
+  labs(y = "Number of weekly cases", x = "Year", size = 18) +
+  theme(axis.text.x = element_text(angle=90, margin = margin(t = 0.1, r = 0.2, b = 0.2, l = 0.3, unit = "cm"), 
+                                   face = "bold", size = 10, vjust = 0.5),
+        axis.text.y = element_text(face = "bold", size = 10),
+        plot.margin = margin(1,1,1,1, "cm"), 
+        axis.title =  element_text(size = 12),
+        panel.background = element_rect(fill = "white", colour = "grey50"),
+        panel.grid.major = element_line(size = 0.5, linetype = 'solid',
+                                        colour = "grey"),
+        panel.grid.minor = element_line(size = 0.5, linetype = 'dashed',
+                                        colour = "grey90"))
+#ggsave("plots/hist_by_week_hpai_only_americas.png")
+
+
+### START HERE NEXT TIME
+
+
+# could also make a dataframe of the counts of the number in each week
+count_dates <- dates %>% 
+  count(weekdate)
+
+weekly_counts <- left_join(week_calendar, count_dates)
+weekly_counts[which(is.na(weekly_counts$n)), "n"] <- 0
+
+
+## Also then can have as a line plot
+ggplot(data = weekly_counts, aes(x = weekdate, y = n)) +
+  geom_line(lwd = 0.9, col = "blue")  + 
+  labs(y = "Number of weekly cases", x = "Year", size = 18) +
+  theme(axis.text.x = element_text(angle=90, margin = margin(t = 0.1, r = 0.2, b = 0.2, l = 0.3, unit = "cm"), 
+                                   face = "bold", size = 10, vjust = 0.5),
+        axis.text.y = element_text(face = "bold", size = 10),
+        plot.margin = margin(1,1,1,1, "cm"), 
+        axis.title =  element_text(size = 12),
+        panel.background = element_rect(fill = "white", colour = "grey50"),
+        panel.grid.major = element_line(size = 0.5, linetype = 'solid',
+                                        colour = "grey"),
+        panel.grid.minor = element_line(size = 0.5, linetype = 'dashed',
+                                        colour = "grey90"))
+#ggsave("plots/lineplot_by_week_hpai_only.png")
+
+# write the results so can compare to domestic cases
+#write.csv(weekly_counts, "data/flu_data/prepped_data/weekly_counts_hpai_wild_europe.csv")
+
+# Now to plot the time series by serotype 
+serotype_data <- as.data.frame(table(hpai$serotype_HN))
+
+# For quite a number of the subtypes there are only a few entries. 
+# For the line plot by subtype, only use those that have >10 entries
+serotype_data_ten_or_more <- serotype_data[which(serotype_data$Freq > 10),]
+serotype_data_ten_or_more <- serotype_data_ten_or_more[which(serotype_data_ten_or_more$Var1 != ""),]
+
+subtype_plot_data <- dates[which(hpai$serotype_HN %in% serotype_data_ten_or_more$Var1),]
+# Remove the row where the sybtype isn't listed 
+subtype_plot_data <- subtype_plot_data[which(subtype_plot_data$serotype_HN!=""),]
+
+yearlabs <- c("2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", 
+              "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023")
+
+weekbreaks <- week_calendar[which(week_calendar$week_num == 1), "week_of_study"]
+weekbreaks <- weekbreaks[["week_of_study"]]
+
+
+ggplot(subtype_plot_data, aes(x = week_of_study, fill = serotype_HN)) + 
+  geom_bar(position = "stack") + 
+  labs(y = "Number of weekly cases", x = "Year", size = 18, fill = "Serotype") +
+  theme(axis.text.x = element_text(angle=90, margin = margin(t = 0.1, r = 0.2, b = 0.2, l = 0.3, unit = "cm"), 
+                                   face = "bold", size = 10, vjust = 0.5),
+        axis.text.y = element_text(face = "bold", size = 10),
+        plot.margin = margin(1,1,1,1, "cm"), 
+        axis.title =  element_text(size = 12),
+        panel.background = element_rect(fill = "grey90", colour = "grey90"),
+        panel.grid.major = element_line(size = 0.5, linetype = 'solid',
+                                        colour = "white"),
+        panel.grid.minor = element_line(size = 0.5, linetype = 'dashed',
+                                        colour = "white")) +
+  scale_x_continuous(breaks = weekbreaks, labels = yearlabs)
+# ggsave("plots/subtypes/serotype_by_week_hpai_only.png")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #Start on 5th Jan 1987 as that's a Monday and no data before middle of the year
 start.plot_americas <- c("1987-01-05", "2023-12-31")
@@ -275,6 +464,8 @@ subtype_counts_weekyear_americas <- americas_ai_birds %>%
   group_by(week) %>% count()
 
 # merge with the weekly counts
+#####--- Need to find a better way to do this as currently have 2 lots of week 53. 
+
 all_dates_americas_data <- left_join(all_dates_americas, subtype_counts_weekyear_americas)
 all_dates_americas_data$year_of_study <- all_dates_americas_data$year - 1987
 all_dates_americas_data$week_seq <- all_dates_americas_data$week_num + (52*all_dates_americas_data$year_of_study)
@@ -304,9 +495,45 @@ ggplot(data = all_dates_americas_data,
   #  panel.background = element_rect(fill = "white", colour = "grey50")) + 
   labs(y = "Number of weekly cases", x = "Year", size = 18, title = "Americas") +
   scale_x_continuous(breaks = weekbreaks_americas, labels = yearlabs_americas)
-ggsave("plots/time_series_americas.png")
+#ggsave("plots/time_series_americas.png")
+
+#####
+
+# by week if want to remove the duplicate records - but just based on location and date,
+americas_no_dups <- americas_ai_birds[!duplicated(americas_ai_birds[c("X", "Y", "observation.date")]),]
+
+subtype_counts_weekyear_americas_nodups <- americas_no_dups %>%
+  group_by(week) %>% count()
 
 
+# merge with the weekly counts- first for all 
+
+all_dates_americas_data_nodups <- left_join(all_dates_americas, subtype_counts_weekyear_americas_nodups)
+all_dates_americas_data_nodups$year_of_study <- all_dates_americas_data_nodups$year - 1987
+all_dates_americas_data_nodups$week_seq <- all_dates_americas_data_nodups$week_num +
+  (52*all_dates_americas_data_nodups$year_of_study)
+all_dates_americas_data_nodups[which(is.na(all_dates_americas_data_nodups$n)),"n"] <- 0
+
+
+par(mar = c(3,3,3,3))
+ggplot(data = all_dates_americas_data_nodups, 
+       aes(x = week_seq, y = n)) +
+  geom_line(lwd = 0.5, col = "darkgreen") + 
+  scale_color_brewer(palette="Paired", na.translate = F) + 
+  theme(axis.text.x = element_text(angle=90, margin = margin(t = .2, unit = "cm"), 
+                                   face = "bold", size = 12, vjust = 0.5),
+        axis.text.y = element_text(face = "bold", size = 12),
+        plot.margin = margin(1,1,1,1, "cm"), 
+        axis.title =  element_text(size = 14),
+        plot.background = element_rect(fill = "white"))+
+  #  panel.background = element_rect(fill = "white", colour = "grey50")) + 
+  labs(y = "Number of weekly cases", x = "Year", size = 18, title = "Americas") +
+  scale_x_continuous(breaks = weekbreaks_americas, labels = yearlabs_americas)
+#ggsave("plots/time_series_americas_nodups.png")
+
+
+
+##########################################################
 # now repeat for asia
 
 range(asia_ai_birds$observation.date)
@@ -358,5 +585,33 @@ ggplot(data = all_dates_asia_data,
   #  panel.background = element_rect(fill = "white", colour = "grey50")) + 
   labs(y = "Number of weekly cases", x = "Year", size = 18, title = "Asia") +
   scale_x_continuous(breaks = weekbreaks_asia, labels = yearlabs_asia)
-ggsave("plots/time_series_asia.png")
+#ggsave("plots/time_series_asia.png")
 
+
+# by week if want to remove the duplicate records (just on location and date at this point)
+asia_no_dups <- asia_ai_birds[!duplicated(asia_ai_birds[c("X", "Y", "observation.date")]),]
+
+subtype_counts_weekyear_asia_nodups <- asia_no_dups %>%
+  group_by(week) %>% count()
+
+# merge with the weekly counts
+all_dates_asia_data_no_dups <- left_join(all_dates_asia, subtype_counts_weekyear_asia_nodups)
+all_dates_asia_data_no_dups$year_of_study <- all_dates_asia_data_no_dups$year - 2004
+all_dates_asia_data_no_dups$week_seq <- all_dates_asia_data_no_dups$week_num + (52*all_dates_asia_data_no_dups$year_of_study)
+all_dates_asia_data_no_dups[which(is.na(all_dates_asia_data_no_dups$n)),"n"] <- 0
+
+par(mar = c(3,3,3,3))
+ggplot(data = all_dates_asia_data_no_dups, 
+       aes(x = week_seq, y = n)) +
+  geom_line(lwd = 0.5, col = "purple") + 
+  scale_color_brewer(palette="Paired", na.translate = F) + 
+  theme(axis.text.x = element_text(angle=90, margin = margin(t = .2, unit = "cm"), 
+                                   face = "bold", size = 12, vjust = 0.5),
+        axis.text.y = element_text(face = "bold", size = 12),
+        plot.margin = margin(1,1,1,1, "cm"), 
+        axis.title =  element_text(size = 14),
+        plot.background = element_rect(fill = "white"))+
+  #  panel.background = element_rect(fill = "white", colour = "grey50")) + 
+  labs(y = "Number of weekly cases", x = "Year", size = 18, title = "Asia") +
+  scale_x_continuous(breaks = weekbreaks_asia, labels = yearlabs_asia)
+#ggsave("plots/time_series_asia_no_dups.png")

@@ -299,6 +299,7 @@ all_dates_subtype_data <- left_join(all_dates, subtype_counts_weekyear)
 all_dates_subtype_data$year_of_study <- all_dates_subtype_data$year - 2005
 all_dates_subtype_data$week_seq <- all_dates_subtype_data$week_num + (52*all_dates_subtype_data$year_of_study)
 
+#write.csv(all_dates_subtype_data, "data/flu_data/prepped_data/time_series_domestic_hpai.csv", row.names = F)
 
 weekbreaks <- all_dates_subtype_data %>% filter(grepl('Week 01', week))
 weekbreaks <- unique(weekbreaks[,"week_seq"])
