@@ -1,0 +1,5010 @@
+RHEIFORMES
+1 SPECIES
+Rheidae
+Rheas
+1 SPECIES HIDE
+Greater Rhea
+Greater Rhea
+Rhea americana
+TINAMIFORMES
+5 SPECIES
+Tinamidae
+Tinamous
+5 SPECIES HIDE
+Highland Tinamou
+Highland Tinamou
+Nothocercus bonapartei
+Great Tinamou
+Great Tinamou
+Tinamus major
+Little Tinamou
+Little Tinamou
+Crypturellus soui
+Slaty-breasted Tinamou
+Slaty-breasted Tinamou
+Crypturellus boucardi
+Thicket Tinamou
+Thicket Tinamou
+Crypturellus cinnamomeus
+ANSERIFORMES
+83 SPECIES
+Anatidae
+Ducks, Geese, and Waterfowl
+83 SPECIES HIDE
+White-faced Whistling-Duck
+White-faced Whistling-Duck
+Dendrocygna viduata
+Black-bellied Whistling-Duck
+Black-bellied Whistling-Duck
+Dendrocygna autumnalis
+West Indian Whistling-Duck
+West Indian Whistling-Duck
+Dendrocygna arborea
+Fulvous Whistling-Duck
+Fulvous Whistling-Duck
+Dendrocygna bicolor
+Bar-headed Goose
+Bar-headed Goose
+Anser indicus
+Emperor Goose
+Emperor Goose
+Anser canagicus
+Snow Goose
+Snow Goose
+Anser caerulescens
+Ross's Goose
+Ross's Goose
+Anser rossii
+Graylag Goose
+Graylag Goose
+Anser anser
+Greater White-fronted Goose
+Greater White-fronted Goose
+Anser albifrons
+Taiga Bean-Goose
+Taiga Bean-Goose
+Anser fabalis
+Pink-footed Goose
+Pink-footed Goose
+Anser brachyrhynchus
+Brant
+Brant
+Branta bernicla
+Barnacle Goose
+Barnacle Goose
+Branta leucopsis
+Cackling Goose
+Cackling Goose
+Branta hutchinsii
+Canada Goose
+Canada Goose
+Branta canadensis
+Red-breasted Goose
+Red-breasted Goose
+Branta ruficollis
+Mute Swan
+Mute Swan
+Cygnus olor
+Black Swan
+Black Swan
+Cygnus atratus
+Black-necked Swan
+Black-necked Swan
+Cygnus melancoryphus
+Trumpeter Swan
+Trumpeter Swan
+Cygnus buccinator
+Tundra Swan
+Tundra Swan
+Cygnus columbianus
+Whooper Swan
+Whooper Swan
+Cygnus cygnus
+Coscoroba Swan
+Coscoroba Swan
+Coscoroba coscoroba
+Orinoco Goose
+Orinoco Goose
+Oressochen jubatus
+Upland Goose
+Upland Goose
+Chloephaga picta
+Egyptian Goose
+Egyptian Goose
+Alopochen aegyptiaca
+Paradise Shelduck
+Paradise Shelduck
+Tadorna variegata
+Common Shelduck
+Common Shelduck
+Tadorna tadorna
+Crested Duck
+Crested Duck
+Lophonetta specularioides
+Muscovy Duck
+Muscovy Duck
+Cairina moschata
+Ringed Teal
+Ringed Teal
+Callonetta leucophrys
+Wood Duck
+Wood Duck
+Aix sponsa
+Mandarin Duck
+Mandarin Duck
+Aix galericulata
+Garganey
+Garganey
+Spatula querquedula
+Silver Teal
+Silver Teal
+Spatula versicolor
+Blue-winged Teal
+Blue-winged Teal
+Spatula discors
+Cinnamon Teal
+Cinnamon Teal
+Spatula cyanoptera
+Northern Shoveler
+Northern Shoveler
+Spatula clypeata
+Gadwall
+Gadwall
+Mareca strepera
+Eurasian Wigeon
+Eurasian Wigeon
+Mareca penelope
+American Wigeon
+American Wigeon
+Mareca americana
+Chiloe Wigeon
+Chiloe Wigeon
+Mareca sibilatrix
+Yellow-billed Duck
+Yellow-billed Duck
+Anas undulata
+Indian Spot-billed Duck
+Indian Spot-billed Duck
+Anas poecilorhyncha
+Eastern Spot-billed Duck
+Eastern Spot-billed Duck
+Anas zonorhyncha
+Mallard
+Mallard
+Anas platyrhynchos
+Mexican Duck
+Mexican Duck
+Anas diazi
+American Black Duck
+American Black Duck
+Anas rubripes
+Mottled Duck
+Mottled Duck
+Anas fulvigula
+White-cheeked Pintail
+White-cheeked Pintail
+Anas bahamensis
+Northern Pintail
+Northern Pintail
+Anas acuta
+Yellow-billed Pintail
+Yellow-billed Pintail
+Anas georgica
+Green-winged Teal
+Green-winged Teal
+Anas crecca
+Red-crested Pochard
+Red-crested Pochard
+Netta rufina
+Rosy-billed Pochard
+Rosy-billed Pochard
+Netta peposaca
+Canvasback
+Canvasback
+Aythya valisineria
+Redhead
+Redhead
+Aythya americana
+Common Pochard
+Common Pochard
+Aythya ferina
+Ring-necked Duck
+Ring-necked Duck
+Aythya collaris
+Ferruginous Duck
+Ferruginous Duck
+Aythya nyroca
+Tufted Duck
+Tufted Duck
+Aythya fuligula
+Greater Scaup
+Greater Scaup
+Aythya marila
+Lesser Scaup
+Lesser Scaup
+Aythya affinis
+Steller's Eider
+Steller's Eider
+Polysticta stelleri
+Spectacled Eider
+Spectacled Eider
+Somateria fischeri
+King Eider
+King Eider
+Somateria spectabilis
+Common Eider
+Common Eider
+Somateria mollissima
+Harlequin Duck
+Harlequin Duck
+Histrionicus histrionicus
+Surf Scoter
+Surf Scoter
+Melanitta perspicillata
+White-winged Scoter
+White-winged Scoter
+Melanitta deglandi
+Common Scoter
+Common Scoter
+Melanitta nigra
+Black Scoter
+Black Scoter
+Melanitta americana
+Long-tailed Duck
+Long-tailed Duck
+Clangula hyemalis
+Bufflehead
+Bufflehead
+Bucephala albeola
+Common Goldeneye
+Common Goldeneye
+Bucephala clangula
+Barrow's Goldeneye
+Barrow's Goldeneye
+Bucephala islandica
+Smew
+Smew
+Mergellus albellus
+Hooded Merganser
+Hooded Merganser
+Lophodytes cucullatus
+Common Merganser
+Common Merganser
+Mergus merganser
+Red-breasted Merganser
+Red-breasted Merganser
+Mergus serrator
+Masked Duck
+Masked Duck
+Nomonyx dominicus
+Ruddy Duck
+Ruddy Duck
+Oxyura jamaicensis
+GALLIFORMES
+49 SPECIES
+Cracidae
+Guans, Chachalacas, and Curassows
+10 SPECIES HIDE
+Plain Chachalaca
+Plain Chachalaca
+Ortalis vetula
+Gray-headed Chachalaca
+Gray-headed Chachalaca
+Ortalis cinereiceps
+Rufous-vented Chachalaca
+Rufous-vented Chachalaca
+Ortalis ruficauda
+Rufous-bellied Chachalaca
+Rufous-bellied Chachalaca
+Ortalis wagleri
+West Mexican Chachalaca
+West Mexican Chachalaca
+Ortalis poliocephala
+White-bellied Chachalaca
+White-bellied Chachalaca
+Ortalis leucogastra
+Crested Guan
+Crested Guan
+Penelope purpurascens
+Black Guan
+Black Guan
+Chamaepetes unicolor
+Highland Guan
+Highland Guan
+Penelopina nigra
+Great Curassow
+Great Curassow
+Crax rubra
+Odontophoridae
+New World Quail
+14 SPECIES HIDE
+Tawny-faced Quail
+Tawny-faced Quail
+Rhynchortyx cinctus
+Mountain Quail
+Mountain Quail
+Oreortyx pictus
+Buffy-crowned Wood-Partridge
+Buffy-crowned Wood-Partridge
+Dendrortyx leucophrys
+Northern Bobwhite
+Northern Bobwhite
+Colinus virginianus
+Black-throated Bobwhite
+Black-throated Bobwhite
+Colinus nigrogularis
+Crested Bobwhite
+Crested Bobwhite
+Colinus cristatus
+Scaled Quail
+Scaled Quail
+Callipepla squamata
+California Quail
+California Quail
+Callipepla californica
+Gambel's Quail
+Gambel's Quail
+Callipepla gambelii
+Montezuma Quail
+Montezuma Quail
+Cyrtonyx montezumae
+Singing Quail
+Singing Quail
+Dactylortyx thoracicus
+Black-eared Wood-Quail
+Black-eared Wood-Quail
+Odontophorus melanotis
+Black-breasted Wood-Quail
+Black-breasted Wood-Quail
+Odontophorus leucolaemus
+Spotted Wood-Quail
+Spotted Wood-Quail
+Odontophorus guttatus
+Phasianidae
+Pheasants, Grouse, and Allies
+25 SPECIES HIDE
+Wild Turkey
+Wild Turkey
+Meleagris gallopavo
+Ocellated Turkey
+Ocellated Turkey
+Meleagris ocellata
+Ruffed Grouse
+Ruffed Grouse
+Bonasa umbellus
+Greater Sage-Grouse
+Greater Sage-Grouse
+Centrocercus urophasianus
+Gunnison Sage-Grouse
+Gunnison Sage-Grouse
+Centrocercus minimus
+Dusky Grouse
+Dusky Grouse
+Dendragapus obscurus
+Sooty Grouse
+Sooty Grouse
+Dendragapus fuliginosus
+Sharp-tailed Grouse
+Sharp-tailed Grouse
+Tympanuchus phasianellus
+Greater Prairie-Chicken
+Greater Prairie-Chicken
+Tympanuchus cupido
+Lesser Prairie-Chicken
+Lesser Prairie-Chicken
+Tympanuchus pallidicinctus
+White-tailed Ptarmigan
+White-tailed Ptarmigan
+Lagopus leucura
+Willow Ptarmigan
+Willow Ptarmigan
+Lagopus lagopus
+Rock Ptarmigan
+Rock Ptarmigan
+Lagopus muta
+Spruce Grouse
+Spruce Grouse
+Canachites canadensis
+Gray Partridge
+Gray Partridge
+Perdix perdix
+Mikado Pheasant
+Mikado Pheasant
+Syrmaticus mikado
+Ring-necked Pheasant
+Ring-necked Pheasant
+Phasianus colchicus
+Kalij Pheasant
+Kalij Pheasant
+Lophura leucomelanos
+Indian Peafowl
+Indian Peafowl
+Pavo cristatus
+Red Junglefowl
+Red Junglefowl
+Gallus gallus
+Black Francolin
+Black Francolin
+Francolinus francolinus
+Himalayan Snowcock
+Himalayan Snowcock
+Tetraogallus himalayensis
+Common Quail
+Common Quail
+Coturnix coturnix
+Red-legged Partridge
+Red-legged Partridge
+Alectoris rufa
+Chukar
+Chukar
+Alectoris chukar
+PHOENICOPTERIFORMES
+2 SPECIES
+Phoenicopteridae
+Flamingos
+2 SPECIES HIDE
+Chilean Flamingo
+Chilean Flamingo
+Phoenicopterus chilensis
+American Flamingo
+American Flamingo
+Phoenicopterus ruber
+PODICIPEDIFORMES
+7 SPECIES
+Podicipedidae
+Grebes
+7 SPECIES HIDE
+Least Grebe
+Least Grebe
+Tachybaptus dominicus
+Pied-billed Grebe
+Pied-billed Grebe
+Podilymbus podiceps
+Horned Grebe
+Horned Grebe
+Podiceps auritus
+Red-necked Grebe
+Red-necked Grebe
+Podiceps grisegena
+Eared Grebe
+Eared Grebe
+Podiceps nigricollis
+Western Grebe
+Western Grebe
+Aechmophorus occidentalis
+Clark's Grebe
+Clark's Grebe
+Aechmophorus clarkii
+COLUMBIFORMES
+36 SPECIES
+Columbidae
+Pigeons and Doves
+36 SPECIES HIDE
+Rock Pigeon
+Rock Pigeon
+Columba livia
+Speckled Pigeon
+Speckled Pigeon
+Columba guinea
+Common Wood-Pigeon
+Common Wood-Pigeon
+Columba palumbus
+Pale-vented Pigeon
+Pale-vented Pigeon
+Patagioenas cayennensis
+Scaled Pigeon
+Scaled Pigeon
+Patagioenas speciosa
+Scaly-naped Pigeon
+Scaly-naped Pigeon
+Patagioenas squamosa
+Bare-eyed Pigeon
+Bare-eyed Pigeon
+Patagioenas corensis
+White-crowned Pigeon
+White-crowned Pigeon
+Patagioenas leucocephala
+Red-billed Pigeon
+Red-billed Pigeon
+Patagioenas flavirostris
+Band-tailed Pigeon
+Band-tailed Pigeon
+Patagioenas fasciata
+Ruddy Pigeon
+Ruddy Pigeon
+Patagioenas subvinacea
+Short-billed Pigeon
+Short-billed Pigeon
+Patagioenas nigrirostris
+European Turtle-Dove
+European Turtle-Dove
+Streptopelia turtur
+Oriental Turtle-Dove
+Oriental Turtle-Dove
+Streptopelia orientalis
+Eurasian Collared-Dove
+Eurasian Collared-Dove
+Streptopelia decaocto
+Ring-necked Dove
+Ring-necked Dove
+Streptopelia capicola
+Spotted Dove
+Spotted Dove
+Spilopelia chinensis
+Crested Pigeon
+Crested Pigeon
+Ocyphaps lophotes
+Inca Dove
+Inca Dove
+Columbina inca
+Common Ground Dove
+Common Ground Dove
+Columbina passerina
+Plain-breasted Ground Dove
+Plain-breasted Ground Dove
+Columbina minuta
+Ruddy Ground Dove
+Ruddy Ground Dove
+Columbina talpacoti
+Blue Ground Dove
+Blue Ground Dove
+Claravis pretiosa
+Ruddy Quail-Dove
+Ruddy Quail-Dove
+Geotrygon montana
+White-tipped Dove
+White-tipped Dove
+Leptotila verreauxi
+Caribbean Dove
+Caribbean Dove
+Leptotila jamaicensis
+Gray-chested Dove
+Gray-chested Dove
+Leptotila cassinii
+Gray-headed Dove
+Gray-headed Dove
+Leptotila plumbeiceps
+Buff-fronted Quail-Dove
+Buff-fronted Quail-Dove
+Zentrygon costaricensis
+Purplish-backed Quail-Dove
+Purplish-backed Quail-Dove
+Zentrygon lawrencii
+White-faced Quail-Dove
+White-faced Quail-Dove
+Zentrygon albifacies
+Chiriqui Quail-Dove
+Chiriqui Quail-Dove
+Zentrygon chiriquensis
+White-winged Dove
+White-winged Dove
+Zenaida asiatica
+Zenaida Dove
+Zenaida Dove
+Zenaida aurita
+Eared Dove
+Eared Dove
+Zenaida auriculata
+Mourning Dove
+Mourning Dove
+Zenaida macroura
+CUCULIFORMES
+12 SPECIES
+Cuculidae
+Cuckoos
+12 SPECIES HIDE
+Greater Ani
+Greater Ani
+Crotophaga major
+Smooth-billed Ani
+Smooth-billed Ani
+Crotophaga ani
+Groove-billed Ani
+Groove-billed Ani
+Crotophaga sulcirostris
+Striped Cuckoo
+Striped Cuckoo
+Tapera naevia
+Lesser Ground-Cuckoo
+Lesser Ground-Cuckoo
+Morococcyx erythropygus
+Greater Roadrunner
+Greater Roadrunner
+Geococcyx californianus
+Squirrel Cuckoo
+Squirrel Cuckoo
+Piaya cayana
+Yellow-billed Cuckoo
+Yellow-billed Cuckoo
+Coccyzus americanus
+Mangrove Cuckoo
+Mangrove Cuckoo
+Coccyzus minor
+Black-billed Cuckoo
+Black-billed Cuckoo
+Coccyzus erythropthalmus
+Common Cuckoo
+Common Cuckoo
+Cuculus canorus
+Oriental Cuckoo
+Oriental Cuckoo
+Cuculus optatus
+CAPRIMULGIFORMES
+99 SPECIES
+Caprimulgidae
+Nightjars and Allies
+12 SPECIES HIDE
+Lesser Nighthawk
+Lesser Nighthawk
+Chordeiles acutipennis
+Common Nighthawk
+Common Nighthawk
+Chordeiles minor
+Antillean Nighthawk
+Antillean Nighthawk
+Chordeiles gundlachii
+Common Pauraque
+Common Pauraque
+Nyctidromus albicollis
+Yucatan Poorwill
+Yucatan Poorwill
+Nyctiphrynus yucatanicus
+Common Poorwill
+Common Poorwill
+Phalaenoptilus nuttallii
+Chuck-will's-widow
+Chuck-will's-widow
+Antrostomus carolinensis
+Yucatan Nightjar
+Yucatan Nightjar
+Antrostomus badius
+Buff-collared Nightjar
+Buff-collared Nightjar
+Antrostomus ridgwayi
+Eastern Whip-poor-will
+Eastern Whip-poor-will
+Antrostomus vociferus
+Dusky Nightjar
+Dusky Nightjar
+Antrostomus saturatus
+Mexican Whip-poor-will
+Mexican Whip-poor-will
+Antrostomus arizonae
+Nyctibiidae
+Potoos
+1 SPECIES HIDE
+Common Potoo
+Common Potoo
+Nyctibius griseus
+Apodidae
+Swifts
+15 SPECIES HIDE
+Black Swift
+Black Swift
+Cypseloides niger
+White-collared Swift
+White-collared Swift
+Streptoprocne zonaris
+Gray-rumped Swift
+Gray-rumped Swift
+Chaetura cinereiventris
+Chimney Swift
+Chimney Swift
+Chaetura pelagica
+Vaux's Swift
+Vaux's Swift
+Chaetura vauxi
+Short-tailed Swift
+Short-tailed Swift
+Chaetura brachyura
+White-throated Needletail
+White-throated Needletail
+Hirundapus caudacutus
+Alpine Swift
+Alpine Swift
+Tachymarptis melba
+Common Swift
+Common Swift
+Apus apus
+Pacific Swift
+Pacific Swift
+Apus pacificus
+Little Swift
+Little Swift
+Apus affinis
+White-throated Swift
+White-throated Swift
+Aeronautes saxatalis
+Lesser Swallow-tailed Swift
+Lesser Swallow-tailed Swift
+Panyptila cayennensis
+Great Swallow-tailed Swift
+Great Swallow-tailed Swift
+Panyptila sanctihieronymi
+Antillean Palm Swift
+Antillean Palm Swift
+Tachornis phoenicobia
+Trochilidae
+Hummingbirds
+71 SPECIES HIDE
+White-necked Jacobin
+White-necked Jacobin
+Florisuga mellivora
+White-tipped Sicklebill
+White-tipped Sicklebill
+Eutoxeres aquila
+Rufous-breasted Hermit
+Rufous-breasted Hermit
+Glaucis hirsutus
+Band-tailed Barbthroat
+Band-tailed Barbthroat
+Threnetes ruckeri
+Green Hermit
+Green Hermit
+Phaethornis guy
+Long-billed Hermit
+Long-billed Hermit
+Phaethornis longirostris
+Stripe-throated Hermit
+Stripe-throated Hermit
+Phaethornis striigularis
+Brown Violetear
+Brown Violetear
+Colibri delphinae
+Mexican Violetear
+Mexican Violetear
+Colibri thalassinus
+Lesser Violetear
+Lesser Violetear
+Colibri cyanotus
+Tooth-billed Hummingbird
+Tooth-billed Hummingbird
+Androdon aequatorialis
+Black-throated Mango
+Black-throated Mango
+Anthracothorax nigricollis
+Green-breasted Mango
+Green-breasted Mango
+Anthracothorax prevostii
+Veraguan Mango
+Veraguan Mango
+Anthracothorax veraguensis
+Green-throated Carib
+Green-throated Carib
+Eulampis holosericeus
+Greenish Puffleg
+Greenish Puffleg
+Haplophaedia aureliae
+Rivoli's Hummingbird
+Rivoli's Hummingbird
+Eugenes fulgens
+Talamanca Hummingbird
+Talamanca Hummingbird
+Eugenes spectabilis
+Long-billed Starthroat
+Long-billed Starthroat
+Heliomaster longirostris
+Plain-capped Starthroat
+Plain-capped Starthroat
+Heliomaster constantii
+Fiery-throated Hummingbird
+Fiery-throated Hummingbird
+Panterpe insignis
+Green-throated Mountain-gem
+Green-throated Mountain-gem
+Lampornis viridipallens
+Green-breasted Mountain-gem
+Green-breasted Mountain-gem
+Lampornis sybillae
+Blue-throated Mountain-gem
+Blue-throated Mountain-gem
+Lampornis clemenciae
+White-bellied Mountain-gem
+White-bellied Mountain-gem
+Lampornis hemileucus
+White-throated Mountain-gem
+White-throated Mountain-gem
+Lampornis castaneoventris
+Garnet-throated Hummingbird
+Garnet-throated Hummingbird
+Lamprolaima rhami
+Sparkling-tailed Hummingbird
+Sparkling-tailed Hummingbird
+Tilmatura dupontii
+Magenta-throated Woodstar
+Magenta-throated Woodstar
+Philodice bryantae
+Lucifer Hummingbird
+Lucifer Hummingbird
+Calothorax lucifer
+Ruby-throated Hummingbird
+Ruby-throated Hummingbird
+Archilochus colubris
+Black-chinned Hummingbird
+Black-chinned Hummingbird
+Archilochus alexandri
+Vervain Hummingbird
+Vervain Hummingbird
+Mellisuga minima
+Anna's Hummingbird
+Anna's Hummingbird
+Calypte anna
+Costa's Hummingbird
+Costa's Hummingbird
+Calypte costae
+Calliope Hummingbird
+Calliope Hummingbird
+Selasphorus calliope
+Rufous Hummingbird
+Rufous Hummingbird
+Selasphorus rufus
+Allen's Hummingbird
+Allen's Hummingbird
+Selasphorus sasin
+Broad-tailed Hummingbird
+Broad-tailed Hummingbird
+Selasphorus platycercus
+Wine-throated Hummingbird
+Wine-throated Hummingbird
+Selasphorus ellioti
+Volcano Hummingbird
+Volcano Hummingbird
+Selasphorus flammula
+Scintillant Hummingbird
+Scintillant Hummingbird
+Selasphorus scintilla
+Cuban Emerald
+Cuban Emerald
+Riccordia ricordii
+Broad-billed Hummingbird
+Broad-billed Hummingbird
+Cynanthus latirostris
+Turquoise-crowned Hummingbird
+Turquoise-crowned Hummingbird
+Cynanthus doubledayi
+Canivet's Emerald
+Canivet's Emerald
+Cynanthus canivetii
+White-eared Hummingbird
+White-eared Hummingbird
+Basilinna leucotis
+Xantus's Hummingbird
+Xantus's Hummingbird
+Basilinna xantusii
+Wedge-tailed Sabrewing
+Wedge-tailed Sabrewing
+Pampa curvipennis
+Violet-headed Hummingbird
+Violet-headed Hummingbird
+Klais guimeti
+Emerald-chinned Hummingbird
+Emerald-chinned Hummingbird
+Abeillia abeillei
+Violet Sabrewing
+Violet Sabrewing
+Campylopterus hemileucurus
+Bronze-tailed Plumeleteer
+Bronze-tailed Plumeleteer
+Chalybura urochrysia
+White-vented Plumeleteer
+White-vented Plumeleteer
+Chalybura buffonii
+Crowned Woodnymph
+Crowned Woodnymph
+Thalurania colombica
+Stripe-tailed Hummingbird
+Stripe-tailed Hummingbird
+Eupherusa eximia
+Black-bellied Hummingbird
+Black-bellied Hummingbird
+Eupherusa nigriventris
+Violet-crowned Hummingbird
+Violet-crowned Hummingbird
+Ramosomyia violiceps
+Green-fronted Hummingbird
+Green-fronted Hummingbird
+Ramosomyia viridifrons
+Azure-crowned Hummingbird
+Azure-crowned Hummingbird
+Saucerottia cyanocephala
+Blue-vented Hummingbird
+Blue-vented Hummingbird
+Saucerottia hoffmanni
+Berylline Hummingbird
+Berylline Hummingbird
+Saucerottia beryllina
+Blue-tailed Hummingbird
+Blue-tailed Hummingbird
+Saucerottia cyanura
+Snowy-bellied Hummingbird
+Snowy-bellied Hummingbird
+Saucerottia edward
+Cinnamon Hummingbird
+Cinnamon Hummingbird
+Amazilia rutila
+Buff-bellied Hummingbird
+Buff-bellied Hummingbird
+Amazilia yucatanensis
+Rufous-tailed Hummingbird
+Rufous-tailed Hummingbird
+Amazilia tzacatl
+Humboldt's Sapphire
+Humboldt's Sapphire
+Chrysuronia humboldtii
+White-bellied Emerald
+White-bellied Emerald
+Chlorestes candida
+Blue-throated Goldentail
+Blue-throated Goldentail
+Chlorestes eliciae
+Violet-bellied Hummingbird
+Violet-bellied Hummingbird
+Chlorestes julie
+GRUIFORMES
+27 SPECIES
+Rallidae
+Rails, Gallinules, and Coots
+22 SPECIES HIDE
+Ridgway's Rail
+Ridgway's Rail
+Rallus obsoletus
+King Rail
+King Rail
+Rallus elegans
+Clapper Rail
+Clapper Rail
+Rallus crepitans
+Virginia Rail
+Virginia Rail
+Rallus limicola
+Corn Crake
+Corn Crake
+Crex crex
+Uniform Crake
+Uniform Crake
+Amaurolimnas concolor
+Giant Wood-Rail
+Giant Wood-Rail
+Aramides ypecaha
+Russet-naped Wood-Rail
+Russet-naped Wood-Rail
+Aramides albiventris
+Gray-cowled Wood-Rail
+Gray-cowled Wood-Rail
+Aramides cajaneus
+Sora
+Sora
+Porzana carolina
+Spotted Crake
+Spotted Crake
+Porzana porzana
+Eurasian Moorhen
+Eurasian Moorhen
+Gallinula chloropus
+Common Gallinule
+Common Gallinule
+Gallinula galeata
+Eurasian Coot
+Eurasian Coot
+Fulica atra
+American Coot
+American Coot
+Fulica americana
+Purple Gallinule
+Purple Gallinule
+Porphyrio martinica
+Gray-headed Swamphen
+Gray-headed Swamphen
+Porphyrio poliocephalus
+Ocellated Crake
+Ocellated Crake
+Rufirallus schomburgkii
+Yellow Rail
+Yellow Rail
+Coturnicops noveboracensis
+Ruddy Crake
+Ruddy Crake
+Laterallus ruber
+White-throated Crake
+White-throated Crake
+Laterallus albigularis
+Black Rail
+Black Rail
+Laterallus jamaicensis
+Aramidae
+Limpkin
+1 SPECIES HIDE
+Limpkin
+Limpkin
+Aramus guarauna
+Gruidae
+Cranes
+4 SPECIES HIDE
+Gray Crowned-Crane
+Gray Crowned-Crane
+Balearica regulorum
+Sandhill Crane
+Sandhill Crane
+Antigone canadensis
+Common Crane
+Common Crane
+Grus grus
+Whooping Crane
+Whooping Crane
+Grus americana
+CHARADRIIFORMES
+134 SPECIES
+Burhinidae
+Thick-knees
+1 SPECIES HIDE
+Double-striped Thick-knee
+Double-striped Thick-knee
+Hesperoburhinus bistriatus
+Recurvirostridae
+Stilts and Avocets
+3 SPECIES HIDE
+Black-winged Stilt
+Black-winged Stilt
+Himantopus himantopus
+Black-necked Stilt
+Black-necked Stilt
+Himantopus mexicanus
+American Avocet
+American Avocet
+Recurvirostra americana
+Haematopodidae
+Oystercatchers
+3 SPECIES HIDE
+Eurasian Oystercatcher
+Eurasian Oystercatcher
+Haematopus ostralegus
+American Oystercatcher
+American Oystercatcher
+Haematopus palliatus
+Black Oystercatcher
+Black Oystercatcher
+Haematopus bachmani
+Charadriidae
+Plovers and Lapwings
+19 SPECIES HIDE
+Black-bellied Plover
+Black-bellied Plover
+Pluvialis squatarola
+European Golden-Plover
+European Golden-Plover
+Pluvialis apricaria
+American Golden-Plover
+American Golden-Plover
+Pluvialis dominica
+Pacific Golden-Plover
+Pacific Golden-Plover
+Pluvialis fulva
+Eurasian Dotterel
+Eurasian Dotterel
+Eudromias morinellus
+Killdeer
+Killdeer
+Charadrius vociferus
+Common Ringed Plover
+Common Ringed Plover
+Charadrius hiaticula
+Semipalmated Plover
+Semipalmated Plover
+Charadrius semipalmatus
+Piping Plover
+Piping Plover
+Charadrius melodus
+Little Ringed Plover
+Little Ringed Plover
+Charadrius dubius
+Northern Lapwing
+Northern Lapwing
+Vanellus vanellus
+Spur-winged Lapwing
+Spur-winged Lapwing
+Vanellus spinosus
+Southern Lapwing
+Southern Lapwing
+Vanellus chilensis
+Greater Sand-Plover
+Greater Sand-Plover
+Anarhynchus leschenaultii
+Wilson's Plover
+Wilson's Plover
+Anarhynchus wilsonia
+Collared Plover
+Collared Plover
+Anarhynchus collaris
+Mountain Plover
+Mountain Plover
+Anarhynchus montanus
+Snowy Plover
+Snowy Plover
+Anarhynchus nivosus
+Kentish Plover
+Kentish Plover
+Anarhynchus alexandrinus
+Jacanidae
+Jacanas
+2 SPECIES HIDE
+Northern Jacana
+Northern Jacana
+Jacana spinosa
+Wattled Jacana
+Wattled Jacana
+Jacana jacana
+Scolopacidae
+Sandpipers and Allies
+61 SPECIES HIDE
+Upland Sandpiper
+Upland Sandpiper
+Bartramia longicauda
+Bristle-thighed Curlew
+Bristle-thighed Curlew
+Numenius tahitiensis
+Whimbrel
+Whimbrel
+Numenius phaeopus
+Little Curlew
+Little Curlew
+Numenius minutus
+Long-billed Curlew
+Long-billed Curlew
+Numenius americanus
+Far Eastern Curlew
+Far Eastern Curlew
+Numenius madagascariensis
+Eurasian Curlew
+Eurasian Curlew
+Numenius arquata
+Bar-tailed Godwit
+Bar-tailed Godwit
+Limosa lapponica
+Black-tailed Godwit
+Black-tailed Godwit
+Limosa limosa
+Hudsonian Godwit
+Hudsonian Godwit
+Limosa haemastica
+Marbled Godwit
+Marbled Godwit
+Limosa fedoa
+Short-billed Dowitcher
+Short-billed Dowitcher
+Limnodromus griseus
+Long-billed Dowitcher
+Long-billed Dowitcher
+Limnodromus scolopaceus
+Jack Snipe
+Jack Snipe
+Lymnocryptes minimus
+American Woodcock
+American Woodcock
+Scolopax minor
+Eurasian Woodcock
+Eurasian Woodcock
+Scolopax rusticola
+Common Snipe
+Common Snipe
+Gallinago gallinago
+Wilson's Snipe
+Wilson's Snipe
+Gallinago delicata
+Wilson's Phalarope
+Wilson's Phalarope
+Phalaropus tricolor
+Red-necked Phalarope
+Red-necked Phalarope
+Phalaropus lobatus
+Terek Sandpiper
+Terek Sandpiper
+Xenus cinereus
+Common Sandpiper
+Common Sandpiper
+Actitis hypoleucos
+Spotted Sandpiper
+Spotted Sandpiper
+Actitis macularius
+Green Sandpiper
+Green Sandpiper
+Tringa ochropus
+Solitary Sandpiper
+Solitary Sandpiper
+Tringa solitaria
+Gray-tailed Tattler
+Gray-tailed Tattler
+Tringa brevipes
+Wandering Tattler
+Wandering Tattler
+Tringa incana
+Marsh Sandpiper
+Marsh Sandpiper
+Tringa stagnatilis
+Wood Sandpiper
+Wood Sandpiper
+Tringa glareola
+Common Redshank
+Common Redshank
+Tringa totanus
+Lesser Yellowlegs
+Lesser Yellowlegs
+Tringa flavipes
+Willet
+Willet
+Tringa semipalmata
+Spotted Redshank
+Spotted Redshank
+Tringa erythropus
+Common Greenshank
+Common Greenshank
+Tringa nebularia
+Greater Yellowlegs
+Greater Yellowlegs
+Tringa melanoleuca
+Ruddy Turnstone
+Ruddy Turnstone
+Arenaria interpres
+Black Turnstone
+Black Turnstone
+Arenaria melanocephala
+Great Knot
+Great Knot
+Calidris tenuirostris
+Red Knot
+Red Knot
+Calidris canutus
+Surfbird
+Surfbird
+Calidris virgata
+Ruff
+Ruff
+Calidris pugnax
+Broad-billed Sandpiper
+Broad-billed Sandpiper
+Calidris falcinellus
+Sharp-tailed Sandpiper
+Sharp-tailed Sandpiper
+Calidris acuminata
+Curlew Sandpiper
+Curlew Sandpiper
+Calidris ferruginea
+Stilt Sandpiper
+Stilt Sandpiper
+Calidris himantopus
+Temminck's Stint
+Temminck's Stint
+Calidris temminckii
+Long-toed Stint
+Long-toed Stint
+Calidris subminuta
+Red-necked Stint
+Red-necked Stint
+Calidris ruficollis
+Spoon-billed Sandpiper
+Spoon-billed Sandpiper
+Calidris pygmaea
+Buff-breasted Sandpiper
+Buff-breasted Sandpiper
+Calidris subruficollis
+Sanderling
+Sanderling
+Calidris alba
+Dunlin
+Dunlin
+Calidris alpina
+Purple Sandpiper
+Purple Sandpiper
+Calidris maritima
+Rock Sandpiper
+Rock Sandpiper
+Calidris ptilocnemis
+Baird's Sandpiper
+Baird's Sandpiper
+Calidris bairdii
+Little Stint
+Little Stint
+Calidris minuta
+White-rumped Sandpiper
+White-rumped Sandpiper
+Calidris fuscicollis
+Least Sandpiper
+Least Sandpiper
+Calidris minutilla
+Pectoral Sandpiper
+Pectoral Sandpiper
+Calidris melanotos
+Western Sandpiper
+Western Sandpiper
+Calidris mauri
+Semipalmated Sandpiper
+Semipalmated Sandpiper
+Calidris pusilla
+Glareolidae
+Pratincoles and Coursers
+1 SPECIES HIDE
+Oriental Pratincole
+Oriental Pratincole
+Glareola maldivarum
+Stercorariidae
+Skuas and Jaegers
+3 SPECIES HIDE
+Long-tailed Jaeger
+Long-tailed Jaeger
+Stercorarius longicaudus
+Parasitic Jaeger
+Parasitic Jaeger
+Stercorarius parasiticus
+Pomarine Jaeger
+Pomarine Jaeger
+Stercorarius pomarinus
+Alcidae
+Auks, Murres, and Puffins
+2 SPECIES HIDE
+Marbled Murrelet
+Marbled Murrelet
+Brachyramphus marmoratus
+Pigeon Guillemot
+Pigeon Guillemot
+Cepphus columba
+Laridae
+Gulls, Terns, and Skimmers
+39 SPECIES HIDE
+Little Gull
+Little Gull
+Hydrocoloeus minutus
+Ross's Gull
+Ross's Gull
+Rhodostethia rosea
+Ivory Gull
+Ivory Gull
+Pagophila eburnea
+Sabine's Gull
+Sabine's Gull
+Xema sabini
+Bonaparte's Gull
+Bonaparte's Gull
+Chroicocephalus philadelphia
+Silver Gull
+Silver Gull
+Chroicocephalus novaehollandiae
+Black-headed Gull
+Black-headed Gull
+Chroicocephalus ridibundus
+Gray Gull
+Gray Gull
+Leucophaeus modestus
+Laughing Gull
+Laughing Gull
+Leucophaeus atricilla
+Franklin's Gull
+Franklin's Gull
+Leucophaeus pipixcan
+Black-tailed Gull
+Black-tailed Gull
+Larus crassirostris
+Heermann's Gull
+Heermann's Gull
+Larus heermanni
+Common Gull
+Common Gull
+Larus canus
+Short-billed Gull
+Short-billed Gull
+Larus brachyrhynchus
+Ring-billed Gull
+Ring-billed Gull
+Larus delawarensis
+Western Gull
+Western Gull
+Larus occidentalis
+Kelp Gull
+Kelp Gull
+Larus dominicanus
+Herring Gull
+Herring Gull
+Larus argentatus
+Yellow-legged Gull
+Yellow-legged Gull
+Larus michahellis
+Great Black-backed Gull
+Great Black-backed Gull
+Larus marinus
+Glaucous Gull
+Glaucous Gull
+Larus hyperboreus
+Lesser Black-backed Gull
+Lesser Black-backed Gull
+Larus fuscus
+California Gull
+California Gull
+Larus californicus
+Glaucous-winged Gull
+Glaucous-winged Gull
+Larus glaucescens
+Slaty-backed Gull
+Slaty-backed Gull
+Larus schistisagus
+Iceland Gull
+Iceland Gull
+Larus glaucoides
+Black Skimmer
+Black Skimmer
+Rynchops niger
+Aleutian Tern
+Aleutian Tern
+Onychoprion aleuticus
+Least Tern
+Least Tern
+Sternula antillarum
+Caspian Tern
+Caspian Tern
+Hydroprogne caspia
+Black Tern
+Black Tern
+Chlidonias niger
+White-winged Tern
+White-winged Tern
+Chlidonias leucopterus
+Forster's Tern
+Forster's Tern
+Sterna forsteri
+Arctic Tern
+Arctic Tern
+Sterna paradisaea
+Common Tern
+Common Tern
+Sterna hirundo
+Roseate Tern
+Roseate Tern
+Sterna dougallii
+Sandwich Tern
+Sandwich Tern
+Thalasseus sandvicensis
+Elegant Tern
+Elegant Tern
+Thalasseus elegans
+Royal Tern
+Royal Tern
+Thalasseus maximus
+GAVIIFORMES
+5 SPECIES
+Gaviidae
+Loons
+5 SPECIES HIDE
+Red-throated Loon
+Red-throated Loon
+Gavia stellata
+Arctic Loon
+Arctic Loon
+Gavia arctica
+Pacific Loon
+Pacific Loon
+Gavia pacifica
+Common Loon
+Common Loon
+Gavia immer
+Yellow-billed Loon
+Yellow-billed Loon
+Gavia adamsii
+PROCELLARIIFORMES
+1 SPECIES
+Procellariidae
+Shearwaters and Petrels
+1 SPECIES HIDE
+Black-vented Shearwater
+Black-vented Shearwater
+Puffinus opisthomelas
+CICONIIFORMES
+4 SPECIES
+Ciconiidae
+Storks
+4 SPECIES HIDE
+Maguari Stork
+Maguari Stork
+Ciconia maguari
+White Stork
+White Stork
+Ciconia ciconia
+Jabiru
+Jabiru
+Jabiru mycteria
+Wood Stork
+Wood Stork
+Mycteria americana
+SULIFORMES
+10 SPECIES
+Fregatidae
+Frigatebirds
+1 SPECIES HIDE
+Magnificent Frigatebird
+Magnificent Frigatebird
+Fregata magnificens
+Sulidae
+Boobies and Gannets
+2 SPECIES HIDE
+Northern Gannet
+Northern Gannet
+Morus bassanus
+Peruvian Booby
+Peruvian Booby
+Sula variegata
+Anhingidae
+Anhingas
+1 SPECIES HIDE
+Anhinga
+Anhinga
+Anhinga anhinga
+Phalacrocoracidae
+Cormorants and Shags
+6 SPECIES HIDE
+Brandt's Cormorant
+Brandt's Cormorant
+Urile penicillatus
+Red-faced Cormorant
+Red-faced Cormorant
+Urile urile
+Pelagic Cormorant
+Pelagic Cormorant
+Urile pelagicus
+Great Cormorant
+Great Cormorant
+Phalacrocorax carbo
+Double-crested Cormorant
+Double-crested Cormorant
+Nannopterum auritum
+Neotropic Cormorant
+Neotropic Cormorant
+Nannopterum brasilianum
+PELECANIFORMES
+40 SPECIES
+Pelecanidae
+Pelicans
+4 SPECIES HIDE
+American White Pelican
+American White Pelican
+Pelecanus erythrorhynchos
+Brown Pelican
+Brown Pelican
+Pelecanus occidentalis
+Peruvian Pelican
+Peruvian Pelican
+Pelecanus thagus
+Great White Pelican
+Great White Pelican
+Pelecanus onocrotalus
+Ardeidae
+Herons, Egrets, and Bitterns
+29 SPECIES HIDE
+Rufescent Tiger-Heron
+Rufescent Tiger-Heron
+Tigrisoma lineatum
+Bare-throated Tiger-Heron
+Bare-throated Tiger-Heron
+Tigrisoma mexicanum
+Fasciated Tiger-Heron
+Fasciated Tiger-Heron
+Tigrisoma fasciatum
+Boat-billed Heron
+Boat-billed Heron
+Cochlearius cochlearius
+Agami Heron
+Agami Heron
+Agamia agami
+Great Bittern
+Great Bittern
+Botaurus stellaris
+American Bittern
+American Bittern
+Botaurus lentiginosus
+Least Bittern
+Least Bittern
+Ixobrychus exilis
+Little Bittern
+Little Bittern
+Ixobrychus minutus
+Yellow Bittern
+Yellow Bittern
+Ixobrychus sinensis
+Yellow-crowned Night Heron
+Yellow-crowned Night Heron
+Nyctanassa violacea
+Black-crowned Night Heron
+Black-crowned Night Heron
+Nycticorax nycticorax
+Whistling Heron
+Whistling Heron
+Syrigma sibilatrix
+Little Blue Heron
+Little Blue Heron
+Egretta caerulea
+Tricolored Heron
+Tricolored Heron
+Egretta tricolor
+Reddish Egret
+Reddish Egret
+Egretta rufescens
+Chinese Egret
+Chinese Egret
+Egretta eulophotes
+Snowy Egret
+Snowy Egret
+Egretta thula
+Little Egret
+Little Egret
+Egretta garzetta
+Western Reef-Heron
+Western Reef-Heron
+Egretta gularis
+Striated Heron
+Striated Heron
+Butorides striata
+Green Heron
+Green Heron
+Butorides virescens
+Squacco Heron
+Squacco Heron
+Ardeola ralloides
+Chinese Pond-Heron
+Chinese Pond-Heron
+Ardeola bacchus
+Great Egret
+Great Egret
+Ardea alba
+Gray Heron
+Gray Heron
+Ardea cinerea
+Great Blue Heron
+Great Blue Heron
+Ardea herodias
+Cocoi Heron
+Cocoi Heron
+Ardea cocoi
+Purple Heron
+Purple Heron
+Ardea purpurea
+Threskiornithidae
+Ibises and Spoonbills
+7 SPECIES HIDE
+White Ibis
+White Ibis
+Eudocimus albus
+Glossy Ibis
+Glossy Ibis
+Plegadis falcinellus
+White-faced Ibis
+White-faced Ibis
+Plegadis chihi
+Green Ibis
+Green Ibis
+Mesembrinibis cayennensis
+Bare-faced Ibis
+Bare-faced Ibis
+Phimosus infuscatus
+Eurasian Spoonbill
+Eurasian Spoonbill
+Platalea leucorodia
+Roseate Spoonbill
+Roseate Spoonbill
+Platalea ajaja
+CATHARTIFORMES
+5 SPECIES
+Cathartidae
+New World Vultures
+5 SPECIES HIDE
+California Condor
+California Condor
+Gymnogyps californianus
+King Vulture
+King Vulture
+Sarcoramphus papa
+Black Vulture
+Black Vulture
+Coragyps atratus
+Turkey Vulture
+Turkey Vulture
+Cathartes aura
+Lesser Yellow-headed Vulture
+Lesser Yellow-headed Vulture
+Cathartes burrovianus
+ACCIPITRIFORMES
+47 SPECIES
+Pandionidae
+Osprey
+1 SPECIES HIDE
+Osprey
+Osprey
+Pandion haliaetus
+Accipitridae
+Hawks, Eagles, and Kites
+46 SPECIES HIDE
+White-tailed Kite
+White-tailed Kite
+Elanus leucurus
+Hook-billed Kite
+Hook-billed Kite
+Chondrohierax uncinatus
+Gray-headed Kite
+Gray-headed Kite
+Leptodon cayanensis
+Swallow-tailed Kite
+Swallow-tailed Kite
+Elanoides forficatus
+Black Hawk-Eagle
+Black Hawk-Eagle
+Spizaetus tyrannus
+Ornate Hawk-Eagle
+Ornate Hawk-Eagle
+Spizaetus ornatus
+Black-and-white Hawk-Eagle
+Black-and-white Hawk-Eagle
+Spizaetus melanoleucus
+Golden Eagle
+Golden Eagle
+Aquila chrysaetos
+Snail Kite
+Snail Kite
+Rostrhamus sociabilis
+Double-toothed Kite
+Double-toothed Kite
+Harpagus bidentatus
+Mississippi Kite
+Mississippi Kite
+Ictinia mississippiensis
+Plumbeous Kite
+Plumbeous Kite
+Ictinia plumbea
+Western Marsh Harrier
+Western Marsh Harrier
+Circus aeruginosus
+Long-winged Harrier
+Long-winged Harrier
+Circus buffoni
+Hen Harrier
+Hen Harrier
+Circus cyaneus
+Northern Harrier
+Northern Harrier
+Circus hudsonius
+Chinese Sparrowhawk
+Chinese Sparrowhawk
+Accipiter soloensis
+Eurasian Sparrowhawk
+Eurasian Sparrowhawk
+Accipiter nisus
+Sharp-shinned Hawk
+Sharp-shinned Hawk
+Accipiter striatus
+Cooper's Hawk
+Cooper's Hawk
+Accipiter cooperii
+Bicolored Hawk
+Bicolored Hawk
+Accipiter bicolor
+American Goshawk
+American Goshawk
+Accipiter atricapillus
+Black Kite
+Black Kite
+Milvus migrans
+Bald Eagle
+Bald Eagle
+Haliaeetus leucocephalus
+Crane Hawk
+Crane Hawk
+Geranospiza caerulescens
+Plumbeous Hawk
+Plumbeous Hawk
+Cryptoleucopteryx plumbea
+Common Black Hawk
+Common Black Hawk
+Buteogallus anthracinus
+Savanna Hawk
+Savanna Hawk
+Buteogallus meridionalis
+Great Black Hawk
+Great Black Hawk
+Buteogallus urubitinga
+Barred Hawk
+Barred Hawk
+Morphnarchus princeps
+Roadside Hawk
+Roadside Hawk
+Rupornis magnirostris
+Harris's Hawk
+Harris's Hawk
+Parabuteo unicinctus
+White-tailed Hawk
+White-tailed Hawk
+Geranoaetus albicaudatus
+Variable Hawk
+Variable Hawk
+Geranoaetus polyosoma
+White Hawk
+White Hawk
+Pseudastur albicollis
+Semiplumbeous Hawk
+Semiplumbeous Hawk
+Leucopternis semiplumbeus
+Gray Hawk
+Gray Hawk
+Buteo plagiatus
+Gray-lined Hawk
+Gray-lined Hawk
+Buteo nitidus
+Red-shouldered Hawk
+Red-shouldered Hawk
+Buteo lineatus
+Broad-winged Hawk
+Broad-winged Hawk
+Buteo platypterus
+Short-tailed Hawk
+Short-tailed Hawk
+Buteo brachyurus
+Swainson's Hawk
+Swainson's Hawk
+Buteo swainsoni
+Zone-tailed Hawk
+Zone-tailed Hawk
+Buteo albonotatus
+Red-tailed Hawk
+Red-tailed Hawk
+Buteo jamaicensis
+Rough-legged Hawk
+Rough-legged Hawk
+Buteo lagopus
+Ferruginous Hawk
+Ferruginous Hawk
+Buteo regalis
+STRIGIFORMES
+25 SPECIES
+Tytonidae
+Barn-Owls
+1 SPECIES HIDE
+Barn Owl
+Barn Owl
+Tyto alba
+Strigidae
+Owls
+24 SPECIES HIDE
+Flammulated Owl
+Flammulated Owl
+Psiloscops flammeolus
+Whiskered Screech-Owl
+Whiskered Screech-Owl
+Megascops trichopsis
+Bearded Screech-Owl
+Bearded Screech-Owl
+Megascops barbarus
+Pacific Screech-Owl
+Pacific Screech-Owl
+Megascops cooperi
+Western Screech-Owl
+Western Screech-Owl
+Megascops kennicottii
+Eastern Screech-Owl
+Eastern Screech-Owl
+Megascops asio
+Spectacled Owl
+Spectacled Owl
+Pulsatrix perspicillata
+Snowy Owl
+Snowy Owl
+Bubo scandiacus
+Great Horned Owl
+Great Horned Owl
+Bubo virginianus
+Northern Hawk Owl
+Northern Hawk Owl
+Surnia ulula
+Northern Pygmy-Owl
+Northern Pygmy-Owl
+Glaucidium gnoma
+Costa Rican Pygmy-Owl
+Costa Rican Pygmy-Owl
+Glaucidium costaricanum
+Central American Pygmy-Owl
+Central American Pygmy-Owl
+Glaucidium griseiceps
+Ferruginous Pygmy-Owl
+Ferruginous Pygmy-Owl
+Glaucidium brasilianum
+Burrowing Owl
+Burrowing Owl
+Athene cunicularia
+Mottled Owl
+Mottled Owl
+Strix virgata
+Black-and-white Owl
+Black-and-white Owl
+Strix nigrolineata
+Spotted Owl
+Spotted Owl
+Strix occidentalis
+Barred Owl
+Barred Owl
+Strix varia
+Fulvous Owl
+Fulvous Owl
+Strix fulvescens
+Long-eared Owl
+Long-eared Owl
+Asio otus
+Short-eared Owl
+Short-eared Owl
+Asio flammeus
+Northern Saw-whet Owl
+Northern Saw-whet Owl
+Aegolius acadicus
+Unspotted Saw-whet Owl
+Unspotted Saw-whet Owl
+Aegolius ridgwayi
+TROGONIFORMES
+11 SPECIES
+Trogonidae
+Trogons
+11 SPECIES HIDE
+Golden-headed Quetzal
+Golden-headed Quetzal
+Pharomachrus auriceps
+Resplendent Quetzal
+Resplendent Quetzal
+Pharomachrus mocinno
+Lattice-tailed Trogon
+Lattice-tailed Trogon
+Trogon clathratus
+Slaty-tailed Trogon
+Slaty-tailed Trogon
+Trogon massena
+Black-headed Trogon
+Black-headed Trogon
+Trogon melanocephalus
+Citreoline Trogon
+Citreoline Trogon
+Trogon citreolus
+Baird's Trogon
+Baird's Trogon
+Trogon bairdii
+Gartered Trogon
+Gartered Trogon
+Trogon caligatus
+Elegant Trogon
+Elegant Trogon
+Trogon elegans
+Mountain Trogon
+Mountain Trogon
+Trogon mexicanus
+Collared Trogon
+Collared Trogon
+Trogon collaris
+BUCEROTIFORMES
+2 SPECIES
+Upupidae
+Hoopoes
+1 SPECIES HIDE
+Eurasian Hoopoe
+Eurasian Hoopoe
+Upupa epops
+Bucerotidae
+Hornbills
+1 SPECIES HIDE
+Oriental Pied-Hornbill
+Oriental Pied-Hornbill
+Anthracoceros albirostris
+CORACIIFORMES
+21 SPECIES
+Todidae
+Todies
+1 SPECIES HIDE
+Puerto Rican Tody
+Puerto Rican Tody
+Todus mexicanus
+Momotidae
+Motmots
+10 SPECIES HIDE
+Tody Motmot
+Tody Motmot
+Hylomanes momotula
+Blue-throated Motmot
+Blue-throated Motmot
+Aspatha gularis
+Russet-crowned Motmot
+Russet-crowned Motmot
+Momotus mexicanus
+Blue-capped Motmot
+Blue-capped Motmot
+Momotus coeruliceps
+Lesson's Motmot
+Lesson's Motmot
+Momotus lessonii
+Whooping Motmot
+Whooping Motmot
+Momotus subrufescens
+Rufous Motmot
+Rufous Motmot
+Baryphthengus martii
+Keel-billed Motmot
+Keel-billed Motmot
+Electron carinatum
+Broad-billed Motmot
+Broad-billed Motmot
+Electron platyrhynchum
+Turquoise-browed Motmot
+Turquoise-browed Motmot
+Eumomota superciliosa
+Alcedinidae
+Kingfishers
+8 SPECIES HIDE
+Common Kingfisher
+Common Kingfisher
+Alcedo atthis
+Laughing Kookaburra
+Laughing Kookaburra
+Dacelo novaeguineae
+Ringed Kingfisher
+Ringed Kingfisher
+Megaceryle torquata
+Belted Kingfisher
+Belted Kingfisher
+Megaceryle alcyon
+Amazon Kingfisher
+Amazon Kingfisher
+Chloroceryle amazona
+American Pygmy Kingfisher
+American Pygmy Kingfisher
+Chloroceryle aenea
+Green Kingfisher
+Green Kingfisher
+Chloroceryle americana
+Green-and-rufous Kingfisher
+Green-and-rufous Kingfisher
+Chloroceryle inda
+Meropidae
+Bee-eaters
+1 SPECIES HIDE
+European Bee-eater
+European Bee-eater
+Merops apiaster
+Coraciidae
+Rollers
+1 SPECIES HIDE
+Lilac-breasted Roller
+Lilac-breasted Roller
+Coracias caudatus
+GALBULIFORMES
+6 SPECIES
+Bucconidae
+Puffbirds
+3 SPECIES HIDE
+Black-breasted Puffbird
+Black-breasted Puffbird
+Notharchus pectoralis
+Barred Puffbird
+Barred Puffbird
+Nystalus radiatus
+Gray-cheeked Nunlet
+Gray-cheeked Nunlet
+Nonnula frontalis
+Galbulidae
+Jacamars
+3 SPECIES HIDE
+Dusky-backed Jacamar
+Dusky-backed Jacamar
+Brachygalba salmoni
+Rufous-tailed Jacamar
+Rufous-tailed Jacamar
+Galbula ruficauda
+Great Jacamar
+Great Jacamar
+Jacamerops aureus
+PICIFORMES
+52 SPECIES
+Capitonidae
+New World Barbets
+2 SPECIES HIDE
+Spot-crowned Barbet
+Spot-crowned Barbet
+Capito maculicoronatus
+Red-headed Barbet
+Red-headed Barbet
+Eubucco bourcierii
+Semnornithidae
+Toucan-Barbets
+1 SPECIES HIDE
+Prong-billed Barbet
+Prong-billed Barbet
+Semnornis frantzii
+Ramphastidae
+Toucans
+5 SPECIES HIDE
+Northern Emerald-Toucanet
+Northern Emerald-Toucanet
+Aulacorhynchus prasinus
+Collared Aracari
+Collared Aracari
+Pteroglossus torquatus
+Yellow-eared Toucanet
+Yellow-eared Toucanet
+Selenidera spectabilis
+Yellow-throated Toucan
+Yellow-throated Toucan
+Ramphastos ambiguus
+Keel-billed Toucan
+Keel-billed Toucan
+Ramphastos sulfuratus
+Picidae
+Woodpeckers
+44 SPECIES HIDE
+Eurasian Wryneck
+Eurasian Wryneck
+Jynx torquilla
+Williamson's Sapsucker
+Williamson's Sapsucker
+Sphyrapicus thyroideus
+Yellow-bellied Sapsucker
+Yellow-bellied Sapsucker
+Sphyrapicus varius
+Red-naped Sapsucker
+Red-naped Sapsucker
+Sphyrapicus nuchalis
+Red-breasted Sapsucker
+Red-breasted Sapsucker
+Sphyrapicus ruber
+Lewis's Woodpecker
+Lewis's Woodpecker
+Melanerpes lewis
+Puerto Rican Woodpecker
+Puerto Rican Woodpecker
+Melanerpes portoricensis
+Red-headed Woodpecker
+Red-headed Woodpecker
+Melanerpes erythrocephalus
+Acorn Woodpecker
+Acorn Woodpecker
+Melanerpes formicivorus
+Golden-naped Woodpecker
+Golden-naped Woodpecker
+Melanerpes chrysauchen
+Black-cheeked Woodpecker
+Black-cheeked Woodpecker
+Melanerpes pucherani
+Hispaniolan Woodpecker
+Hispaniolan Woodpecker
+Melanerpes striatus
+Golden-cheeked Woodpecker
+Golden-cheeked Woodpecker
+Melanerpes chrysogenys
+Yucatan Woodpecker
+Yucatan Woodpecker
+Melanerpes pygmaeus
+Red-crowned Woodpecker
+Red-crowned Woodpecker
+Melanerpes rubricapillus
+Gila Woodpecker
+Gila Woodpecker
+Melanerpes uropygialis
+Hoffmann's Woodpecker
+Hoffmann's Woodpecker
+Melanerpes hoffmannii
+Golden-fronted Woodpecker
+Golden-fronted Woodpecker
+Melanerpes aurifrons
+Red-bellied Woodpecker
+Red-bellied Woodpecker
+Melanerpes carolinus
+West Indian Woodpecker
+West Indian Woodpecker
+Melanerpes superciliaris
+American Three-toed Woodpecker
+American Three-toed Woodpecker
+Picoides dorsalis
+Black-backed Woodpecker
+Black-backed Woodpecker
+Picoides arcticus
+Great Spotted Woodpecker
+Great Spotted Woodpecker
+Dendrocopos major
+Downy Woodpecker
+Downy Woodpecker
+Dryobates pubescens
+Nuttall's Woodpecker
+Nuttall's Woodpecker
+Dryobates nuttallii
+Ladder-backed Woodpecker
+Ladder-backed Woodpecker
+Dryobates scalaris
+Red-cockaded Woodpecker
+Red-cockaded Woodpecker
+Dryobates borealis
+Hairy Woodpecker
+Hairy Woodpecker
+Dryobates villosus
+White-headed Woodpecker
+White-headed Woodpecker
+Dryobates albolarvatus
+Smoky-brown Woodpecker
+Smoky-brown Woodpecker
+Dryobates fumigatus
+Arizona Woodpecker
+Arizona Woodpecker
+Dryobates arizonae
+Red-rumped Woodpecker
+Red-rumped Woodpecker
+Dryobates kirkii
+Crimson-crested Woodpecker
+Crimson-crested Woodpecker
+Campephilus melanoleucos
+Pale-billed Woodpecker
+Pale-billed Woodpecker
+Campephilus guatemalensis
+Lineated Woodpecker
+Lineated Woodpecker
+Dryocopus lineatus
+Pileated Woodpecker
+Pileated Woodpecker
+Dryocopus pileatus
+Cinnamon Woodpecker
+Cinnamon Woodpecker
+Celeus loricatus
+Chestnut-colored Woodpecker
+Chestnut-colored Woodpecker
+Celeus castaneus
+Rufous-winged Woodpecker
+Rufous-winged Woodpecker
+Piculus simplex
+Stripe-cheeked Woodpecker
+Stripe-cheeked Woodpecker
+Piculus callopterus
+Golden-green Woodpecker
+Golden-green Woodpecker
+Piculus chrysochloros
+Golden-olive Woodpecker
+Golden-olive Woodpecker
+Colaptes rubiginosus
+Northern Flicker
+Northern Flicker
+Colaptes auratus
+Gilded Flicker
+Gilded Flicker
+Colaptes chrysoides
+FALCONIFORMES
+15 SPECIES
+Falconidae
+Falcons and Caracaras
+15 SPECIES HIDE
+Laughing Falcon
+Laughing Falcon
+Herpetotheres cachinnans
+Collared Forest-Falcon
+Collared Forest-Falcon
+Micrastur semitorquatus
+Slaty-backed Forest-Falcon
+Slaty-backed Forest-Falcon
+Micrastur mirandollei
+Barred Forest-Falcon
+Barred Forest-Falcon
+Micrastur ruficollis
+Crested Caracara
+Crested Caracara
+Caracara plancus
+Red-throated Caracara
+Red-throated Caracara
+Ibycter americanus
+Yellow-headed Caracara
+Yellow-headed Caracara
+Daptrius chimachima
+Eurasian Kestrel
+Eurasian Kestrel
+Falco tinnunculus
+American Kestrel
+American Kestrel
+Falco sparverius
+Red-footed Falcon
+Red-footed Falcon
+Falco vespertinus
+Merlin
+Merlin
+Falco columbarius
+Aplomado Falcon
+Aplomado Falcon
+Falco femoralis
+Bat Falcon
+Bat Falcon
+Falco rufigularis
+Peregrine Falcon
+Peregrine Falcon
+Falco peregrinus
+Prairie Falcon
+Prairie Falcon
+Falco mexicanus
+PSITTACIFORMES
+56 SPECIES
+Cacatuidae
+Cockatoos
+4 SPECIES HIDE
+Cockatiel
+Cockatiel
+Nymphicus hollandicus
+Galah
+Galah
+Eolophus roseicapilla
+Little Corella
+Little Corella
+Cacatua sanguinea
+Sulphur-crested Cockatoo
+Sulphur-crested Cockatoo
+Cacatua galerita
+Psittaculidae
+Old World Parrots
+11 SPECIES HIDE
+Alexandrine Parakeet
+Alexandrine Parakeet
+Psittacula eupatria
+Rose-ringed Parakeet
+Rose-ringed Parakeet
+Psittacula krameri
+Plum-headed Parakeet
+Plum-headed Parakeet
+Psittacula cyanocephala
+Malabar Parakeet
+Malabar Parakeet
+Psittacula columboides
+Crimson Rosella
+Crimson Rosella
+Platycercus elegans
+Eastern Rosella
+Eastern Rosella
+Platycercus eximius
+Red-rumped Parrot
+Red-rumped Parrot
+Psephotus haematonotus
+Budgerigar
+Budgerigar
+Melopsittacus undulatus
+Little Lorikeet
+Little Lorikeet
+Parvipsitta pusilla
+Rainbow Lorikeet
+Rainbow Lorikeet
+Trichoglossus moluccanus
+Rosy-faced Lovebird
+Rosy-faced Lovebird
+Agapornis roseicollis
+Psittacidae
+New World and African Parrots
+41 SPECIES HIDE
+Red-fronted Parrotlet
+Red-fronted Parrotlet
+Touit costaricensis
+Barred Parakeet
+Barred Parakeet
+Bolborhynchus lineola
+Monk Parakeet
+Monk Parakeet
+Myiopsitta monachus
+White-winged Parakeet
+White-winged Parakeet
+Brotogeris versicolurus
+Yellow-chevroned Parakeet
+Yellow-chevroned Parakeet
+Brotogeris chiriri
+Orange-chinned Parakeet
+Orange-chinned Parakeet
+Brotogeris jugularis
+Brown-hooded Parrot
+Brown-hooded Parrot
+Pyrilia haematotis
+Saffron-headed Parrot
+Saffron-headed Parrot
+Pyrilia pyrilia
+Scaly-headed Parrot
+Scaly-headed Parrot
+Pionus maximiliani
+Blue-headed Parrot
+Blue-headed Parrot
+Pionus menstruus
+White-crowned Parrot
+White-crowned Parrot
+Pionus senilis
+Red-crowned Parrot
+Red-crowned Parrot
+Amazona viridigenalis
+Lilac-crowned Parrot
+Lilac-crowned Parrot
+Amazona finschi
+Red-lored Parrot
+Red-lored Parrot
+Amazona autumnalis
+Yellow-naped Parrot
+Yellow-naped Parrot
+Amazona auropalliata
+Yellow-crowned Parrot
+Yellow-crowned Parrot
+Amazona ochrocephala
+Turquoise-fronted Parrot
+Turquoise-fronted Parrot
+Amazona aestiva
+White-fronted Parrot
+White-fronted Parrot
+Amazona albifrons
+Yellow-lored Parrot
+Yellow-lored Parrot
+Amazona xantholora
+Mealy Parrot
+Mealy Parrot
+Amazona farinosa
+Orange-winged Parrot
+Orange-winged Parrot
+Amazona amazonica
+Green-rumped Parrotlet
+Green-rumped Parrotlet
+Forpus passerinus
+Painted Parakeet
+Painted Parakeet
+Pyrrhura picta
+Sulphur-winged Parakeet
+Sulphur-winged Parakeet
+Pyrrhura hoffmanni
+Maroon-fronted Parrot
+Maroon-fronted Parrot
+Rhynchopsitta terrisi
+Olive-throated Parakeet
+Olive-throated Parakeet
+Eupsittula nana
+Orange-fronted Parakeet
+Orange-fronted Parakeet
+Eupsittula canicularis
+Brown-throated Parakeet
+Brown-throated Parakeet
+Eupsittula pertinax
+Nanday Parakeet
+Nanday Parakeet
+Aratinga nenday
+Blue-and-yellow Macaw
+Blue-and-yellow Macaw
+Ara ararauna
+Chestnut-fronted Macaw
+Chestnut-fronted Macaw
+Ara severus
+Great Green Macaw
+Great Green Macaw
+Ara ambiguus
+Scarlet Macaw
+Scarlet Macaw
+Ara macao
+Red-and-green Macaw
+Red-and-green Macaw
+Ara chloropterus
+Blue-crowned Parakeet
+Blue-crowned Parakeet
+Thectocercus acuticaudatus
+Green Parakeet
+Green Parakeet
+Psittacara holochlorus
+Pacific Parakeet
+Pacific Parakeet
+Psittacara strenuus
+Crimson-fronted Parakeet
+Crimson-fronted Parakeet
+Psittacara finschi
+Mitred Parakeet
+Mitred Parakeet
+Psittacara mitratus
+Red-masked Parakeet
+Red-masked Parakeet
+Psittacara erythrogenys
+White-eyed Parakeet
+White-eyed Parakeet
+Psittacara leucophthalmus
+PASSERIFORMES
+776 SPECIES
+Sapayoidae
+Sapayoa
+1 SPECIES HIDE
+Sapayoa
+Sapayoa
+Sapayoa aenigma
+Thamnophilidae
+Typical Antbirds
+22 SPECIES HIDE
+Rufous-rumped Antwren
+Rufous-rumped Antwren
+Euchrepomis callinota
+Fasciated Antshrike
+Fasciated Antshrike
+Cymbilaimus lineatus
+Great Antshrike
+Great Antshrike
+Taraba major
+Barred Antshrike
+Barred Antshrike
+Thamnophilus doliatus
+Black-crowned Antshrike
+Black-crowned Antshrike
+Thamnophilus atrinucha
+Black Antshrike
+Black Antshrike
+Thamnophilus nigriceps
+Russet Antshrike
+Russet Antshrike
+Thamnistes anabatinus
+Spot-crowned Antvireo
+Spot-crowned Antvireo
+Dysithamnus puncticeps
+Checker-throated Stipplethroat
+Checker-throated Stipplethroat
+Epinecrophylla fulviventris
+Pacific Antwren
+Pacific Antwren
+Myrmotherula pacifica
+White-flanked Antwren
+White-flanked Antwren
+Myrmotherula axillaris
+Slaty Antwren
+Slaty Antwren
+Myrmotherula schisticolor
+Dusky Antbird
+Dusky Antbird
+Cercomacroides tyrannina
+Jet Antbird
+Jet Antbird
+Cercomacra nigricans
+Bare-crowned Antbird
+Bare-crowned Antbird
+Gymnocichla nudiceps
+White-bellied Antbird
+White-bellied Antbird
+Myrmeciza longipes
+Dull-mantled Antbird
+Dull-mantled Antbird
+Sipia laemosticta
+Zeledon's Antbird
+Zeledon's Antbird
+Hafferia zeledoni
+Wing-banded Antbird
+Wing-banded Antbird
+Myrmornis torquata
+Bicolored Antbird
+Bicolored Antbird
+Gymnopithys bicolor
+Spotted Antbird
+Spotted Antbird
+Hylophylax naevioides
+Ocellated Antbird
+Ocellated Antbird
+Phaenostictus mcleannani
+Conopophagidae
+Gnateaters
+1 SPECIES HIDE
+Black-crowned Antpitta
+Black-crowned Antpitta
+Pittasoma michleri
+Grallariidae
+Antpittas
+2 SPECIES HIDE
+Thicket Antpitta
+Thicket Antpitta
+Myrmothera dives
+Ochre-breasted Antpitta
+Ochre-breasted Antpitta
+Grallaricula flavirostris
+Rhinocryptidae
+Tapaculos
+1 SPECIES HIDE
+Silvery-fronted Tapaculo
+Silvery-fronted Tapaculo
+Scytalopus argentifrons
+Formicariidae
+Antthrushes
+4 SPECIES HIDE
+Mayan Antthrush
+Mayan Antthrush
+Formicarius moniliger
+Black-faced Antthrush
+Black-faced Antthrush
+Formicarius analis
+Black-headed Antthrush
+Black-headed Antthrush
+Formicarius nigricapillus
+Rufous-breasted Antthrush
+Rufous-breasted Antthrush
+Formicarius rufipectus
+Furnariidae
+Ovenbirds and Woodcreepers
+24 SPECIES HIDE
+Olivaceous Woodcreeper
+Olivaceous Woodcreeper
+Sittasomus griseicapillus
+Ruddy Woodcreeper
+Ruddy Woodcreeper
+Dendrocincla homochroa
+Plain-brown Woodcreeper
+Plain-brown Woodcreeper
+Dendrocincla fuliginosa
+Wedge-billed Woodcreeper
+Wedge-billed Woodcreeper
+Glyphorynchus spirurus
+Northern Barred-Woodcreeper
+Northern Barred-Woodcreeper
+Dendrocolaptes sanctithomae
+Black-banded Woodcreeper
+Black-banded Woodcreeper
+Dendrocolaptes picumnus
+Strong-billed Woodcreeper
+Strong-billed Woodcreeper
+Xiphocolaptes promeropirhynchus
+Cocoa Woodcreeper
+Cocoa Woodcreeper
+Xiphorhynchus susurrans
+Ivory-billed Woodcreeper
+Ivory-billed Woodcreeper
+Xiphorhynchus flavigaster
+Spotted Woodcreeper
+Spotted Woodcreeper
+Xiphorhynchus erythropygius
+Straight-billed Woodcreeper
+Straight-billed Woodcreeper
+Dendroplex picus
+Brown-billed Scythebill
+Brown-billed Scythebill
+Campylorhamphus pusillus
+Streak-headed Woodcreeper
+Streak-headed Woodcreeper
+Lepidocolaptes souleyetii
+Spot-crowned Woodcreeper
+Spot-crowned Woodcreeper
+Lepidocolaptes affinis
+Plain Xenops
+Plain Xenops
+Xenops minutus
+Slaty-winged Foliage-gleaner
+Slaty-winged Foliage-gleaner
+Philydor fuscipenne
+Ruddy Foliage-gleaner
+Ruddy Foliage-gleaner
+Clibanornis rubiginosus
+Streak-breasted Treehunter
+Streak-breasted Treehunter
+Thripadectes rufobrunneus
+Ochre-throated Foliage-gleaner
+Ochre-throated Foliage-gleaner
+Automolus ochrolaemus
+Spotted Barbtail
+Spotted Barbtail
+Premnoplex brunnescens
+Ruddy Treerunner
+Ruddy Treerunner
+Margarornis rubiginosus
+Double-banded Graytail
+Double-banded Graytail
+Xenerpestes minlosi
+Pale-breasted Spinetail
+Pale-breasted Spinetail
+Synallaxis albescens
+Rufous-breasted Spinetail
+Rufous-breasted Spinetail
+Synallaxis erythrothorax
+Pipridae
+Manakins
+7 SPECIES HIDE
+Lance-tailed Manakin
+Lance-tailed Manakin
+Chiroxiphia lanceolata
+Long-tailed Manakin
+Long-tailed Manakin
+Chiroxiphia linearis
+White-ruffed Manakin
+White-ruffed Manakin
+Corapipo altera
+White-collared Manakin
+White-collared Manakin
+Manacus candei
+Golden-collared Manakin
+Golden-collared Manakin
+Manacus vitellinus
+White-crowned Manakin
+White-crowned Manakin
+Pseudopipra pipra
+Red-capped Manakin
+Red-capped Manakin
+Ceratopipra mentalis
+Cotingidae
+Cotingas
+6 SPECIES HIDE
+Purple-throated Fruitcrow
+Purple-throated Fruitcrow
+Querula purpurata
+Blue Cotinga
+Blue Cotinga
+Cotinga nattererii
+Rufous Piha
+Rufous Piha
+Lipaugus unirufus
+Three-wattled Bellbird
+Three-wattled Bellbird
+Procnias tricarunculatus
+Black-tipped Cotinga
+Black-tipped Cotinga
+Carpodectes hopkei
+Snowy Cotinga
+Snowy Cotinga
+Carpodectes nitidus
+Tityridae
+Tityras and Allies
+8 SPECIES HIDE
+Black-crowned Tityra
+Black-crowned Tityra
+Tityra inquisitor
+Masked Tityra
+Masked Tityra
+Tityra semifasciata
+Northern Schiffornis
+Northern Schiffornis
+Schiffornis veraepacis
+Russet-winged Schiffornis
+Russet-winged Schiffornis
+Schiffornis stenorhyncha
+Cinnamon Becard
+Cinnamon Becard
+Pachyramphus cinnamomeus
+White-winged Becard
+White-winged Becard
+Pachyramphus polychopterus
+Gray-collared Becard
+Gray-collared Becard
+Pachyramphus major
+Rose-throated Becard
+Rose-throated Becard
+Pachyramphus aglaiae
+Oxyruncidae
+Sharpbill, Royal Flycatcher, and Allies
+4 SPECIES HIDE
+Tropical Royal Flycatcher
+Tropical Royal Flycatcher
+Onychorhynchus coronatus
+Ruddy-tailed Flycatcher
+Ruddy-tailed Flycatcher
+Terenotriccus erythrurus
+Tawny-breasted Flycatcher
+Tawny-breasted Flycatcher
+Myiobius villosus
+Sulphur-rumped Flycatcher
+Sulphur-rumped Flycatcher
+Myiobius sulphureipygius
+Tyrannidae
+Tyrant Flycatchers
+89 SPECIES HIDE
+Stub-tailed Spadebill
+Stub-tailed Spadebill
+Platyrinchus cancrominus
+Golden-crowned Spadebill
+Golden-crowned Spadebill
+Platyrinchus coronatus
+Olive-striped Flycatcher
+Olive-striped Flycatcher
+Mionectes galbinus
+Ochre-bellied Flycatcher
+Ochre-bellied Flycatcher
+Mionectes oleagineus
+Sepia-capped Flycatcher
+Sepia-capped Flycatcher
+Leptopogon amaurocephalus
+Slaty-capped Flycatcher
+Slaty-capped Flycatcher
+Leptopogon superciliaris
+Bronze-olive Pygmy-Tyrant
+Bronze-olive Pygmy-Tyrant
+Pseudotriccus pelzelni
+Black-capped Pygmy-Tyrant
+Black-capped Pygmy-Tyrant
+Myiornis atricapillus
+Scale-crested Pygmy-Tyrant
+Scale-crested Pygmy-Tyrant
+Lophotriccus pileatus
+Northern Bentbill
+Northern Bentbill
+Oncostoma cinereigulare
+Slate-headed Tody-Flycatcher
+Slate-headed Tody-Flycatcher
+Poecilotriccus sylvia
+Common Tody-Flycatcher
+Common Tody-Flycatcher
+Todirostrum cinereum
+Black-headed Tody-Flycatcher
+Black-headed Tody-Flycatcher
+Todirostrum nigriceps
+Brownish Twistwing
+Brownish Twistwing
+Cnipodectes subbrunneus
+Eye-ringed Flatbill
+Eye-ringed Flatbill
+Rhynchocyclus brevirostris
+Yellow-olive Flatbill
+Yellow-olive Flatbill
+Tolmomyias sulphurescens
+Brown-capped Tyrannulet
+Brown-capped Tyrannulet
+Ornithion brunneicapillus
+Northern Beardless-Tyrannulet
+Northern Beardless-Tyrannulet
+Camptostoma imberbe
+Southern Beardless-Tyrannulet
+Southern Beardless-Tyrannulet
+Camptostoma obsoletum
+Yellow Tyrannulet
+Yellow Tyrannulet
+Capsiempis flaveola
+Yellow-crowned Tyrannulet
+Yellow-crowned Tyrannulet
+Tyrannulus elatus
+Forest Elaenia
+Forest Elaenia
+Myiopagis gaimardii
+Greenish Elaenia
+Greenish Elaenia
+Myiopagis viridicata
+Yellow-bellied Elaenia
+Yellow-bellied Elaenia
+Elaenia flavogaster
+Small-billed Elaenia
+Small-billed Elaenia
+Elaenia parvirostris
+White-crested Elaenia
+White-crested Elaenia
+Elaenia albiceps
+Mountain Elaenia
+Mountain Elaenia
+Elaenia frantzii
+Caribbean Elaenia
+Caribbean Elaenia
+Elaenia martinica
+Mistletoe Tyrannulet
+Mistletoe Tyrannulet
+Zimmerius parvus
+Bran-colored Flycatcher
+Bran-colored Flycatcher
+Myiophobus fasciatus
+Black-billed Flycatcher
+Black-billed Flycatcher
+Aphanotriccus audax
+Tufted Flycatcher
+Tufted Flycatcher
+Mitrephanes phaeocercus
+Olive-sided Flycatcher
+Olive-sided Flycatcher
+Contopus cooperi
+Greater Pewee
+Greater Pewee
+Contopus pertinax
+Dark Pewee
+Dark Pewee
+Contopus lugubris
+Western Wood-Pewee
+Western Wood-Pewee
+Contopus sordidulus
+Eastern Wood-Pewee
+Eastern Wood-Pewee
+Contopus virens
+Cuban Pewee
+Cuban Pewee
+Contopus caribaeus
+Yellow-bellied Flycatcher
+Yellow-bellied Flycatcher
+Empidonax flaviventris
+Acadian Flycatcher
+Acadian Flycatcher
+Empidonax virescens
+Alder Flycatcher
+Alder Flycatcher
+Empidonax alnorum
+Willow Flycatcher
+Willow Flycatcher
+Empidonax traillii
+Least Flycatcher
+Least Flycatcher
+Empidonax minimus
+Hammond's Flycatcher
+Hammond's Flycatcher
+Empidonax hammondii
+Gray Flycatcher
+Gray Flycatcher
+Empidonax wrightii
+Dusky Flycatcher
+Dusky Flycatcher
+Empidonax oberholseri
+Western Flycatcher
+Western Flycatcher
+Empidonax difficilis
+Yellowish Flycatcher
+Yellowish Flycatcher
+Empidonax flavescens
+Buff-breasted Flycatcher
+Buff-breasted Flycatcher
+Empidonax fulvifrons
+Black-capped Flycatcher
+Black-capped Flycatcher
+Empidonax atriceps
+Black Phoebe
+Black Phoebe
+Sayornis nigricans
+Eastern Phoebe
+Eastern Phoebe
+Sayornis phoebe
+Say's Phoebe
+Say's Phoebe
+Sayornis saya
+Northern Scrub-Flycatcher
+Northern Scrub-Flycatcher
+Sublegatus arenarum
+Vermilion Flycatcher
+Vermilion Flycatcher
+Pyrocephalus rubinus
+Pied Water-Tyrant
+Pied Water-Tyrant
+Fluvicola pica
+Long-tailed Tyrant
+Long-tailed Tyrant
+Colonia colonus
+Bright-rumped Attila
+Bright-rumped Attila
+Attila spadiceus
+Rufous Mourner
+Rufous Mourner
+Rhytipterna holerythra
+Yucatan Flycatcher
+Yucatan Flycatcher
+Myiarchus yucatanensis
+Dusky-capped Flycatcher
+Dusky-capped Flycatcher
+Myiarchus tuberculifer
+Panama Flycatcher
+Panama Flycatcher
+Myiarchus panamensis
+Ash-throated Flycatcher
+Ash-throated Flycatcher
+Myiarchus cinerascens
+Nutting's Flycatcher
+Nutting's Flycatcher
+Myiarchus nuttingi
+Great Crested Flycatcher
+Great Crested Flycatcher
+Myiarchus crinitus
+Brown-crested Flycatcher
+Brown-crested Flycatcher
+Myiarchus tyrannulus
+La Sagra's Flycatcher
+La Sagra's Flycatcher
+Myiarchus sagrae
+Puerto Rican Flycatcher
+Puerto Rican Flycatcher
+Myiarchus antillarum
+Cattle Tyrant
+Cattle Tyrant
+Machetornis rixosa
+Lesser Kiskadee
+Lesser Kiskadee
+Philohydor lictor
+Great Kiskadee
+Great Kiskadee
+Pitangus sulphuratus
+Boat-billed Flycatcher
+Boat-billed Flycatcher
+Megarynchus pitangua
+Rusty-margined Flycatcher
+Rusty-margined Flycatcher
+Myiozetetes cayanensis
+Social Flycatcher
+Social Flycatcher
+Myiozetetes similis
+Gray-capped Flycatcher
+Gray-capped Flycatcher
+Myiozetetes granadensis
+Streaked Flycatcher
+Streaked Flycatcher
+Myiodynastes maculatus
+Sulphur-bellied Flycatcher
+Sulphur-bellied Flycatcher
+Myiodynastes luteiventris
+Piratic Flycatcher
+Piratic Flycatcher
+Legatus leucophaius
+Crowned Slaty Flycatcher
+Crowned Slaty Flycatcher
+Empidonomus aurantioatrocristatus
+Tropical Kingbird
+Tropical Kingbird
+Tyrannus melancholicus
+Couch's Kingbird
+Couch's Kingbird
+Tyrannus couchii
+Cassin's Kingbird
+Cassin's Kingbird
+Tyrannus vociferans
+Thick-billed Kingbird
+Thick-billed Kingbird
+Tyrannus crassirostris
+Western Kingbird
+Western Kingbird
+Tyrannus verticalis
+Eastern Kingbird
+Eastern Kingbird
+Tyrannus tyrannus
+Gray Kingbird
+Gray Kingbird
+Tyrannus dominicensis
+Loggerhead Kingbird
+Loggerhead Kingbird
+Tyrannus caudifasciatus
+Scissor-tailed Flycatcher
+Scissor-tailed Flycatcher
+Tyrannus forficatus
+Fork-tailed Flycatcher
+Fork-tailed Flycatcher
+Tyrannus savana
+Vireonidae
+Vireos, Shrike-Babblers, and Erpornis
+26 SPECIES HIDE
+Rufous-browed Peppershrike
+Rufous-browed Peppershrike
+Cyclarhis gujanensis
+Scrub Greenlet
+Scrub Greenlet
+Hylophilus flavipes
+Chestnut-sided Shrike-Vireo
+Chestnut-sided Shrike-Vireo
+Vireolanius melitophrys
+Green Shrike-Vireo
+Green Shrike-Vireo
+Vireolanius pulchellus
+Tawny-crowned Greenlet
+Tawny-crowned Greenlet
+Tunchiornis ochraceiceps
+Lesser Greenlet
+Lesser Greenlet
+Pachysylvia decurtata
+Golden Vireo
+Golden Vireo
+Vireo hypochryseus
+Black-capped Vireo
+Black-capped Vireo
+Vireo atricapilla
+White-eyed Vireo
+White-eyed Vireo
+Vireo griseus
+Thick-billed Vireo
+Thick-billed Vireo
+Vireo crassirostris
+Mangrove Vireo
+Mangrove Vireo
+Vireo pallens
+Bell's Vireo
+Bell's Vireo
+Vireo bellii
+Gray Vireo
+Gray Vireo
+Vireo vicinior
+Hutton's Vireo
+Hutton's Vireo
+Vireo huttoni
+Yellow-throated Vireo
+Yellow-throated Vireo
+Vireo flavifrons
+Yellow-winged Vireo
+Yellow-winged Vireo
+Vireo carmioli
+Cassin's Vireo
+Cassin's Vireo
+Vireo cassinii
+Blue-headed Vireo
+Blue-headed Vireo
+Vireo solitarius
+Plumbeous Vireo
+Plumbeous Vireo
+Vireo plumbeus
+Philadelphia Vireo
+Philadelphia Vireo
+Vireo philadelphicus
+Warbling Vireo
+Warbling Vireo
+Vireo gilvus
+Brown-capped Vireo
+Brown-capped Vireo
+Vireo leucophrys
+Red-eyed Vireo
+Red-eyed Vireo
+Vireo olivaceus
+Yellow-green Vireo
+Yellow-green Vireo
+Vireo flavoviridis
+Black-whiskered Vireo
+Black-whiskered Vireo
+Vireo altiloquus
+Yucatan Vireo
+Yucatan Vireo
+Vireo magister
+Laniidae
+Shrikes
+4 SPECIES HIDE
+Red-backed Shrike
+Red-backed Shrike
+Lanius collurio
+Brown Shrike
+Brown Shrike
+Lanius cristatus
+Loggerhead Shrike
+Loggerhead Shrike
+Lanius ludovicianus
+Northern Shrike
+Northern Shrike
+Lanius borealis
+Corvidae
+Crows, Jays, and Magpies
+36 SPECIES HIDE
+Canada Jay
+Canada Jay
+Perisoreus canadensis
+Black-throated Jay
+Black-throated Jay
+Cyanolyca pumilo
+Silvery-throated Jay
+Silvery-throated Jay
+Cyanolyca argentigula
+Azure-hooded Jay
+Azure-hooded Jay
+Cyanolyca cucullata
+Black-throated Magpie-Jay
+Black-throated Magpie-Jay
+Calocitta colliei
+White-throated Magpie-Jay
+White-throated Magpie-Jay
+Calocitta formosa
+Brown Jay
+Brown Jay
+Psilorhinus morio
+Black-chested Jay
+Black-chested Jay
+Cyanocorax affinis
+Green Jay
+Green Jay
+Cyanocorax yncas
+Bushy-crested Jay
+Bushy-crested Jay
+Cyanocorax melanocyaneus
+Yucatan Jay
+Yucatan Jay
+Cyanocorax yucatanicus
+Pinyon Jay
+Pinyon Jay
+Gymnorhinus cyanocephalus
+Steller's Jay
+Steller's Jay
+Cyanocitta stelleri
+Blue Jay
+Blue Jay
+Cyanocitta cristata
+Florida Scrub-Jay
+Florida Scrub-Jay
+Aphelocoma coerulescens
+Island Scrub-Jay
+Island Scrub-Jay
+Aphelocoma insularis
+California Scrub-Jay
+California Scrub-Jay
+Aphelocoma californica
+Woodhouse's Scrub-Jay
+Woodhouse's Scrub-Jay
+Aphelocoma woodhouseii
+Mexican Jay
+Mexican Jay
+Aphelocoma wollweberi
+Eurasian Jay
+Eurasian Jay
+Garrulus glandarius
+Azure-winged Magpie
+Azure-winged Magpie
+Cyanopica cyanus
+Red-billed Blue-Magpie
+Red-billed Blue-Magpie
+Urocissa erythroryncha
+Eurasian Magpie
+Eurasian Magpie
+Pica pica
+Black-billed Magpie
+Black-billed Magpie
+Pica hudsonia
+Yellow-billed Magpie
+Yellow-billed Magpie
+Pica nuttalli
+Clark's Nutcracker
+Clark's Nutcracker
+Nucifraga columbiana
+Eurasian Jackdaw
+Eurasian Jackdaw
+Corvus monedula
+House Crow
+House Crow
+Corvus splendens
+Rook
+Rook
+Corvus frugilegus
+American Crow
+American Crow
+Corvus brachyrhynchos
+Sinaloa Crow
+Sinaloa Crow
+Corvus sinaloae
+Fish Crow
+Fish Crow
+Corvus ossifragus
+Chihuahuan Raven
+Chihuahuan Raven
+Corvus cryptoleucus
+Hooded Crow
+Hooded Crow
+Corvus cornix
+Pied Crow
+Pied Crow
+Corvus albus
+Common Raven
+Common Raven
+Corvus corax
+Paridae
+Tits, Chickadees, and Titmice
+15 SPECIES HIDE
+Carolina Chickadee
+Carolina Chickadee
+Poecile carolinensis
+Black-capped Chickadee
+Black-capped Chickadee
+Poecile atricapillus
+Mountain Chickadee
+Mountain Chickadee
+Poecile gambeli
+Mexican Chickadee
+Mexican Chickadee
+Poecile sclateri
+Chestnut-backed Chickadee
+Chestnut-backed Chickadee
+Poecile rufescens
+Boreal Chickadee
+Boreal Chickadee
+Poecile hudsonicus
+Gray-headed Chickadee
+Gray-headed Chickadee
+Poecile cinctus
+Eurasian Blue Tit
+Eurasian Blue Tit
+Cyanistes caeruleus
+Bridled Titmouse
+Bridled Titmouse
+Baeolophus wollweberi
+Oak Titmouse
+Oak Titmouse
+Baeolophus inornatus
+Juniper Titmouse
+Juniper Titmouse
+Baeolophus ridgwayi
+Tufted Titmouse
+Tufted Titmouse
+Baeolophus bicolor
+Black-crested Titmouse
+Black-crested Titmouse
+Baeolophus atricristatus
+Great Tit
+Great Tit
+Parus major
+Japanese Tit
+Japanese Tit
+Parus minor
+Remizidae
+Penduline-Tits
+1 SPECIES HIDE
+Verdin
+Verdin
+Auriparus flaviceps
+Alaudidae
+Larks
+2 SPECIES HIDE
+Horned Lark
+Horned Lark
+Eremophila alpestris
+Eurasian Skylark
+Eurasian Skylark
+Alauda arvensis
+Acrocephalidae
+Reed Warblers and Allies
+3 SPECIES HIDE
+Icterine Warbler
+Icterine Warbler
+Hippolais icterina
+Sedge Warbler
+Sedge Warbler
+Acrocephalus schoenobaenus
+Blyth's Reed Warbler
+Blyth's Reed Warbler
+Acrocephalus dumetorum
+Locustellidae
+Grassbirds and Allies
+1 SPECIES HIDE
+River Warbler
+River Warbler
+Locustella fluviatilis
+Hirundinidae
+Swallows
+17 SPECIES HIDE
+Bank Swallow
+Bank Swallow
+Riparia riparia
+Tree Swallow
+Tree Swallow
+Tachycineta bicolor
+White-winged Swallow
+White-winged Swallow
+Tachycineta albiventer
+Mangrove Swallow
+Mangrove Swallow
+Tachycineta albilinea
+Violet-green Swallow
+Violet-green Swallow
+Tachycineta thalassina
+Purple Martin
+Purple Martin
+Progne subis
+Caribbean Martin
+Caribbean Martin
+Progne dominicensis
+Gray-breasted Martin
+Gray-breasted Martin
+Progne chalybea
+Southern Martin
+Southern Martin
+Progne elegans
+Brown-chested Martin
+Brown-chested Martin
+Progne tapera
+Northern Rough-winged Swallow
+Northern Rough-winged Swallow
+Stelgidopteryx serripennis
+Southern Rough-winged Swallow
+Southern Rough-winged Swallow
+Stelgidopteryx ruficollis
+Black-capped Swallow
+Black-capped Swallow
+Atticora pileata
+Blue-and-white Swallow
+Blue-and-white Swallow
+Pygochelidon cyanoleuca
+Barn Swallow
+Barn Swallow
+Hirundo rustica
+Cliff Swallow
+Cliff Swallow
+Petrochelidon pyrrhonota
+Cave Swallow
+Cave Swallow
+Petrochelidon fulva
+Pycnonotidae
+Bulbuls
+3 SPECIES HIDE
+Collared Finchbill
+Collared Finchbill
+Spizixos semitorques
+Red-whiskered Bulbul
+Red-whiskered Bulbul
+Pycnonotus jocosus
+Red-vented Bulbul
+Red-vented Bulbul
+Pycnonotus cafer
+Phylloscopidae
+Leaf Warblers
+8 SPECIES HIDE
+Wood Warbler
+Wood Warbler
+Phylloscopus sibilatrix
+Yellow-browed Warbler
+Yellow-browed Warbler
+Phylloscopus inornatus
+Pallas's Leaf Warbler
+Pallas's Leaf Warbler
+Phylloscopus proregulus
+Dusky Warbler
+Dusky Warbler
+Phylloscopus fuscatus
+Willow Warbler
+Willow Warbler
+Phylloscopus trochilus
+Common Chiffchaff
+Common Chiffchaff
+Phylloscopus collybita
+Arctic Warbler
+Arctic Warbler
+Phylloscopus borealis
+Kamchatka Leaf Warbler
+Kamchatka Leaf Warbler
+Phylloscopus examinandus
+Aegithalidae
+Long-tailed Tits
+1 SPECIES HIDE
+Bushtit
+Bushtit
+Psaltriparus minimus
+Sylviidae
+Sylviid Warblers and Allies
+1 SPECIES HIDE
+Lesser Whitethroat
+Lesser Whitethroat
+Curruca curruca
+Paradoxornithidae
+Parrotbills
+2 SPECIES HIDE
+Wrentit
+Wrentit
+Chamaea fasciata
+Vinous-throated Parrotbill
+Vinous-throated Parrotbill
+Suthora webbiana
+Zosteropidae
+White-eyes, Yuhinas, and Allies
+2 SPECIES HIDE
+Swinhoe's White-eye
+Swinhoe's White-eye
+Zosterops simplex
+Indian White-eye
+Indian White-eye
+Zosterops palpebrosus
+Leiothrichidae
+Laughingthrushes and Allies
+1 SPECIES HIDE
+Red-billed Leiothrix
+Red-billed Leiothrix
+Leiothrix lutea
+Regulidae
+Kinglets
+2 SPECIES HIDE
+Ruby-crowned Kinglet
+Ruby-crowned Kinglet
+Corthylio calendula
+Golden-crowned Kinglet
+Golden-crowned Kinglet
+Regulus satrapa
+Sittidae
+Nuthatches
+4 SPECIES HIDE
+White-breasted Nuthatch
+White-breasted Nuthatch
+Sitta carolinensis
+Pygmy Nuthatch
+Pygmy Nuthatch
+Sitta pygmaea
+Brown-headed Nuthatch
+Brown-headed Nuthatch
+Sitta pusilla
+Red-breasted Nuthatch
+Red-breasted Nuthatch
+Sitta canadensis
+Certhiidae
+Treecreepers
+1 SPECIES HIDE
+Brown Creeper
+Brown Creeper
+Certhia americana
+Polioptilidae
+Gnatcatchers
+8 SPECIES HIDE
+Tawny-faced Gnatwren
+Tawny-faced Gnatwren
+Microbates cinereiventris
+Long-billed Gnatwren
+Long-billed Gnatwren
+Ramphocaenus melanurus
+White-browed Gnatcatcher
+White-browed Gnatcatcher
+Polioptila bilineata
+Blue-gray Gnatcatcher
+Blue-gray Gnatcatcher
+Polioptila caerulea
+Black-tailed Gnatcatcher
+Black-tailed Gnatcatcher
+Polioptila melanura
+California Gnatcatcher
+California Gnatcatcher
+Polioptila californica
+Black-capped Gnatcatcher
+Black-capped Gnatcatcher
+Polioptila nigriceps
+White-lored Gnatcatcher
+White-lored Gnatcatcher
+Polioptila albiloris
+Troglodytidae
+Wrens
+35 SPECIES HIDE
+Rock Wren
+Rock Wren
+Salpinctes obsoletus
+Nightingale Wren
+Nightingale Wren
+Microcerculus philomela
+Scaly-breasted Wren
+Scaly-breasted Wren
+Microcerculus marginatus
+Canyon Wren
+Canyon Wren
+Catherpes mexicanus
+House Wren
+House Wren
+Troglodytes aedon
+Rufous-browed Wren
+Rufous-browed Wren
+Troglodytes rufociliatus
+Ochraceous Wren
+Ochraceous Wren
+Troglodytes ochraceus
+Pacific Wren
+Pacific Wren
+Troglodytes pacificus
+Winter Wren
+Winter Wren
+Troglodytes hiemalis
+Timberline Wren
+Timberline Wren
+Thryorchilus browni
+Sedge Wren
+Sedge Wren
+Cistothorus stellaris
+Grass Wren
+Grass Wren
+Cistothorus platensis
+Marsh Wren
+Marsh Wren
+Cistothorus palustris
+Carolina Wren
+Carolina Wren
+Thryothorus ludovicianus
+Bewick's Wren
+Bewick's Wren
+Thryomanes bewickii
+White-headed Wren
+White-headed Wren
+Campylorhynchus albobrunneus
+Rufous-naped Wren
+Rufous-naped Wren
+Campylorhynchus rufinucha
+Cactus Wren
+Cactus Wren
+Campylorhynchus brunneicapillus
+Bicolored Wren
+Bicolored Wren
+Campylorhynchus griseus
+Sooty-headed Wren
+Sooty-headed Wren
+Pheugopedius spadix
+Rufous-breasted Wren
+Rufous-breasted Wren
+Pheugopedius rutilus
+Spot-breasted Wren
+Spot-breasted Wren
+Pheugopedius maculipectus
+Happy Wren
+Happy Wren
+Pheugopedius felix
+Black-throated Wren
+Black-throated Wren
+Pheugopedius atrogularis
+Sinaloa Wren
+Sinaloa Wren
+Thryophilus sinaloa
+Banded Wren
+Banded Wren
+Thryophilus pleurostictus
+Rufous-and-white Wren
+Rufous-and-white Wren
+Thryophilus rufalbus
+Stripe-breasted Wren
+Stripe-breasted Wren
+Cantorchilus thoracicus
+Stripe-throated Wren
+Stripe-throated Wren
+Cantorchilus leucopogon
+Cabanis's Wren
+Cabanis's Wren
+Cantorchilus modestus
+Canebrake Wren
+Canebrake Wren
+Cantorchilus zeledoni
+Buff-breasted Wren
+Buff-breasted Wren
+Cantorchilus leucotis
+White-bellied Wren
+White-bellied Wren
+Uropsila leucogastra
+White-breasted Wood-Wren
+White-breasted Wood-Wren
+Henicorhina leucosticta
+Gray-breasted Wood-Wren
+Gray-breasted Wood-Wren
+Henicorhina leucophrys
+Cinclidae
+Dippers
+1 SPECIES HIDE
+American Dipper
+American Dipper
+Cinclus mexicanus
+Sturnidae
+Starlings
+6 SPECIES HIDE
+Common Hill Myna
+Common Hill Myna
+Gracula religiosa
+European Starling
+European Starling
+Sturnus vulgaris
+Brahminy Starling
+Brahminy Starling
+Sturnia pagodarum
+Common Myna
+Common Myna
+Acridotheres tristis
+Crested Myna
+Crested Myna
+Acridotheres cristatellus
+Superb Starling
+Superb Starling
+Lamprotornis superbus
+Mimidae
+Mockingbirds and Thrashers
+17 SPECIES HIDE
+Blue Mockingbird
+Blue Mockingbird
+Melanotis caerulescens
+Blue-and-white Mockingbird
+Blue-and-white Mockingbird
+Melanotis hypoleucus
+Black Catbird
+Black Catbird
+Melanoptila glabrirostris
+Gray Catbird
+Gray Catbird
+Dumetella carolinensis
+Scaly-breasted Thrasher
+Scaly-breasted Thrasher
+Allenia fusca
+Pearly-eyed Thrasher
+Pearly-eyed Thrasher
+Margarops fuscatus
+Curve-billed Thrasher
+Curve-billed Thrasher
+Toxostoma curvirostre
+Brown Thrasher
+Brown Thrasher
+Toxostoma rufum
+Long-billed Thrasher
+Long-billed Thrasher
+Toxostoma longirostre
+Bendire's Thrasher
+Bendire's Thrasher
+Toxostoma bendirei
+California Thrasher
+California Thrasher
+Toxostoma redivivum
+LeConte's Thrasher
+LeConte's Thrasher
+Toxostoma lecontei
+Crissal Thrasher
+Crissal Thrasher
+Toxostoma crissale
+Sage Thrasher
+Sage Thrasher
+Oreoscoptes montanus
+Long-tailed Mockingbird
+Long-tailed Mockingbird
+Mimus longicaudatus
+Tropical Mockingbird
+Tropical Mockingbird
+Mimus gilvus
+Northern Mockingbird
+Northern Mockingbird
+Mimus polyglottos
+Turdidae
+Thrushes and Allies
+36 SPECIES HIDE
+Eastern Bluebird
+Eastern Bluebird
+Sialia sialis
+Western Bluebird
+Western Bluebird
+Sialia mexicana
+Mountain Bluebird
+Mountain Bluebird
+Sialia currucoides
+Townsend's Solitaire
+Townsend's Solitaire
+Myadestes townsendi
+Brown-backed Solitaire
+Brown-backed Solitaire
+Myadestes occidentalis
+Black-faced Solitaire
+Black-faced Solitaire
+Myadestes melanops
+Slate-colored Solitaire
+Slate-colored Solitaire
+Myadestes unicolor
+Varied Thrush
+Varied Thrush
+Ixoreus naevius
+Black-billed Nightingale-Thrush
+Black-billed Nightingale-Thrush
+Catharus gracilirostris
+Orange-billed Nightingale-Thrush
+Orange-billed Nightingale-Thrush
+Catharus aurantiirostris
+Slaty-backed Nightingale-Thrush
+Slaty-backed Nightingale-Thrush
+Catharus fuscater
+Ruddy-capped Nightingale-Thrush
+Ruddy-capped Nightingale-Thrush
+Catharus frantzii
+Black-headed Nightingale-Thrush
+Black-headed Nightingale-Thrush
+Catharus mexicanus
+Yellow-throated Nightingale-Thrush
+Yellow-throated Nightingale-Thrush
+Catharus dryas
+Veery
+Veery
+Catharus fuscescens
+Gray-cheeked Thrush
+Gray-cheeked Thrush
+Catharus minimus
+Bicknell's Thrush
+Bicknell's Thrush
+Catharus bicknelli
+Swainson's Thrush
+Swainson's Thrush
+Catharus ustulatus
+Hermit Thrush
+Hermit Thrush
+Catharus guttatus
+Wood Thrush
+Wood Thrush
+Hylocichla mustelina
+Mistle Thrush
+Mistle Thrush
+Turdus viscivorus
+Song Thrush
+Song Thrush
+Turdus philomelos
+Redwing
+Redwing
+Turdus iliacus
+Mountain Thrush
+Mountain Thrush
+Turdus plebejus
+Eurasian Blackbird
+Eurasian Blackbird
+Turdus merula
+White-throated Thrush
+White-throated Thrush
+Turdus assimilis
+Clay-colored Thrush
+Clay-colored Thrush
+Turdus grayi
+Spectacled Thrush
+Spectacled Thrush
+Turdus nudigenis
+Black Thrush
+Black Thrush
+Turdus infuscatus
+Sooty Thrush
+Sooty Thrush
+Turdus nigrescens
+American Robin
+American Robin
+Turdus migratorius
+Rufous-backed Robin
+Rufous-backed Robin
+Turdus rufopalliatus
+Rufous-collared Robin
+Rufous-collared Robin
+Turdus rufitorques
+Red-legged Thrush
+Red-legged Thrush
+Turdus plumbeus
+Eyebrowed Thrush
+Eyebrowed Thrush
+Turdus obscurus
+Fieldfare
+Fieldfare
+Turdus pilaris
+Muscicapidae
+Old World Flycatchers
+12 SPECIES HIDE
+Gray-streaked Flycatcher
+Gray-streaked Flycatcher
+Muscicapa griseisticta
+Asian Brown Flycatcher
+Asian Brown Flycatcher
+Muscicapa dauurica
+Spotted Flycatcher
+Spotted Flycatcher
+Muscicapa striata
+White-rumped Shama
+White-rumped Shama
+Copsychus malabaricus
+European Robin
+European Robin
+Erithacus rubecula
+Bluethroat
+Bluethroat
+Luscinia svecica
+Siberian Rubythroat
+Siberian Rubythroat
+Calliope calliope
+Taiga Flycatcher
+Taiga Flycatcher
+Ficedula albicilla
+Common Redstart
+Common Redstart
+Phoenicurus phoenicurus
+Rufous-tailed Rock-Thrush
+Rufous-tailed Rock-Thrush
+Monticola saxatilis
+Amur Stonechat
+Amur Stonechat
+Saxicola stejnegeri
+Northern Wheatear
+Northern Wheatear
+Oenanthe oenanthe
+Bombycillidae
+Waxwings
+2 SPECIES HIDE
+Bohemian Waxwing
+Bohemian Waxwing
+Bombycilla garrulus
+Cedar Waxwing
+Cedar Waxwing
+Bombycilla cedrorum
+Ptiliogonatidae
+Silky-flycatchers
+4 SPECIES HIDE
+Black-and-yellow Silky-flycatcher
+Black-and-yellow Silky-flycatcher
+Phainoptila melanoxantha
+Gray Silky-flycatcher
+Gray Silky-flycatcher
+Ptiliogonys cinereus
+Long-tailed Silky-flycatcher
+Long-tailed Silky-flycatcher
+Ptiliogonys caudatus
+Phainopepla
+Phainopepla
+Phainopepla nitens
+Dulidae
+Palmchat
+1 SPECIES HIDE
+Palmchat
+Palmchat
+Dulus dominicus
+Chloropseidae
+Leafbirds
+1 SPECIES HIDE
+Golden-fronted Leafbird
+Golden-fronted Leafbird
+Chloropsis aurifrons
+Peucedramidae
+Olive Warbler
+1 SPECIES HIDE
+Olive Warbler
+Olive Warbler
+Peucedramus taeniatus
+Ploceidae
+Weavers and Allies
+1 SPECIES HIDE
+Northern Red Bishop
+Northern Red Bishop
+Euplectes franciscanus
+Estrildidae
+Waxbills and Allies
+11 SPECIES HIDE
+Diamond Firetail
+Diamond Firetail
+Stagonopleura guttata
+Red-browed Firetail
+Red-browed Firetail
+Neochmia temporalis
+Double-barred Finch
+Double-barred Finch
+Stizoptera bichenovii
+Indian Silverbill
+Indian Silverbill
+Euodice malabarica
+Java Sparrow
+Java Sparrow
+Padda oryzivora
+Scaly-breasted Munia
+Scaly-breasted Munia
+Lonchura punctulata
+White-rumped Munia
+White-rumped Munia
+Lonchura striata
+Tricolored Munia
+Tricolored Munia
+Lonchura malacca
+Chestnut Munia
+Chestnut Munia
+Lonchura atricapilla
+Common Waxbill
+Common Waxbill
+Estrilda astrild
+Southern Cordonbleu
+Southern Cordonbleu
+Uraeginthus angolensis
+Viduidae
+Indigobirds
+1 SPECIES HIDE
+Pin-tailed Whydah
+Pin-tailed Whydah
+Vidua macroura
+Passeridae
+Old World Sparrows
+2 SPECIES HIDE
+House Sparrow
+House Sparrow
+Passer domesticus
+Eurasian Tree Sparrow
+Eurasian Tree Sparrow
+Passer montanus
+Motacillidae
+Wagtails and Pipits
+10 SPECIES HIDE
+Gray Wagtail
+Gray Wagtail
+Motacilla cinerea
+Eastern Yellow Wagtail
+Eastern Yellow Wagtail
+Motacilla tschutschensis
+Citrine Wagtail
+Citrine Wagtail
+Motacilla citreola
+White Wagtail
+White Wagtail
+Motacilla alba
+Meadow Pipit
+Meadow Pipit
+Anthus pratensis
+Tree Pipit
+Tree Pipit
+Anthus trivialis
+Olive-backed Pipit
+Olive-backed Pipit
+Anthus hodgsoni
+Red-throated Pipit
+Red-throated Pipit
+Anthus cervinus
+American Pipit
+American Pipit
+Anthus rubescens
+Sprague's Pipit
+Sprague's Pipit
+Anthus spragueii
+Fringillidae
+Finches, Euphonias, and Allies
+40 SPECIES HIDE
+Common Chaffinch
+Common Chaffinch
+Fringilla coelebs
+Brambling
+Brambling
+Fringilla montifringilla
+Elegant Euphonia
+Elegant Euphonia
+Chlorophonia elegantissima
+Yellow-collared Chlorophonia
+Yellow-collared Chlorophonia
+Chlorophonia flavirostris
+Blue-crowned Chlorophonia
+Blue-crowned Chlorophonia
+Chlorophonia occipitalis
+Golden-browed Chlorophonia
+Golden-browed Chlorophonia
+Chlorophonia callophrys
+Scrub Euphonia
+Scrub Euphonia
+Euphonia affinis
+Yellow-crowned Euphonia
+Yellow-crowned Euphonia
+Euphonia luteicapilla
+Yellow-throated Euphonia
+Yellow-throated Euphonia
+Euphonia hirundinacea
+Thick-billed Euphonia
+Thick-billed Euphonia
+Euphonia laniirostris
+Olive-backed Euphonia
+Olive-backed Euphonia
+Euphonia gouldi
+Hooded Grosbeak
+Hooded Grosbeak
+Coccothraustes abeillei
+Evening Grosbeak
+Evening Grosbeak
+Coccothraustes vespertinus
+Hawfinch
+Hawfinch
+Coccothraustes coccothraustes
+Common Rosefinch
+Common Rosefinch
+Carpodacus erythrinus
+Pine Grosbeak
+Pine Grosbeak
+Pinicola enucleator
+Eurasian Bullfinch
+Eurasian Bullfinch
+Pyrrhula pyrrhula
+Gray-crowned Rosy-Finch
+Gray-crowned Rosy-Finch
+Leucosticte tephrocotis
+Black Rosy-Finch
+Black Rosy-Finch
+Leucosticte atrata
+Brown-capped Rosy-Finch
+Brown-capped Rosy-Finch
+Leucosticte australis
+House Finch
+House Finch
+Haemorhous mexicanus
+Purple Finch
+Purple Finch
+Haemorhous purpureus
+Cassin's Finch
+Cassin's Finch
+Haemorhous cassinii
+European Greenfinch
+European Greenfinch
+Chloris chloris
+Oriental Greenfinch
+Oriental Greenfinch
+Chloris sinica
+Yellow-fronted Canary
+Yellow-fronted Canary
+Crithagra mozambica
+Eurasian Linnet
+Eurasian Linnet
+Linaria cannabina
+Common Redpoll
+Common Redpoll
+Acanthis flammea
+Hoary Redpoll
+Hoary Redpoll
+Acanthis hornemanni
+Red Crossbill
+Red Crossbill
+Loxia curvirostra
+Cassia Crossbill
+Cassia Crossbill
+Loxia sinesciuris
+White-winged Crossbill
+White-winged Crossbill
+Loxia leucoptera
+European Goldfinch
+European Goldfinch
+Carduelis carduelis
+European Serin
+European Serin
+Serinus serinus
+Eurasian Siskin
+Eurasian Siskin
+Spinus spinus
+Pine Siskin
+Pine Siskin
+Spinus pinus
+Black-headed Siskin
+Black-headed Siskin
+Spinus notatus
+Lesser Goldfinch
+Lesser Goldfinch
+Spinus psaltria
+Lawrence's Goldfinch
+Lawrence's Goldfinch
+Spinus lawrencei
+American Goldfinch
+American Goldfinch
+Spinus tristis
+Calcariidae
+Longspurs and Snow Buntings
+6 SPECIES HIDE
+Lapland Longspur
+Lapland Longspur
+Calcarius lapponicus
+Chestnut-collared Longspur
+Chestnut-collared Longspur
+Calcarius ornatus
+Smith's Longspur
+Smith's Longspur
+Calcarius pictus
+Thick-billed Longspur
+Thick-billed Longspur
+Rhynchophanes mccownii
+Snow Bunting
+Snow Bunting
+Plectrophenax nivalis
+McKay's Bunting
+McKay's Bunting
+Plectrophenax hyperboreus
+Emberizidae
+Old World Buntings
+5 SPECIES HIDE
+Yellowhammer
+Yellowhammer
+Emberiza citrinella
+Reed Bunting
+Reed Bunting
+Emberiza schoeniclus
+Yellow-breasted Bunting
+Yellow-breasted Bunting
+Emberiza aureola
+Little Bunting
+Little Bunting
+Emberiza pusilla
+Rustic Bunting
+Rustic Bunting
+Emberiza rustica
+Passerellidae
+New World Sparrows
+58 SPECIES HIDE
+Yellow-throated Chlorospingus
+Yellow-throated Chlorospingus
+Chlorospingus flavigularis
+Sooty-capped Chlorospingus
+Sooty-capped Chlorospingus
+Chlorospingus pileatus
+Common Chlorospingus
+Common Chlorospingus
+Chlorospingus flavopectus
+Rufous-winged Sparrow
+Rufous-winged Sparrow
+Peucaea carpalis
+Stripe-headed Sparrow
+Stripe-headed Sparrow
+Peucaea ruficauda
+Cassin's Sparrow
+Cassin's Sparrow
+Peucaea cassinii
+Bachman's Sparrow
+Bachman's Sparrow
+Peucaea aestivalis
+Grasshopper Sparrow
+Grasshopper Sparrow
+Ammodramus savannarum
+Olive Sparrow
+Olive Sparrow
+Arremonops rufivirgatus
+Green-backed Sparrow
+Green-backed Sparrow
+Arremonops chloronotus
+Black-striped Sparrow
+Black-striped Sparrow
+Arremonops conirostris
+Chipping Sparrow
+Chipping Sparrow
+Spizella passerina
+Clay-colored Sparrow
+Clay-colored Sparrow
+Spizella pallida
+Black-chinned Sparrow
+Black-chinned Sparrow
+Spizella atrogularis
+Field Sparrow
+Field Sparrow
+Spizella pusilla
+Brewer's Sparrow
+Brewer's Sparrow
+Spizella breweri
+Five-striped Sparrow
+Five-striped Sparrow
+Amphispizopsis quinquestriata
+Black-throated Sparrow
+Black-throated Sparrow
+Amphispiza bilineata
+Lark Sparrow
+Lark Sparrow
+Chondestes grammacus
+Lark Bunting
+Lark Bunting
+Calamospiza melanocorys
+Costa Rican Brushfinch
+Costa Rican Brushfinch
+Arremon costaricensis
+Orange-billed Sparrow
+Orange-billed Sparrow
+Arremon aurantiirostris
+Chestnut-capped Brushfinch
+Chestnut-capped Brushfinch
+Arremon brunneinucha
+American Tree Sparrow
+American Tree Sparrow
+Spizelloides arborea
+Fox Sparrow
+Fox Sparrow
+Passerella iliaca
+Dark-eyed Junco
+Dark-eyed Junco
+Junco hyemalis
+Yellow-eyed Junco
+Yellow-eyed Junco
+Junco phaeonotus
+Volcano Junco
+Volcano Junco
+Junco vulcani
+Rufous-collared Sparrow
+Rufous-collared Sparrow
+Zonotrichia capensis
+White-crowned Sparrow
+White-crowned Sparrow
+Zonotrichia leucophrys
+Golden-crowned Sparrow
+Golden-crowned Sparrow
+Zonotrichia atricapilla
+Harris's Sparrow
+Harris's Sparrow
+Zonotrichia querula
+White-throated Sparrow
+White-throated Sparrow
+Zonotrichia albicollis
+Sagebrush Sparrow
+Sagebrush Sparrow
+Artemisiospiza nevadensis
+Bell's Sparrow
+Bell's Sparrow
+Artemisiospiza belli
+Vesper Sparrow
+Vesper Sparrow
+Pooecetes gramineus
+LeConte's Sparrow
+LeConte's Sparrow
+Ammospiza leconteii
+Seaside Sparrow
+Seaside Sparrow
+Ammospiza maritima
+Nelson's Sparrow
+Nelson's Sparrow
+Ammospiza nelsoni
+Saltmarsh Sparrow
+Saltmarsh Sparrow
+Ammospiza caudacuta
+Savannah Sparrow
+Savannah Sparrow
+Passerculus sandwichensis
+Baird's Sparrow
+Baird's Sparrow
+Centronyx bairdii
+Henslow's Sparrow
+Henslow's Sparrow
+Centronyx henslowii
+Song Sparrow
+Song Sparrow
+Melospiza melodia
+Lincoln's Sparrow
+Lincoln's Sparrow
+Melospiza lincolnii
+Swamp Sparrow
+Swamp Sparrow
+Melospiza georgiana
+Large-footed Finch
+Large-footed Finch
+Pezopetes capitalis
+Canyon Towhee
+Canyon Towhee
+Melozone fusca
+Abert's Towhee
+Abert's Towhee
+Melozone aberti
+California Towhee
+California Towhee
+Melozone crissalis
+White-faced Ground-Sparrow
+White-faced Ground-Sparrow
+Melozone biarcuata
+Rusty Sparrow
+Rusty Sparrow
+Aimophila rufescens
+Rufous-crowned Sparrow
+Rufous-crowned Sparrow
+Aimophila ruficeps
+Green-tailed Towhee
+Green-tailed Towhee
+Pipilo chlorurus
+Spotted Towhee
+Spotted Towhee
+Pipilo maculatus
+Eastern Towhee
+Eastern Towhee
+Pipilo erythrophthalmus
+White-naped Brushfinch
+White-naped Brushfinch
+Atlapetes albinucha
+Yellow-thighed Brushfinch
+Yellow-thighed Brushfinch
+Atlapetes tibialis
+Nesospingidae
+Puerto Rican Tanager
+1 SPECIES HIDE
+Puerto Rican Tanager
+Puerto Rican Tanager
+Nesospingus speculiferus
+Spindalidae
+Spindalises
+2 SPECIES HIDE
+Western Spindalis
+Western Spindalis
+Spindalis zena
+Puerto Rican Spindalis
+Puerto Rican Spindalis
+Spindalis portoricensis
+Zeledoniidae
+Wrenthrush
+1 SPECIES HIDE
+Wrenthrush
+Wrenthrush
+Zeledonia coronata
+Icteriidae
+Yellow-breasted Chat
+1 SPECIES HIDE
+Yellow-breasted Chat
+Yellow-breasted Chat
+Icteria virens
+Icteridae
+Troupials and Allies
+48 SPECIES HIDE
+Yellow-headed Blackbird
+Yellow-headed Blackbird
+Xanthocephalus xanthocephalus
+Bobolink
+Bobolink
+Dolichonyx oryzivorus
+Western Meadowlark
+Western Meadowlark
+Sturnella neglecta
+Eastern Meadowlark
+Eastern Meadowlark
+Sturnella magna
+Chihuahuan Meadowlark
+Chihuahuan Meadowlark
+Sturnella lilianae
+Red-breasted Meadowlark
+Red-breasted Meadowlark
+Leistes militaris
+Yellow-billed Cacique
+Yellow-billed Cacique
+Amblycercus holosericeus
+Yellow-winged Cacique
+Yellow-winged Cacique
+Cassiculus melanicterus
+Crested Oropendola
+Crested Oropendola
+Psarocolius decumanus
+Chestnut-headed Oropendola
+Chestnut-headed Oropendola
+Psarocolius wagleri
+Montezuma Oropendola
+Montezuma Oropendola
+Psarocolius montezuma
+Scarlet-rumped Cacique
+Scarlet-rumped Cacique
+Cacicus uropygialis
+Yellow-rumped Cacique
+Yellow-rumped Cacique
+Cacicus cela
+Puerto Rican Oriole
+Puerto Rican Oriole
+Icterus portoricensis
+Black-vented Oriole
+Black-vented Oriole
+Icterus wagleri
+Bar-winged Oriole
+Bar-winged Oriole
+Icterus maculialatus
+Black-cowled Oriole
+Black-cowled Oriole
+Icterus prosthemelas
+Orchard Oriole
+Orchard Oriole
+Icterus spurius
+Hooded Oriole
+Hooded Oriole
+Icterus cucullatus
+Yellow-backed Oriole
+Yellow-backed Oriole
+Icterus chrysater
+Yellow-tailed Oriole
+Yellow-tailed Oriole
+Icterus mesomelas
+Venezuelan Troupial
+Venezuelan Troupial
+Icterus icterus
+Streak-backed Oriole
+Streak-backed Oriole
+Icterus pustulatus
+Bullock's Oriole
+Bullock's Oriole
+Icterus bullockii
+Orange Oriole
+Orange Oriole
+Icterus auratus
+Yellow Oriole
+Yellow Oriole
+Icterus nigrogularis
+Spot-breasted Oriole
+Spot-breasted Oriole
+Icterus pectoralis
+Altamira Oriole
+Altamira Oriole
+Icterus gularis
+Audubon's Oriole
+Audubon's Oriole
+Icterus graduacauda
+Baltimore Oriole
+Baltimore Oriole
+Icterus galbula
+Black-backed Oriole
+Black-backed Oriole
+Icterus abeillei
+Scott's Oriole
+Scott's Oriole
+Icterus parisorum
+Red-winged Blackbird
+Red-winged Blackbird
+Agelaius phoeniceus
+Tricolored Blackbird
+Tricolored Blackbird
+Agelaius tricolor
+Shiny Cowbird
+Shiny Cowbird
+Molothrus bonariensis
+Bronzed Cowbird
+Bronzed Cowbird
+Molothrus aeneus
+Brown-headed Cowbird
+Brown-headed Cowbird
+Molothrus ater
+Giant Cowbird
+Giant Cowbird
+Molothrus oryzivorus
+Melodious Blackbird
+Melodious Blackbird
+Dives dives
+Cuban Blackbird
+Cuban Blackbird
+Ptiloxena atroviolacea
+Rusty Blackbird
+Rusty Blackbird
+Euphagus carolinus
+Brewer's Blackbird
+Brewer's Blackbird
+Euphagus cyanocephalus
+Common Grackle
+Common Grackle
+Quiscalus quiscula
+Boat-tailed Grackle
+Boat-tailed Grackle
+Quiscalus major
+Great-tailed Grackle
+Great-tailed Grackle
+Quiscalus mexicanus
+Nicaraguan Grackle
+Nicaraguan Grackle
+Quiscalus nicaraguensis
+Greater Antillean Grackle
+Greater Antillean Grackle
+Quiscalus niger
+Carib Grackle
+Carib Grackle
+Quiscalus lugubris
+Parulidae
+New World Warblers
+77 SPECIES HIDE
+Ovenbird
+Ovenbird
+Seiurus aurocapilla
+Worm-eating Warbler
+Worm-eating Warbler
+Helmitheros vermivorum
+Louisiana Waterthrush
+Louisiana Waterthrush
+Parkesia motacilla
+Northern Waterthrush
+Northern Waterthrush
+Parkesia noveboracensis
+Golden-winged Warbler
+Golden-winged Warbler
+Vermivora chrysoptera
+Blue-winged Warbler
+Blue-winged Warbler
+Vermivora cyanoptera
+Black-and-white Warbler
+Black-and-white Warbler
+Mniotilta varia
+Prothonotary Warbler
+Prothonotary Warbler
+Protonotaria citrea
+Swainson's Warbler
+Swainson's Warbler
+Limnothlypis swainsonii
+Crescent-chested Warbler
+Crescent-chested Warbler
+Oreothlypis superciliosa
+Flame-throated Warbler
+Flame-throated Warbler
+Oreothlypis gutturalis
+Tennessee Warbler
+Tennessee Warbler
+Leiothlypis peregrina
+Orange-crowned Warbler
+Orange-crowned Warbler
+Leiothlypis celata
+Colima Warbler
+Colima Warbler
+Leiothlypis crissalis
+Lucy's Warbler
+Lucy's Warbler
+Leiothlypis luciae
+Nashville Warbler
+Nashville Warbler
+Leiothlypis ruficapilla
+Virginia's Warbler
+Virginia's Warbler
+Leiothlypis virginiae
+Connecticut Warbler
+Connecticut Warbler
+Oporornis agilis
+Gray-crowned Yellowthroat
+Gray-crowned Yellowthroat
+Geothlypis poliocephala
+MacGillivray's Warbler
+MacGillivray's Warbler
+Geothlypis tolmiei
+Mourning Warbler
+Mourning Warbler
+Geothlypis philadelphia
+Kentucky Warbler
+Kentucky Warbler
+Geothlypis formosa
+Black-polled Yellowthroat
+Black-polled Yellowthroat
+Geothlypis speciosa
+Belding's Yellowthroat
+Belding's Yellowthroat
+Geothlypis beldingi
+Bahama Yellowthroat
+Bahama Yellowthroat
+Geothlypis rostrata
+Altamira Yellowthroat
+Altamira Yellowthroat
+Geothlypis flavovelata
+Common Yellowthroat
+Common Yellowthroat
+Geothlypis trichas
+Whistling Warbler
+Whistling Warbler
+Catharopeza bishopi
+Plumbeous Warbler
+Plumbeous Warbler
+Setophaga plumbea
+Arrowhead Warbler
+Arrowhead Warbler
+Setophaga pharetra
+Hooded Warbler
+Hooded Warbler
+Setophaga citrina
+American Redstart
+American Redstart
+Setophaga ruticilla
+Kirtland's Warbler
+Kirtland's Warbler
+Setophaga kirtlandii
+Cape May Warbler
+Cape May Warbler
+Setophaga tigrina
+Cerulean Warbler
+Cerulean Warbler
+Setophaga cerulea
+Northern Parula
+Northern Parula
+Setophaga americana
+Tropical Parula
+Tropical Parula
+Setophaga pitiayumi
+Magnolia Warbler
+Magnolia Warbler
+Setophaga magnolia
+Bay-breasted Warbler
+Bay-breasted Warbler
+Setophaga castanea
+Blackburnian Warbler
+Blackburnian Warbler
+Setophaga fusca
+Yellow Warbler
+Yellow Warbler
+Setophaga petechia
+Chestnut-sided Warbler
+Chestnut-sided Warbler
+Setophaga pensylvanica
+Blackpoll Warbler
+Blackpoll Warbler
+Setophaga striata
+Black-throated Blue Warbler
+Black-throated Blue Warbler
+Setophaga caerulescens
+Palm Warbler
+Palm Warbler
+Setophaga palmarum
+Olive-capped Warbler
+Olive-capped Warbler
+Setophaga pityophila
+Pine Warbler
+Pine Warbler
+Setophaga pinus
+Yellow-rumped Warbler
+Yellow-rumped Warbler
+Setophaga coronata
+Yellow-throated Warbler
+Yellow-throated Warbler
+Setophaga dominica
+Bahama Warbler
+Bahama Warbler
+Setophaga flavescens
+Vitelline Warbler
+Vitelline Warbler
+Setophaga vitellina
+Prairie Warbler
+Prairie Warbler
+Setophaga discolor
+Adelaide's Warbler
+Adelaide's Warbler
+Setophaga adelaidae
+Barbuda Warbler
+Barbuda Warbler
+Setophaga subita
+St. Lucia Warbler
+St. Lucia Warbler
+Setophaga delicata
+Grace's Warbler
+Grace's Warbler
+Setophaga graciae
+Black-throated Gray Warbler
+Black-throated Gray Warbler
+Setophaga nigrescens
+Townsend's Warbler
+Townsend's Warbler
+Setophaga townsendi
+Hermit Warbler
+Hermit Warbler
+Setophaga occidentalis
+Golden-cheeked Warbler
+Golden-cheeked Warbler
+Setophaga chrysoparia
+Black-throated Green Warbler
+Black-throated Green Warbler
+Setophaga virens
+Fan-tailed Warbler
+Fan-tailed Warbler
+Basileuterus lachrymosus
+Rufous-capped Warbler
+Rufous-capped Warbler
+Basileuterus rufifrons
+Chestnut-capped Warbler
+Chestnut-capped Warbler
+Basileuterus delattrii
+Black-cheeked Warbler
+Black-cheeked Warbler
+Basileuterus melanogenys
+Golden-browed Warbler
+Golden-browed Warbler
+Basileuterus belli
+Golden-crowned Warbler
+Golden-crowned Warbler
+Basileuterus culicivorus
+Costa Rican Warbler
+Costa Rican Warbler
+Basileuterus melanotis
+Buff-rumped Warbler
+Buff-rumped Warbler
+Myiothlypis fulvicauda
+Canada Warbler
+Canada Warbler
+Cardellina canadensis
+Wilson's Warbler
+Wilson's Warbler
+Cardellina pusilla
+Red-faced Warbler
+Red-faced Warbler
+Cardellina rubrifrons
+Red Warbler
+Red Warbler
+Cardellina rubra
+Pink-headed Warbler
+Pink-headed Warbler
+Cardellina versicolor
+Painted Redstart
+Painted Redstart
+Myioborus pictus
+Slate-throated Redstart
+Slate-throated Redstart
+Myioborus miniatus
+Collared Redstart
+Collared Redstart
+Myioborus torquatus
+Mitrospingidae
+Mitrospingid Tanagers
+1 SPECIES HIDE
+Dusky-faced Tanager
+Dusky-faced Tanager
+Mitrospingus cassinii
+Cardinalidae
+Cardinals and Allies
+29 SPECIES HIDE
+Rose-throated Tanager
+Rose-throated Tanager
+Piranga roseogularis
+Hepatic Tanager
+Hepatic Tanager
+Piranga flava
+Summer Tanager
+Summer Tanager
+Piranga rubra
+Scarlet Tanager
+Scarlet Tanager
+Piranga olivacea
+Western Tanager
+Western Tanager
+Piranga ludoviciana
+Flame-colored Tanager
+Flame-colored Tanager
+Piranga bidentata
+White-winged Tanager
+White-winged Tanager
+Piranga leucoptera
+Red-crowned Ant-Tanager
+Red-crowned Ant-Tanager
+Habia rubica
+Red-throated Ant-Tanager
+Red-throated Ant-Tanager
+Habia fuscicauda
+Black-cheeked Ant-Tanager
+Black-cheeked Ant-Tanager
+Habia atrimaxillaris
+Carmiol's Tanager
+Carmiol's Tanager
+Chlorothraupis carmioli
+Lemon-spectacled Tanager
+Lemon-spectacled Tanager
+Chlorothraupis olivacea
+Crimson-collared Grosbeak
+Crimson-collared Grosbeak
+Periporphyrus celaeno
+Black-faced Grosbeak
+Black-faced Grosbeak
+Caryothraustes poliogaster
+Northern Cardinal
+Northern Cardinal
+Cardinalis cardinalis
+Pyrrhuloxia
+Pyrrhuloxia
+Cardinalis sinuatus
+Yellow Grosbeak
+Yellow Grosbeak
+Pheucticus chrysopeplus
+Black-thighed Grosbeak
+Black-thighed Grosbeak
+Pheucticus tibialis
+Rose-breasted Grosbeak
+Rose-breasted Grosbeak
+Pheucticus ludovicianus
+Black-headed Grosbeak
+Black-headed Grosbeak
+Pheucticus melanocephalus
+Gray-throated Chat
+Gray-throated Chat
+Granatellus sallaei
+Blue-black Grosbeak
+Blue-black Grosbeak
+Cyanoloxia cyanoides
+Blue Bunting
+Blue Bunting
+Cyanocompsa parellina
+Blue Grosbeak
+Blue Grosbeak
+Passerina caerulea
+Lazuli Bunting
+Lazuli Bunting
+Passerina amoena
+Indigo Bunting
+Indigo Bunting
+Passerina cyanea
+Varied Bunting
+Varied Bunting
+Passerina versicolor
+Painted Bunting
+Painted Bunting
+Passerina ciris
+Dickcissel
+Dickcissel
+Spiza americana
+Thraupidae
+Tanagers and Allies
+59 SPECIES HIDE
+Red-crested Cardinal
+Red-crested Cardinal
+Paroaria coronata
+Yellow-billed Cardinal
+Yellow-billed Cardinal
+Paroaria capitata
+White-shouldered Tanager
+White-shouldered Tanager
+Loriotus luctuosus
+Tawny-crested Tanager
+Tawny-crested Tanager
+Tachyphonus delatrii
+White-lined Tanager
+White-lined Tanager
+Tachyphonus rufus
+Black-throated Shrike-Tanager
+Black-throated Shrike-Tanager
+Lanio aurantius
+White-throated Shrike-Tanager
+White-throated Shrike-Tanager
+Lanio leucothorax
+Crimson-collared Tanager
+Crimson-collared Tanager
+Ramphocelus sanguinolentus
+Scarlet-rumped Tanager
+Scarlet-rumped Tanager
+Ramphocelus passerinii
+Silver-beaked Tanager
+Silver-beaked Tanager
+Ramphocelus carbo
+Crimson-backed Tanager
+Crimson-backed Tanager
+Ramphocelus dimidiatus
+Blue-and-gold Tanager
+Blue-and-gold Tanager
+Bangsia arcaei
+Blue-gray Tanager
+Blue-gray Tanager
+Thraupis episcopus
+Yellow-winged Tanager
+Yellow-winged Tanager
+Thraupis abbas
+Palm Tanager
+Palm Tanager
+Thraupis palmarum
+Speckled Tanager
+Speckled Tanager
+Ixothraupis guttata
+Azure-rumped Tanager
+Azure-rumped Tanager
+Poecilostreptus cabanisi
+Gray-and-gold Tanager
+Gray-and-gold Tanager
+Poecilostreptus palmeri
+Golden-hooded Tanager
+Golden-hooded Tanager
+Stilpnia larvata
+Spangle-cheeked Tanager
+Spangle-cheeked Tanager
+Tangara dowii
+Plain-colored Tanager
+Plain-colored Tanager
+Tangara inornata
+Paradise Tanager
+Paradise Tanager
+Tangara chilensis
+Rufous-winged Tanager
+Rufous-winged Tanager
+Tangara lavinia
+Bay-headed Tanager
+Bay-headed Tanager
+Tangara gyrola
+Emerald Tanager
+Emerald Tanager
+Tangara florida
+Silver-throated Tanager
+Silver-throated Tanager
+Tangara icterocephala
+Blue Dacnis
+Blue Dacnis
+Dacnis cayana
+Shining Honeycreeper
+Shining Honeycreeper
+Cyanerpes lucidus
+Red-legged Honeycreeper
+Red-legged Honeycreeper
+Cyanerpes cyaneus
+Green Honeycreeper
+Green Honeycreeper
+Chlorophanes spiza
+Sulphur-rumped Tanager
+Sulphur-rumped Tanager
+Heterospingus rubrifrons
+Scarlet-browed Tanager
+Scarlet-browed Tanager
+Heterospingus xanthopygius
+Black-and-yellow Tanager
+Black-and-yellow Tanager
+Chrysothlypis chrysomelas
+Cinnamon-bellied Flowerpiercer
+Cinnamon-bellied Flowerpiercer
+Diglossa baritula
+Slaty Flowerpiercer
+Slaty Flowerpiercer
+Diglossa plumbea
+Saffron Finch
+Saffron Finch
+Sicalis flaveola
+Grassland Yellow-Finch
+Grassland Yellow-Finch
+Sicalis luteola
+Blue-black Grassquit
+Blue-black Grassquit
+Volatinia jacarina
+Lined Seedeater
+Lined Seedeater
+Sporophila lineola
+Ruddy-breasted Seedeater
+Ruddy-breasted Seedeater
+Sporophila minuta
+Thick-billed Seed-Finch
+Thick-billed Seed-Finch
+Sporophila funerea
+Nicaraguan Seed-Finch
+Nicaraguan Seed-Finch
+Sporophila nuttingi
+Variable Seedeater
+Variable Seedeater
+Sporophila corvina
+Morelet's Seedeater
+Morelet's Seedeater
+Sporophila morelleti
+Cinnamon-rumped Seedeater
+Cinnamon-rumped Seedeater
+Sporophila torqueola
+Yellow-bellied Seedeater
+Yellow-bellied Seedeater
+Sporophila nigricollis
+Bananaquit
+Bananaquit
+Coereba flaveola
+Yellow-faced Grassquit
+Yellow-faced Grassquit
+Tiaris olivaceus
+Puerto Rican Bullfinch
+Puerto Rican Bullfinch
+Melopyrrha portoricensis
+Greater Antillean Bullfinch
+Greater Antillean Bullfinch
+Melopyrrha violacea
+Lesser Antillean Bullfinch
+Lesser Antillean Bullfinch
+Loxigilla noctis
+Black-faced Grassquit
+Black-faced Grassquit
+Melanospiza bicolor
+Buff-throated Saltator
+Buff-throated Saltator
+Saltator maximus
+Black-headed Saltator
+Black-headed Saltator
+Saltator atriceps
+Olive-gray Saltator
+Olive-gray Saltator
+Saltator olivascens
+Cinnamon-bellied Saltator
+Cinnamon-bellied Saltator
+Saltator grandis
+Streaked Saltator
+Streaked Saltator
+Saltator striatipectus
+Lesser Antillean Saltator
+Lesser Antillean Saltator
+Saltator albicollis
+Slate-colored Grosbeak
+Slate-colored Grosbeak
+Saltator grossus
