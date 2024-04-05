@@ -87,10 +87,8 @@ setMethod("check","SpeciesList",
 setGeneric("save",function(obj) standardGeneric("save"))
 setMethod("save","SpeciesList",
 	function(obj){
-		## only saving those species which have a valid code in ebirdst_runs database
-		temp <- subset(obj@df,!is.na(common_code))
 		## Selecting columns required and renaming
-		temp <- temp[,c("common_code","scientific","common")]
+		temp <- obj@df[,c("common_code","scientific","common")]
 		colnames(temp) = c("code","scientific_name","common_name")
 		## Setting scienfitic and common names to lower case
 		temp$scientific_name <- tolower(temp$scientific_name)
