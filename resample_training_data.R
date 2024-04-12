@@ -11,6 +11,13 @@ library(ibis.iSDM)
 library(terra)
 library(sf)
 
+# Set ratio of pseudoabsences to positives (x:1)
+pseud_ratio <- 1
+
+#############
+# Read data #
+#############
+
 # Read in extent of Europe mapped
 base_map <- terra::rast("output/euro_rast_10k.tif")
 
@@ -240,7 +247,7 @@ pseudoabs_gen <- function (maindf){
       data = df,
       x = "X",
       y = "Y",
-      n = nrow(df), # Sample pseudoabsences at 1:1 ratio with presences
+      n = round(nrow(df)*pseud_ratio), # Sample pseudoabsences at given ratio
       method=c('biased'), 
       rlayer = base_map,
       rbias = weight_layer %>%
@@ -252,7 +259,7 @@ pseudoabs_gen <- function (maindf){
       data = df,
       x = "X",
       y = "Y",
-      n = nrow(df), # Sample pseudoabsences at 1:1 ratio with presences
+      n = round(nrow(df)*pseud_ratio), # Sample pseudoabsences at given ratio
       method=c('biased'), 
       rlayer = base_map,
       rbias = weight_layer %>%
@@ -262,7 +269,7 @@ pseudoabs_gen <- function (maindf){
     pseudoabs_dens_buff <- add_pseudoabsence(df %>% select(X,Y) %>% mutate(pr_ab = 1),
                                              field_occurrence = "pr_ab",
                                              template = base_map,
-                                             settings = pseudoabs_settings(nrpoints = nrow(df),
+                                             settings = pseudoabs_settings(nrpoints = round(nrow(df)*pseud_ratio),
                                                                            method = "buffer",
                                                                            buffer_distance = 25000,
                                                                            bias = weight_layer))
@@ -327,6 +334,10 @@ pseudoabs_gen(df_B)
 
 ###########################
 # Data filtering/thinning #
+###########################
+
+###########################
+# If not using a pseudoabs ratio of 1:1, you might need to differentially thin with parameters based on pseudoabs or presence in order to preserve that ratio and not just thin down to the same value??
 ###########################
 
 # Read in and assemble environmental predictor layers used in data resampling from .tif
