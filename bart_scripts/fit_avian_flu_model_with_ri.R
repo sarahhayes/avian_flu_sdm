@@ -714,7 +714,7 @@ K_OPT <- cv_results$k[argmin]
 power_opt <- cv_results$power[argmin]
 base_opt <- cv_results$base[argmin]
 
-test_data <- read.csv(paste(PATH_TO_DATA, "test_data_A_Q3.csv", sep=""))
+test_data <- read.csv(paste(PATH_TO_DATA, "training_sets/test_data_A_Q3.csv", sep=""))
 xtest <- test_data %>% dplyr::select(!("y"|"ri"))
 ytest <- test_data$y
 countrytest <- test_data$ri
@@ -835,7 +835,7 @@ K_OPT <- cv_results$k[argmin]
 power_opt <- cv_results$power[argmin]
 base_opt <- cv_results$base[argmin]
 
-test_data <- read.csv(paste(PATH_TO_DATA, "test_data_A_Q4.csv", sep=""))
+test_data <- read.csv(paste(PATH_TO_DATA, "training_sets/test_data_A_Q4.csv", sep=""))
 xtest <- test_data %>% dplyr::select(!("y"|"ri"))
 ytest <- test_data$y
 countrytest <- test_data$ri
