@@ -360,7 +360,10 @@ serotype_data <- as.data.frame(table(hpai$serotype_HN))
 serotype_data_ten_or_more <- serotype_data[which(serotype_data$Freq > 10),]
 serotype_data_ten_or_more <- serotype_data_ten_or_more[which(serotype_data_ten_or_more$Var1 != ""),]
 
-subtype_plot_data <- dates[which(hpai$serotype_HN %in% serotype_data_ten_or_more$Var1),]
+serotype_over_ten <- serotype_data_ten_or_more$Var1 %>% droplevels()
+
+subtype_plot_data <- dates %>% dplyr::filter(serotype_HN %in% serotype_over_ten)
+#subtype_plot_data <- dates[which(dates$serotype_HN %in% serotype_data_ten_or_more$Var1),]
 # Remove the row where the sybtype isn't listed 
 subtype_plot_data <- subtype_plot_data[which(subtype_plot_data$serotype_HN!=""),]
 
@@ -501,7 +504,7 @@ q4plot <- ggplot(q4_sub, aes(x=month_fact, fill = year_fact)) +
 q4plot
 
 ggpubr::ggarrange(q1plot, q2plot, q3plot, q4plot, ncol = 2, nrow = 2)
-#ggsave("plots/counts_by_month_per_quart_coloured_by_year.png")
+ggsave("plots/counts_by_month_per_quart_coloured_by_year.png")
 
 
 dev.off()

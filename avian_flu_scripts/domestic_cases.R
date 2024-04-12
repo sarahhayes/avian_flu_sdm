@@ -93,12 +93,15 @@ poss_cases <- dplyr::filter(inf_a_hpai, disease_eng == "Influenza A viruses of h
 table(poss_cases$Epi_unit)
 table(poss_cases$Species)
 table(inf_a_hpai$Epi_unit)
-#
+table(inf_a_hpai$disease_eng)
+
 #Removing zoo and cage animals. Will save further filtering until later
-
 inf_a_hpai <- dplyr::filter(inf_a_hpai, !Epi_unit %in% c("Zoo", "Cage"))
-
 table(inf_a_hpai$region) # all regions represented
+
+## Alternative approach would be justt to use those labelled as poultry These make up the majority of the records
+## However, the definition of poultry which is here (https://www.woah.org/en/what-we-do/standards/codes-and-manuals/terrestrial-code-online-access/?id=169&L=1&htmfile=glossaire.htm) 
+## means this would exclude backyard flocks. 
 
 colnames(inf_a_hpai)
 inf_a_hpai_trim <- dplyr::select(inf_a_hpai, all_of(c("Latitude", "Longitude", "Outbreak_start_date", "Species", 
@@ -199,7 +202,7 @@ ai_pos_birds$serotype_HN <- ai_pos_birds$Serotype
 ai_pos_birds <- ai_pos_birds %>% filter(!str_detect(Serotype, "LPAI"))
 # Now remove extra info
 ai_pos_birds$serotype_HN <-  gsub("HPAI","",as.character(ai_pos_birds$serotype_HN))
-ai_pos_birds$serotype_HN <-  gsub("LPAI","",as.character(ai_pos_birds$serotype_HN))
+#ai_pos_birds$serotype_HN <-  gsub("LPAI","",as.character(ai_pos_birds$serotype_HN))
 ai_pos_birds$serotype_HN<-toupper(ai_pos_birds$serotype_HN) # so they match
 ai_pos_birds$serotype_HN <- trimws(ai_pos_birds$serotype_HN) # trim any white space in the entries to aid matching
 table(ai_pos_birds$serotype_HN)
@@ -231,7 +234,7 @@ no_dups_date_loc_serotype <- unique(dt_pos, by = c("X", "Y", "observation.date",
 # The middle two are the same, suggesting that there are none that are the same for all details except source. 
 # The final one (no_dups_date_loc_serotype) contains 60 more than the one filtered just on date and location.
 # On inspection, these are indeed listed as different serotypes in the same location and same date. There are a 
-# number of entries in Romania where fao have listed as "H5N1 HPAI" and woah just have "H5".. Imagine these are the same? 
+# number of entries in Romania where fao have listed as "H5N1 HPAI" and woah just have "H5". Imagine these are the same? 
 
 ## No duplicates_all will still have some that are the same place and time but different species. However, when looking
 ## at these, there are instances where we have fao and woah reporting a same location and date but might say, 
@@ -261,74 +264,91 @@ range(hpai$observation.date)
 
 serotype_data <- as.data.frame(table(hpai$serotype_HN))
 
-## Need to ensure that have all the weeks represented as currently misses out those with no cases 
 
 ## To make sure we include all weeks in a plot, even those without any data, we need a dataframe with 
 ## all the weeks and months,
+## # Now to plot the time series by serotype 
 
-#Start on 3rd Jan 2004 as that's a Monday and no data before middle of the year
-start.plot <- c("2005-01-03", "2023-12-31")
-week_test <- as.character(seq(as.Date(start.plot[1]), as.Date(start.plot[2]), by="weeks"))
+## start on 3rd Jan 2005 as that's a Monday
+week_calendar <- data.frame(date=seq(as.Date("2005-01-03"), as.Date("2023-07-27"), by="day")) %>% 
+  mutate(week_num=isoweek(date),year=year(date)) %>%
+  group_by(year,week_num) %>% 
+  summarise(weekdate=min(date)) 
+week_calendar$week_of_study <- seq(1, nrow(week_calendar), by = 1)
 
-all_dates <- as.data.frame(matrix(nrow = length(week_test), ncol = 1))
-all_dates[,1]  <- week_test
-colnames(all_dates) <- "week_from_start"
-all_dates$date <- as.Date(all_dates$week_from_start, "%Y-%m-%d")
+# combine with the data
+dates <- merge(hpai, week_calendar)
 
-all_dates$year <- lubridate::year(all_dates$date)
-all_dates$month <- lubridate::month(all_dates$date)
-all_dates$month_year <- format(all_dates$date, "%Y-%m")
-all_dates$week <- format(all_dates$date, "%Y Week %W")
-all_dates$week_num <- lubridate::isoweek(all_dates$date)
+# plot directly
+ggplot(dates, aes(x=weekdate)) + geom_histogram(bins = nrow(week_calendar), col = "purple") + 
+  labs(y = "Number of weekly cases", x = "Year", size = 18) +
+  theme(axis.text.x = element_text(angle=90, margin = margin(t = 0.1, r = 0.2, b = 0.2, l = 0.3, unit = "cm"), 
+                                   face = "bold", size = 10, vjust = 0.5),
+        axis.text.y = element_text(face = "bold", size = 10),
+        plot.margin = margin(1,1,1,1, "cm"), 
+        axis.title =  element_text(size = 12),
+        panel.background = element_rect(fill = "white", colour = "grey50"),
+        panel.grid.major = element_line(size = 0.5, linetype = 'solid',
+                                        colour = "grey"),
+        panel.grid.minor = element_line(size = 0.5, linetype = 'dashed',
+                                        colour = "grey90"))
+#ggsave("plots/hist_by_week_hpai_only_domestic.png")
+
+# could also make a dataframe of the counts of the number in each week
+count_dates <- dates %>% 
+  count(weekdate)
+
+weekly_counts <- left_join(week_calendar, count_dates)
+weekly_counts[which(is.na(weekly_counts$n)), "n"] <- 0
+
+## Also then can have as a line plot
+ggplot(data = weekly_counts, aes(x = weekdate, y = n)) +
+  geom_line(lwd = 0.9, col = "purple")  + 
+  labs(y = "Number of weekly cases", x = "Year", size = 18) +
+  theme(axis.text.x = element_text(angle=90, margin = margin(t = 0.1, r = 0.2, b = 0.2, l = 0.3, unit = "cm"), 
+                                   face = "bold", size = 10, vjust = 0.5),
+        axis.text.y = element_text(face = "bold", size = 10),
+        plot.margin = margin(1,1,1,1, "cm"), 
+        axis.title =  element_text(size = 12),
+        panel.background = element_rect(fill = "white", colour = "grey50"),
+        panel.grid.major = element_line(size = 0.5, linetype = 'solid',
+                                        colour = "grey"),
+        panel.grid.minor = element_line(size = 0.5, linetype = 'dashed',
+                                        colour = "grey90"))
+#ggsave("plots/lineplot_by_week_hpai_only_domestic.png")
+
+
 
 # For quite a number of the subtypes there are only a few entries. 
 # For the line plot by subtype, only use those that have >10 entries
 
-serotype_data_ten_or_more <- serotype_data[which(serotype_data$Freq > 10),]
-serotype_data_ten_or_more <- serotype_data_ten_or_more[which(serotype_data_ten_or_more$Var1 != ""),]
 
-subtype_plot_data <- hpai[which(hpai$serotype_HN %in% serotype_data_ten_or_more$Var1),]
-subtype_plot_data <- dplyr::select(subtype_plot_data, c("year", "month", "month_year", "week","week_num", "serotype_HN"))
-
-# by week 
-subtype_counts_weekyear <- subtype_plot_data %>%
-  group_by(week, serotype_HN) %>% count()
-
-# merge with the weekly counts
-all_dates_subtype_data <- left_join(all_dates, subtype_counts_weekyear)
-all_dates_subtype_data$year_of_study <- all_dates_subtype_data$year - 2005
-all_dates_subtype_data$week_seq <- all_dates_subtype_data$week_num + (52*all_dates_subtype_data$year_of_study)
-
-#write.csv(all_dates_subtype_data, "data/flu_data/prepped_data/time_series_domestic_hpai.csv", row.names = F)
-
-weekbreaks <- all_dates_subtype_data %>% filter(grepl('Week 01', week))
-weekbreaks <- unique(weekbreaks[,"week_seq"])
-weekbreaks
-
+subtype_plot_data <- dates
+(subtype_plot_data)
 
 yearlabs <- c("2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", 
               "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023")
 
-par(mar = c(3,3,3,3))
+weekbreaks <- week_calendar[which(week_calendar$week_num == 1), "week_of_study"]
+weekbreaks <- weekbreaks[["week_of_study"]]
 
-ggplot(data = all_dates_subtype_data, 
-       aes(x = week_seq, y = n, col = serotype_HN, group = serotype_HN)) +
-  geom_line(lwd = 0.9) + 
-  scale_color_brewer(palette="Paired", na.translate = F) + 
-  theme(axis.text.x = element_text(angle=90, margin = margin(t = .2, unit = "cm"), 
-                                   face = "bold", size = 12, vjust = 0.5),
-        axis.text.y = element_text(face = "bold", size = 12),
+
+ggplot(subtype_plot_data, aes(x = week_of_study, fill = serotype_HN)) + 
+  geom_bar(position = "stack") + 
+  labs(y = "Number of weekly cases", x = "Year", size = 18, fill = "Serotype") +
+  theme(axis.text.x = element_text(angle=90, margin = margin(t = 0.1, r = 0.2, b = 0.2, l = 0.3, unit = "cm"), 
+                                   face = "bold", size = 10, vjust = 0.5),
+        axis.text.y = element_text(face = "bold", size = 10),
         plot.margin = margin(1,1,1,1, "cm"), 
-        axis.title =  element_text(size = 14),
-        plot.background = element_rect(fill = "light blue"))+
-  #  panel.background = element_rect(fill = "white", colour = "grey50")) + 
-  labs(colour = "Subtype", y = "Number of weekly cases", x = "Year", size = 18) +
+        axis.title =  element_text(size = 12),
+        panel.background = element_rect(fill = "grey90", colour = "grey90"),
+        panel.grid.major = element_line(size = 0.5, linetype = 'solid',
+                                        colour = "white"),
+        panel.grid.minor = element_line(size = 0.5, linetype = 'dashed',
+                                        colour = "white")) +
   scale_x_continuous(breaks = weekbreaks, labels = yearlabs)
-#ggsave("plots/subtypes/serotype_line_by_week_hpai_domestic_birds.png")
+#ggsave("plots/subtypes/serotype_by_week_hpai_only_domestic.png")
 
-
-## If want to repeat by month, will need to do another table to join with 
-## so don't miss any months.
 
 subtype_counts_year <- subtype_plot_data %>%
   group_by(year, serotype_HN) %>% count()
@@ -342,6 +362,10 @@ subtype_counts_year$factor_HN <- as.factor(subtype_counts_year$serotype_HN)
 ggplot(data = subtype_plot_data, aes(x = year, fill = serotype_HN))+
   geom_bar()
 #ggsave("plots/subtypes/serotype_bar_by_year_hpai_domestic_birds.png")
+
+
+## save the timeseries so can compare to wild birds to look for lag. 
+
 
 ######
 

@@ -1,5 +1,5 @@
-## 03/01/2024
-## Exploring data availability across Asia and the Americas 
+## 011/04/2024
+## Preparing data for the Americas 
 
 rm(list = ls())
 
@@ -33,7 +33,8 @@ fao_data_trim <- dplyr::select(fao_data, all_of(c("Latitude", "Longitude", "obse
 fao_data_trim$source <- "fao"
 fao_data_trim$observation.date <- as.Date(fao_data_trim$observation.date, "%d/%m/%Y")
 
-fao_data_trim_asia_americas <- fao_data_trim %>% filter(Region %in% c("Americas", "Asia"))
+# use this if filtering by specified region 
+fao_data_trim_americas <- fao_data_trim %>% filter(Region == "Americas")
 
 # WAHIS
 wahis <- read_excel("data/flu_data/raw_data/WOAH_july_2023.xlsx", sheet = 2)
@@ -47,12 +48,9 @@ inf_data <- wahis[which(wahis$disease_eng %in%
 
 
 inf_a_hpai <- dplyr::filter(inf_data, disease_eng %in% c("Influenza A viruses of high pathogenicity (Inf. with) (non-poultry including wild birds) (2017-)",
-                                           "High pathogenicity avian influenza viruses (poultry) (Inf. with)"))
+                                                         "High pathogenicity avian influenza viruses (poultry) (Inf. with)"))
 
 table(inf_a_hpai$region) # all regions represented
-
-# Quick look at Oceania
-Oceania <- inf_a_hpai %>% dplyr::filter(region == "Oceania")
 
 colnames(inf_a_hpai)
 table(inf_a_hpai$is_wild)
@@ -83,7 +81,7 @@ inf_a_hpai_trim <- dplyr::select(inf_a_hpai_wild, all_of(c("Latitude", "Longitud
                                                            "country", "sero_sub_genotype_eng", "region")))
 inf_a_hpai_trim$source <- "woah"
 
-inf_a_hpai_americas_asia <- inf_a_hpai_trim %>% filter(region %in% c("Asia", "Americas"))
+inf_a_hpai_americas <- inf_a_hpai_trim %>% filter(region == "Americas")
 
 # BVBRC
 bvbrc_data <- read.csv("data/flu_data/raw_data/BVBRC_surveillance.csv")
@@ -104,7 +102,8 @@ bvbrc_data_slim <- filter(bvbrc_data_slim, Host.Natural.State == "Wild")
 bvbrc_data_slim <- drop_na(bvbrc_data_slim, Collection.Year)
 
 # There are samples labelled "env" which I assume are environmental so remove these
-bvbrc_data_slim <- bvbrc_data_slim[which(bvbrc_data_slim$Host.Species != "Env"),]
+# bvbrc_data_slim <- bvbrc_data_slim[which(bvbrc_data_slim$Host.Species != "Env"),]
+bvbrc_data_slim <- dplyr::filter(bvbrc_data_slim, Host.Species != "Env")
 
 # separate positive and negative
 pos_data <- filter(bvbrc_data_slim, Pathogen.Test.Result == "Positive")
@@ -120,64 +119,56 @@ bv_pos_data_trim$source <- "zbvbrc"
 bv_pos_data_trim$Collection.Date <- as.Date(bv_pos_data_trim$Collection.Date,
                                             "%Y-%m-%d")
 
-americas_countries <- c("Argentina", "Brazil", "Canada", "Chile", "Colombia", "Guatemala", 
+americas_countries <- c("Argentina", "Brazil", "Canada", "Chile", "Colombia", "Guatemala", "Greenland",
                         "United States Of America", "USA" )
 
-asia_countries <- c("Bangladesh", "Bhutan", "Cambodia", "China", "Georgia", "Japan", "Lebanon", "Mongolia", 
-                    "Oman", "Russia", "Sri Lanka", "Taiwan", "Thailand", "Turkey", "Viet Nam")
 
-oceania_countries <- c("Australia", "Papua New Guinea")
+bv_americas <- bv_pos_data_trim %>% filter(Collection.Country %in% c(americas_countries)) 
+bv_americas$Region <- "Americas"
 
-bv_americas_asia <- bv_pos_data_trim %>% filter(Collection.Country %in% c(americas_countries, asia_countries)) 
-bv_americas_asia$Region <- "Asia"
-bv_americas_asia[which(bv_americas_asia$Collection.Country %in% americas_countries),"Region"] <- "Americas"
+table(bv_americas$Region, bv_americas$Collection.Country)
 
-table(bv_americas_asia$Region)
-table(bv_americas_asia$Region, bv_americas_asia$Collection.Country)
-
-# quick look at Oceania
-oceania_bvbrc <- bv_pos_data_trim %>% dplyr::filter(Collection.Country %in% oceania_countries)
-table(oceania_bvbrc$Subtype)
 
 ## we only want HPAI 
-table(bv_americas_asia$Subtype)
+table(bv_americas$Subtype)
 # filter those that contain H5 or H7 - although these are not necessarily HPAI
-poss_hpai <- bv_americas_asia %>% filter(str_detect(Subtype,"H5") | str_detect(Subtype, "H7"))
+poss_hpai <- bv_americas %>% filter(str_detect(Subtype,"H5") | str_detect(Subtype, "H7"))
 
 table(poss_hpai$Subtype)
 
 # We now have the trimmed data sets for all the sources. 
 # first need all the names to match so we can rbind
 
-colnames(fao_data_trim_asia_americas)
-colnames(inf_a_hpai_americas_asia)
+colnames(fao_data_trim_americas)
+colnames(inf_a_hpai_americas)
 colnames(poss_hpai)
-inf_a_hpai_americas_asia <- rename(inf_a_hpai_americas_asia, observation.date = Outbreak_start_date, 
-                          Country = country, Serotype = sero_sub_genotype_eng, Region = region)
+inf_a_hpai_americas <- rename(inf_a_hpai_americas, observation.date = Outbreak_start_date, 
+                                   Country = country, Serotype = sero_sub_genotype_eng, Region = region)
 poss_hpai <- rename(poss_hpai, Latitude = Collection.Latitude,
-                           Longitude = Collection.Longitude,
-                           observation.date = Collection.Date,
-                           Species  = Host.Species,
-                           Country = Collection.Country,
-                           Serotype = Subtype)
+                    Longitude = Collection.Longitude,
+                    observation.date = Collection.Date,
+                    Species  = Host.Species,
+                    Country = Collection.Country,
+                    Serotype = Subtype)
+
 
 poss_hpai <- dplyr::select(poss_hpai, c(Latitude, Longitude, observation.date, Species,
-                                                      Country, Serotype, source, Region))
+                                        Country, Serotype, source, Region))
 
-americas_asia_data <- rbind(fao_data_trim_asia_americas, inf_a_hpai_americas_asia, poss_hpai)
+americas_data <- rbind(fao_data_trim_americas, inf_a_hpai_americas, poss_hpai)
 
 
 ## check for any NA values
-sum(is.na(americas_asia_data$Latitude))
-sum(is.na(americas_asia_data$Longitude))
+sum(is.na(americas_data$Latitude))
+sum(is.na(americas_data$Longitude))
 
 # remove the rows that are NA for location 
-americas_asia_data <- drop_na(americas_asia_data, Latitude)
-sum(is.na(americas_asia_data$Latitude))
+americas_data <- drop_na(americas_data, Latitude)
+sum(is.na(americas_data$Latitude))
 
 ## Want to remove mammals
 
-table(americas_asia_data$Species)
+table(americas_data$Species)
 
 species_list <- read.csv("avian_flu_scripts/detecting_mammals_asia_americas.csv")
 
@@ -205,7 +196,7 @@ unwanted_sp <- c(unwanted_sp, unwanted_sp_manual_ext)
 ## Remove from the data so just birds
 
 ai_pos_birds <- 
-  americas_asia_data[-which(americas_asia_data$Species %in% unwanted_sp),]
+  americas_data[-which(americas_data$Species %in% unwanted_sp),]
 
 ## Ideally we want only the HPAI
 
@@ -216,7 +207,7 @@ table(ai_pos_birds$Serotype)
 table(ai_pos_birds$source)
 table(ai_pos_birds$Serotype, ai_pos_birds$source)
 
-# Produc a new column 
+# Produce a new column 
 ai_pos_birds$serotype_HN <- ai_pos_birds$Serotype
 # Now remove extra info
 ai_pos_birds$serotype_HN <-  gsub("HPAI","",as.character(ai_pos_birds$serotype_HN))
@@ -234,6 +225,13 @@ point_data <- st_as_sf(x = ai_pos_birds,
                        crs = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0")
 class(point_data)
 
+# change the projections
+proj_crs <- 8858
+point_data <- sf::st_transform(point_data, proj_crs)
+point_data # Now a spatial points object in the right projection
+class(point_data)
+head(point_data)
+
 point_data_df <- point_data %>%
   dplyr::mutate(X = sf::st_coordinates(.)[,1],
                 Y = sf::st_coordinates(.)[,2])
@@ -249,17 +247,10 @@ point_data_df$week_num <- lubridate::isoweek(point_data_df$observation.date)
 
 range(point_data_df$observation.date)
 
-## Next I want to remove the duplicates that are present in the data 
-
 library(data.table)
 dt_pos <- data.table(point_data_df)
 
 table(dt_pos$Country) # a couple of different spellings for a number of the countries
-dt_pos[which(dt_pos$Country == "China (People's Rep. of)"), "Country"] <- "China"
-dt_pos[which(dt_pos$Country == "Taiwan (Province of China)"), "Country"] <- "Chinese Taipei"
-dt_pos[which(dt_pos$Country == "Hong Kong  SAR"), "Country"] <- "Hong Kong"
-dt_pos[which(dt_pos$Country == "Iran  (Islamic Republic of)"), "Country"] <- "Iran"
-dt_pos[which(dt_pos$Country == "Korea (Rep. of)"), "Country"] <- "Republic of Korea"
 dt_pos[which(dt_pos$Country == "United States of America"), "Country"] <- "USA"
 dt_pos[which(dt_pos$Country == "United States Of America"), "Country"] <- "USA"
 table(dt_pos$Country)
@@ -287,41 +278,22 @@ no_dups_date_loc_serotype <- unique(dt_pos, by = c("X", "Y", "observation.date",
 no_dups_date_loc_serotype <- sf::st_as_sf(no_dups_date_loc_serotype)
 # split by the two regions
 
-asia_ai_birds <- no_dups_date_loc_serotype %>% filter(Region == "Asia")
-americas_ai_birds <- no_dups_date_loc_serotype %>% filter(Region == "Americas")
+americas_ai_birds <- no_dups_date_loc_serotype
 
-table(asia_ai_birds$source)
 table(americas_ai_birds$source)
 
 ## make plots to show distribution
-library(rnaturalearth)
-spdf_world <- ne_download(scale = 110, type = "countries")
-plot(spdf_world)
 
-americas_map <- spdf_world %>% subset(., REGION_UN == "Americas")
+americas_map <- terra::vect("output/am_vect_poly.shp")
 plot(americas_map)
-asia_map <- spdf_world %>% subset(., REGION_UN == "Asia")
-plot(asia_map)
 
-png("plots/americas_pos_data_hpai.png", width = 480, height = 480)
+#png("plots/americas_pos_data_hpai.png", width = 480, height = 480)
 par(mar = c(0,0,0,0))
 plot(americas_map)
 plot(americas_ai_birds[which(americas_ai_birds$source == "fao"),], add = T, pch = 18, col = "red", cex = 0.6)
 plot(americas_ai_birds[which(americas_ai_birds$source == "woah"),], add = T, pch = 18, col = "blue", cex = 0.6)
-plot(americas_ai_birds[which(americas_ai_birds$source == "bvbrc"),], add = T, pch = 18, col = "green", cex = 0.6)
-legend(-40,20, legend=c("FAO", "WOAH", "BV-BRC"),  
-       fill = c("red", "blue", "green"),
-       cex = 0.8
-)
-dev.off()
-
-#png("plots/asia_pos_data_hpai.png", width = 480, height = 480)
-par(mar = c(0,0,0,0))
-plot(asia_map)
-plot(asia_ai_birds[which(asia_ai_birds$source == "fao"),], add = T, pch = 18, col = "red", cex = 0.6)
-plot(asia_ai_birds[which(asia_ai_birds$source == "woah"),], add = T, pch = 18, col = "blue", cex = 0.6)
-plot(asia_ai_birds[which(asia_ai_birds$source == "bvbrc"),], add = T, pch = 18, col = "green", cex = 0.6)
-legend(40,0, legend=c("FAO", "WOAH", "BV-BRC"),  
+plot(americas_ai_birds[which(americas_ai_birds$source == "zbvbrc"),], add = T, pch = 18, col = "green", cex = 0.6)
+legend(-4000000,20, legend=c("FAO", "WOAH", "BV-BRC"),  
        fill = c("red", "blue", "green"),
        cex = 0.8
 )
@@ -403,9 +375,9 @@ range(subtype_plot_data_americas$year)
 
 
 yearlabs_americas <- c( "1988", "1989", "1990", "1991", "1992", "1993", "1994", "1995",
-              "1996", "1997", "1998", "1999", "2000", "2001", "2002", "2003", "2004",
-              "2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", 
-              "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023")
+                        "1996", "1997", "1998", "1999", "2000", "2001", "2002", "2003", "2004",
+                        "2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", 
+                        "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023")
 
 weekbreaks_americas <- week_calendar_americas[which(week_calendar_americas$week_num == 1), "week_of_study"]
 weekbreaks_americas <- weekbreaks_americas[["week_of_study"]]
@@ -426,7 +398,7 @@ ggplot(subtype_plot_data_americas, aes(x = week_of_study, fill = serotype_HN)) +
   scale_x_continuous(breaks = weekbreaks_americas, labels = yearlabs_americas)
 # ggsave("plots/subtypes/serotype_by_week_hpai_only_americas.png")
 
-# This might need looking at again depending on what we wish to focus on. PErhaps just look at certain part of plot? 
+# This might need looking at again depending on what we wish to focus on. Perhaps just look at certain part of plot? 
 # Below is a small adaptation just to look at 2005 onwards 
 
 ggplot(subtype_plot_data_americas[which(subtype_plot_data_americas$year >=2005),], aes(x = week_of_study, fill = serotype_HN)) + 
@@ -443,104 +415,9 @@ ggplot(subtype_plot_data_americas[which(subtype_plot_data_americas$year >=2005),
         panel.grid.minor = element_line(size = 0.5, linetype = 'dashed',
                                         colour = "white")) +
   scale_x_continuous(breaks = weekbreaks_americas, labels = yearlabs_americas)
-#ggsave("plots/subtypes/serotype_by_week_hpai_only_americas_2005onwards.png")
+ggsave("plots/subtypes/serotype_by_week_hpai_only_americas_2005onwards.png")
 
 
 
 
-##########################################################
-# now repeat for asia
-
-range(asia_ai_birds$observation.date)
-
-## start on 5th Jan 2004 as that's a Monday
-week_calendar_asia <- data.frame(date=seq(as.Date("2004-01-05"), as.Date("2023-07-27"), by="day")) %>% 
-  mutate(week_num=isoweek(date),year=year(date)) %>%
-  group_by(year,week_num) %>% 
-  summarise(weekdate=min(date)) 
-week_calendar_asia$week_of_study <- seq(1, nrow(week_calendar_asia), by = 1)
-
-# combine with the data
-dates_asia <- merge(asia_ai_birds, week_calendar_asia)
-
-# plot directly
-ggplot(dates_asia, aes(x=weekdate)) + geom_histogram(bins = nrow(week_calendar_asia), col = "orange") + 
-  labs(y = "Number of weekly cases", x = "Year", size = 18) +
-  theme(axis.text.x = element_text(angle=90, margin = margin(t = 0.1, r = 0.2, b = 0.2, l = 0.3, unit = "cm"), 
-                                   face = "bold", size = 10, vjust = 0.5),
-        axis.text.y = element_text(face = "bold", size = 10),
-        plot.margin = margin(1,1,1,1, "cm"), 
-        axis.title =  element_text(size = 12),
-        panel.background = element_rect(fill = "white", colour = "grey50"),
-        panel.grid.major = element_line(size = 0.5, linetype = 'solid',
-                                        colour = "grey"),
-        panel.grid.minor = element_line(size = 0.5, linetype = 'dashed',
-                                        colour = "grey90"))
-#ggsave("plots/hist_by_week_hpai_only_asia.png")
-
-
-# could also make a dataframe of the counts of the number in each week
-count_dates_asia <- dates_asia %>% 
-  count(weekdate)
-
-weekly_counts_asia <- left_join(week_calendar_asia, count_dates_asia)
-weekly_counts_asia[which(is.na(weekly_counts_asia$n)), "n"] <- 0
-
-
-## Also then can have as a line plot
-ggplot(data = weekly_counts_asia, aes(x = weekdate, y = n)) +
-  geom_line(lwd = 0.9, col = "orange")  + 
-  labs(y = "Number of weekly cases", x = "Year", size = 18) +
-  theme(axis.text.x = element_text(angle=90, margin = margin(t = 0.1, r = 0.2, b = 0.2, l = 0.3, unit = "cm"), 
-                                   face = "bold", size = 10, vjust = 0.5),
-        axis.text.y = element_text(face = "bold", size = 10),
-        plot.margin = margin(1,1,1,1, "cm"), 
-        axis.title =  element_text(size = 12),
-        panel.background = element_rect(fill = "white", colour = "grey50"),
-        panel.grid.major = element_line(size = 0.5, linetype = 'solid',
-                                        colour = "grey"),
-        panel.grid.minor = element_line(size = 0.5, linetype = 'dashed',
-                                        colour = "grey90"))
-#ggsave("plots/lineplot_by_week_hpai_only_asia.png")
-
-# Now to plot the time series by serotype 
-serotype_data_asia <- as.data.frame(table(asia_ai_birds$serotype_HN))
-
-# For quite a number of the subtypes there are only a few entries. 
-# For the line plot by subtype, only use those that have >10 entries
-serotype_data_ten_or_more_asia <- serotype_data_asia[which(serotype_data_asia$Freq > 10),]
-serotype_data_ten_or_more_asia <- serotype_data_ten_or_more_asia[which(serotype_data_ten_or_more_asia$Var1 != ""),]
-
-serotype_over_ten_asia <- serotype_data_ten_or_more_asia$Var1 %>% droplevels()
-
-subtype_plot_data_asia <- dates_asia[which(dates_asia$serotype_HN %in% serotype_over_ten_asia),]
-table(subtype_plot_data_asia$serotype_HN)
-
-# Remove the rows where the sybtype isn't listed 
-subtype_plot_data_asia <- subtype_plot_data_asia[which(subtype_plot_data_asia$serotype_HN!=""),]
-
-range(subtype_plot_data_asia$year)
-
-
-yearlabs_asia <- c("2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", 
-                   "2014", "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023")
-
-weekbreaks_asia <- week_calendar_asia[which(week_calendar_asia$week_num == 1), "week_of_study"]
-weekbreaks_asia <- weekbreaks_asia[["week_of_study"]]
-
-ggplot(subtype_plot_data_asia, aes(x = week_of_study, fill = serotype_HN)) + 
-  geom_bar(position = "stack") + 
-  labs(y = "Number of weekly cases", x = "Year", size = 18, fill = "Serotype") +
-  theme(axis.text.x = element_text(angle=90, margin = margin(t = 0.1, r = 0.2, b = 0.2, l = 0.3, unit = "cm"), 
-                                   face = "bold", size = 10, vjust = 0.5),
-        axis.text.y = element_text(face = "bold", size = 10),
-        plot.margin = margin(1,1,1,1, "cm"), 
-        axis.title =  element_text(size = 12),
-        panel.background = element_rect(fill = "grey90", colour = "grey90"),
-        panel.grid.major = element_line(size = 0.5, linetype = 'solid',
-                                        colour = "white"),
-        panel.grid.minor = element_line(size = 0.5, linetype = 'dashed',
-                                        colour = "white")) +
-  scale_x_continuous(breaks = weekbreaks_asia, labels = yearlabs_asia)
-# ggsave("plots/subtypes/serotype_by_week_hpai_only_asia.png")
 
