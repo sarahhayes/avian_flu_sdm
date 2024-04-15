@@ -6,7 +6,7 @@
 PLOT <- FALSE
 VARIMPS <- TRUE
 
-# Set focal region (eur = Europe, amer = Americas, asia = Asia, anything else gives global)
+# Set focal region (eur = Europe, amer = Americas, asia = Asia, global = all, just using EltonTraits)
 region <- "global"
 
 library(av)
@@ -234,110 +234,114 @@ get_bird_ids <- function(name_vect, name_sources){
 
 # Get list of birds which appear in specified region with eBird species codes
 
-# Load in saved codes
-if(region == "eur"){
-  ebird_codes <- read.csv("Species_List/Processed_Species_List/europe.csv")
-} else if (region == "amer"){
-  ebird_codes <- bind_rows(read.csv("Species_List/Processed_Species_List/north_america.csv"),
-                           read.csv("Species_List/Processed_Species_List/central_america.csv"),
-                           read.csv("Species_List/Processed_Species_List/south_america.csv")) %>% distinct
-} else if (region == "asia"){
-  ebird_codes <- read.csv("Species_List/Processed_Species_List/asia.csv")
+if(region != "global"){
+  
+  # Load in saved codes
+  if(region == "eur"){
+    ebird_codes <- read.csv("Species_List/Processed_Species_List/europe.csv")
+  } else if (region == "amer"){
+    ebird_codes <- bind_rows(read.csv("Species_List/Processed_Species_List/north_america.csv"),
+                             read.csv("Species_List/Processed_Species_List/central_america.csv"),
+                             read.csv("Species_List/Processed_Species_List/south_america.csv")) %>% distinct
+  } else if (region == "asia"){
+    ebird_codes <- read.csv("Species_List/Processed_Species_List/asia.csv")
+  } 
+  
+  # Restrict to species with ebird status and trends data product
+  ebird_codes <- ebird_codes %>% filter(!is.na(code))
+  
+  # # Cross-ref previous Europe list
+  # read.csv("ebird/codes_for_europe_clean.csv") %>% 
+  #   mutate(species = tolower(species)) %>% 
+  #   left_join(ebird_codes, by = c("species" = "common_name"))
+  
+  # We now want the ID's for the species in eBird. 
+  eBird_IDs <- get_bird_ids(ebird_codes$scientific_name, c("eBird"))
+  
+  # See if any species were not successfully ID'd
+  cat(length(which(eBird_IDs[[1]]$X2=="-100")), "species were not ID'd.")
+  non_IDd_species <- ebird_codes$scientific_name[which(eBird_IDs[[1]]$X2=="-100")]
+  cat("Unidentified species are:",
+      non_IDd_species,
+      sep = "\n")
+  for (spe in non_IDd_species){
+    if (spe %in% AVONET_df$Species1_BirdLife){
+      cat(spe,
+          "is in BirdLife and cross-referenced with",
+          AVONET_df$Species2_eBird[which(AVONET_df$Species1_BirdLife==spe)],
+          "in eBird.\n")
+    }
+    else{
+      cat(spe, "does not appear in BirdLife.\n")
+    }
+    if (spe %in% AVONET_df$Species2_eBird){
+      cat(spe,
+          "is in eBird.\n")
+    }
+    else{
+      cat(spe, "does not appear in eBird\n")
+    }
+    if (spe %in% AVONET_df$Species3_BirdTree){
+      cat(spe,
+          "is in BirdTree and cross-referenced with",
+          AVONET_df$Species2_eBird[which(AVONET_df$Species3_BirdTree==spe)],
+          "in eBird.\n")
+    }
+    else{
+      cat(spe, "does not appear in BirdTree.\n")
+    }
+  }
+  
+  # Should find a matchup between Cuculus optatus and Cuculus solitarius, but
+  # if you look this up online it appears to be spurious.
+  # We match up Cuculus optatus with Cuculus saturatus because C. optatus was
+  # formerly classed as a subspecies of C. saturatus.
+  ebird_codes$scientific_name[which(ebird_codes$scientific_name=="cuculus optatus")] <- "cuculus saturatus"
+  
+  # Porphyrio poliocephalus doesn't have an obvious match in AVONET and is only
+  # found in small numbers at the very edge of the EPSG:3035 range so we just
+  # remove it from the list
+  ebird_codes <- ebird_codes %>% filter(scientific_name != "porphyrio poliocephalus")
+  
+  # This is a simple alternative name:
+  ebird_codes$scientific_name[which(ebird_codes$scientific_name=="daptrius chimachima")] <- "milvago chimachima"
+  ebird_codes$scientific_name[which(ebird_codes$scientific_name=="daptrius chimango")] <- "milvago chimango"
+  
+  # Drop failed matches for Asia
+  ebird_codes <- ebird_codes %>% filter(!(scientific_name %in% c("porphyrio poliocephalus",
+                                                                 "charadrius melanops",
+                                                                 "anarhynchus ruficapillus",
+                                                                 "larus brachyrhynchus",
+                                                                 "icthyophaga leucogaster")))
+  
+  # Replace with part matches for Asia
+  ebird_codes$scientific_name[which(ebird_codes$scientific_name=="acritillas indica")] <- "iola indica"
+  ebird_codes$scientific_name[which(ebird_codes$scientific_name=="spilopelia chinensis")] <- "streptopelia chinensis"
+  
+  # Drop failed matches for Americas
+  ebird_codes <- ebird_codes %>% filter(!(scientific_name %in% c("porphyrio poliocephalus",
+                                                                 "anas diazi",
+                                                                 "ramosomyia violiceps",
+                                                                 "anarhynchus wilsonia",
+                                                                 "anarhynchus nivosus",
+                                                                 "larus brachyrhynchus",
+                                                                 "accipiter atricapillus",
+                                                                 "loxia sinesciuris",
+                                                                 "sturnella lilianae")))
+  
+  # Now try doing ID matchup again:
+  eBird_IDs <- get_bird_ids(ebird_codes$scientific_name, c("eBird"))
+  
+  # Check we got everything:
+  cat(length(which(eBird_IDs[[1]]$X2=="-100")), "species were not ID'd.")
+  
+  sp_df <- ebird_codes %>% as_tibble
+  
+  # Add ID options to species dataframe
+  sp_df$Avibase_ID <- eBird_IDs[[1]][, -c(1)]
+  sp_df$synonyms <- eBird_IDs[[2]]
+  
 }
-
-# Restrict to species with ebird status and trends data product
-ebird_codes <- ebird_codes %>% filter(!is.na(code))
-
-# # Cross-ref previous Europe list
-# read.csv("ebird/codes_for_europe_clean.csv") %>% 
-#   mutate(species = tolower(species)) %>% 
-#   left_join(ebird_codes, by = c("species" = "common_name"))
-
-# We now want the ID's for the species in eBird. 
-eBird_IDs <- get_bird_ids(ebird_codes$scientific_name, c("eBird"))
-
-# See if any species were not successfully ID'd
-cat(length(which(eBird_IDs[[1]]$X2=="-100")), "species were not ID'd.")
-non_IDd_species <- ebird_codes$scientific_name[which(eBird_IDs[[1]]$X2=="-100")]
-cat("Unidentified species are:",
-    non_IDd_species,
-    sep = "\n")
-for (spe in non_IDd_species){
-  if (spe %in% AVONET_df$Species1_BirdLife){
-    cat(spe,
-        "is in BirdLife and cross-referenced with",
-        AVONET_df$Species2_eBird[which(AVONET_df$Species1_BirdLife==spe)],
-        "in eBird.\n")
-  }
-  else{
-    cat(spe, "does not appear in BirdLife.\n")
-  }
-  if (spe %in% AVONET_df$Species2_eBird){
-    cat(spe,
-        "is in eBird.\n")
-  }
-  else{
-    cat(spe, "does not appear in eBird\n")
-  }
-  if (spe %in% AVONET_df$Species3_BirdTree){
-    cat(spe,
-        "is in BirdTree and cross-referenced with",
-        AVONET_df$Species2_eBird[which(AVONET_df$Species3_BirdTree==spe)],
-        "in eBird.\n")
-  }
-  else{
-    cat(spe, "does not appear in BirdTree.\n")
-  }
-}
-
-# Should find a matchup between Cuculus optatus and Cuculus solitarius, but
-# if you look this up online it appears to be spurious.
-# We match up Cuculus optatus with Cuculus saturatus because C. optatus was
-# formerly classed as a subspecies of C. saturatus.
-ebird_codes$scientific_name[which(ebird_codes$scientific_name=="cuculus optatus")] <- "cuculus saturatus"
-
-# Porphyrio poliocephalus doesn't have an obvious match in AVONET and is only
-# found in small numbers at the very edge of the EPSG:3035 range so we just
-# remove it from the list
-ebird_codes <- ebird_codes %>% filter(scientific_name != "porphyrio poliocephalus")
-
-# This is a simple alternative name:
-ebird_codes$scientific_name[which(ebird_codes$scientific_name=="daptrius chimachima")] <- "milvago chimachima"
-ebird_codes$scientific_name[which(ebird_codes$scientific_name=="daptrius chimango")] <- "milvago chimango"
-
-# Drop failed matches for Asia
-ebird_codes <- ebird_codes %>% filter(!(scientific_name %in% c("porphyrio poliocephalus",
-                                                               "charadrius melanops",
-                                                               "anarhynchus ruficapillus",
-                                                               "larus brachyrhynchus",
-                                                               "icthyophaga leucogaster")))
-
-# Replace with part matches for Asia
-ebird_codes$scientific_name[which(ebird_codes$scientific_name=="acritillas indica")] <- "iola indica"
-ebird_codes$scientific_name[which(ebird_codes$scientific_name=="spilopelia chinensis")] <- "streptopelia chinensis"
-
-# Drop failed matches for Americas
-ebird_codes <- ebird_codes %>% filter(!(scientific_name %in% c("porphyrio poliocephalus",
-                                                               "anas diazi",
-                                                               "ramosomyia violiceps",
-                                                               "anarhynchus wilsonia",
-                                                               "anarhynchus nivosus",
-                                                               "larus brachyrhynchus",
-                                                               "accipiter atricapillus",
-                                                               "loxia sinesciuris",
-                                                               "sturnella lilianae")))
-
-# Now try doing ID matchup again:
-eBird_IDs <- get_bird_ids(ebird_codes$scientific_name, c("eBird"))
-
-# Check we got everything:
-cat(length(which(eBird_IDs[[1]]$X2=="-100")), "species were not ID'd.")
-
-sp_df <- ebird_codes %>% as_tibble
-
-# Add ID options to species dataframe
-sp_df$Avibase_ID <- eBird_IDs[[1]][, -c(1)]
-sp_df$synonyms <- eBird_IDs[[2]]
 
 ################################################################################
 # Now introduce trait data
@@ -432,21 +436,33 @@ EltonTraits_syns <- id_and_syn[[2]]
 # Check we got everything:
 cat(length(which(EltonTraits_IDs[, 2]=="-100")), "species were not ID'd.")
 
-# Find position of each species from eBird in IUCN data:
-position_in_EltonTraits <- sapply(
-  1:nrow(sp_df),
-  FUN = function(i){
-    if (sp_df$scientific_name[i] %in% EltonTraits_df$Scientific){
-      return(which(EltonTraits_df$Scientific == sp_df$scientific_name[i]))
+if (region == "global"){
+  
+  sp_df <- EltonTraits_df
+  
+  # Add ID options to species dataframe
+  sp_df$Avibase_ID <- EltonTraits_IDs[, -c(1)]
+  sp_df$synonyms <- EltonTraits_syns
+  
+} else {
+  
+  # Find position of each species from eBird in IUCN data:
+  position_in_EltonTraits <- sapply(
+    1:nrow(sp_df),
+    FUN = function(i){
+      if (sp_df$scientific_name[i] %in% EltonTraits_df$Scientific){
+        return(which(EltonTraits_df$Scientific == sp_df$scientific_name[i]))
+      }
+      else{
+        return(which(EltonTraits_df$Scientific %in% sp_df$synonyms[i, ]))
+      }
     }
-    else{
-      return(which(EltonTraits_df$Scientific %in% sp_df$synonyms[i, ]))
-    }
-  }
-)
-
-EltonTraits_by_species <- EltonTraits_df[map_dbl(position_in_EltonTraits, first), ]
-sp_df <- cbind(sp_df, EltonTraits_by_species)
+  )
+  
+  EltonTraits_by_species <- EltonTraits_df[map_dbl(position_in_EltonTraits, first), ]
+  sp_df <- cbind(sp_df, EltonTraits_by_species)
+  
+}
 
 ################################################################################
 # Now introduce CLOVER database and identify all avian species known to be hosts
@@ -607,7 +623,7 @@ IUCN_df <- distinct(IUCN_df)
 # Check if we can do IUCN to eBird matches by binomial name:
 has_IUCN_data <- sapply(1:nrow(sp_df),
                         FUN = function(i){
-                          (length(base::intersect(eBird_IDs[[2]][i, ], IUCN_df$scientificName))) > 0
+                          (length(base::intersect(sp_df$synonyms[i, ], IUCN_df$scientificName))) > 0
                         })
 cat("There are",
     length(which(!has_IUCN_data)),
@@ -621,7 +637,7 @@ sp_df <- sp_df[has_IUCN_data, ]
 
 multiple_IUCN_matches <- sapply(1:nrow(sp_df),
                                 FUN = function(i){
-                                  (length(base::intersect(eBird_IDs[[2]][i, ], IUCN_df$scientificName))) > 1
+                                  (length(base::intersect(sp_df$synonyms[i, ], IUCN_df$scientificName))) > 1
                                 })
 cat("There are",
     length(which(multiple_IUCN_matches)),
@@ -631,7 +647,7 @@ cat("There are",
 problem_cases <- sapply(1:nrow(sp_df),
                         FUN = function(i){
                           (!(sp_df$Scientific[i] %in% IUCN_df$scientificName)) &
-                            ((length(base::intersect(eBird_IDs[[2]][i, ], IUCN_df$scientificName))) > 1)
+                            ((length(base::intersect(sp_df$synonyms[i, ], IUCN_df$scientificName))) > 1)
                         })
 cat("There are",
     length(which(problem_cases)),
@@ -651,7 +667,7 @@ position_in_IUCN <- sapply(
       return(which(IUCN_df$scientificName == sp_df$Scientific[i]))
     }
     else{
-      return(which(IUCN_df$scientificName %in% eBird_IDs[[2]][i, ]))
+      return(which(IUCN_df$scientificName %in% sp_df$synonyms[i, ]))
     }
   }
 )
@@ -718,7 +734,7 @@ nearest_host_df <- data.frame(phylo_sp, nearest_host_distance)
 # Check that we can make at least one assignment for all species in EltonTraits:
 has_phylo_data <- sapply(1:nrow(sp_df),
                          FUN = function(i){
-                           (length(base::intersect(eBird_IDs[[2]][i, ], nearest_host_df$phylo_sp))) > 0
+                           (length(base::intersect(sp_df$synonyms[i, ], nearest_host_df$phylo_sp))) > 0
                          })
 cat("Phylogeny can not be matched to",
     length(which(!has_phylo_data)),
