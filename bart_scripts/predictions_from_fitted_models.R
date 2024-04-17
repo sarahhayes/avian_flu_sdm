@@ -6,12 +6,12 @@ args <- commandArgs(trailingOnly = T)
 if (length(args)<4){
   INCLUDE_CROSSTERMS <- "no-crossterms" # Set to "no-crossterms" to do model without crossterms or "with-crossterms" to do model with crossterms
 }else{
-  INCLUDE_CROSSTERMS <- as.logical(args[4])
+  INCLUDE_CROSSTERMS <- args[4]
 }
 if (length(args)<3){
-  CV_OR_RI <- "cv" # Set to "cv" to do crossvalidated model or "ri" to do crossvalidation + random intercept model
+  CV_OR_RI <- "ri" # Set to "cv" to do crossvalidated model or "ri" to do crossvalidation + random intercept model
 }else{
-  CV_OR_RI <- as.logical(args[3])
+  CV_OR_RI <- args[3]
 }
 if (length(args)<2){
   # Set path to folder containing data, and where output will be stored
@@ -97,7 +97,11 @@ countrytest <- test_data$ri
 load(file = paste(PATH_TO_OUTPUTS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_model_with_vs_A_Q1.rds", sep = ""))
 sdm_A_Q1 <- sdm
 cutoff <- get_threshold(sdm)
-metrics_A_Q1 <- get_sens_and_spec(sdm, xtest, ytest, NULL, cutoff)
+if (CV_OR_RI=="ri"){
+  metrics_A_Q1 <- get_sens_and_spec(sdm, xtest, ytest, countrytest, cutoff)
+}else{
+  metrics_A_Q1 <- get_sens_and_spec(sdm, xtest, ytest, NULL, cutoff)
+}
 cat("Dataset A Q1, test metrics: sens =",
     metrics_A_Q1$sens,
     ", spec =",
@@ -135,7 +139,11 @@ countrytest <- test_data$ri
 load(file = paste(PATH_TO_OUTPUTS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_model_with_vs_A_Q2.rds", sep = ""))
 sdm_A_Q2 <- sdm
 cutoff <- get_threshold(sdm)
-metrics_A_Q2 <- get_sens_and_spec(sdm, xtest, ytest, NULL, cutoff)
+if (CV_OR_RI=="ri"){
+  metrics_A_Q2 <- get_sens_and_spec(sdm, xtest, ytest, countrytest, cutoff)
+}else{
+  metrics_A_Q2 <- get_sens_and_spec(sdm, xtest, ytest, NULL, cutoff)
+}
 cat("Dataset A Q2, test metrics: sens =",
     metrics_A_Q2$sens,
     ", spec =",
@@ -173,7 +181,11 @@ countrytest <- test_data$ri
 load(file = paste(PATH_TO_OUTPUTS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_model_with_vs_A_Q3.rds", sep = ""))
 sdm_A_Q3 <- sdm
 cutoff <- get_threshold(sdm)
-metrics_A_Q3 <- get_sens_and_spec(sdm, xtest, ytest, NULL, cutoff)
+if (CV_OR_RI=="ri"){
+  metrics_A_Q3 <- get_sens_and_spec(sdm, xtest, ytest, countrytest, cutoff)
+}else{
+  metrics_A_Q3 <- get_sens_and_spec(sdm, xtest, ytest, NULL, cutoff)
+}
 cat("Dataset A Q3, test metrics: sens =",
     metrics_A_Q3$sens,
     ", spec =",
@@ -211,7 +223,11 @@ countrytest <- test_data$ri
 load(file = paste(PATH_TO_OUTPUTS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_model_with_vs_A_Q4.rds", sep = ""))
 sdm_A_Q4 <- sdm
 cutoff <- get_threshold(sdm)
-metrics_A_Q4 <- get_sens_and_spec(sdm, xtest, ytest, NULL, cutoff)
+if (CV_OR_RI=="ri"){
+  metrics_A_Q4 <- get_sens_and_spec(sdm, xtest, ytest, countrytest, cutoff)
+}else{
+  metrics_A_Q4 <- get_sens_and_spec(sdm, xtest, ytest, NULL, cutoff)
+}
 cat("Dataset A Q4, test metrics: sens =",
     metrics_A_Q4$sens,
     ", spec =",
@@ -250,7 +266,11 @@ if (B_TEST_DATA_AVAILABLE){
   ytest <- test_data$y
   countrytest <- test_data$ri
   cutoff <- get_threshold(sdm)
-  metrics_B_Q1 <- get_sens_and_spec(sdm, xtest, ytest, NULL, cutoff)
+  if (CV_OR_RI=="ri"){
+    metrics_B_Q1 <- get_sens_and_spec(sdm, xtest, ytest, countrytest, cutoff)
+  }else{
+    metrics_B_Q1 <- get_sens_and_spec(sdm, xtest, ytest, NULL, cutoff)
+  }
   cat("Dataset B Q1, test metrics: sens =",
       metrics_B_Q1$sens,
       ", spec =",
@@ -292,7 +312,11 @@ if (B_TEST_DATA_AVAILABLE){
   ytest <- test_data$y
   countrytest <- test_data$ri
   cutoff <- get_threshold(sdm)
-  metrics_B_Q2 <- get_sens_and_spec(sdm, xtest, ytest, NULL, cutoff)
+  if (CV_OR_RI=="ri"){
+    metrics_B_Q2 <- get_sens_and_spec(sdm, xtest, ytest, countrytest, cutoff)
+  }else{
+    metrics_B_Q2 <- get_sens_and_spec(sdm, xtest, ytest, NULL, cutoff)
+  }
   cat("Dataset B Q2, test metrics: sens =",
       metrics_B_Q2$sens,
       ", spec =",
@@ -335,7 +359,11 @@ if (B_TEST_DATA_AVAILABLE){
   ytest <- test_data$y
   countrytest <- test_data$ri
   cutoff <- get_threshold(sdm)
-  metrics_B_Q3 <- get_sens_and_spec(sdm, xtest, ytest, NULL, cutoff)
+  if (CV_OR_RI=="ri"){
+    metrics_B_Q3 <- get_sens_and_spec(sdm, xtest, ytest, countrytest, cutoff)
+  }else{
+    metrics_B_Q3 <- get_sens_and_spec(sdm, xtest, ytest, NULL, cutoff)
+  }
   cat("Dataset B Q3, test metrics: sens =",
       metrics_B_Q3$sens,
       ", spec =",
@@ -378,7 +406,11 @@ if (B_TEST_DATA_AVAILABLE){
   ytest <- test_data$y
   countrytest <- test_data$ri
   cutoff <- get_threshold(sdm)
-  metrics_B_Q4 <- get_sens_and_spec(sdm, xtest, ytest, NULL, cutoff)
+  if (CV_OR_RI=="ri"){
+    metrics_B_Q4 <- get_sens_and_spec(sdm, xtest, ytest, countrytest, cutoff)
+  }else{
+    metrics_B_Q4 <- get_sens_and_spec(sdm, xtest, ytest, NULL, cutoff)
+  }
   cat("Dataset B Q4, test metrics: sens =",
       metrics_B_Q4$sens,
       ", spec =",
