@@ -33,8 +33,6 @@ fao_data_trim <- dplyr::select(fao_data, all_of(c("Latitude", "Longitude", "obse
 fao_data_trim$source <- "fao"
 fao_data_trim$observation.date <- as.Date(fao_data_trim$observation.date, "%d/%m/%Y")
 
-# use this if filtering by specified region 
-fao_data_trim_asia <- fao_data_trim %>% filter(Region == "Asia")
 
 # WAHIS
 wahis <- read_excel("data/flu_data/raw_data/WOAH_july_2023.xlsx", sheet = 2)
@@ -81,8 +79,6 @@ inf_a_hpai_trim <- dplyr::select(inf_a_hpai_wild, all_of(c("Latitude", "Longitud
                                                            "country", "sero_sub_genotype_eng", "region")))
 inf_a_hpai_trim$source <- "woah"
 
-inf_a_hpai_asia <- inf_a_hpai_trim %>% filter(region == "Asia")
-
 # BVBRC
 bvbrc_data <- read.csv("data/flu_data/raw_data/BVBRC_surveillance.csv")
 
@@ -115,20 +111,9 @@ bv_pos_data_trim <- dplyr::select(pos_data, all_of(c("Collection.Date",
                                                      "Collection.Country",
                                                      "Subtype")))
 
-bv_pos_data_trim$source <- "zbvbrc"
-bv_pos_data_trim$Collection.Date <- as.Date(bv_pos_data_trim$Collection.Date,
-                                            "%Y-%m-%d")
 
-asia_countries <- c("Bangladesh", "Bhutan", "Cambodia", "China", "Georgia", "Japan", "Lebanon", "Mongolia", 
-                    "Oman", "Russia", "Sri Lanka", "Taiwan", "Thailand", "Turkey", "Viet Nam")
 
-oceania_countries <- c("Australia", "Papua New Guinea")
-
-bv_asia <- bv_pos_data_trim %>% filter(Collection.Country %in% c(asia_countries)) 
-bv_asia$Region <- "Asia"
-
-table(bv_asia$Region, bv_asia$Collection.Country)
-
+bv_asia <- bv_pos_data_trim
 
 ## we only want HPAI 
 table(bv_asia$Subtype)
@@ -137,14 +122,16 @@ poss_hpai <- bv_asia %>% filter(str_detect(Subtype,"H5") | str_detect(Subtype, "
 
 table(poss_hpai$Subtype)
 
+poss_hpai$source <- "zbvbrc"
+
 # We now have the trimmed data sets for all the sources. 
 # first need all the names to match so we can rbind
 
-colnames(fao_data_trim_asia)
-colnames(inf_a_hpai_asia)
+colnames(fao_data_trim)
+colnames(inf_a_hpai_trim)
 colnames(poss_hpai)
-inf_a_hpai_asia <- rename(inf_a_hpai_asia, observation.date = Outbreak_start_date, 
-                              Country = country, Serotype = sero_sub_genotype_eng, Region = region)
+inf_a_hpai_trim <- rename(inf_a_hpai_trim, observation.date = Outbreak_start_date, 
+                          Country = country, Serotype = sero_sub_genotype_eng, Region = region)
 poss_hpai <- rename(poss_hpai, Latitude = Collection.Latitude,
                     Longitude = Collection.Longitude,
                     observation.date = Collection.Date,
@@ -152,11 +139,12 @@ poss_hpai <- rename(poss_hpai, Latitude = Collection.Latitude,
                     Country = Collection.Country,
                     Serotype = Subtype)
 
+poss_hpai$Region <- NA
 
 poss_hpai <- dplyr::select(poss_hpai, c(Latitude, Longitude, observation.date, Species,
                                         Country, Serotype, source, Region))
 
-asia_data <- rbind(fao_data_trim_asia, inf_a_hpai_asia, poss_hpai)
+asia_data <- rbind(fao_data_trim, inf_a_hpai_trim, poss_hpai)
 
 
 ## check for any NA values
@@ -217,6 +205,10 @@ ai_pos_birds$serotype_HN <- trimws(ai_pos_birds$serotype_HN) # trim any white sp
 table(ai_pos_birds$serotype_HN)
 
 
+
+zipmap <- terra::vect(x = "data/gis_world/WB_countries_Admin0_10m/WB_countries_Admin0_10m.shp")
+plot(zipmap)
+
 library(sf)
 # change into sf object so can change projection of point. 
 # Assuming FAO are entered in standard lon/lat format
@@ -225,8 +217,20 @@ point_data <- st_as_sf(x = ai_pos_birds,
                        coords = c("Longitude", "Latitude"),
                        crs = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0")
 class(point_data)
+plot(point_data[6], pch = 18)
 
-# change the projections
+#png("plots/hpai_world.png")
+plot(zipmap)
+plot(point_data[6], add = T, pch = 18)
+#dev.off()
+
+# read in the asia_russia shapefile
+
+ar_shp <- terra::vect("output/asia_russia_vect_poly.shp")
+plot(ar_shp)
+ar_shp ## this is in the local projection
+
+# change the projections of the points
 proj_crs <- 8859
 point_data <- sf::st_transform(point_data, proj_crs)
 point_data # Now a spatial points object in the right projection
@@ -238,8 +242,33 @@ point_data_df <- point_data %>%
                 Y = sf::st_coordinates(.)[,2])
 head(point_data_df)
 
-# Add a year and month and year_month to the data
+## START HERE
 
+# tidy the below lines which do seem to wor
+ar_sf <- sf::st_as_sf(ar_shp)
+plot(ar_sf)
+
+try <- st_intersection(point_data, ar_sf)
+plot(try)
+
+table(try$Country)
+
+
+## select the data that we want based on a shapefile
+asia_shp <- terra::vect("output/asia_vect_bb.shp")
+plot(asia_shp)
+asia_shp
+
+# select the data that fall within this box to see if many data in asia
+ai_data_prj_area <- point_data_df %>%
+  dplyr::filter(X >= -9500000 & X <= 2000000) %>%
+  dplyr::filter(Y >= 1900000 & Y <= 8000000)
+
+
+plot(asia_shp)
+plot(ai_data_prj_area, add = T, pch = 16)
+
+# Add a year and month and year_month to the data
 point_data_df$year <- lubridate::year(point_data_df$observation.date)
 point_data_df$month <- lubridate::month(point_data_df$observation.date)
 point_data_df$month_year <-  format(as.Date(point_data_df$observation.date), "%Y-%m")
@@ -376,9 +405,9 @@ range(subtype_plot_data_asia$year)
 
 
 yearlabs_asia <- c( "1988", "1989", "1990", "1991", "1992", "1993", "1994", "1995",
-                        "1996", "1997", "1998", "1999", "2000", "2001", "2002", "2003", "2004",
-                        "2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", 
-                        "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023")
+                    "1996", "1997", "1998", "1999", "2000", "2001", "2002", "2003", "2004",
+                    "2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", 
+                    "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023")
 
 weekbreaks_asia <- week_calendar_asia[which(week_calendar_asia$week_num == 1), "week_of_study"]
 weekbreaks_asia <- weekbreaks_asia[["week_of_study"]]
