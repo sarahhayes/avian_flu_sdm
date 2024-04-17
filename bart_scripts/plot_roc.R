@@ -1,6 +1,25 @@
 # In this script we load in the outputs from fit_avian_flu_model.R.
 
-PATH_TO_DATA <- "../../../OneDrive - The University of Liverpool/"
+# Optional command line arguments, must be passed as strings:
+args <- commandArgs(trailingOnly = T)
+if (length(args)<4){
+  INCLUDE_CROSSTERMS <- "no-crossterms" # Set to "no-crossterms" to do model without crossterms or "with-crossterms" to do model with crossterms
+}else{
+  INCLUDE_CROSSTERMS <- args[4]
+}
+if (length(args)<3){
+  CV_OR_RI <- "cv" # Set to "cv" to do crossvalidated model or "ri" to do crossvalidation + random intercept model
+}else{
+  CV_OR_RI <- args[3]
+}
+if (length(args)<1){
+  # Set path to folder containing data, and where output will be stored
+  PATH_TO_OUTPUTS <- "../../../OneDrive - The University of Liverpool/AI_S2_SDM_storage/"
+}else{
+  PATH_TO_OUTPUTS <- args[1]
+}
+
+B_TEST_DATA_AVAILABLE <- FALSE # Set to TRUE if we have test data for dataset B, otherwise this should be FALSE
 
 library(embarcadero)
 library(ggplot2)
@@ -9,174 +28,149 @@ library(RColorBrewer)
 library(terra)
 set.seed(12345)
 
-# Function for directly getting optimal cutoff
-get_threshold <- function(object){
-  fitobj <- object$fit
+################################################################################
+# Make AUC plot and get numbers for table for dataset A
+
+for (idx in 1:4){
+  # Slightly hacky way to load in predictions and give it an arbitrary name.
+  # This is needed because readRDS appears to be deprecated and the load
+  # function brings in the original variable name. If you do x<-load(x.rds) then
+  # x just gives you the variable name; when we pipe with get() we can get the
+  # value of the thing with that variable name, provided it's been loaded in.
+  load(file = paste(PATH_TO_OUTPUTS,
+                    "fitted-BART-models-",
+                    INCLUDE_CROSSTERMS,
+                    "/",
+                    CV_OR_RI,
+                    "_metrics_A_Q",
+                    idx,
+                    ".rds",
+                    sep = ""))
+  metrics <- load(file = paste(PATH_TO_OUTPUTS,
+                               "fitted-BART-models-",
+                               INCLUDE_CROSSTERMS,
+                               "/",
+                               CV_OR_RI,
+                               "_metrics_A_Q",
+                               idx,
+                               ".rds",
+                               sep = "")) %>% get
+  cat("Dataset A Q",
+      idx,
+      "\nsensitivity =",
+      metrics$sens,
+      "\nspecificity =",
+      metrics$spec,
+      "\nTSS =",
+      metrics$tss,
+      "\nAUC=",
+      metrics$auc,
+      "\n\n"
+  )
   
-  true.vector <- fitobj$data@y 
-  
-  pred <- prediction(colMeans(pnorm(object$yhat.train)), true.vector)
-  
-  perf.tss <- performance(pred,"sens","spec")
-  tss.list <- (perf.tss@x.values[[1]] + perf.tss@y.values[[1]] - 1)
-  tss.df <- data.frame(alpha=perf.tss@alpha.values[[1]],tss=tss.list)
-  thresh <- min(tss.df$alpha[which(tss.df$tss==max(tss.df$tss))])
-  return(thresh)
 }
 
-################################################################################
-# Lookup table for renaming landcover layers
-lc_lookup <- pairlist("lc_1" = "Water_bodies",
-                      "lc_2" = "Evergreen_Needleleaf_Forests",
-                      "lc_3" = "Evergreen_Broadleaf_Forests",
-                      "lc_4" = "Deciduous_Needleleaf_Forests",
-                      "lc_5" = "Deciduous_Broadleaf_Forests",
-                      "lc_6" = "Mixed_Forests",
-                      "lc_7" = "Closed_Shrublands",
-                      "lc_8" = "Open_Shrublands",
-                      "lc_9" = "Woody_Savannas",
-                      "lc_10" = "Savannas",
-                      "lc_11" = "Grasslands",
-                      "lc_12" = "Permanent_Wetlands",
-                      "lc_13" = "Croplands",
-                      "lc_14" = "Urban_and_Built-up_Lands",
-                      "lc_15" = "Cropland/Natural_Vegetation_Mosaics",
-                      "lc_16" = "Non-Vegetated_Lands",
-                      "lc_17" = "Unclassified")
-
-################################################################################
-# Make AUC plot and getting numbers for table
-
-# Load models:
-load(file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/sdm_Q1.rds", sep = ""))
-q1_sdm <- sdm
-load(file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/sdm_Q2.rds", sep = ""))
-q2_sdm <- sdm
-load(file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/sdm_Q3.rds", sep = ""))
-q3_sdm <- sdm
-load(file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/sdm_Q4.rds", sep = ""))
-q4_sdm <- sdm
-rm(sdm)
-
-load(file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/q1_train_test_data.rds", sep = ""))
-q1_xtrain <- xtrain
-q1_ytrain <- ytrain
-q1_xtest <- xtest
-q1_ytest <- ytest
-load(file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/q2_train_test_data.rds", sep = ""))
-q2_xtrain <- xtrain
-q2_ytrain <- ytrain
-q2_xtest <- xtest
-q2_ytest <- ytest
-load(file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/q3_train_test_data.rds", sep = ""))
-q3_xtrain <- xtrain
-q3_ytrain <- ytrain
-q3_xtest <- xtest
-q3_ytest <- ytest
-load(file = paste(PATH_TO_DATA, "AI_S2_SDM_storage/fitted-BART-models/q4_train_test_data.rds", sep = ""))
-q4_xtrain <- xtrain
-q4_ytrain <- ytrain
-q4_xtest <- xtest
-q4_ytest <- ytest
-rm(xtrain, ytrain, xtest, ytest)
-
-get_sens_and_spec <- function(sdm, xtest, ytest, cutoff){
-  pred <- xtest[which(complete.cases(xtest)), ] %>%
-    stats::predict(object=sdm, type = "bart") %>%
-    pnorm() %>%
-    colMeans() %>%
-    prediction(labels = ytest[which(complete.cases(xtest))])
-  perf <-  performance(pred, measure = "sens", x.measure = "spec")
-  tss_list <- (perf@x.values[[1]] + perf@y.values[[1]] - 1)
-  tss_df <- data.frame(alpha=perf@alpha.values[[1]],tss=tss_list)
-  # cutoff <- min(tss_df$alpha[which(tss_df$tss==max(tss_df$tss))])
-  sens <- perf@x.values[[1]][which.min(abs(perf@alpha.values[[1]]-cutoff))]
-  spec <- perf@y.values[[1]][which.min(abs(perf@alpha.values[[1]]-cutoff))]
-  tss <- tss_df[which.min(abs(tss_df$alpha-cutoff)),'tss']
-  auc <- performance(pred,"auc")@y.values[[1]]
-  return(pairlist("pred"=pred,
-                  "perf"=perf,
-                  "sens"=sens,
-                  "spec"=spec,
-                  "tss"=tss,
-                  "auc"=auc))
-}
-
-# Try getting sensitivity and specificity:
-q1_cutoff <- get_threshold(q1_sdm)
-q2_cutoff <- get_threshold(q2_sdm)
-q3_cutoff <- get_threshold(q3_sdm)
-q4_cutoff <- get_threshold(q4_sdm)
-
-q1_sens_spec <- get_sens_and_spec(q1_sdm, q1_xtest, q1_ytest, q1_cutoff)
-q2_sens_spec <- get_sens_and_spec(q2_sdm, q2_xtest, q2_ytest, q2_cutoff)
-q3_sens_spec <- get_sens_and_spec(q3_sdm, q3_xtest, q3_ytest, q3_cutoff)
-q4_sens_spec <- get_sens_and_spec(q4_sdm, q4_xtest, q4_ytest, q4_cutoff)
-
-cat("Q1 sensitivity =",
-    q1_sens_spec$sens,
-    ", specificity =",
-    q1_sens_spec$spec,
-    ", TSS =",
-    q1_sens_spec$tss,
-    ", AUC=",
-    q1_sens_spec$auc
-    )
-cat("Q2 sensitivity =",
-    q2_sens_spec$sens,
-    ", specificity =",
-    q2_sens_spec$spec,
-    ", TSS =",
-    q2_sens_spec$tss,
-    ", AUC=",
-    q2_sens_spec$auc
-)
-cat("Q3 sensitivity =",
-    q3_sens_spec$sens,
-    ", specificity =",
-    q3_sens_spec$spec,
-    ", TSS =",
-    q3_sens_spec$tss,
-    ", AUC=",
-    q3_sens_spec$auc
-)
-cat("Q4 sensitivity =",
-    q4_sens_spec$sens,
-    ", specificity =",
-    q4_sens_spec$spec,
-    ", TSS =",
-    q4_sens_spec$tss,
-    ", AUC=",
-    q4_sens_spec$auc
-)
-
-q1_x <- performance(q1_sens_spec$pred, "tpr", "fpr")
-q2_x <- performance(q2_sens_spec$pred, "tpr", "fpr")
-q3_x <- performance(q3_sens_spec$pred, "tpr", "fpr")
-q4_x <- performance(q4_sens_spec$pred, "tpr", "fpr")
-q1_rocdf <- data.frame(fpr=q1_x@x.values[[1]],
-                    tpr=q1_x@y.values[[1]])
-q2_rocdf <- data.frame(fpr=q2_x@x.values[[1]],
-                       tpr=q2_x@y.values[[1]])
-q3_rocdf <- data.frame(fpr=q3_x@x.values[[1]],
-                       tpr=q3_x@y.values[[1]])
-q4_rocdf <- data.frame(fpr=q4_x@x.values[[1]],
-                       tpr=q4_x@y.values[[1]])
+Q1_x <- performance(metrics_A_Q1$pred, "tpr", "fpr")
+Q2_x <- performance(metrics_A_Q2$pred, "tpr", "fpr")
+Q3_x <- performance(metrics_A_Q3$pred, "tpr", "fpr")
+Q4_x <- performance(metrics_A_Q4$pred, "tpr", "fpr")
+Q1_rocdf <- data.frame(fpr=Q1_x@x.values[[1]],
+                       tpr=Q1_x@y.values[[1]])
+Q2_rocdf <- data.frame(fpr=Q2_x@x.values[[1]],
+                       tpr=Q2_x@y.values[[1]])
+Q3_rocdf <- data.frame(fpr=Q3_x@x.values[[1]],
+                       tpr=Q3_x@y.values[[1]])
+Q4_rocdf <- data.frame(fpr=Q4_x@x.values[[1]],
+                       tpr=Q4_x@y.values[[1]])
 pal <- c("#2271B2",
          "#F748A5",
          "#359B73",
          "#e69f00")
 roc_plot <- ggplot() + 
-  geom_line(aes(x=q1_rocdf$fpr,y=q1_rocdf$tpr, colour = "Q1")) + 
-  geom_line(aes(x=q2_rocdf$fpr,y=q2_rocdf$tpr, colour = "Q2")) + 
-  geom_line(aes(x=q3_rocdf$fpr,y=q3_rocdf$tpr, colour = "Q3")) + 
-  geom_line(aes(x=q4_rocdf$fpr,y=q4_rocdf$tpr, colour = "Q4")) + 
+  geom_line(aes(x=Q1_rocdf$fpr,y=Q1_rocdf$tpr, colour = "A Q1")) + 
+  geom_line(aes(x=Q2_rocdf$fpr,y=Q2_rocdf$tpr, colour = "A Q2")) + 
+  geom_line(aes(x=Q3_rocdf$fpr,y=Q3_rocdf$tpr, colour = "A Q3")) + 
+  geom_line(aes(x=Q4_rocdf$fpr,y=Q4_rocdf$tpr, colour = "A Q4")) + 
   scale_colour_manual("",
-                      breaks = c("Q1", "Q2", "Q3", "Q4"),
+                      breaks = c("A Q1", "A Q2", "A Q3", "A Q4"),
                       values = pal) +
   ggtitle('Receiver-operating characteristic') + 
   xlab('False positive rate') + 
   ylab('True positive rate') + 
   geom_abline(intercept=0,slope=1,col='black')
 
-ggsave("plots/RO_curve.png", plot = roc_plot, width = 6.5, height = 4.5)
+ggsave("plots/RO_curve_A.png", plot = roc_plot, width = 6.5, height = 4.5)
+
+################################################################################
+# Make AUC plot and get numbers for table for dataset B
+if (B_TEST_DATA_AVAILABLE)
+  {for (idx in 1:4){
+    # Slightly hacky way to load in predictions and give it an arbitrary name.
+    # This is needed because readRDS appears to be deprecated and the load
+    # function brings in the original variable name. If you do x<-load(x.rds) then
+    # x just gives you the variable name; when we pipe with get() we can get the
+    # value of the thing with that variable name, provided it's been loaded in.
+    load(file = paste(PATH_TO_OUTPUTS,
+                      "fitted-BART-models-",
+                      INCLUDE_CROSSTERMS,
+                      "/",
+                      CV_OR_RI,
+                      "_metrics_B_Q",
+                      idx,
+                      ".rds",
+                      sep = ""))
+    metrics <- load(file = paste(PATH_TO_OUTPUTS,
+                                 "fitted-BART-models-",
+                                 INCLUDE_CROSSTERMS,
+                                 "/",
+                                 CV_OR_RI,
+                                 "_metrics_B_Q",
+                                 idx,
+                                 ".rds",
+                                 sep = "")) %>% get
+    cat("Dataset B Q",
+        idx,
+        "\nsensitivity =",
+        metrics$sens,
+        "\nspecificity =",
+        metrics$spec,
+        "\nTSS =",
+        metrics$tss,
+        "\nAUC=",
+        metrics$auc,
+        "\n\n"
+    )
+    
+  }
+  
+  Q1_x <- performance(metrics_B_Q1$pred, "tpr", "fpr")
+  Q2_x <- performance(metrics_B_Q2$pred, "tpr", "fpr")
+  Q3_x <- performance(metrics_B_Q3$pred, "tpr", "fpr")
+  Q4_x <- performance(metrics_B_Q4$pred, "tpr", "fpr")
+  Q1_rocdf <- data.frame(fpr=Q1_x@x.values[[1]],
+                         tpr=Q1_x@y.values[[1]])
+  Q2_rocdf <- data.frame(fpr=Q2_x@x.values[[1]],
+                         tpr=Q2_x@y.values[[1]])
+  Q3_rocdf <- data.frame(fpr=Q3_x@x.values[[1]],
+                         tpr=Q3_x@y.values[[1]])
+  Q4_rocdf <- data.frame(fpr=Q4_x@x.values[[1]],
+                         tpr=Q4_x@y.values[[1]])
+  pal <- c("#2271B2",
+           "#F748A5",
+           "#359B73",
+           "#e69f00")
+  roc_plot <- ggplot() + 
+    geom_line(aes(x=Q1_rocdf$fpr,y=Q1_rocdf$tpr, colour = "B Q1")) + 
+    geom_line(aes(x=Q2_rocdf$fpr,y=Q2_rocdf$tpr, colour = "B Q2")) + 
+    geom_line(aes(x=Q3_rocdf$fpr,y=Q3_rocdf$tpr, colour = "B Q3")) + 
+    geom_line(aes(x=Q4_rocdf$fpr,y=Q4_rocdf$tpr, colour = "B Q4")) + 
+    scale_colour_manual("",
+                        breaks = c("B Q1", "B Q2", "B Q3", "B Q4"),
+                        values = pal) +
+    ggtitle('Receiver-operating characteristic') + 
+    xlab('False positive rate') + 
+    ylab('True positive rate') + 
+    geom_abline(intercept=0,slope=1,col='black')
+  
+  ggsave("plots/RO_curve_B.png", plot = roc_plot, width = 6.5, height = 4.5)
+}
