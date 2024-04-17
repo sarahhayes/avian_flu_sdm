@@ -3,7 +3,24 @@
 
 rm(list = ls())
 
-PATH_TO_DATA <- "../../../OneDrive - The University of Liverpool/"
+# Optional command line arguments, must be passed as strings:
+args <- commandArgs(trailingOnly = T)
+if (length(args)<4){
+  INCLUDE_CROSSTERMS <- "no-crossterms" # Set to "no-crossterms" to do model without crossterms or "with-crossterms" to do model with crossterms
+}else{
+  INCLUDE_CROSSTERMS <- args[4]
+}
+if (length(args)<3){
+  CV_OR_RI <- "cv" # Set to "cv" to do crossvalidated model or "ri" to do crossvalidation + random intercept model
+}else{
+  CV_OR_RI <- args[3]
+}
+if (length(args)<1){
+  # Set path to folder containing data, and where output will be stored
+  PATH_TO_OUTPUTS <- "../../../OneDrive - The University of Liverpool/AI_S2_SDM_storage/"
+}else{
+  PATH_TO_OUTPUTS <- args[1]
+}
 
 library(embarcadero)
 library(raster)
@@ -15,11 +32,29 @@ preds <- list()
 
 
 for (idx in 1:4){
-  load(file = paste(PATH_TO_DATA,
-                    "AI_S2_SDM_storage/fitted-BART-models/prediction_Q",
+  # Slightly hacky way to load in predictions and give it an arbitrary name.
+  # This is needed because readRDS appears to be deprecated and the load
+  # function brings in the original variable name. If you do x<-load(x.rds) then
+  # x just gives you the variable name; when we pipe with get() we can get the
+  # value of the thing with that variable name, provided it's been loaded in.
+  load(file = paste(PATH_TO_OUTPUTS,
+                    "fitted-BART-models-",
+                    INCLUDE_CROSSTERMS,
+                    "/",
+                    CV_OR_RI,
+                    "_predictions_A_Q",
                     idx,
                     ".rds",
                     sep = ""))
+  pred_layer <- load(file = paste(PATH_TO_OUTPUTS,
+                                     "fitted-BART-models-",
+                                     INCLUDE_CROSSTERMS,
+                                     "/",
+                                     CV_OR_RI,
+                                     "_predictions_A_Q",
+                                     idx,
+                                     ".rds",
+                                     sep = "")) %>% get
   preds[[idx]] <- pred_layer
   names(preds[[idx]]) <- c(paste0("Q",idx),
                            paste0("Q",idx,"_2.5th_percentile"),
@@ -110,7 +145,7 @@ dev.off()
 ################################################################################
 # Plot case data
 
-pos_data <- read.csv(paste(PATH_TO_DATA,
+pos_data <- read.csv(paste(PATH_TO_OUTPUTS,
                            "AI_S2_SDM_storage/Avian flu data/pos_points_proj_area_all_sources_duplicates_removed.csv",
                            sep = ""))
 

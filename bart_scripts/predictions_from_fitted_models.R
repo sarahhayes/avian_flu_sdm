@@ -9,7 +9,7 @@ if (length(args)<4){
   INCLUDE_CROSSTERMS <- args[4]
 }
 if (length(args)<3){
-  CV_OR_RI <- "ri" # Set to "cv" to do crossvalidated model or "ri" to do crossvalidation + random intercept model
+  CV_OR_RI <- "cv" # Set to "cv" to do crossvalidated model or "ri" to do crossvalidation + random intercept model
 }else{
   CV_OR_RI <- args[3]
 }
