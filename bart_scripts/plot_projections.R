@@ -62,8 +62,15 @@ for (idx in 1:4){
   
 }
 
-png("plots/A_projections.png", width = 7, height = 7,
-    units = "in", res = 330)
+png(paste("plots/",
+          INCLUDE_CROSSTERMS,
+          "_",
+          CV_OR_RI,
+          "_A_projections.png", sep=""),
+    width = 7,
+    height = 7,
+    units = "in",
+    res = 330)
 spplot(stack(preds[[1]][[1]],
              preds[[2]][[1]], 
              preds[[3]][[1]], 
@@ -75,7 +82,13 @@ grid::grid.text("Probability", x=grid::unit(0.98, "npc"), y=grid::unit(0.50, "np
 dev.off()
 
 
-png("plots/A_q1_uncertainty.png", width = 21, height = 7,
+png(paste("plots/",
+          INCLUDE_CROSSTERMS,
+          "_",
+          CV_OR_RI,
+          "_A_q1_uncertainty.png", sep=""),
+          width = 21,
+          height = 7,
     units = "in", res = 330)
 spplot(stack(preds[[1]][[2]],
              preds[[1]][[1]],
@@ -87,7 +100,13 @@ grid::grid.text("Probability", x=grid::unit(0.98, "npc"), y=grid::unit(0.50, "np
 dev.off()
 
 
-png("plots/A_q2_uncertainty.png", width = 21, height = 7,
+png(paste("plots/",
+          INCLUDE_CROSSTERMS,
+          "_",
+          CV_OR_RI,
+          "_A_q2_uncertainty.png", sep=""),
+          width = 21,
+          height = 7,
     units = "in", res = 330)
 spplot(stack(preds[[2]][[2]],
              preds[[2]][[1]],
@@ -99,7 +118,13 @@ grid::grid.text("Probability", x=grid::unit(0.98, "npc"), y=grid::unit(0.50, "np
 dev.off()
 
 
-png("plots/A_q3_uncertainty.png", width = 21, height = 7,
+png(paste("plots/",
+          INCLUDE_CROSSTERMS,
+          "_",
+          CV_OR_RI,
+          "_A_q3_uncertainty.png", sep=""),
+          width = 21,
+          height = 7,
     units = "in", res = 330)
 spplot(stack(preds[[3]][[2]],
              preds[[3]][[1]],
@@ -111,8 +136,15 @@ grid::grid.text("Probability", x=grid::unit(0.98, "npc"), y=grid::unit(0.50, "np
 dev.off()
 
 
-png("plots/A_q4_uncertainty.png", width = 21, height = 7,
-    units = "in", res = 330)
+png(paste("plots/",
+          INCLUDE_CROSSTERMS,
+          "_",
+          CV_OR_RI,
+          "_A_q4_uncertainty.png", sep=""),
+    width = 21,
+    height = 7,
+    units = "in",
+    res = 330)
 spplot(stack(preds[[4]][[2]],
              preds[[4]][[1]],
              preds[[4]][[3]]),
@@ -123,7 +155,14 @@ grid::grid.text("Probability", x=grid::unit(0.98, "npc"), y=grid::unit(0.50, "np
 dev.off()
 
 
-pdf("plots/A_all_uncertainty.pdf", paper="a4", width = 8, height = 11.3)
+pdf(paste("plots/",
+          INCLUDE_CROSSTERMS,
+          "_",
+          CV_OR_RI,
+          "_A_all_uncertainty.pdf", sep=""),
+    paper="a4",
+    width = 8,
+    height = 11.3)
 spplot(stack(preds[[1]][[2]],
              preds[[1]][[1]],
              preds[[1]][[3]],
@@ -175,8 +214,15 @@ for (idx in 1:4){
   
 }
 
-png("plots/A_projections.png", width = 7, height = 7,
-    units = "in", res = 330)
+png(paste("plots/",
+          INCLUDE_CROSSTERMS,
+          "_",
+          CV_OR_RI,
+          "_A_projections.png", sep=""),
+          width = 7,
+          height = 7,
+    units = "in",
+    res = 330)
 spplot(stack(preds[[1]][[1]],
              preds[[2]][[1]], 
              preds[[3]][[1]], 
@@ -188,8 +234,15 @@ grid::grid.text("Probability", x=grid::unit(0.98, "npc"), y=grid::unit(0.50, "np
 dev.off()
 
 
-png("plots/B_q1_uncertainty.png", width = 21, height = 7,
-    units = "in", res = 330)
+png(paste("plots/",
+          INCLUDE_CROSSTERMS,
+          "_",
+          CV_OR_RI,
+          "_B_q1_uncertainty.png", sep=""),
+    width = 21,
+    height = 7,
+    units = "in",
+    res = 330)
 spplot(stack(preds[[1]][[2]],
              preds[[1]][[1]],
              preds[[1]][[3]]),
@@ -200,8 +253,15 @@ grid::grid.text("Probability", x=grid::unit(0.98, "npc"), y=grid::unit(0.50, "np
 dev.off()
 
 
-png("plots/B_q2_uncertainty.png", width = 21, height = 7,
-    units = "in", res = 330)
+png(paste("plots/",
+          INCLUDE_CROSSTERMS,
+          "_",
+          CV_OR_RI,
+          "_B_q2_uncertainty.png", sep=""),
+    width = 21,
+    height = 7,
+    units = "in",
+    res = 330)
 spplot(stack(preds[[2]][[2]],
              preds[[2]][[1]],
              preds[[2]][[3]]),
@@ -212,8 +272,15 @@ grid::grid.text("Probability", x=grid::unit(0.98, "npc"), y=grid::unit(0.50, "np
 dev.off()
 
 
-png("plots/B_q3_uncertainty.png", width = 21, height = 7,
-    units = "in", res = 330)
+png(paste("plots/",
+          INCLUDE_CROSSTERMS,
+          "_",
+          CV_OR_RI,
+          "_B_q3_uncertainty.png", sep=""),
+    width = 21,
+    height = 7,
+    units = "in",
+    res = 330)
 spplot(stack(preds[[3]][[2]],
              preds[[3]][[1]],
              preds[[3]][[3]]),
@@ -224,8 +291,15 @@ grid::grid.text("Probability", x=grid::unit(0.98, "npc"), y=grid::unit(0.50, "np
 dev.off()
 
 
-png("plots/B_q4_uncertainty.png", width = 21, height = 7,
-    units = "in", res = 330)
+png(paste("plots/",
+          INCLUDE_CROSSTERMS,
+          "_",
+          CV_OR_RI,
+          "_B_q4_uncertainty.png", sep=""),
+    width = 21,
+    height = 7,
+    units = "in",
+    res = 330)
 spplot(stack(preds[[4]][[2]],
              preds[[4]][[1]],
              preds[[4]][[3]]),
@@ -236,7 +310,14 @@ grid::grid.text("Probability", x=grid::unit(0.98, "npc"), y=grid::unit(0.50, "np
 dev.off()
 
 
-pdf("plots/B_all_uncertainty.pdf", paper="a4", width = 8, height = 11.3)
+pdf(paste("plots/",
+          INCLUDE_CROSSTERMS,
+          "_",
+          CV_OR_RI,
+          "_B_all_uncertainty.pdf", sep=""),
+    paper="a4",
+    width = 8,
+    height = 11.3)
 spplot(stack(preds[[1]][[2]],
              preds[[1]][[1]],
              preds[[1]][[3]],
