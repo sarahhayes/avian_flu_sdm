@@ -386,6 +386,11 @@ get_sens_and_spec <- function(sdm, xtest, ytest, ri, cutoff){
 #### Period A Q1 ####
 
 training_data <- read.csv(paste(PATH_TO_DATA, "training_sets/training_data_A_Q1.csv", sep=""))
+if (!INCLUDE_CROSS_QUARTER_COVS){
+  all_excludes <- grep("quart|_q", colnames(training_data), value = TRUE)
+  q1_excludes <- grep("first|q1", all_excludes, value = TRUE, invert = TRUE)
+  training_data <- training_data[, setdiff(colnames(training_data), q1_excludes)]
+}
 xtrain <- training_data %>% dplyr::select(!("y"|"ri"))
 ytrain <- training_data$y
 countrytrain <- training_data$ri
@@ -508,6 +513,11 @@ if (SAVE_FITS){
 #### Period A Q2 ####
 
 training_data <- read.csv(paste(PATH_TO_DATA, "training_sets/training_data_A_Q2.csv", sep=""))
+if (!INCLUDE_CROSS_QUARTER_COVS){
+  all_excludes <- grep("quart|_q", colnames(training_data), value = TRUE)
+  q2_excludes <- grep("second|q2", all_excludes, value = TRUE, invert = TRUE)
+  training_data <- training_data[, setdiff(colnames(training_data), q2_excludes)]
+}
 xtrain <- training_data %>% dplyr::select(!("y"|"ri"))
 ytrain <- training_data$y
 countrytrain <- training_data$ri
@@ -630,6 +640,11 @@ if (SAVE_FITS){
 #### Period A Q3 ####
 
 training_data <- read.csv(paste(PATH_TO_DATA, "training_sets/training_data_A_Q3.csv", sep=""))
+if (!INCLUDE_CROSS_QUARTER_COVS){
+  all_excludes <- grep("quart|_q", colnames(training_data), value = TRUE)
+  q3_excludes <- grep("third|q3", all_excludes, value = TRUE, invert = TRUE)
+  training_data <- training_data[, setdiff(colnames(training_data), q3_excludes)]
+}
 xtrain <- training_data %>% dplyr::select(!("y"|"ri"))
 ytrain <- training_data$y
 countrytrain <- training_data$ri
@@ -751,6 +766,11 @@ if (SAVE_FITS){
 #### Period A Q4 ####
 
 training_data <- read.csv(paste(PATH_TO_DATA, "training_sets/training_data_A_Q4.csv", sep=""))
+if (!INCLUDE_CROSS_QUARTER_COVS){
+  all_excludes <- grep("quart|_q", colnames(training_data), value = TRUE)
+  q4_excludes <- grep("fourth|q4", all_excludes, value = TRUE, invert = TRUE)
+  training_data <- training_data[, setdiff(colnames(training_data), q4_excludes)]
+}
 xtrain <- training_data %>% dplyr::select(!("y"|"ri"))
 ytrain <- training_data$y
 countrytrain <- training_data$ri
@@ -872,6 +892,11 @@ if (SAVE_FITS){
 #### Period B Q1 ####
 
 training_data <- read.csv(paste(PATH_TO_DATA, "training_sets/training_data_B_Q1.csv", sep=""))
+if (!INCLUDE_CROSS_QUARTER_COVS){
+  all_excludes <- grep("quart|_q", colnames(training_data), value = TRUE)
+  q1_excludes <- grep("first|q1", all_excludes, value = TRUE, invert = TRUE)
+  training_data <- training_data[, setdiff(colnames(training_data), q1_excludes)]
+}
 xtrain <- training_data %>% dplyr::select(!("y"|"ri"))
 ytrain <- training_data$y
 countrytrain <- training_data$ri
@@ -987,6 +1012,11 @@ if (SAVE_FITS){
 #### Period B Q2 ####
 
 training_data <- read.csv(paste(PATH_TO_DATA, "training_sets/training_data_B_Q2.csv", sep=""))
+if (!INCLUDE_CROSS_QUARTER_COVS){
+  all_excludes <- grep("quart|_q", colnames(training_data), value = TRUE)
+  q2_excludes <- grep("second|q2", all_excludes, value = TRUE, invert = TRUE)
+  training_data <- training_data[, setdiff(colnames(training_data), q2_excludes)]
+}
 xtrain <- training_data %>% dplyr::select(!("y"|"ri"))
 ytrain <- training_data$y
 countrytrain <- training_data$ri
@@ -1103,6 +1133,11 @@ if (SAVE_FITS){
 #### Period B Q3 ####
 
 training_data <- read.csv(paste(PATH_TO_DATA, "training_sets/training_data_B_Q3.csv", sep=""))
+if (!INCLUDE_CROSS_QUARTER_COVS){
+  all_excludes <- grep("quart|_q", colnames(training_data), value = TRUE)
+  q3_excludes <- grep("third|q3", all_excludes, value = TRUE, invert = TRUE)
+  training_data <- training_data[, setdiff(colnames(training_data), q3_excludes)]
+}
 xtrain <- training_data %>% dplyr::select(!("y"|"ri"))
 ytrain <- training_data$y
 countrytrain <- training_data$ri
@@ -1219,6 +1254,11 @@ if (SAVE_FITS){
 #### Period B Q4 ####
 
 training_data <- read.csv(paste(PATH_TO_DATA, "training_sets/training_data_B_Q4.csv", sep=""))
+if (!INCLUDE_CROSS_QUARTER_COVS){
+  all_excludes <- grep("quart|_q", colnames(training_data), value = TRUE)
+  q4_excludes <- grep("fourth|q4", all_excludes, value = TRUE, invert = TRUE)
+  training_data <- training_data[, setdiff(colnames(training_data), q4_excludes)]
+}
 xtrain <- training_data %>% dplyr::select(!("y"|"ri"))
 ytrain <- training_data$y
 countrytrain <- training_data$ri
