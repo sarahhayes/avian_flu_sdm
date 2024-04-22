@@ -99,7 +99,15 @@ roc_plot <- ggplot() +
   ylab('True positive rate') + 
   geom_abline(intercept=0,slope=1,col='black')
 
-ggsave("plots/RO_curve_A.png", plot = roc_plot, width = 6.5, height = 4.5)
+ggsave(paste("plots/",
+       INCLUDE_CROSSTERMS,
+       "_",
+       CV_OR_RI,
+       "_RO_curve_A.png",
+       sep=""),
+       plot = roc_plot,
+       width = 6.5,
+       height = 4.5)
 
 ################################################################################
 # Make AUC plot and get numbers for table for dataset B
@@ -172,5 +180,13 @@ if (B_TEST_DATA_AVAILABLE)
     ylab('True positive rate') + 
     geom_abline(intercept=0,slope=1,col='black')
   
-  ggsave("plots/RO_curve_B.png", plot = roc_plot, width = 6.5, height = 4.5)
+  ggsave(paste("plots/",
+               INCLUDE_CROSSTERMS,
+               "_",
+               CV_OR_RI,
+               "_RO_curve_A.png",
+               sep=""),
+         plot = roc_plot,
+         width = 6.5,
+         height = 4.5)
 }
