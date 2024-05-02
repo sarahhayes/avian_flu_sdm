@@ -42,35 +42,44 @@ pos_sites <- read.csv("data_offline\\Avian flu data\\hpai_pos_birds_nobvbrc.csv"
 pos_sites %>% pull(Q) %>% table
 pos_sites %>% pull(serotype_HN) %>% table
 
+# Data set A: roughly, "enzootic AI"
 # Training set A: all AI before 2020/21 H5N8 outbreak (which includes a H5N8 outbreak in 2017)
 # Test set A: 2020/21 H5N8 outbreak
-df_A <- pos_sites %>% filter(date < as.Date("2020-01-01")|date > as.Date("2020-01-01") & serotype_HN == "H5N8") %>%
+df_A <- pos_sites %>% filter(date < as.Date("2020-01-01")|date > as.Date("2020-01-01") & date < as.Date("2023-01-01") & serotype_HN == "H5N8") %>%
   mutate(df = case_when(date < as.Date("2020-01-01") ~ "train_A",
                         date > as.Date("2020-01-01") & serotype_HN == "H5N8" ~ "test_A"))
 
-# Training set B: all AI after 2020/2021 H5N8 outbreak (almost all H5N1)
-df_B <- pos_sites %>% filter(date > as.Date("2021-09-01")) %>% mutate(df = "train_B")
+# Data set B: roughly, "epizootic AI"
+# Training set B: H5N1 outbreak from Sep 21 until Mar 23 (retain ambiguous H5 or unlabelled)
+# Test set B: H5N1 outbreak Apr 23 - Mar 24 
+df_B <- pos_sites %>% filter(date > as.Date("2021-09-01") & serotype_HN %in% c("H5N1", "H5", "")) %>%
+  mutate(df = case_when(date <= as.Date("2023-03-30") ~ "train_B",
+                        date > as.Date("2023-03-30") ~ "test_B"))
 
 # How many per quarter
 pre_table <- bind_rows(df_A, df_B) %>% with(., table(df, Q))
 pre_table
 
-# # Plot over time
+# Plot over time
 # df_A %>% filter(grepl("train", df)) %>%
 #   ggplot(aes(x = date)) +
 #   geom_histogram(fill = "#00BA38")
 # 
 # df_A %>% filter(grepl("test", df)) %>%
 #   ggplot(aes(x = date)) +
-#   geom_histogram(fill = "#F8766D")
+#   geom_histogram(fill = "#63db87")
 # 
 # df_B %>% filter(grepl("train", df)) %>%
 #   ggplot(aes(x = date)) +
 #   geom_histogram(fill = "#619CFF")
+# 
+# df_B %>% filter(grepl("test", df)) %>%
+#   ggplot(aes(x = date)) +
+#   geom_histogram(fill = "#99bfff")
 
 bind_rows(df_A, df_B) %>% 
   ggplot(aes(x = date, fill = df)) +
-  geom_histogram()
+  geom_histogram(bins=100)
 
 pos_sites %>% 
   mutate(serotype_HN = case_when(
@@ -98,6 +107,7 @@ bind_rows(df_A, df_B)  %>%
 rast_train_A_list <- list()
 rast_test_A_list <- list()
 rast_train_B_list <- list()
+rast_test_B_list <- list()
 
 for (i in 1:4){
   
@@ -128,10 +138,19 @@ for (i in 1:4){
     set_names(c("X", "Y", "pos")) %>% 
     mutate(Q = paste0("Q",i), df = "train_B")
   
+  rast_test_B_list[[i]] <- df_B %>% filter(df == "test_B") %>%
+    filter(Q == paste0("Q", i)) %>%
+    st_as_sf(coords = c("X", "Y"), crs = "EPSG:3035") %>%  # Map to 10km grid
+    rasterize(y = base_map, fun = "max") %>%  # Consider positives as 1 no matter how many records in the cell
+    as.data.frame(xy = TRUE) %>%  # Convert back to data frame
+    filter(complete.cases(.)) %>%  # Select only cells with presences
+    set_names(c("X", "Y", "pos")) %>% 
+    mutate(Q = paste0("Q",i), df = "test_B")
+  
 }
 
 df_A <- bind_rows(rast_train_A_list, rast_test_A_list)
-df_B <- bind_rows(rast_train_B_list)
+df_B <- bind_rows(rast_train_B_list, rast_test_B_list)
 
 # How many per quarter after counting at grid cell level?
 post_table <- bind_rows(df_A, df_B) %>% with(., table(df, Q))
@@ -386,14 +405,14 @@ for (i in 1:4){
                         replace=FALSE)
   
   pseudoabs_train_B[[i]] <- pseudoabs %>% filter(Q == paste0("Q",i)) %>% .[train_index,]
-  # pseudoabs_test_B[[i]] <- pseudoabs %>% filter(Q == paste0("Q",i)) %>% .[-train_index,] ## No pseudoabsences for data set B?
+  pseudoabs_test_B[[i]] <- pseudoabs %>% filter(Q == paste0("Q",i)) %>% .[-train_index,]
   
 }
 
 pseudoabs_train_A %<>% bind_rows
 pseudoabs_test_A %<>% bind_rows
 pseudoabs_train_B %<>% bind_rows
-# pseudoabs_test_B %<>% bind_rows
+pseudoabs_test_B %<>% bind_rows
 
 # Conduct thinning
 thinner <- function (maindf, nbins){
@@ -566,6 +585,65 @@ for (i in 1:4){
  dev.off()
  
  df %>% saveRDS(paste0("training_sets//test_coords_A_Q", i, ".RDS"))
+ 
+  df <- bind_rows(
+    test_B %>% filter(Q == paste0("Q",i)) %>% select(X, Y, pos),
+    pseudoabs_test_B %>% filter(Q == paste0("Q",i)) %>% rename(pos = pr_ab) %>% select(X, Y, pos) # Add in test pseudoabsences
+    ) 
+ 
+ png(paste0("plots//resampling//test//test_B_Q", i, ".png"), width = 10, height = 10, units = "in", res = 600)
+ plot(base_map, col = "gray95", main = paste0("test set B, Q",i," (pos = green, pseudoabs = red)"))
+ points(df %>% filter(pos == 1) %>% pull(X),
+        df %>% filter(pos == 1) %>% pull(Y), 
+        pch=16, cex=0.2, col = "green3")
+ points(df %>% filter(pos == 0) %>% pull(X),
+        df %>% filter(pos == 0) %>% pull(Y), 
+        pch=16, cex=0.2, col = "firebrick1")
+ dev.off()
+ 
+ df %>% saveRDS(paste0("training_sets//test_coords_B_Q", i, ".RDS"))
 }
 
+# Plot all in single plot
 
+for (i in 1:4){
+  
+  tr <- readRDS(paste0("training_sets/training_coords_A_Q", i, ".RDS"))
+  ts <- readRDS(paste0("training_sets/test_coords_A_Q", i, ".RDS"))
+  
+  png(paste0("training_sets/plot_A_Q", i, ".png"), width = 10, height = 10, units = "in", res = 600)
+  plot(base_map, col = "gray95", main = paste0("dataset A, Q",i," (pos = green, pseudoabs = red, faded = test)"))
+  points(tr %>% filter(pos == 1) %>% pull(X),
+         tr %>% filter(pos == 1) %>% pull(Y), 
+         pch=16, cex=0.3, col = rgb(red = 16/255, green = 165/255, blue = 53/255, alpha = 1))
+  points(tr %>% filter(pos == 0) %>% pull(X),
+         tr %>% filter(pos == 0) %>% pull(Y), 
+         pch=16, cex=0.3, col = rgb(red = 184/255, green = 22/255, blue = 22/255, alpha = 1))
+  points(ts %>% filter(pos == 1) %>% pull(X),
+         ts %>% filter(pos == 1) %>% pull(Y), 
+         pch=16, cex=0.3, col = rgb(red = 16/255, green = 165/255, blue = 53/255, alpha = 0.4))
+  points(ts %>% filter(pos == 0) %>% pull(X),
+         ts %>% filter(pos == 0) %>% pull(Y), 
+         pch=16, cex=0.3, col = rgb(red = 133/255, green = 81/255, blue = 81/255, alpha = 0.4))
+  dev.off()
+
+  tr <- readRDS(paste0("training_sets/training_coords_B_Q", i, ".RDS"))
+  ts <- readRDS(paste0("training_sets/test_coords_B_Q", i, ".RDS"))
+  
+  png(paste0("training_sets/plot_B_Q", i, ".png"), width = 10, height = 10, units = "in", res = 600)
+  plot(base_map, col = "gray95", main = paste0("dataset B, Q",i," (pos = green, pseudoabs = red, faded = test)"))
+  points(tr %>% filter(pos == 1) %>% pull(X),
+         tr %>% filter(pos == 1) %>% pull(Y), 
+         pch=16, cex=0.3, col = rgb(red = 16/255, green = 165/255, blue = 53/255, alpha = 1))
+  points(tr %>% filter(pos == 0) %>% pull(X),
+         tr %>% filter(pos == 0) %>% pull(Y), 
+         pch=16, cex=0.3, col = rgb(red = 184/255, green = 22/255, blue = 22/255, alpha = 1))
+  points(ts %>% filter(pos == 1) %>% pull(X),
+         ts %>% filter(pos == 1) %>% pull(Y), 
+         pch=16, cex=0.3, col = rgb(red = 16/255, green = 165/255, blue = 53/255, alpha = 0.4))
+  points(ts %>% filter(pos == 0) %>% pull(X),
+         ts %>% filter(pos == 0) %>% pull(Y), 
+         pch=16, cex=0.3, col = rgb(red = 133/255, green = 81/255, blue = 81/255, alpha = 0.4))
+  dev.off()
+  
+}
