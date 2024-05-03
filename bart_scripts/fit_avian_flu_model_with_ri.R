@@ -13,9 +13,9 @@ if (length(args)<3){
   SAVE_FITS <- as.logical(args[3])
 }
 if (length(args)<2){
-  INCLUDE_CROSS_QUARTER_COVS <- TRUE # Indicator for whether to include seasonal covariates for Quarter m=/=n in the model for Quarter n.
+  INCLUDE_CROSSTERMS <- "no-crossterms" # Set to "no-crossterms" to do model without crossterms or "with-crossterms" to do model with crossterms
 }else{
-  INCLUDE_CROSS_QUARTER_COVS <- as.logical(args[2])
+  INCLUDE_CROSSTERMS <- args[2]
 }
 if (length(args)<1){
   # Set path to folder containing data, and where output will be stored
@@ -24,7 +24,7 @@ if (length(args)<1){
   PATH_TO_DATA <- args[1]
 }
 
-dir.create(file.path(PATH_TO_DATA, "fitted-BART-models/"), showWarnings = FALSE)
+dir.create(file.path(PATH_TO_DATA, "fitted-BART-models-", INCLUDE_CROSSTERMS, "/"), showWarnings = FALSE)
 
 library(caret)
 library(dplyr)
@@ -386,7 +386,7 @@ get_sens_and_spec <- function(sdm, xtest, ytest, ri, cutoff){
 #### Period A Q1 ####
 
 training_data <- read.csv(paste(PATH_TO_DATA, "training_sets/training_data_A_Q1.csv", sep=""))
-if (!INCLUDE_CROSS_QUARTER_COVS){
+if (INCLUDE_CROSSTERMS=="no-crossterms"){
   all_excludes <- grep("quart|_q", colnames(training_data), value = TRUE)
   q1_excludes <- grep("first|q1", all_excludes, value = TRUE, invert = TRUE)
   training_data <- training_data[, setdiff(colnames(training_data), q1_excludes)]
@@ -491,7 +491,7 @@ summary(basic_model)
 
 if (SAVE_FITS){
   save(basic_model,
-       file = paste(PATH_TO_DATA, "fitted-BART-models/ri_model_A_Q1.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "fitted-BART-models-", INCLUDE_CROSSTERMS, "/ri_model_A_Q1.rds", sep = ""))
 }
 
 # Perform variable selection
@@ -506,14 +506,14 @@ invisible(sdm$fit[[1]]$state)
 summary(sdm)
 if (SAVE_FITS){
   save(sdm,
-       file = paste(PATH_TO_DATA, "fitted-BART-models/ri_model_with_vs_A_Q1.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "fitted-BART-models-", INCLUDE_CROSSTERMS, "/ri_model_with_vs_A_Q1.rds", sep = ""))
 }
 
 
 #### Period A Q2 ####
 
 training_data <- read.csv(paste(PATH_TO_DATA, "training_sets/training_data_A_Q2.csv", sep=""))
-if (!INCLUDE_CROSS_QUARTER_COVS){
+if (INCLUDE_CROSSTERMS=="no-crossterms"){
   all_excludes <- grep("quart|_q", colnames(training_data), value = TRUE)
   q2_excludes <- grep("second|q2", all_excludes, value = TRUE, invert = TRUE)
   training_data <- training_data[, setdiff(colnames(training_data), q2_excludes)]
@@ -618,7 +618,7 @@ summary(basic_model)
 
 if (SAVE_FITS){
   save(basic_model,
-       file = paste(PATH_TO_DATA, "fitted-BART-models/ri_model_A_Q2.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "fitted-BART-models-", INCLUDE_CROSSTERMS, "/ri_model_A_Q2.rds", sep = ""))
 }
 
 sdm <- bart.step(x.data = xtrain,
@@ -632,7 +632,7 @@ invisible(sdm$fit[[1]]$state)
 summary(sdm)
 if (SAVE_FITS){
   save(sdm,
-       file = paste(PATH_TO_DATA, "fitted-BART-models/ri_model_with_vs_A_Q2.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "fitted-BART-models-", INCLUDE_CROSSTERMS, "/ri_model_with_vs_A_Q2.rds", sep = ""))
 }
 
 
@@ -640,7 +640,7 @@ if (SAVE_FITS){
 #### Period A Q3 ####
 
 training_data <- read.csv(paste(PATH_TO_DATA, "training_sets/training_data_A_Q3.csv", sep=""))
-if (!INCLUDE_CROSS_QUARTER_COVS){
+if (INCLUDE_CROSSTERMS=="no-crossterms"){
   all_excludes <- grep("quart|_q", colnames(training_data), value = TRUE)
   q3_excludes <- grep("third|q3", all_excludes, value = TRUE, invert = TRUE)
   training_data <- training_data[, setdiff(colnames(training_data), q3_excludes)]
@@ -745,7 +745,7 @@ summary(basic_model)
 
 if (SAVE_FITS){
   save(basic_model,
-       file = paste(PATH_TO_DATA, "fitted-BART-models/ri_model_A_Q3.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "fitted-BART-models-", INCLUDE_CROSSTERMS, "/ri_model_A_Q3.rds", sep = ""))
 }
 
 sdm <- bart.step(x.data = xtrain,
@@ -759,14 +759,14 @@ invisible(sdm$fit[[1]]$state)
 summary(sdm)
 if (SAVE_FITS){
   save(sdm,
-       file = paste(PATH_TO_DATA, "fitted-BART-models/ri_model_with_vs_A_Q3.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "fitted-BART-models-", INCLUDE_CROSSTERMS, "/ri_model_with_vs_A_Q3.rds", sep = ""))
 }
 
 
 #### Period A Q4 ####
 
 training_data <- read.csv(paste(PATH_TO_DATA, "training_sets/training_data_A_Q4.csv", sep=""))
-if (!INCLUDE_CROSS_QUARTER_COVS){
+if (INCLUDE_CROSSTERMS=="no-crossterms"){
   all_excludes <- grep("quart|_q", colnames(training_data), value = TRUE)
   q4_excludes <- grep("fourth|q4", all_excludes, value = TRUE, invert = TRUE)
   training_data <- training_data[, setdiff(colnames(training_data), q4_excludes)]
@@ -871,7 +871,7 @@ summary(basic_model)
 
 if (SAVE_FITS){
   save(basic_model,
-       file = paste(PATH_TO_DATA, "fitted-BART-models/ri_model_A_Q4.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "fitted-BART-models-", INCLUDE_CROSSTERMS, "/ri_model_A_Q4.rds", sep = ""))
 }
 
 sdm <- bart.step(x.data = xtrain,
@@ -885,14 +885,14 @@ invisible(sdm$fit[[1]]$state)
 summary(sdm)
 if (SAVE_FITS){
   save(sdm,
-       file = paste(PATH_TO_DATA, "fitted-BART-models/ri_model_with_vs_A_Q4.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "fitted-BART-models-", INCLUDE_CROSSTERMS, "/ri_model_with_vs_A_Q4.rds", sep = ""))
 }
 
 
 #### Period B Q1 ####
 
 training_data <- read.csv(paste(PATH_TO_DATA, "training_sets/training_data_B_Q1.csv", sep=""))
-if (!INCLUDE_CROSS_QUARTER_COVS){
+if (INCLUDE_CROSSTERMS=="no-crossterms"){
   all_excludes <- grep("quart|_q", colnames(training_data), value = TRUE)
   q1_excludes <- grep("first|q1", all_excludes, value = TRUE, invert = TRUE)
   training_data <- training_data[, setdiff(colnames(training_data), q1_excludes)]
@@ -992,7 +992,7 @@ summary(basic_model)
 
 if (SAVE_FITS){
   save(basic_model,
-       file = paste(PATH_TO_DATA, "fitted-BART-models/ri_model_B_Q1.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "fitted-BART-models-", INCLUDE_CROSSTERMS, "/ri_model_B_Q1.rds", sep = ""))
 }
 
 sdm <- bart.step(x.data = xtrain,
@@ -1006,13 +1006,13 @@ invisible(sdm$fit[[1]]$state)
 summary(sdm)
 if (SAVE_FITS){
   save(sdm,
-       file = paste(PATH_TO_DATA, "fitted-BART-models/ri_model_with_vs_B_Q1.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "fitted-BART-models-", INCLUDE_CROSSTERMS, "/ri_model_with_vs_B_Q1.rds", sep = ""))
 }
 
 #### Period B Q2 ####
 
 training_data <- read.csv(paste(PATH_TO_DATA, "training_sets/training_data_B_Q2.csv", sep=""))
-if (!INCLUDE_CROSS_QUARTER_COVS){
+if (INCLUDE_CROSSTERMS=="no-crossterms"){
   all_excludes <- grep("quart|_q", colnames(training_data), value = TRUE)
   q2_excludes <- grep("second|q2", all_excludes, value = TRUE, invert = TRUE)
   training_data <- training_data[, setdiff(colnames(training_data), q2_excludes)]
@@ -1112,7 +1112,7 @@ summary(basic_model)
 
 if (SAVE_FITS){
   save(basic_model,
-       file = paste(PATH_TO_DATA, "fitted-BART-models/ri_model_B_Q2.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "fitted-BART-models-", INCLUDE_CROSSTERMS, "/ri_model_B_Q2.rds", sep = ""))
 }
 
 sdm <- bart.step(x.data = xtrain,
@@ -1126,14 +1126,14 @@ invisible(sdm$fit[[1]]$state)
 summary(sdm)
 if (SAVE_FITS){
   save(sdm,
-       file = paste(PATH_TO_DATA, "fitted-BART-models/ri_model_with_vs_B_Q2.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "fitted-BART-models-", INCLUDE_CROSSTERMS, "/ri_model_with_vs_B_Q2.rds", sep = ""))
 }
 
 
 #### Period B Q3 ####
 
 training_data <- read.csv(paste(PATH_TO_DATA, "training_sets/training_data_B_Q3.csv", sep=""))
-if (!INCLUDE_CROSS_QUARTER_COVS){
+if (INCLUDE_CROSSTERMS=="no-crossterms"){
   all_excludes <- grep("quart|_q", colnames(training_data), value = TRUE)
   q3_excludes <- grep("third|q3", all_excludes, value = TRUE, invert = TRUE)
   training_data <- training_data[, setdiff(colnames(training_data), q3_excludes)]
@@ -1233,7 +1233,7 @@ summary(basic_model)
 
 if (SAVE_FITS){
   save(basic_model,
-       file = paste(PATH_TO_DATA, "fitted-BART-models/ri_model_B_Q3.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "fitted-BART-models-", INCLUDE_CROSSTERMS, "/ri_model_B_Q3.rds", sep = ""))
 }
 
 sdm <- bart.step(x.data = xtrain,
@@ -1247,14 +1247,14 @@ invisible(sdm$fit[[1]]$state)
 summary(sdm)
 if (SAVE_FITS){
   save(sdm,
-       file = paste(PATH_TO_DATA, "fitted-BART-models/ri_model_with_vs_B_Q3.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "fitted-BART-models-", INCLUDE_CROSSTERMS, "/ri_model_with_vs_B_Q3.rds", sep = ""))
 }
 
 
 #### Period B Q4 ####
 
 training_data <- read.csv(paste(PATH_TO_DATA, "training_sets/training_data_B_Q4.csv", sep=""))
-if (!INCLUDE_CROSS_QUARTER_COVS){
+if (INCLUDE_CROSSTERMS=="no-crossterms"){
   all_excludes <- grep("quart|_q", colnames(training_data), value = TRUE)
   q4_excludes <- grep("fourth|q4", all_excludes, value = TRUE, invert = TRUE)
   training_data <- training_data[, setdiff(colnames(training_data), q4_excludes)]
@@ -1354,7 +1354,7 @@ summary(basic_model)
 
 if (SAVE_FITS){
   save(basic_model,
-       file = paste(PATH_TO_DATA, "fitted-BART-models/ri_model_B_Q4.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "fitted-BART-models-", INCLUDE_CROSSTERMS, "/ri_model_B_Q4.rds", sep = ""))
 }
 
 sdm <- bart.step(x.data = xtrain,
@@ -1368,5 +1368,5 @@ invisible(sdm$fit[[1]]$state)
 summary(sdm)
 if (SAVE_FITS){
   save(sdm,
-       file = paste(PATH_TO_DATA, "fitted-BART-models/ri_model_with_vs_B_Q4.rds", sep = ""))
+       file = paste(PATH_TO_DATA, "fitted-BART-models-", INCLUDE_CROSSTERMS, "/ri_model_with_vs_B_Q4.rds", sep = ""))
 }
