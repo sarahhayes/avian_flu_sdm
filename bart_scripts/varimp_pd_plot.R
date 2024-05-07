@@ -7,7 +7,7 @@ ALL_VARS_FOR_PD = FALSE # If set to true we do partial dependence on everything
 # Optional command line arguments, must be passed as strings:
 args <- commandArgs(trailingOnly = T)
 if (length(args)<4){
-  INCLUDE_CROSSTERMS <- "no-crossterms" # Set to "no-crossterms" to do model without crossterms or "with-crossterms" to do model with crossterms
+  INCLUDE_CROSSTERMS <- "with-crossterms" # Set to "no-crossterms" to do model without crossterms or "with-crossterms" to do model with crossterms
 }else{
   INCLUDE_CROSSTERMS <- args[4]
 }
@@ -192,7 +192,7 @@ if (ALL_VARS_FOR_PD){
                x=rownames(df)) %>%
     unique()
 }else{
-  vars = c("isotherm_mean", "anatinae")
+  vars = c("mean_prec_lag3", "species_richness_lag0")
 }
 
 pd_summ <- replicate(4, vector("list", length(vars)), simplify = FALSE) # initialise empty lists
@@ -208,6 +208,19 @@ for(idx in 1:4){
                     idx,
                     ".rds",
                     sep = ""))
+  
+  colnames(sdm$fit$data@x) <- data.frame("var" = colnames(sdm$fit$data@x)) %>%
+    mutate(var = gsub("first_quart", "q1", var),
+           var = gsub("second_quart", "q2", var),
+           var = gsub("third_quart", "q3", var),
+           var = gsub("fourth_quart", "q4", var)) %>%
+    mutate(varq = str_extract(var, "_q\\d") %>% str_sub(-1) %>% as.numeric) %>%
+    rowwise %>%
+    mutate(var = gsub("_q[1-4]", paste0("_lag", idx-varq), var)) %>%
+    mutate(var = gsub("-3", "1", var),
+           var = gsub("-2", "2", var),
+           var = gsub("-1", "3", var)) %>%
+    select(-varq) %>% pull(var)
   
   for(j in 1:length(vars)){
     
@@ -371,7 +384,7 @@ for(idx in 1:4){
   varimp_summ[[idx]] <-  bind_rows(varimp_raw %>% summarise(across(everything(), mean)),
                                    varimp_raw %>% summarise(across(everything(), sd))) %>% # IQR, 95% CI?
     t() %>%
-    data.frame(Q = paste0("A Q",idx)) %>%
+    data.frame(Q = paste0("B Q",idx)) %>%
     rownames_to_column(var = "var") %>%
     rename("mean" = "X1", "sd" = "X2") %>%
     mutate(var = gsub("first_quart", "q1", var),
@@ -512,7 +525,7 @@ if (ALL_VARS_FOR_PD){
                x=rownames(df)) %>%
     unique()
 }else{
-  vars = c("isotherm_mean", "vend")
+  vars = c("isotherm_mean_lag0", "ardeidae_lag0")
 }
 
 pd_summ <- replicate(4, vector("list", length(vars)), simplify = FALSE) # initialise empty lists
@@ -528,6 +541,19 @@ for(idx in 1:4){
                     idx,
                     ".rds",
                     sep = ""))
+  
+  colnames(sdm$fit$data@x) <- data.frame("var" = colnames(sdm$fit$data@x)) %>%
+    mutate(var = gsub("first_quart", "q1", var),
+           var = gsub("second_quart", "q2", var),
+           var = gsub("third_quart", "q3", var),
+           var = gsub("fourth_quart", "q4", var)) %>%
+    mutate(varq = str_extract(var, "_q\\d") %>% str_sub(-1) %>% as.numeric) %>%
+    rowwise %>%
+    mutate(var = gsub("_q[1-4]", paste0("_lag", idx-varq), var)) %>%
+    mutate(var = gsub("-3", "1", var),
+           var = gsub("-2", "2", var),
+           var = gsub("-1", "3", var)) %>%
+    select(-varq) %>% pull(var)
   
   for(j in 1:length(vars)){
     
