@@ -81,7 +81,7 @@ echo "Running R job:"
 echo   
 
 # options: storage folder for input/output, include cross-seasonal covariates?, save outputs?
-Rscript bart_scripts/fit_avian_flu_model_with_ri.R "volatile/" "TRUE" "TRUE"
+Rscript bart_scripts/fit_avian_flu_model_with_ri.R "volatile/" "with-crossterms" "TRUE"
 
 # the ret flag is the return code, so you can spot easily if your code failed.
 ret=$?
