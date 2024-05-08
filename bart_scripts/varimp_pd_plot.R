@@ -152,7 +152,7 @@ df <- varimp_summ %>%
 
 ordered_var <- unique(as.character(df$var[order(df$mean, decreasing = TRUE)]))
 df <- df %>% mutate(var = fct_relevel(var, ordered_var),
-                    upper = mean + sd, lower = mean - sd)
+                    upper = mean + sd, lower = mean - sd) %>% mutate(var = fct_relevel(var, ordered_var)) %>% arrange(var)
 
 fig_varimp <- ggplot(df, aes(x = var, y = mean, ymin = lower, ymax = upper, color = Q)) + 
   geom_errorbar(width=0, position=position_dodge(0.6)) + 
@@ -192,7 +192,7 @@ if (ALL_VARS_FOR_PD){
                x=rownames(df)) %>%
     unique()
 }else{
-  vars = c("mean_prec_lag3", "species_richness_lag0")
+  vars = c("variation_in_quarterly_mean_temp_lag0", "variation_in_quarterly_mean_temp_lag2")
 }
 
 pd_summ <- replicate(4, vector("list", length(vars)), simplify = FALSE) # initialise empty lists
@@ -347,8 +347,7 @@ for(j in 1:length(vars)){
 }
 
 fig_pd_chosen <- wrap_plots(panel_list, ncol = 2) +
-  plot_layout(guides = "collect", axis_titles = "collect") +
-  plot_annotation(tag_levels = 'A')
+  plot_layout(guides = "collect", axis_titles = "collect")
 
 ggsave(paste("plots/",
              INCLUDE_CROSSTERMS,
@@ -485,7 +484,7 @@ df <- varimp_summ %>%
 
 ordered_var <- unique(as.character(df$var[order(df$mean, decreasing = TRUE)]))
 df <- df %>% mutate(var = fct_relevel(var, ordered_var),
-                    upper = mean + sd, lower = mean - sd)
+                    upper = mean + sd, lower = mean - sd) %>% mutate(var = fct_relevel(var, ordered_var)) %>% arrange(var)
 
 fig_varimp <- ggplot(df, aes(x = var, y = mean, ymin = lower, ymax = upper, color = Q)) + 
   geom_errorbar(width=0, position=position_dodge(0.6)) + 
@@ -525,7 +524,7 @@ if (ALL_VARS_FOR_PD){
                x=rownames(df)) %>%
     unique()
 }else{
-  vars = c("isotherm_mean_lag0", "ardeidae_lag0")
+  vars = c("dist_to_coast_km", "plant_lag0")
 }
 
 pd_summ <- replicate(4, vector("list", length(vars)), simplify = FALSE) # initialise empty lists
@@ -680,8 +679,7 @@ for(j in 1:length(vars)){
 }
 
 fig_pd_chosen <- wrap_plots(panel_list, ncol = 2) +
-  plot_layout(guides = "collect", axis_titles = "collect") +
-  plot_annotation(tag_levels = 'A')
+  plot_layout(guides = "collect", axis_titles = "collect")
 
 ggsave(paste("plots/",
              INCLUDE_CROSSTERMS,
