@@ -6,14 +6,14 @@
 library(taxize)
 
 #for Europe
-#species_list <- as.data.frame(table(ai_data_prj_area$Species))
+species_list <- as.data.frame(table(ai_data_prj_area$Species))
 #for asia and americas
-species_list <- as.data.frame(table(americas_asia_data$Species))
+#species_list <- as.data.frame(table(americas_asia_data$Species))
 
 colnames(species_list) <- c("species", "freq")
 species_list$species <- as.character(species_list$species)
 
-for (i in 410:nrow(species_list)) {
+for (i in 294:nrow(species_list)) {
   species_list[i,"class"] <- tax_name(species_list[i,"species"],
                                       get = "class",
                                       db = "ncbi")$class
@@ -27,7 +27,7 @@ not_sp$species_edit <- not_sp$species
 not_sp$species_edit <- sub("\\(.*", "", not_sp$species_edit)
 not_sp$species_edit <- sub("\\:.*", "", not_sp$species_edit)
 
-for (i in 71:nrow(not_sp)) {
+for (i in 121:nrow(not_sp)) {
   not_sp[i,"class"] <- tax_name(not_sp[i,"species_edit"],
                                 get = "class",
                                 db = "ncbi")$class
@@ -70,7 +70,7 @@ species_list$species <- sub("\\:.*", "", species_list$species)
 species_list$species <- str_squish(species_list$species)
 
 #for (i in 1:20) {
-for (i in 407:nrow(species_list)) {
+for (i in 410:nrow(species_list)) {
   species_list[i,"order"] <- tax_name(species_list[i,"species"], 
                                        get = "order",
                                        db = "ncbi")$order 
@@ -126,6 +126,10 @@ species_list[which(species_list$species == "Brent Goose"),
 species_list[which(species_list$species == "Buzzard"), 
              c("class", "order", "family", "genus")] <- 
   c("Aves", "Accipitriformes", "Accipitridae", "")
+
+species_list[which(species_list$species == "Cape Gannet Shy Albatross"), 
+             c("class", "order", "family", "genus")] <- 
+  c("Aves", "Procellariiformes", "Diomedeidae", "")
 
 species_list[which(species_list$species == "Common Wood-Pigeon"), 
              c("class", "order", "family", "genus")] <- 
@@ -211,6 +215,10 @@ species_list[which(species_list$species == "Oyster Catcher"),
              c("class", "order", "family", "genus")] <- 
   c("Aves", "Charadriiformes", "Haematopodidae", "Haematopus")
 
+species_list[which(species_list$species == "Partridge"), 
+             c("class", "order", "family", "genus")] <- 
+  c("Aves", "Galliformes", "Phasianidae", "")
+
 species_list[which(species_list$species == "Peregrin Falcon"), 
              c("class", "order", "family", "genus")] <- 
   c("Aves", "Falconiformes", "Falconidae", "Falco")
@@ -222,6 +230,10 @@ species_list[which(species_list$species == "Phalacrocorax pygmaeus"),
 species_list[which(species_list$species == "Pigeon"), 
              c("class", "order", "family", "genus")] <- 
   c("Aves", "Columbiformes", "Columbidae", "Columba")
+
+species_list[which(species_list$species == "Purple Sandpiper"), 
+             c("class", "order", "family", "genus")] <- 
+  c("Aves", "Charadriiformes", "Scolopacidae", "Calidris")
 
 species_list[which(species_list$species == "Rose Pelican"), 
              c("class", "order", "family", "genus")] <- 
@@ -263,6 +275,10 @@ species_list[which(species_list$species == "Thrush"),
              c("class", "order", "family", "genus")] <- 
   c("Aves", "Passeriformes", "Turdidae", "")
 
+species_list[which(species_list$species == "Umbrella Cockatoo"), 
+             c("class", "order", "family", "genus")] <- 
+  c("Aves", "Psittaciformes", "Cacatuidae", "Cacatua")
+
 species_list[which(species_list$species == "Variable Hawk"), 
              c("class", "order", "family", "genus")] <- 
   c("Aves", "Accipitriformes", "Accipitridae", "")
@@ -291,7 +307,13 @@ species_list[which(species_list$species == "Wild Duck"),
              c("class", "order", "family", "genus")] <- 
   c("Aves", "Anseriformes", "Anatidae", "")
 
+# there are two lines with black guillemot that haven't been combined. Seven birds in total. 
+# Combine these and add manually. 
 
+species_list[which(species_list$species == "Black Guillemot"),]
+
+species_list <- species_list %>% dplyr::filter(species != "Black Guillemot")
+species_list <- rbind(species_list, c("Black Guillemot", 7, "Aves", "Charadriiformes", "Alcidea", "Cepphus"))
 
 #write.csv(species_list, "avian_flu_scripts/species_with_family.csv")
 

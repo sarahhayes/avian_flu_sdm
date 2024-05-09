@@ -16,9 +16,14 @@ library(RColorBrewer)
 
 ## first do fao as it's the biggest
 #FAO 
-# use the full data as want to include asia as well 
-fao_data  <- read.csv("data/flu_data/raw_data/epidemiology-raw-data_202308011345.csv")
 
+# go to empres i, epidemiology, select virus, timeframe, status (confirmed) and animal type (wild)
+
+# use the full data as want to include asia as well 
+#fao_data  <- read.csv("data/flu_data/raw_data/epidemiology-raw-data_202308011345.csv") # first set of data up to end July 2023
+# fao_data  <- read.csv("data/flu_data/raw_data/epidemiology-raw-data_202404281930.csv") # later download from April 2024. This one contains some domestic birds
+# table(fao_data$Animal.type)
+fao_data  <- read.csv("data/flu_data/raw_data/epidemiology-raw-data_wild_apr_2024.csv") # download from april 2024, wild tab selected
 table(fao_data$Region)
 
 colnames(fao_data)
@@ -31,6 +36,7 @@ fao_data <- fao_data[which(fao_data$observation.date != ""),]
 
 # we only want to include wild birds
 table(fao_data$Species)
+table(fao_data$Diagnosis.status)
 
 
 fao_data_trim <- dplyr::select(fao_data, all_of(c("Latitude", "Longitude", "observation.date", "Species", "Country", "Serotype")))
@@ -38,7 +44,8 @@ fao_data_trim$source <- "fao"
 fao_data_trim$observation.date <- as.Date(fao_data_trim$observation.date, "%d/%m/%Y")
 
 # WAHIS
-wahis <- read_excel("data/flu_data/raw_data/WOAH_july_2023.xlsx", sheet = 2)
+#wahis <- read_excel("data/flu_data/raw_data/WOAH_july_2023.xlsx", sheet = 2)
+wahis <- read.csv("data/flu_data/raw_data/WOAH_april_2024.csv")
 
 # contains all diseases and species so filter these down to the ones we want
 
@@ -154,7 +161,7 @@ nrow(pos_ai_data_prj_area)
 nrow(ai_data_prj_area)
 
 #save these
-#write.csv(pos_ai_data_prj_area, "output/avian_flu/pos_points_proj_area_fao_woah_all_wild.csv" )
+# write.csv(pos_ai_data_prj_area, "output/avian_flu/pos_points_proj_area_fao_woah_all_wild.csv" )
 
 ## We need to remove mammals from these data
 
@@ -167,12 +174,15 @@ species_list <- read.csv("avian_flu_scripts/detecting_mammals.csv")
 unwanted_sp <- species_list[which(species_list$class == "Mammalia"), "species"]
 
 ## manually extract those not automatically done. 
-unwanted_sp_manual_ext <- c("Al indeterminatum fau",
+unwanted_sp_manual_ext <- c("Al indeterminatum fau","",
+                            "Common Raccoon (Procyon Lotor)",
                             "Fox",
                             "Nyctereutes Viverrinus (Japanese Racoon Dog)",
+                            "Otter (Lutrinae)",
                             "Polar Fox",
                             "Polecat",
                             "Stone Marten",
+                            "Unspecified Env. Sample",
                             "Unspecified Mammal")
 
 
@@ -181,6 +191,7 @@ unwanted_sp <- c(unwanted_sp, unwanted_sp_manual_ext)
 nrow(ai_data_prj_area[which(ai_data_prj_area$Species %in% unwanted_sp),])
 
 # 751 mammal entries that we are removing. 
+# 854 mammals if using april 2024 data 
 
 ## Remove from the data so just birds
 
@@ -247,8 +258,7 @@ species_list_fam <- read.csv("avian_flu_scripts/species_with_family.csv")
 #unique(species_list$family)
 unique(species_list_fam$family)
 
-## 53 bird families in total (remove the NA and "")
-
+## 53 bird families in total (remove the NA, and "")
 
 ## Next I want to remove the duplicates that are present in the data 
 
@@ -284,6 +294,7 @@ table(ai_pos_birds$serotype_HN)
 
 hpai <- ai_pos_birds %>% mutate(geometry = as.character(geometry))
 # write.csv(hpai, "data/flu_data/prepped_data/hpai_pos_birds_nobvbrc.csv")
+# write.csv(hpai, "data/flu_data/prepped_data/hpai_pos_birds_nobvbrc_april2024.csv", row.names = F)
 
 # Add a year and month and year_month to the data
 
@@ -301,7 +312,8 @@ range(hpai$observation.date)
 ## # Now to plot the time series by serotype 
 
 ## start on 3rd Jan 2005 as that's a Monday
-week_calendar <- data.frame(date=seq(as.Date("2005-01-03"), as.Date("2023-07-27"), by="day")) %>% 
+#week_calendar <- data.frame(date=seq(as.Date("2005-01-03"), as.Date("2023-07-27"), by="day")) %>% 
+week_calendar <- data.frame(date=seq(as.Date("2005-01-03"), as.Date("2024-04-28"), by="day")) %>% 
   mutate(week_num=isoweek(date),year=year(date)) %>%
   group_by(year,week_num) %>% 
   summarise(weekdate=min(date)) 
@@ -324,6 +336,7 @@ ggplot(dates, aes(x=weekdate)) + geom_histogram(bins = nrow(week_calendar), col 
         panel.grid.minor = element_line(size = 0.5, linetype = 'dashed',
                                         colour = "grey90"))
 #ggsave("plots/hist_by_week_hpai_only.png")
+ggsave("plots/hist_by_week_hpai_only_april24.png")
 
 # could also make a dataframe of the counts of the number in each week
 count_dates <- dates %>% 
@@ -347,10 +360,11 @@ ggplot(data = weekly_counts, aes(x = weekdate, y = n)) +
                                         colour = "grey"),
         panel.grid.minor = element_line(size = 0.5, linetype = 'dashed',
                                         colour = "grey90"))
-#ggsave("plots/lineplot_by_week_hpai_only.png")
+ggsave("plots/lineplot_by_week_hpai_only.png")
 
 # write the results so can compare to domestic cases
-#write.csv(weekly_counts, "data/flu_data/prepped_data/weekly_counts_hpai_wild_europe.csv")
+# write.csv(weekly_counts, "data/flu_data/prepped_data/weekly_counts_hpai_wild_europe.csv", row.names = F )
+write.csv(weekly_counts, "data/flu_data/prepped_data/weekly_counts_hpai_wild_europe_april2024.csv", row.names = F)
 
 # Now to plot the time series by serotype 
 serotype_data <- as.data.frame(table(hpai$serotype_HN))
@@ -368,11 +382,10 @@ subtype_plot_data <- dates %>% dplyr::filter(serotype_HN %in% serotype_over_ten)
 subtype_plot_data <- subtype_plot_data[which(subtype_plot_data$serotype_HN!=""),]
 
 yearlabs <- c("2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", 
-              "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023")
+              "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024")
 
 weekbreaks <- week_calendar[which(week_calendar$week_num == 1), "week_of_study"]
 weekbreaks <- weekbreaks[["week_of_study"]]
-
 
 ggplot(subtype_plot_data, aes(x = week_of_study, fill = serotype_HN)) + 
   geom_bar(position = "stack") + 
@@ -389,8 +402,7 @@ ggplot(subtype_plot_data, aes(x = week_of_study, fill = serotype_HN)) +
                                         colour = "white")) +
   scale_x_continuous(breaks = weekbreaks, labels = yearlabs)
 # ggsave("plots/subtypes/serotype_by_week_hpai_only.png")
-
-
+ggsave("plots/subtypes/serotype_by_week_hpai_only_april2024.png")
 
 
 ## If want to repeat by month, will need to do another table to join with 
@@ -400,6 +412,7 @@ ggplot(data = subtype_plot_data, aes(x = year, fill = serotype_HN))+
   geom_bar() +
   labs(y = "Number of cases", x = "Year", size = 18, fill = "Serotype") 
 #ggsave("plots/subtypes/serotype_bar_by_year_hpai.png")
+#ggsave("plots/subtypes/serotype_bar_by_year_hpai_april2024.png")
 
 # Year seems to work OK. suspect this is because year is a numeric variable. 
 
@@ -436,7 +449,8 @@ year_cols <- c("2005" = "grey",
                "2020" = "#CC6699",
                "2021" = "#3399FF",
                "2022" = "#FF0000",
-               "2023" = "#99FFFF")
+               "2023" = "#99FFFF",
+               "2024" = "#65CCFF")
 
 #trial run
 ggplot(q1_sub, aes(x=week_num, fill = year_fact)) +
@@ -504,7 +518,8 @@ q4plot <- ggplot(q4_sub, aes(x=month_fact, fill = year_fact)) +
 q4plot
 
 ggpubr::ggarrange(q1plot, q2plot, q3plot, q4plot, ncol = 2, nrow = 2)
-ggsave("plots/counts_by_month_per_quart_coloured_by_year.png")
+#ggsave("plots/counts_by_month_per_quart_coloured_by_year.png")
+ggsave("plots/counts_by_month_per_quart_coloured_by_year_april_2024.png")
 
 
 dev.off()
@@ -531,3 +546,51 @@ plot(ai_pos_birds[which(ai_pos_birds$serotype_HN == "H5N8" & hpai$year < "2020")
 plot(euro_shp, main = "H5N8 2020 onwards")
 plot(ai_pos_birds[which(ai_pos_birds$serotype_HN == "H5N8" & hpai$year >= "2020"), "geometry"], add = T, col = "dark green", pch = 18, cex = 0.5)
 #dev.off()
+
+
+############
+
+## Look at the data set from 2020 onwards and see how may entries for pre and post-March 2023
+
+hpai_2020_a <- hpai %>% dplyr::filter(year >=2020 & observation.date < "2023-04-01")
+hpai_2020_b <- hpai %>% dplyr::filter(observation.date >="2023-04-01")
+
+
+week_counts_2020_a <- weekly_counts %>% dplyr::filter(weekdate > "2020-01-01" & weekdate < "2023-04-03")
+week_counts_2020_b <- weekly_counts %>% dplyr::filter(weekdate >= "2023-04-03")
+
+
+dev.off()
+
+## plot of the first part of the data
+ggplot(data = week_counts_2020_a, aes(x = weekdate, y = n)) +
+  geom_line(lwd = 0.9, col = "purple")  + 
+  labs(y = "Number of weekly cases", x = "Year", size = 18) +
+  theme(axis.text.x = element_text(angle=90, margin = margin(t = 0.1, r = 0.2, b = 0.2, l = 0.3, unit = "cm"), 
+                                   face = "bold", size = 10, vjust = 0.5),
+        axis.text.y = element_text(face = "bold", size = 10),
+        plot.margin = margin(1,1,1,1, "cm"), 
+        axis.title =  element_text(size = 12),
+        panel.background = element_rect(fill = "white", colour = "grey50"),
+        panel.grid.major = element_line(size = 0.5, linetype = 'solid',
+                                        colour = "grey"),
+        panel.grid.minor = element_line(size = 0.5, linetype = 'dashed',
+                                        colour = "grey90"))
+ggsave("plots/counts_by_week_0120_0423.png")
+
+
+# plot of the second part of the data
+ggplot(data = week_counts_2020_b, aes(x = weekdate, y = n)) +
+  geom_line(lwd = 0.9, col = "orange")  + 
+  labs(y = "Number of weekly cases", x = "Year", size = 18) +
+  theme(axis.text.x = element_text(angle=90, margin = margin(t = 0.1, r = 0.2, b = 0.2, l = 0.3, unit = "cm"), 
+                                   face = "bold", size = 10, vjust = 0.5),
+        axis.text.y = element_text(face = "bold", size = 10),
+        plot.margin = margin(1,1,1,1, "cm"), 
+        axis.title =  element_text(size = 12),
+        panel.background = element_rect(fill = "white", colour = "grey50"),
+        panel.grid.major = element_line(size = 0.5, linetype = 'solid',
+                                        colour = "grey"),
+        panel.grid.minor = element_line(size = 0.5, linetype = 'dashed',
+                                        colour = "grey90"))
+ggsave("plots/counts_by_week_0423_0424.png")

@@ -21,17 +21,23 @@ library(RColorBrewer)
 # I have selected those just listed as domestic and not included 'captive'. I did look at captive on the fao page but these were more
 # rare/zoo species. First will focus on just domestic outbreaks. 
 
-fao_data  <- read.csv("data/flu_data/raw_data/fao_domestic_cases_raw_data.csv")
+#fao_data  <- read.csv("data/flu_data/raw_data/fao_domestic_cases_raw_data.csv")
+fao_data  <- read.csv("data/flu_data/raw_data/epidemiology-raw-data_domestic_apr_2024.csv") # later download from april 2024
 
 table(fao_data$Region)
 
 colnames(fao_data)
+table(fao_data$Diagnosis.status)
+table(fao_data$Animal.type)
+
+# the rogue entry is misaligned and is in cats in Korea so remove
+fao_data <- fao_data %>% dplyr::filter(Animal.type != "Confirmed")
 
 # rename the date columns
 fao_data <-  dplyr::rename(fao_data, any_of(c(observation.date = "Observation.date..dd.mm.yyyy.",
                                               report.date = "Report.date..dd.mm.yyyy.")))
 
-# There are 1657 rows with no entries for observation date 
+# There are 1684 rows with no entries for observation date 
 nrow(fao_data[which(fao_data$observation.date == ""),])
 
 no_obs_data <- fao_data[which(fao_data$observation.date == ""),]
@@ -45,7 +51,7 @@ table(fao_data$Species) # selected just those listed as 'domestic' from website.
 
 # Remove the entries that are mammals or environmental
 
-unwanted_sp_fao <- c("Canine", "Cats", "Dogs", "Donkey", "Ferret", "Goats", "House Crow", 
+unwanted_sp_fao <- c("Canine", "Cats", "Cattle", "Dogs", "Donkey", "Ferret", "Goats", "House Crow", 
                      "Swine", "Unspecified Env. Sample")
 
 fao_data <- fao_data %>% filter(!Species %in% unwanted_sp_fao)
@@ -63,8 +69,6 @@ fao_data[which(fao_data$Species == "Common Quail:coturnix Coturnix(Phasianidae)"
 fao_data[which(fao_data$Species == "Muscovy Duck:cairina Moschata(Anatidae)"), "Species"] <- "Muscovy Duck"
 fao_data[which(fao_data$Species == "Phasianidae:Phasianidae (Incognita)(Phasianidae)"), "Species"] <- "Phasianidae"
 table(fao_data$Species)
-
-
 fao_data_trim <- dplyr::select(fao_data, all_of(c("Latitude", "Longitude", "observation.date", "Species", "Country", "Serotype")))
 fao_data_trim$Epi_unit <- NA # for later merge with WAHIS
 fao_data_trim$source <- "fao"
@@ -74,7 +78,8 @@ fao_data_trim$observation.date <- as.Date(fao_data_trim$observation.date, "%d/%m
 ####### Now do WAHIS
 
 # WAHIS
-wahis <- read_excel("data/flu_data/raw_data/WOAH_july_2023.xlsx", sheet = 2)
+#wahis <- read_excel("data/flu_data/raw_data/WOAH_july_2023.xlsx", sheet = 2)
+wahis <- read.csv("data/flu_data/raw_data/WOAH_april_2024.csv") # later download from april 2024
 
 # contains all diseases and species so filter these down to the ones we want
 
@@ -98,8 +103,9 @@ table(inf_a_hpai$disease_eng)
 #Removing zoo and cage animals. Will save further filtering until later
 inf_a_hpai <- dplyr::filter(inf_a_hpai, !Epi_unit %in% c("Zoo", "Cage"))
 table(inf_a_hpai$region) # all regions represented
+table(inf_a_hpai$disease_eng)
 
-## Alternative approach would be justt to use those labelled as poultry These make up the majority of the records
+## Alternative approach would be just to use those labelled as poultry These make up the majority of the records
 ## However, the definition of poultry which is here (https://www.woah.org/en/what-we-do/standards/codes-and-manuals/terrestrial-code-online-access/?id=169&L=1&htmfile=glossaire.htm) 
 ## means this would exclude backyard flocks. 
 
@@ -170,11 +176,11 @@ ai_data_prj_area <- point_data_df %>%
 
 table(ai_data_prj_area$Species)
 
-unwanted_sp <- c("Cats", "Mustelidae (dom)", "Swine")
+unwanted_sp <- c("Cats", "Dogs", "Mustelidae (dom)", "Swine")
 
 nrow(ai_data_prj_area[which(ai_data_prj_area$Species %in% unwanted_sp),])
 
-# 61 mammal entries that we are removing. 
+# 63 mammal entries that we are removing. 
 
 ## Remove from the data so just birds
 
@@ -211,8 +217,6 @@ table(ai_pos_birds$source, ai_pos_birds$serotype_HN)
 
 # remove the ones where we don't have a serotype as only 7 of them
 ai_pos_birds <- dplyr::filter(ai_pos_birds, serotype_HN != "")
-
-
 
 ## Next I want to look at the duplicates that are present in the data 
 
@@ -270,7 +274,7 @@ serotype_data <- as.data.frame(table(hpai$serotype_HN))
 ## # Now to plot the time series by serotype 
 
 ## start on 3rd Jan 2005 as that's a Monday
-week_calendar <- data.frame(date=seq(as.Date("2005-01-03"), as.Date("2023-07-27"), by="day")) %>% 
+week_calendar <- data.frame(date=seq(as.Date("2005-01-03"), as.Date("2024-04-28"), by="day")) %>% 
   mutate(week_num=isoweek(date),year=year(date)) %>%
   group_by(year,week_num) %>% 
   summarise(weekdate=min(date)) 
@@ -292,7 +296,7 @@ ggplot(dates, aes(x=weekdate)) + geom_histogram(bins = nrow(week_calendar), col 
                                         colour = "grey"),
         panel.grid.minor = element_line(size = 0.5, linetype = 'dashed',
                                         colour = "grey90"))
-#ggsave("plots/hist_by_week_hpai_only_domestic.png")
+ggsave("plots/hist_by_week_hpai_only_domestic.png")
 
 # could also make a dataframe of the counts of the number in each week
 count_dates <- dates %>% 
@@ -315,9 +319,10 @@ ggplot(data = weekly_counts, aes(x = weekdate, y = n)) +
                                         colour = "grey"),
         panel.grid.minor = element_line(size = 0.5, linetype = 'dashed',
                                         colour = "grey90"))
-#ggsave("plots/lineplot_by_week_hpai_only_domestic.png")
+ggsave("plots/lineplot_by_week_hpai_only_domestic.png")
 
-
+# save for the time series
+#write.csv(weekly_counts, "data/flu_data/prepped_data/time_series_domestic_hpai.csv", row.names = F)
 
 # For quite a number of the subtypes there are only a few entries. 
 # For the line plot by subtype, only use those that have >10 entries
@@ -327,7 +332,7 @@ subtype_plot_data <- dates
 (subtype_plot_data)
 
 yearlabs <- c("2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", 
-              "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023")
+              "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024")
 
 weekbreaks <- week_calendar[which(week_calendar$week_num == 1), "week_of_study"]
 weekbreaks <- weekbreaks[["week_of_study"]]
@@ -347,7 +352,7 @@ ggplot(subtype_plot_data, aes(x = week_of_study, fill = serotype_HN)) +
         panel.grid.minor = element_line(size = 0.5, linetype = 'dashed',
                                         colour = "white")) +
   scale_x_continuous(breaks = weekbreaks, labels = yearlabs)
-#ggsave("plots/subtypes/serotype_by_week_hpai_only_domestic.png")
+ggsave("plots/subtypes/serotype_by_week_hpai_only_domestic.png")
 
 
 subtype_counts_year <- subtype_plot_data %>%
@@ -361,10 +366,7 @@ subtype_counts_year$factor_HN <- as.factor(subtype_counts_year$serotype_HN)
 
 ggplot(data = subtype_plot_data, aes(x = year, fill = serotype_HN))+
   geom_bar()
-#ggsave("plots/subtypes/serotype_bar_by_year_hpai_domestic_birds.png")
-
-
-## save the timeseries so can compare to wild birds to look for lag. 
+ ggsave("plots/subtypes/serotype_bar_by_year_hpai_domestic_birds.png")
 
 
 ######
@@ -385,48 +387,210 @@ plot(euro_rast)
 points(p, pch = 18, cex = 0.5)
 
 # rasterize points as a matrix
-# points_rast <- rasterize(p, euro_rast, fun=sum)
 points_rast <- rasterize(p, euro_rast, value = 1) # this one just marks as present or not. Doesn't give an idea of number. 
 
 plot(points_rast)
 points_rast
 
+# We want these split into quarters but also by the period over which we split the data. 
+# For data A and B, the date was selected as 1st September 2021
 
-counts_by_geom <- ai_pos_birds %>% count(geometry)
-counts_by_geom_date <- ai_pos_birds %>% 
-  count(geometry, observation.date)
+dom_a <- hpai %>% filter(observation.date < "2021-09-01")
+dom_b <- hpai %>% filter(observation.date >= "2021-09-01")
+
+
+# also need to split into quarters of the year
+dom_a_q1 <- dom_a %>% dplyr::filter(month %in% c(1,2,3))
+dom_a_q2 <- dom_a %>% dplyr::filter(month %in% c(4,5,6))
+dom_a_q3 <- dom_a %>% dplyr::filter(month %in% c(7,8,9))
+dom_a_q4 <- dom_a %>% dplyr::filter(month %in% c(10,11,12))
+# repeat for b
+dom_b_q1 <- dom_b %>% dplyr::filter(month %in% c(1,2,3))
+dom_b_q2 <- dom_b %>% dplyr::filter(month %in% c(4,5,6))
+dom_b_q3 <- dom_b %>% dplyr::filter(month %in% c(7,8,9))
+dom_b_q4 <- dom_b %>% dplyr::filter(month %in% c(10,11,12))
+
+# function to make the raster
+presence_rast  <- function(pts, ref_rast){
+  p <- cbind(pts$X, pts$Y)
+#  points(p, pch = 18, cex = 0.5) # this just plots the points 
+  points_rast <- rasterize(p, ref_rast, value = 1)
+}
   
+dom_a_q1_presence_rast <- presence_rast(dom_a_q1, euro_rast)
+plot(dom_a_q1_presence_rast, col = "orange")
 
-# from Liam's code prepping eBird data
+dom_a_q2_presence_rast <- presence_rast(dom_a_q2, euro_rast)
+dom_a_q3_presence_rast <- presence_rast(dom_a_q3, euro_rast)
+dom_a_q4_presence_rast <- presence_rast(dom_a_q4, euro_rast)
+# repeat for b
 
-point_ai_data <- st_as_sf(x = hpai, 
-                       coords = c("X", "Y"), 
-                       crs = "EPSG:3035")
+dom_b_q1_presence_rast <- presence_rast(dom_b_q1, euro_rast)
+dom_b_q2_presence_rast <- presence_rast(dom_b_q2, euro_rast)
+dom_b_q3_presence_rast <- presence_rast(dom_b_q3, euro_rast)
+dom_b_q4_presence_rast <- presence_rast(dom_b_q4, euro_rast)
 
-points_sp <- sf::as_Spatial(point_ai_data)
+# writeRaster(dom_a_q1_presence_rast, "data/flu_data/prepped_data/domestic_cases_rasters/dom_a_q1_pres_abs.tif")
+# writeRaster(dom_a_q2_presence_rast, "data/flu_data/prepped_data/domestic_cases_rasters/dom_a_q2_pres_abs.tif")
+# writeRaster(dom_a_q3_presence_rast, "data/flu_data/prepped_data/domestic_cases_rasters/dom_a_q3_pres_abs.tif")
+# writeRaster(dom_a_q4_presence_rast, "data/flu_data/prepped_data/domestic_cases_rasters/dom_a_q4_pres_abs.tif")
+# 
+# writeRaster(dom_b_q1_presence_rast, "data/flu_data/prepped_data/domestic_cases_rasters/dom_b_q1_pres_abs.tif")
+# writeRaster(dom_b_q2_presence_rast, "data/flu_data/prepped_data/domestic_cases_rasters/dom_b_q2_pres_abs.tif")
+# writeRaster(dom_b_q3_presence_rast, "data/flu_data/prepped_data/domestic_cases_rasters/dom_b_q3_pres_abs.tif")
+# writeRaster(dom_b_q4_presence_rast, "data/flu_data/prepped_data/domestic_cases_rasters/dom_b_q4_pres_abs.tif")
 
-# bit below not right yet.
-points_rast_sum <- terra::rasterize(x = vect(points_sp), 
-                                y = euro_rast, 
-                                field = hpai %>% pull(n), 
-                                fun = "sum")
+## One issue with this is that you may well just get rasters that overlay the wild bird cases.
+## Probably useful to compare the two rasters and see if there are many cells that are independent
+
+## Next part is to count how many unique occurrences there are in each cell.
+## We have removed duplicates based on date and location, but possible that we might want to only count an 
+## occurrence in a cell once in a day? 
+
+## first will just count them all.
+
+## issue with the code below is that using raster makes the crs tricky. 
+# total_count_function <- function(points_obj){
+#   p <- cbind(points_obj$X, points_obj$Y)  # make the points object
+#   empty_rast <- raster::raster(euro_rast) # create an empty raster
+#   empty_rast[] = 0 # set value as 0
+#   counts = table(raster::cellFromXY(empty_rast,p)) # make a table of the counts for the cells
+#   empty_rast[as.numeric(names(counts))] = counts #add the counts to the raster
+#   return(empty_rast)
+# }
+
+total_count_function <- function(points_obj){
+  p <- cbind(points_obj$X, points_obj$Y)  # make the points object
+  empty_rast <- terra::rast(euro_rast ) # create an empty raster
+  empty_rast[] = 0 # set value as 0
+  counts = table(terra::cellFromXY(empty_rast,p)) # make a table of the counts for the cells
+  cells_with_cases <- as.numeric(names(counts))
+  cell_vals <- values(empty_rast)
+  cell_vals[cells_with_cases] <-counts[] #  counts_vect
+  values(empty_rast) <- cell_vals #add the counts to the raster
+  return(empty_rast)
+}
+
+points_obj <- dom_a_q1
+
+dom_a_q1_rast_counts <- total_count_function(dom_a_q1)
+dom_a_q1_rast_counts
+plot(dom_a_q1_rast_counts)
+table(values(dom_a_q1_rast_counts))
+
+breakpoints <- c(0, 1, 5, 10, 20, 50, 100, 150)
+colors <- c("white", rev(RColorBrewer::brewer.pal(7, "Reds")))
+
+plot(dom_a_q1_rast_counts, breaks = breakpoints, col = colors, box = F, axes = F)
+plot(euro_shp, add = T)
+
+## create the other rasters
+dom_a_q2_rast_counts <- total_count_function(dom_a_q2)
+dom_a_q3_rast_counts <- total_count_function(dom_a_q3)
+dom_a_q4_rast_counts <- total_count_function(dom_a_q4)
+
+dom_b_q1_rast_counts <- total_count_function(dom_b_q1)
+dom_b_q1_rast_counts
+dom_b_q2_rast_counts <- total_count_function(dom_b_q2)
+dom_b_q3_rast_counts <- total_count_function(dom_b_q3)
+dom_b_q4_rast_counts <- total_count_function(dom_b_q4)
+
+# # save the rasters
+# writeRaster(dom_a_q1_rast_counts, "data/flu_data/prepped_data/domestic_cases_rasters/dom_a_q1_counts.tif")
+# writeRaster(dom_a_q2_rast_counts, "data/flu_data/prepped_data/domestic_cases_rasters/dom_a_q2_counts.tif")
+# writeRaster(dom_a_q3_rast_counts, "data/flu_data/prepped_data/domestic_cases_rasters/dom_a_q3_counts.tif")
+# writeRaster(dom_a_q4_rast_counts, "data/flu_data/prepped_data/domestic_cases_rasters/dom_a_q4_counts.tif")
+# 
+# writeRaster(dom_b_q1_rast_counts, "data/flu_data/prepped_data/domestic_cases_rasters/dom_b_q1_counts.tif")
+# writeRaster(dom_b_q2_rast_counts, "data/flu_data/prepped_data/domestic_cases_rasters/dom_b_q2_counts.tif")
+# writeRaster(dom_b_q3_rast_counts, "data/flu_data/prepped_data/domestic_cases_rasters/dom_b_q3_counts.tif")
+# writeRaster(dom_b_q4_rast_counts, "data/flu_data/prepped_data/domestic_cases_rasters/dom_b_q4_counts.tif")
 
 
-# points_rast <- terra::rasterize(x = vect(points_sp), 
-#                                 y = base_map_10k, 
-#                                 field = ebird_eur %>% pull(n), 
-#                                 fun = "sum")
 
 
-# Assign 0 to any terrestrial cells with no observations
-points_rast <- mask(subst(points_rast %>% as("SpatRaster"), NA, 0), 
-                    base_map_10k %>% as("SpatRaster"), 
-                    maskvalue=NA)
+#####################################################################################################
+# Compare the presence/absence rasters with those of wild bird cases.
 
-plot(points_rast)
+# Read in the data
+
+wild <- read.csv("data/flu_data/prepped_data/hpai_pos_birds_nobvbrc_april2024.csv")
+head(wild)
+
+## add a month and year to aid splitting
+wild$year <- lubridate::year(wild$observation.date)
+wild$month <- lubridate::month(wild$observation.date)
+
+# We want these split into quarters but also by the period over which we split the data. 
+# For data A and B, the date was selected as 1st September 2021
+
+wild_a <- wild %>% filter(observation.date < "2021-09-01")
+wild_b <- wild %>% filter(observation.date >= "2021-09-01")
 
 
-# rasterize points as a SpatVector
-pv <- vect(p)
-xv <- rasterize(pv, r, fun=sum)
+# also need to split into quarters of the year
+wild_a_q1 <- wild_a %>% dplyr::filter(month %in% c(1,2,3))
+wild_a_q2 <- wild_a %>% dplyr::filter(month %in% c(4,5,6))
+wild_a_q3 <- wild_a %>% dplyr::filter(month %in% c(7,8,9))
+wild_a_q4 <- wild_a %>% dplyr::filter(month %in% c(10,11,12))
+# repeat for b
+wild_b_q1 <- wild_b %>% dplyr::filter(month %in% c(1,2,3))
+wild_b_q2 <- wild_b %>% dplyr::filter(month %in% c(4,5,6))
+wild_b_q3 <- wild_b %>% dplyr::filter(month %in% c(7,8,9))
+wild_b_q4 <- wild_b %>% dplyr::filter(month %in% c(10,11,12))
 
+
+wild_a_q1_presence_rast <- presence_rast(wild_a_q1, euro_rast)
+plot(wild_a_q1_presence_rast, col = "purple")
+
+wild_a_q2_presence_rast <- presence_rast(wild_a_q2, euro_rast)
+wild_a_q3_presence_rast <- presence_rast(wild_a_q3, euro_rast)
+wild_a_q4_presence_rast <- presence_rast(wild_a_q4, euro_rast)
+# repeat for b
+
+wild_b_q1_presence_rast <- presence_rast(wild_b_q1, euro_rast)
+wild_b_q2_presence_rast <- presence_rast(wild_b_q2, euro_rast)
+wild_b_q3_presence_rast <- presence_rast(wild_b_q3, euro_rast)
+wild_b_q4_presence_rast <- presence_rast(wild_b_q4, euro_rast)
+
+# Now we want to compare the domestic and wild rasters and find how many there are with values in
+# one of the rasters but not in the other.
+
+# start with q1 a
+# set NAs as 0 in both cases
+
+get_raster_diff <- function(rd, rw){
+  rd[is.na(rd[])] <- 0 # set the NAs as zero in domestic 
+  rw[is.na(rw[])] <- 10 # set the NAs to 10 in wildlife
+  rdiff <- rd - rw # subtract one from the other
+  return(rdiff)
+}
+
+
+diff_a_q1 <- get_raster_diff(dom_a_q1_presence_rast, wild_a_q1_presence_rast)
+table(values(diff_a_q1))
+
+# as done domestic versus wild. 
+# pos dom (1) - pos wild(1) = 0 
+# neg dom(0) - neg wild(10) = - 10  
+# pos dom(1) - neg wild(10) = -9
+# neg dom(0) - pos wild = -1
+
+diff_a_q2 <- get_raster_diff(dom_a_q2_presence_rast, wild_a_q2_presence_rast)
+table(values(diff_a_q2))
+
+diff_a_q3 <- get_raster_diff(dom_a_q3_presence_rast, wild_a_q3_presence_rast)
+table(values(diff_a_q3))
+
+diff_a_q4 <- get_raster_diff(dom_a_q4_presence_rast, wild_a_q4_presence_rast)
+table(values(diff_a_q4))
+
+# and for b 
+diff_b_q1 <- get_raster_diff(dom_b_q1_presence_rast, wild_b_q1_presence_rast)
+table(values(diff_b_q1))
+diff_b_q2 <- get_raster_diff(dom_b_q2_presence_rast, wild_b_q2_presence_rast)
+table(values(diff_b_q2))
+diff_b_q3 <- get_raster_diff(dom_b_q3_presence_rast, wild_b_q3_presence_rast)
+table(values(diff_b_q3))
+diff_b_q4 <- get_raster_diff(dom_b_q4_presence_rast, wild_b_q4_presence_rast)
+table(values(diff_b_q4))
