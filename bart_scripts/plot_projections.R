@@ -3,10 +3,12 @@
 
 rm(list = ls())
 
+PLOT_RAW_CASE_DATA <- FALSE 
+
 # Optional command line arguments, must be passed as strings:
 args <- commandArgs(trailingOnly = T)
 if (length(args)<4){
-  INCLUDE_CROSSTERMS <- "no-crossterms" # Set to "no-crossterms" to do model without crossterms or "with-crossterms" to do model with crossterms
+  INCLUDE_CROSSTERMS <- "with-crossterms" # Set to "no-crossterms" to do model without crossterms or "with-crossterms" to do model with crossterms
 }else{
   INCLUDE_CROSSTERMS <- args[4]
 }
@@ -181,6 +183,33 @@ spplot(stack(preds[[1]][[2]],
 grid::grid.text("Probability", x=grid::unit(0.98, "npc"), y=grid::unit(0.50, "npc"), rot=-90)
 dev.off()
 
+png(paste("plots/",
+          INCLUDE_CROSSTERMS,
+          "_",
+          CV_OR_RI,
+          "_A_all_uncertainty.png", sep=""),
+    width = 8,
+    height = 11.3,
+    units = "in",
+    res = 330)
+spplot(stack(preds[[1]][[2]],
+             preds[[1]][[1]],
+             preds[[1]][[3]],
+             preds[[2]][[2]], 
+             preds[[2]][[1]], 
+             preds[[2]][[3]], 
+             preds[[3]][[2]], 
+             preds[[3]][[1]], 
+             preds[[3]][[3]], 
+             preds[[4]][[2]],
+             preds[[4]][[1]],
+             preds[[4]][[3]]),
+       col.regions = viridis_pal()(100),
+       at = seq(0,1,0.01),
+       cex = 0.8)
+grid::grid.text("Probability", x=grid::unit(0.98, "npc"), y=grid::unit(0.50, "npc"), rot=-90)
+dev.off()
+
 #### Now do dataset B ####
 
 for (idx in 1:4){
@@ -336,36 +365,65 @@ spplot(stack(preds[[1]][[2]],
 grid::grid.text("Probability", x=grid::unit(0.98, "npc"), y=grid::unit(0.50, "npc"), rot=-90)
 dev.off()
 
+png(paste("plots/",
+          INCLUDE_CROSSTERMS,
+          "_",
+          CV_OR_RI,
+          "_B_all_uncertainty.png", sep=""),
+    width = 8,
+    height = 11.3,
+    units = "in",
+    res = 330)
+spplot(stack(preds[[1]][[2]],
+             preds[[1]][[1]],
+             preds[[1]][[3]],
+             preds[[2]][[2]], 
+             preds[[2]][[1]], 
+             preds[[2]][[3]], 
+             preds[[3]][[2]], 
+             preds[[3]][[1]], 
+             preds[[3]][[3]], 
+             preds[[4]][[2]],
+             preds[[4]][[1]],
+             preds[[4]][[3]]),
+       col.regions = viridis_pal()(100),
+       at = seq(0,1,0.01),
+       cex = 0.8)
+grid::grid.text("Probability", x=grid::unit(0.98, "npc"), y=grid::unit(0.50, "npc"), rot=-90)
+dev.off()
+
 ################################################################################
 # Plot case data
 
-pos_data <- read.csv(paste(PATH_TO_OUTPUTS,
-                           "AI_S2_SDM_storage/Avian flu data/pos_points_proj_area_all_sources_duplicates_removed.csv",
-                           sep = ""))
-
-zipmap <- terra::vect(x = "data/gis_europe/CNTR_RG_03M_2020_4326.shp.zip",
-                      layer = "CNTR_RG_03M_2020_4326")
-crs <- "epsg:3035"
-euro_ext <- extent(preds[[1]])
-
-# change projection and extent. 
-# using quite a generous extent whilst plotting as looking at where to set the boundaries
-euro_map <- terra::project(x = zipmap, y = crs) 
-euro_map_crop <- terra::crop(euro_map, euro_ext)
-
-pts_pos <- terra::vect(pos_data, geom=c("X", "Y"),
-                       crs =  "+proj=longlat +ellps=WGS84 +datum=WGS84")
-
-w <- 7
-h <- w * (euro_ext@ymax - euro_ext@ymin)/(euro_ext@xmax - euro_ext@xmin)
-png("plots/poster_positives.png", width = w, height = h,
-    units = "in", res = 330)
-plot(euro_map_crop,
-     col = "white",
-     background = "azure2",
-     axes = FALSE,
-     buffer = FALSE,
-     xmin = euro_ext@xmin,
-     mar = c(0, 0, 0, 0))
-plot(pts_pos, add = T, col = "red", pch = 16, cex = .3)
-dev.off()
+if (PLOT_RAW_CASE_DATA){
+  pos_data <- read.csv(paste(PATH_TO_OUTPUTS,
+                             "AI_S2_SDM_storage/Avian flu data/pos_points_proj_area_all_sources_duplicates_removed.csv",
+                             sep = ""))
+  
+  zipmap <- terra::vect(x = "data/gis_europe/CNTR_RG_03M_2020_4326.shp.zip",
+                        layer = "CNTR_RG_03M_2020_4326")
+  crs <- "epsg:3035"
+  euro_ext <- extent(preds[[1]])
+  
+  # change projection and extent. 
+  # using quite a generous extent whilst plotting as looking at where to set the boundaries
+  euro_map <- terra::project(x = zipmap, y = crs) 
+  euro_map_crop <- terra::crop(euro_map, euro_ext)
+  
+  pts_pos <- terra::vect(pos_data, geom=c("X", "Y"),
+                         crs =  "+proj=longlat +ellps=WGS84 +datum=WGS84")
+  
+  w <- 7
+  h <- w * (euro_ext@ymax - euro_ext@ymin)/(euro_ext@xmax - euro_ext@xmin)
+  png("plots/poster_positives.png", width = w, height = h,
+      units = "in", res = 330)
+  plot(euro_map_crop,
+       col = "white",
+       background = "azure2",
+       axes = FALSE,
+       buffer = FALSE,
+       xmin = euro_ext@xmin,
+       mar = c(0, 0, 0, 0))
+  plot(pts_pos, add = T, col = "red", pch = 16, cex = .3)
+  dev.off()
+}
