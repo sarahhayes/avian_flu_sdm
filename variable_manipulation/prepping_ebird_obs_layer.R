@@ -1,6 +1,6 @@
-##############################################
-# Filter the eBird sampling dataset with auk #
-##############################################
+###############################################
+# Filter the eBird sampling datasets with auk #
+###############################################
 
 library(tidyverse)
 library(magrittr)
@@ -8,11 +8,16 @@ library(auk)
 library(sf)
 library(terra)
 
-setwd("~/avian_flu_sdm/")
+# Prepare background maps for plots
+library(rnaturalearth)
+spdf_world <- ne_download(scale = 110, type = "countries")
+plot(spdf_world)
+
+setwd("~/avian_flu_sdm_fork/")
 auk_set_ebd_path("data_offline/EBD/sampling")
-base_map <- raster::raster("output/euro_rast_latlong.tif")
 
 # Filter to Europe study area; takes up to 10 mins to conduct filtering
+base_map <- terra::rast("output/euro_rast_latlong.tif")
 auk_sampling("ebd_sampling_relDec-2023.txt") %>%
   auk_bbox(bbox = base_map) %>% # limit to area of flu sampling records
   auk_date(date = c("2005-10-07", "2023-06-30")) %>% # limit to dates of flu sampling records
@@ -36,6 +41,10 @@ auk_sampling("ebd_sampling_relDec-2023.txt") %>%
   auk_date(date = c("2005-10-07", "2023-06-30")) %>% # limit to dates of flu sampling records
   auk_filter(file = "output/ebd_sampling_afri.txt")
 
+#################################
+# Process data layer for Europe #
+#################################
+
 ebird_eur <- read_sampling("data_offline/EBD/sampling/ebd_sampling_eur.txt")
 ebird_eur %>% head %>% as.data.frame
 ebird_eur %>% nrow
@@ -49,12 +58,12 @@ ebird_eur %<>% group_by(latitude, longitude) %>% tally
 # change into sf object so can change projection of point. 
 # Assuming FAO are entered in standard lon/lat format
 
+base_map_10k <- terra::rast("output/euro_rast_10k.tif")
+
 point_data <- st_as_sf(x = ebird_eur, 
                        coords = c("longitude", "latitude"),
                        crs = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0") %>%
   st_transform("EPSG:3035")
-
-base_map_10k <- raster::raster("output/euro_rast_10k.tif")
 
 points_sp <- sf::as_Spatial(point_data)
 
@@ -72,28 +81,14 @@ plot(points_rast)
 
 png(paste0("plots//ebird_records.png"), width = 10, height = 10, units = "in", res = 600)
 plot(app(points_rast, function(x) log(x+1)), main = "log(eBird records)")
+plot(spdf_world[1], add = TRUE, color = NA)
 dev.off()
 
 terra::writeRaster(points_rast, "variable_manipulation/variable_outputs/ebird_records.tif", overwrite = TRUE)
 
-###############################################
-# Plot eBird records for Asia/Americas/Africa #
-###############################################
-
-# Prepare background maps
-
-library(rnaturalearth)
-spdf_world <- ne_download(scale = 110, type = "countries")
-plot(spdf_world)
-
-# americas_map <- spdf_world %>% subset(., REGION_UN == "Americas")
-# plot(americas_map)
-# asia_map <- spdf_world %>% subset(., REGION_UN == "Asia")
-# plot(asia_map)
-# africa_map <- spdf_world %>% subset(., REGION_UN == "Africa")
-# plot(africa_map)
-
-# Asia
+###############################
+# Process data layer for Asia #
+###############################
 
 ebird_asia <- read_sampling("data_offline/EBD/sampling/ebd_sampling_asia.txt")
 ebird_asia %>% head %>% as.data.frame
@@ -108,27 +103,37 @@ ebird_asia %<>% group_by(latitude, longitude) %>% tally
 # change into sf object so can change projection of point. 
 # Assuming FAO are entered in standard lon/lat format
 
+base_map_10k <- terra::rast("output/asia_russia_rast.tif")
+
 point_data <- st_as_sf(x = ebird_asia, 
                        coords = c("longitude", "latitude"),
-                       crs = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0")
-
-blank_latlong <- terra::rast(crs="+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0", res = 1)
+                       crs = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0") %>%
+  st_transform(crs(base_map_10k))
 
 points_sp <- sf::as_Spatial(point_data)
 
 points_rast <- terra::rasterize(x = vect(points_sp), 
-                                y = blank_latlong, 
+                                y = base_map_10k, 
                                 field = ebird_asia %>% pull(n), 
                                 fun = "sum")
+
+# Assign 0 to any terrestrial cells with no observations
+points_rast <- mask(subst(points_rast %>% as("SpatRaster"), NA, 0), 
+                    base_map_10k %>% as("SpatRaster"), 
+                    maskvalue=NA)
 
 plot(points_rast)
 
 png(paste0("plots//ebird_records_asia.png"), width = 15, height = 10, units = "in", res = 600)
-plot(app(points_rast, function(x) log(x+1)), main = "log(eBird records, lat/long)", xlim = c(10,180), ylim = c(-35,80))
+plot(app(points_rast, function(x) log(x+1)), main = "log(eBird records, lat/long)")
 plot(spdf_world[1], add = TRUE, color = NA)
 dev.off()
 
-# Americas (takes a long time as ~19GB of data)
+terra::writeRaster(points_rast, "variable_manipulation/variable_outputs/ebird_records_asia.tif", overwrite = TRUE)
+
+###################################
+# Process data layer for Americas #  (takes a long time as ~19GB of data)
+###################################
 
 # ebird_amer <- read_sampling("data_offline/EBD/sampling/ebd_sampling_amer.txt")
 # ebird_amer %>% head %>% as.data.frame
@@ -145,27 +150,38 @@ ebird_amer <- readRDS(file = "data_offline/EBD/sampling/ebird_amer.rds")
 # change into sf object so can change projection of point. 
 # Assuming FAO are entered in standard lon/lat format
 
+base_map_10k <- terra::rast("output/americas_rast.tif")
+
 point_data <- st_as_sf(x = ebird_amer, 
                        coords = c("longitude", "latitude"),
-                       crs = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0")
-
-blank_latlong <- terra::rast(crs="+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0", res = 1)
+                       crs = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0") %>%
+  st_transform(crs(base_map_10k))
 
 points_sp <- sf::as_Spatial(point_data)
 
 points_rast <- terra::rasterize(x = vect(points_sp), 
-                                y = blank_latlong, 
+                                y = base_map_10k, 
                                 field = ebird_amer %>% pull(n), 
                                 fun = "sum")
+
+# Assign 0 to any terrestrial cells with no observations
+points_rast <- mask(subst(points_rast %>% as("SpatRaster"), NA, 0), 
+                    base_map_10k %>% as("SpatRaster"), 
+                    maskvalue=NA)
 
 plot(points_rast)
 
 png(paste0("plots//ebird_records_amer.png"), width = 15, height = 10, units = "in", res = 600)
-plot(app(points_rast, function(x) log(x+1)), main = "log(eBird records, lat/long)", xlim = c(-180,-25), ylim = c(-60,85))
+plot(app(points_rast, function(x) log(x+1)), main = "log(eBird records, lat/long)")
 plot(spdf_world[1], add = TRUE, color = NA)
 dev.off()
 
-# Africa
+terra::writeRaster(points_rast, "variable_manipulation/variable_outputs/ebird_records_amer.tif", overwrite = TRUE)
+
+
+#################################
+# Plot eBird records for Africa #
+#################################
 
 ebird_afri <- read_sampling("data_offline/EBD/sampling/ebd_sampling_afri.txt")
 ebird_afri %>% head %>% as.data.frame
@@ -180,11 +196,11 @@ ebird_afri %<>% group_by(latitude, longitude) %>% tally
 # change into sf object so can change projection of point. 
 # Assuming FAO are entered in standard lon/lat format
 
+blank_latlong <- terra::rast(crs="+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0", res = 1)
+
 point_data <- st_as_sf(x = ebird_afri, 
                        coords = c("longitude", "latitude"),
                        crs = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0")
-
-blank_latlong <- terra::rast(crs="+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0", res = 1)
 
 points_sp <- sf::as_Spatial(point_data)
 

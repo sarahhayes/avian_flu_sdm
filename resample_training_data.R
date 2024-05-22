@@ -294,7 +294,7 @@ pseudoabs_gen <- function (maindf){
                                                                            bias = weight_layer))
     
     
-    png(paste0("plots//resampling//weighted_pseudoabs//", dfname, "_Q", i, "_pseudoabs_", layername %>% gsub(" ", "", .), "_lim.png"), width = 10, height = 10, units = "in", res = 600)
+    png(paste0("plots\\resampling\\weighted_pseudoabs\\", dfname, "_Q", i, "_pseudoabs_", layername %>% gsub(" ", "", .), "_lim.png"), width = 10, height = 10, units = "in", res = 600)
     plot(base_map, col = "gray95",  main = paste0(layername, "-weighted pseudoabsences (75km limit, no buffer) [flexsdm]"))
     plot(ca, add = TRUE)
     points(df %>% pull(X),
@@ -305,10 +305,10 @@ pseudoabs_gen <- function (maindf){
            pch=16, cex=0.2, col = "magenta3")
     dev.off()
     
-    saveRDS(pseudoabs_dens, paste0("plots//resampling//weighted_pseudoabs//", dfname, "_Q", i, "_pseudoabs_", layername %>% gsub(" ", "", .), "_lim.RDS"))
+    saveRDS(pseudoabs_dens, paste0("plots\\resampling\\weighted_pseudoabs\\", dfname, "_Q", i, "_pseudoabs_", layername %>% gsub(" ", "", .), "_lim.RDS"))
     
     
-    png(paste0("plots//resampling//weighted_pseudoabs//", dfname, "_Q", i, "_pseudoabs_", layername %>% gsub(" ", "", .), "_nolim.png"), width = 10, height = 10, units = "in", res = 600)
+    png(paste0("plots\\resampling\\weighted_pseudoabs\\", dfname, "_Q", i, "_pseudoabs_", layername %>% gsub(" ", "", .), "_nolim.png"), width = 10, height = 10, units = "in", res = 600)
     plot(base_map, col = "gray95",  main = paste0(layername, "-weighted pseudoabsences (no limit, no buffer) [flexsdm]"))
     #plot(ca, add = TRUE)
     points(df %>% pull(X),
@@ -319,9 +319,9 @@ pseudoabs_gen <- function (maindf){
            pch=16, cex=0.2, col = "magenta3")
     dev.off()
     
-    saveRDS(pseudoabs_dens_nolim, paste0("plots//resampling//weighted_pseudoabs//", dfname, "_Q", i, "_pseudoabs_", layername %>% gsub(" ", "", .), "_nolim.RDS"))
+    saveRDS(pseudoabs_dens_nolim, paste0("plots\\resampling\\weighted_pseudoabs\\", dfname, "_Q", i, "_pseudoabs_", layername %>% gsub(" ", "", .), "_nolim.RDS"))
     
-    png(paste0("plots//resampling//weighted_pseudoabs//", dfname, "_Q", i, "_pseudoabs_", layername %>% gsub(" ", "", .), "_buff.png"), width = 10, height = 10, units = "in", res = 600)
+    png(paste0("plots\\resampling\\weighted_pseudoabs\\", dfname, "_Q", i, "_pseudoabs_", layername %>% gsub(" ", "", .), "_buff.png"), width = 10, height = 10, units = "in", res = 600)
     plot(base_map, col = "gray95",  main = paste0(layername, "-weighted pseudoabsences (no limit, 25km buffer) [ibis]"))
     #plot(ca, add = TRUE)
     points(pseudoabs_dens_buff %>% filter(pr_ab == 1) %>% pull(x),
@@ -338,7 +338,7 @@ pseudoabs_gen <- function (maindf){
               select(x, y, pr_ab) %>% 
               rename(X = x, Y = y) %>% 
               set_rownames(NULL),
-            paste0("plots//resampling//weighted_pseudoabs//", dfname, "_Q", i, "_pseudoabs_", layername %>% gsub(" ", "", .), "_buff.RDS"))
+            paste0("plots\\resampling\\weighted_pseudoabs\\", dfname, "_Q", i, "_pseudoabs_", layername %>% gsub(" ", "", .), "_buff.RDS"))
     
     
     gc()
@@ -381,7 +381,7 @@ pseudoabs_test_B <- list()
 for (i in 1:4){
   
   # Selected pseudoabs weighted by eBird records
-  pseudoabs <- readRDS(paste0("plots//resampling//weighted_pseudoabs//df_A_Q",i,"_pseudoabs_eBirdrecord_buff.RDS")) %>% mutate(Q = paste0("Q",i))
+  pseudoabs <- readRDS(paste0("plots\\resampling\\weighted_pseudoabs\\df_A_Q",i,"_pseudoabs_eBirdrecord_buff.RDS")) %>% mutate(Q = paste0("Q",i))
   
   pseudoabs_rows <- pseudoabs %>% nrow
   train_rows <- train_A %>% filter(Q == paste0("Q",i)) %>% nrow
@@ -394,7 +394,7 @@ for (i in 1:4){
   pseudoabs_train_A[[i]] <- pseudoabs %>% filter(Q == paste0("Q",i)) %>% .[train_index,]
   pseudoabs_test_A[[i]] <- pseudoabs %>% filter(Q == paste0("Q",i)) %>% .[-train_index,]
   
-  pseudoabs <- readRDS(paste0("plots//resampling//weighted_pseudoabs//df_B_Q",i,"_pseudoabs_eBirdrecord_buff.RDS")) %>% mutate(Q = paste0("Q",i))
+  pseudoabs <- readRDS(paste0("plots\\resampling\\weighted_pseudoabs\\df_B_Q",i,"_pseudoabs_eBirdrecord_buff.RDS")) %>% mutate(Q = paste0("Q",i))
   
   pseudoabs_rows <- pseudoabs %>% filter(Q == paste0("Q",i)) %>% nrow
   train_rows <- train_B %>% filter(Q == paste0("Q",i)) %>% nrow
@@ -438,7 +438,7 @@ thinner <- function (maindf, nbins){
     #   y = "Y",
     #   method = c("defined", d = "25"),
     #   env_layer = terra::rast(paste0("data_offline\\combi_rasters\\env_vars_Q", i, ".tif"))[[c(1:9)]],
-    #   prj = "+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs" # EPSG 3035 as defined by https://epsg.io/3035
+    #   prj = "+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs" # EPSG 3035 as defined by https:\\epsg.io/3035
     # )
     
     # Thin data based on stratifying multidimensional environmental space
@@ -454,7 +454,7 @@ thinner <- function (maindf, nbins){
         nbins = nbins
       )
     
-    png(paste0("plots//resampling//thinning//", dfname, "_Q", i, "_thinned_rand.png"), width = 10, height = 10, units = "in", res = 600)
+    png(paste0("plots\\resampling\\thinning\\", dfname, "_Q", i, "_thinned_rand.png"), width = 10, height = 10, units = "in", res = 600)
     plot(base_map, col = "gray95", main = paste0(dfname, " data thinning: random"))
     points(df %>% pull(X),
            df %>% pull(Y), 
@@ -464,9 +464,9 @@ thinner <- function (maindf, nbins){
            pch=16, cex=0.2, col = "red")
     dev.off()
     
-    thinned_rand %>% saveRDS(paste0("training_sets//raw//", dfname, "_Q", i, "_thinned_rand.RDS"))
+    thinned_rand %>% saveRDS(paste0("training_sets\\raw\\", dfname, "_Q", i, "_thinned_rand.RDS"))
     
-    png(paste0("plots//resampling//thinning//", dfname, "_Q", i, "_thinned_env_", nbins, ".png"), width = 10, height = 10, units = "in", res = 600)
+    png(paste0("plots\\resampling\\thinning\\", dfname, "_Q", i, "_thinned_env_", nbins, ".png"), width = 10, height = 10, units = "in", res = 600)
     plot(base_map, col = "gray95", main = paste0(dfname, " data thinning: environmental space (10 variables, ", nbins, " bins)"))
     points(df %>% pull(X),
            df %>% pull(Y), 
@@ -476,7 +476,7 @@ thinner <- function (maindf, nbins){
            pch=16, cex=0.2, col = "red")
     dev.off()
     
-    thinned_env %>% saveRDS(paste0("training_sets//raw//", dfname, "_Q", i, "_thinned_env_", nbins, ".RDS"))
+    thinned_env %>% saveRDS(paste0("training_sets\\raw\\", dfname, "_Q", i, "_thinned_env_", nbins, ".RDS"))
     
     n_thinned[i,1] <- nrow(df)
     n_thinned[i,2] <- nrow(thinned_rand)
@@ -557,13 +557,13 @@ selectedbins <- 6
 # Combine thinned presences and thinned pseudoabsences into training sets
 
 for (i in 1:4){
-  bind_rows(readRDS(paste0("training_sets//raw//pseudoabs_train_A_Q",i,"_thinned_env_",selectedbins,".RDS")) %>% mutate(pos = 0) %>% select(-id),
-            readRDS(paste0("training_sets//raw//train_A_Q",i,"_thinned_env_",selectedbins,".RDS")) %>% mutate(pos = 1) %>% select(-id)) %>% as.data.frame %>%
-    saveRDS(paste0("training_sets//training_coords_A_Q", i, ".RDS"))
+  bind_rows(readRDS(paste0("training_sets\\raw\\pseudoabs_train_A_Q",i,"_thinned_env_",selectedbins,".RDS")) %>% mutate(pos = 0) %>% select(-id),
+            readRDS(paste0("training_sets\\raw\\train_A_Q",i,"_thinned_env_",selectedbins,".RDS")) %>% mutate(pos = 1) %>% select(-id)) %>% as.data.frame %>%
+    saveRDS(paste0("training_sets\\training_coords_A_Q", i, ".RDS"))
   
-  bind_rows(readRDS(paste0("training_sets//raw//pseudoabs_train_B_Q",i,"_thinned_env_",selectedbins,".RDS")) %>% mutate(pos = 0) %>% select(-id),
-            readRDS(paste0("training_sets//raw//train_B_Q",i,"_thinned_env_",selectedbins,".RDS")) %>% mutate(pos = 1) %>% select(-id)) %>% as.data.frame %>%
-    saveRDS(paste0("training_sets//training_coords_B_Q", i, ".RDS"))
+  bind_rows(readRDS(paste0("training_sets\\raw\\pseudoabs_train_B_Q",i,"_thinned_env_",selectedbins,".RDS")) %>% mutate(pos = 0) %>% select(-id),
+            readRDS(paste0("training_sets\\raw\\train_B_Q",i,"_thinned_env_",selectedbins,".RDS")) %>% mutate(pos = 1) %>% select(-id)) %>% as.data.frame %>%
+    saveRDS(paste0("training_sets\\training_coords_B_Q", i, ".RDS"))
 }
 
 # Combine presences and pseudoabsences into test sets
@@ -574,7 +574,7 @@ for (i in 1:4){
     pseudoabs_test_A %>% filter(Q == paste0("Q",i)) %>% rename(pos = pr_ab) %>% select(X, Y, pos) # Add in test pseudoabsences
     ) 
  
- png(paste0("plots//resampling//test//test_A_Q", i, ".png"), width = 10, height = 10, units = "in", res = 600)
+ png(paste0("plots\\resampling\\test\\test_A_Q", i, ".png"), width = 10, height = 10, units = "in", res = 600)
  plot(base_map, col = "gray95", main = paste0("test set A, Q",i," (pos = green, pseudoabs = red)"))
  points(df %>% filter(pos == 1) %>% pull(X),
         df %>% filter(pos == 1) %>% pull(Y), 
@@ -584,14 +584,14 @@ for (i in 1:4){
         pch=16, cex=0.2, col = "firebrick1")
  dev.off()
  
- df %>% saveRDS(paste0("training_sets//test_coords_A_Q", i, ".RDS"))
+ df %>% saveRDS(paste0("training_sets\\test_coords_A_Q", i, ".RDS"))
  
   df <- bind_rows(
     test_B %>% filter(Q == paste0("Q",i)) %>% select(X, Y, pos),
     pseudoabs_test_B %>% filter(Q == paste0("Q",i)) %>% rename(pos = pr_ab) %>% select(X, Y, pos) # Add in test pseudoabsences
     ) 
  
- png(paste0("plots//resampling//test//test_B_Q", i, ".png"), width = 10, height = 10, units = "in", res = 600)
+ png(paste0("plots\\resampling\\test\\test_B_Q", i, ".png"), width = 10, height = 10, units = "in", res = 600)
  plot(base_map, col = "gray95", main = paste0("test set B, Q",i," (pos = green, pseudoabs = red)"))
  points(df %>% filter(pos == 1) %>% pull(X),
         df %>% filter(pos == 1) %>% pull(Y), 
@@ -601,7 +601,7 @@ for (i in 1:4){
         pch=16, cex=0.2, col = "firebrick1")
  dev.off()
  
- df %>% saveRDS(paste0("training_sets//test_coords_B_Q", i, ".RDS"))
+ df %>% saveRDS(paste0("training_sets\\test_coords_B_Q", i, ".RDS"))
 }
 
 # Plot all in single plot
