@@ -38,8 +38,10 @@ module load compilers/gcc/11.2.0
 module load libs/geos/3.8.1/gcc-11.2.0
 module load libs/proj/9.0.1/gcc-11.2.0+sqlite-3.35.4
 module load libs/gdal/3.5.1/gcc-11.2.0+proj-9.0.1
+module load libs/netcdf/4.7.2/gcc-5.5.0+hdf5_serial-1.8.13
 module load apps/cmake/3.16.1
 module load apps/R/4.2.2/gcc-11.2.0+lapack-3.5.0+blas-3.6.0
+
 
 export R_LIBS_USER=~/volatile/R_libs/4.2.2
 
