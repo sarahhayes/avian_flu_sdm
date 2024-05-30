@@ -79,8 +79,9 @@ points_rast <- mask(subst(points_rast %>% as("SpatRaster"), NA, 0),
 
 plot(points_rast)
 
-png(paste0("plots//ebird_records.png"), width = 10, height = 10, units = "in", res = 600)
-plot(app(points_rast, function(x) log(x+1)), main = "log(eBird records)")
+png(paste0("plots//ebird_records.png"), width = 8, height = 8, units = "in", res = 600)
+plot(app(points_rast, function(x) log(x+1)), main = NULL, axes = TRUE, box = TRUE)
+text(x=7650000, y=3000000, "log(eBird sightings)", srt=90, cex=1, xpd=NA, pos=4)
 plot(spdf_world[1], add = TRUE, color = NA)
 dev.off()
 
