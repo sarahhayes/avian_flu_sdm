@@ -28,7 +28,6 @@ if (length(args)<1){
 library(tidyverse)
 library(dbarts)
 library(patchwork)
-library(ggnewscale)
 
 ### Set plot variable order (should match tables)
 
@@ -213,6 +212,11 @@ df <- varimp_summ %>%
          orig_var = gsub("_lag.$", "", orig_var),
          var = gsub("_2022", "", var),
          var = gsub("_lag.$", "", var),
+         Q = case_when(Q == "Q1" ~ "Q1 (Jan - Mar)",
+                       Q == "Q2" ~ "Q2 (Apr - Jun)",
+                       Q == "Q3" ~ "Q3 (Jul - Sep)",
+                       Q == "Q4" ~ "Q4 (Oct - Dec)"
+         )
   )
 
 top_var <- df %>% group_by(var, orig_var) %>% summarise(g_mean = mean(mean), count = n()) # Data frame to order variables by mean varimp or n times selected
@@ -224,21 +228,24 @@ fig_varimp_A <- ggplot(df, aes(x = mean, y = var, xmin = lower, xmax = upper, co
   geom_point(position=position_dodge(0.6)) +
   geom_hline(yintercept=seq(1.5, nrow(df)-0.5, 1), lwd=.5, colour="grey75") +  # add custom gridlines
   geom_hline(yintercept=c(4.5,5.5,10.5), lwd=1, colour="grey75") + # separate bioclimatic, topographic, livestock, host ecological variables - must set manually each recalculation!
-  scale_x_continuous(position="top") +
-  scale_y_discrete(limits=rev) +
+  scale_x_continuous() +
+  scale_y_discrete() +
   scale_colour_manual(name = element_blank(),
                       breaks = c("ns", "0", "1", "2", "3"),
                       values = c("black", pal)) +
-  theme_bw(base_size = 16) +
-  theme(legend.title=element_blank(), 
+  coord_flip() +
+  facet_wrap(~ Q, nrow=4, strip.position="right") +
+  theme_bw(base_size = 14) +
+  theme(axis.text.x=element_text(size = 11, angle = 30, hjust = 1), 
+        legend.title=element_blank(), 
         legend.position=c(-0.325, 0.975),
         legend.key.size=unit(0.8, "lines"),
         legend.box.margin = margin(0, 0, 0, 0),
         legend.box.background = element_rect(colour = "grey50"),
-        axis.title.y=element_blank(),
-        plot.margin = margin(3, 3, 3, 3),
-        panel.grid.major.y = element_blank()) +
-  facet_wrap(~ Q, nrow=1, strip.position="bottom") +
+        axis.title.x=element_blank(),
+        plot.margin = margin(3, 3, 3, 20),
+        panel.grid.major.y = element_blank(),
+        strip.text.y = element_text(size = 10)) +
   xlab("Relative variable importance")
 
 ggsave(paste("plots/",
@@ -248,7 +255,7 @@ ggsave(paste("plots/",
              "_variable_importance_quarterly_A.png", sep=""),
        plot = fig_varimp_A,
        width = 10,
-       height = 4.5)
+       height = 6)
 
 # Calc and bind pd across all quarters for given variables by name. All you need to do is set names of variables of interest (or don't do anything and let it plot all of them) :)
 
@@ -509,7 +516,7 @@ if (ALL_VARS_FOR_PD){
            var = gsub("_2022", "", var),
            var = gsub("_lag.$", "", var),
     ) %>%
-    mutate(var = fct_relevel(var, varlabs)) %>% 
+    mutate(var = fct_relevel(var, ordered_var)) %>% 
     mutate(Q = as.factor(Q),
            lag = as.factor(lag)) %>%
     arrange(var)
@@ -689,6 +696,11 @@ df <- varimp_summ %>%
          orig_var = gsub("_lag.$", "", orig_var),
          var = gsub("_2022", "", var),
          var = gsub("_lag.$", "", var),
+         Q = case_when(Q == "Q1" ~ "Q1 (Jan - Mar)",
+                       Q == "Q2" ~ "Q2 (Apr - Jun)",
+                       Q == "Q3" ~ "Q3 (Jul - Sep)",
+                       Q == "Q4" ~ "Q4 (Oct - Dec)"
+         )
   )
 
 top_var <- df %>% group_by(var, orig_var) %>% summarise(g_mean = mean(mean), count = n()) # Data frame to order variables by mean varimp or n times selected
@@ -699,22 +711,25 @@ fig_varimp_B <- ggplot(df, aes(x = mean, y = var, xmin = lower, xmax = upper, co
   geom_errorbar(width=0, position=position_dodge(0.6)) + 
   geom_point(position=position_dodge(0.6)) +
   geom_hline(yintercept=seq(1.5, nrow(df)-0.5, 1), lwd=.5, colour="grey75") +  # add custom gridlines
-  geom_hline(yintercept=c(9.5,15.5), lwd=1, colour="grey75") + # separate bioclimatic, topographic, livestock, host ecological variables - must set manually each recalculation!
-  scale_x_continuous(position="top") +
-  scale_y_discrete(limits=rev) +
+  geom_hline(yintercept=c(4.5,5.5,10.5), lwd=1, colour="grey75") + # separate bioclimatic, topographic, livestock, host ecological variables - must set manually each recalculation!
+  scale_x_continuous() +
+  scale_y_discrete() +
   scale_colour_manual(name = element_blank(),
                       breaks = c("ns", "0", "1", "2", "3"),
                       values = c("black", pal)) +
-  theme_bw(base_size = 16) +
-  theme(legend.title=element_blank(), 
+  coord_flip() +
+  facet_wrap(~ Q, nrow=4, strip.position="right") +
+  theme_bw(base_size = 14) +
+  theme(axis.text.x=element_text(size = 11, angle = 30, hjust = 1), 
+        legend.title=element_blank(), 
         legend.position=c(-0.325, 0.975),
         legend.key.size=unit(0.8, "lines"),
         legend.box.margin = margin(0, 0, 0, 0),
         legend.box.background = element_rect(colour = "grey50"),
-        axis.title.y=element_blank(),
-        plot.margin = margin(3, 3, 3, 3),
-        panel.grid.major.y = element_blank()) +
-  facet_wrap(~ Q, nrow=1, strip.position="bottom") +
+        axis.title.x=element_blank(),
+        plot.margin = margin(3, 3, 3, 20),
+        panel.grid.major.y = element_blank(),
+        strip.text.y = element_text(size = 10)) +
   xlab("Relative variable importance")
 
 ggsave(paste("plots/",
@@ -724,7 +739,7 @@ ggsave(paste("plots/",
              "_variable_importance_quarterly_B.png", sep=""),
        plot = fig_varimp_B,
        width = 10,
-       height = 5.5)
+       height = 6)
 
 
 # Calc and bind pd across all quarters for given variables by name. All you need to do is set names of variables of interest (or don't do anything and let it plot all of them) :)
@@ -986,7 +1001,7 @@ if (ALL_VARS_FOR_PD){
            var = gsub("_2022", "", var),
            var = gsub("_lag.$", "", var),
     ) %>%
-    mutate(var = fct_relevel(var, varlabs)) %>% 
+    mutate(var = fct_relevel(var, ordered_var)) %>% 
     mutate(Q = as.factor(Q),
            lag = as.factor(lag)) %>%
     arrange(var)
@@ -1037,3 +1052,22 @@ if (ALL_VARS_FOR_PD){
          width = 9,
          height = 7)
 }
+
+
+
+# Combination plots
+
+fig_varimp_combi <- wrap_plots(list(fig_varimp_A, fig_varimp_B), ncol = 2) +
+  plot_annotation(tag_levels = 'A') +
+  plot_layout(guides = "collect", axis_titles = "collect") &
+  theme(legend.position = 'bottom',
+        plot.tag = element_text(size = 14))
+
+ggsave(paste("plots/",
+             INCLUDE_CROSSTERMS,
+             "_",
+             CV_OR_RI,
+             "_variable_importance_quarterly_combi.png", sep=""),
+       plot = fig_varimp_combi,
+       width = 16,
+       height = 8)

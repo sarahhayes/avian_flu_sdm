@@ -81,7 +81,7 @@ bind_rows(df_A, df_B) %>%
   ggplot(aes(x = date, fill = df)) +
   geom_histogram(bins=100)
 
-pos_sites %>% 
+timeplot <- pos_sites %>% 
   mutate(serotype_HN = case_when(
     serotype_HN == "H5N1" ~ "H5N1",
     serotype_HN == "H5N8" ~ "H5N8",
@@ -90,13 +90,26 @@ pos_sites %>%
   )) %>%
   ggplot(aes(x = date, fill = serotype_HN)) +
   geom_histogram(bins = round(as.numeric((max(pos_sites$date)-min(pos_sites$date))/7)), position = "stack") +
-  geom_vline(xintercept = as.Date("2021-09-01")) +
   geom_vline(xintercept = as.Date("2020-01-01")) +
+  geom_vline(xintercept = as.Date("2021-09-01")) +
+  geom_vline(xintercept = as.Date("2023-03-30")) +
+  geom_text(aes(x = as.Date("2013-01-01"), y = 185 ,label = "A. Train", hjust = 0.5)) +
+  geom_text(aes(x = as.Date("2020-01-01")+(as.Date("2021-09-01")-as.Date("2020-01-01"))/2, y = 185 ,label = "A. Test", hjust = 0.5)) +
+  geom_text(aes(x = as.Date("2021-09-01")+(as.Date("2023-03-30")-as.Date("2021-09-01"))/2, y = 185 ,label = "B. Train", hjust = 0.5)) +
+  geom_text(aes(x = as.Date("2024-03-01"), y = 185 ,label = "B. Test", hjust = 0.5)) +
   scale_x_date(date_labels = "%Y", date_breaks = "2 year") +
   ylab("Weekly cases") +
   xlab("Date") +
   labs(fill = "subtype") +
-  theme_bw()
+  theme_bw() +
+  theme(legend.position = c(0.05,0.75),
+        legend.title=element_blank())
+
+ggsave(paste("plots/timeplot.png"),
+       plot = timeplot,
+       width = 12,
+       height = 3)
+
 
 bind_rows(df_A, df_B)  %>% 
   ggplot(aes(x = date, fill = df)) +
