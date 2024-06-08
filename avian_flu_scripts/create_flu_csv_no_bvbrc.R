@@ -336,7 +336,7 @@ ggplot(dates, aes(x=weekdate)) + geom_histogram(bins = nrow(week_calendar), col 
         panel.grid.minor = element_line(size = 0.5, linetype = 'dashed',
                                         colour = "grey90"))
 #ggsave("plots/hist_by_week_hpai_only.png")
-ggsave("plots/hist_by_week_hpai_only_april24.png")
+#ggsave("plots/hist_by_week_hpai_only_april24.png")
 
 # could also make a dataframe of the counts of the number in each week
 count_dates <- dates %>% 
@@ -360,11 +360,11 @@ ggplot(data = weekly_counts, aes(x = weekdate, y = n)) +
                                         colour = "grey"),
         panel.grid.minor = element_line(size = 0.5, linetype = 'dashed',
                                         colour = "grey90"))
-ggsave("plots/lineplot_by_week_hpai_only.png")
+#ggsave("plots/lineplot_by_week_hpai_only.png")
 
 # write the results so can compare to domestic cases
 # write.csv(weekly_counts, "data/flu_data/prepped_data/weekly_counts_hpai_wild_europe.csv", row.names = F )
-write.csv(weekly_counts, "data/flu_data/prepped_data/weekly_counts_hpai_wild_europe_april2024.csv", row.names = F)
+# write.csv(weekly_counts, "data/flu_data/prepped_data/weekly_counts_hpai_wild_europe_april2024.csv", row.names = F)
 
 # Now to plot the time series by serotype 
 serotype_data <- as.data.frame(table(hpai$serotype_HN))
@@ -402,7 +402,7 @@ ggplot(subtype_plot_data, aes(x = week_of_study, fill = serotype_HN)) +
                                         colour = "white")) +
   scale_x_continuous(breaks = weekbreaks, labels = yearlabs)
 # ggsave("plots/subtypes/serotype_by_week_hpai_only.png")
-ggsave("plots/subtypes/serotype_by_week_hpai_only_april2024.png")
+# ggsave("plots/subtypes/serotype_by_week_hpai_only_april2024.png")
 
 
 ## If want to repeat by month, will need to do another table to join with 
@@ -519,7 +519,7 @@ q4plot
 
 ggpubr::ggarrange(q1plot, q2plot, q3plot, q4plot, ncol = 2, nrow = 2)
 #ggsave("plots/counts_by_month_per_quart_coloured_by_year.png")
-ggsave("plots/counts_by_month_per_quart_coloured_by_year_april_2024.png")
+#ggsave("plots/counts_by_month_per_quart_coloured_by_year_april_2024.png")
 
 
 dev.off()
@@ -548,22 +548,28 @@ plot(ai_pos_birds[which(ai_pos_birds$serotype_HN == "H5N8" & hpai$year >= "2020"
 #dev.off()
 
 
-############
+###########
 
-## Look at the data set from 2020 onwards and see how may entries for pre and post-March 2023
+## Split into datasets A and B
+## first add a column for a simplified version of serotype
 
-hpai_2020_a <- hpai %>% dplyr::filter(year >=2020 & observation.date < "2023-04-01")
-hpai_2020_b <- hpai %>% dplyr::filter(observation.date >="2023-04-01")
+hpai$serotype_simple <- hpai$serotype_HN 
+hpai[which(!hpai$serotype_simple %in% c("H5N1", "H5N6", "H5N8")), "serotype_simple"] <- "Other" 
+table(hpai$serotype_simple)
 
+hpai_a <- hpai %>% dplyr::filter(year <=2019 & observation.date < "2019-09-01")
+hpai_b <- hpai %>% dplyr::filter(observation.date >="2019-09-01")
 
-week_counts_2020_a <- weekly_counts %>% dplyr::filter(weekdate > "2020-01-01" & weekdate < "2023-04-03")
-week_counts_2020_b <- weekly_counts %>% dplyr::filter(weekdate >= "2023-04-03")
+weekly_counts$month <- lubridate::month(weekly_counts$weekdate)
+
+week_counts_a <- weekly_counts %>% dplyr::filter(weekdate < "2019-09-01")
+week_counts_b <- weekly_counts %>% dplyr::filter(weekdate >= "2019-09-01")
 
 
 dev.off()
 
 ## plot of the first part of the data
-ggplot(data = week_counts_2020_a, aes(x = weekdate, y = n)) +
+ggplot(data = week_counts_a, aes(x = weekdate, y = n)) +
   geom_line(lwd = 0.9, col = "purple")  + 
   labs(y = "Number of weekly cases", x = "Year", size = 18) +
   theme(axis.text.x = element_text(angle=90, margin = margin(t = 0.1, r = 0.2, b = 0.2, l = 0.3, unit = "cm"), 
@@ -594,3 +600,58 @@ ggplot(data = week_counts_2020_b, aes(x = weekdate, y = n)) +
         panel.grid.minor = element_line(size = 0.5, linetype = 'dashed',
                                         colour = "grey90"))
 ggsave("plots/counts_by_week_0423_0424.png")
+
+
+## produce maps of the different data sets 
+par(mar = c(0,0,0,0))
+par(mfrow = c(1,2))
+
+euro_map_st <- st_read("output/euro_map.shp")
+
+points_a <- st_as_sf(hpai_a, coords = c("X", "Y"), crs = proj_crs)
+points_b <- st_as_sf(hpai_b, coords = c("X", "Y"), crs = proj_crs)
+
+map_a_data <- 
+  ggplot() +
+  geom_sf(data = euro_map_st, fill = "grey", color = "black", alpha = 0.4)  +
+ # geom_sf(data = points_a, color = "#00BFC4", size = 0.2) +
+  geom_sf(data = points_a, aes(color = serotype_simple), size = 0.2)+#, show.legend = F) +
+  theme_minimal() +
+  guides(color = guide_legend(override.aes = list(size = 4))) +
+  labs(title = "A",
+       x = "Longitude",
+       y = "Latitude",
+       color = "Serotype")
+
+
+map_b_data <- 
+  ggplot() +
+  geom_sf(data = euro_map_st, fill = "grey", color = "black", alpha = 0.4)  +
+  geom_sf(data = points_b, aes(color = serotype_simple), size = 0.2)+#, show.legend = F) +
+  theme_minimal() +
+  guides(color = guide_legend(override.aes = list(size = 4))) +
+  labs(title = "B",
+       x = "Longitude",
+       y = "Latitude",
+       color = "Serotype")
+
+#map_b_data
+
+ggpubr::ggarrange(map_a_data, map_b_data, ncol = 2, nrow = 1, common.legend = TRUE, legend="bottom")
+ggsave("plots/maps_ab.png")
+dev.off()
+
+
+# produce maps that are by quarter for each period. 
+
+hpai_a_q1 <- hpai_a %>% dplyr::filter(month %in% c(1,2,3))
+week_counts_a_q1 <- week_counts_a %>% dplyr::filter(month %in% c(1,2,3))
+points_a_q1 <- st_as_sf(hpai_a_q1, coords = c("X", "Y"), crs = proj_crs)
+
+ggplot() +
+  geom_sf(data = euro_map_st, fill = "grey", color = "black", alpha = 0.4)  +
+  geom_sf(data = points_a_q1, aes(color = serotype_simple), size = 0.5, show.legend = F) +
+  theme_minimal() +
+  labs(title = "A-Q1",
+       x = "Longitude",
+       y = "Latitude")
