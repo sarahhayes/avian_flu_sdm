@@ -210,6 +210,8 @@ spplot(stack(preds[[1]][[2]],
 grid::grid.text("Probability", x=grid::unit(0.98, "npc"), y=grid::unit(0.50, "npc"), rot=-90)
 dev.off()
 
+preds_A <- preds
+
 #### Now do dataset B ####
 
 for (idx in 1:4){
@@ -391,6 +393,44 @@ spplot(stack(preds[[1]][[2]],
        cex = 0.8)
 grid::grid.text("Probability", x=grid::unit(0.98, "npc"), y=grid::unit(0.50, "npc"), rot=-90)
 dev.off()
+
+preds_B <- preds
+
+proj_A <- spplot(stack(preds_A[[1]][[2]],
+                       preds_A[[1]][[1]],
+                       preds_A[[1]][[3]],
+                       preds_A[[2]][[2]], 
+                       preds_A[[2]][[1]], 
+                       preds_A[[2]][[3]], 
+                       preds_A[[3]][[2]], 
+                       preds_A[[3]][[1]], 
+                       preds_A[[3]][[3]], 
+                       preds_A[[4]][[2]],
+                       preds_A[[4]][[1]],
+                       preds_A[[4]][[3]]),
+                 col.regions = viridis_pal()(100),
+                 at = seq(0,1,0.01),
+                 cex = 0.8)
+
+proj_B <- spplot(stack(preds_B[[1]][[2]],
+                       preds_B[[1]][[1]],
+                       preds_B[[1]][[3]],
+                       preds_B[[2]][[2]], 
+                       preds_B[[2]][[1]], 
+                       preds_B[[2]][[3]], 
+                       preds_B[[3]][[2]], 
+                       preds_B[[3]][[1]], 
+                       preds_B[[3]][[3]], 
+                       preds_B[[4]][[2]],
+                       preds_B[[4]][[1]],
+                       preds_B[[4]][[3]]),
+                 col.regions = viridis_pal()(100),
+                 at = seq(0,1,0.01),
+                 cex = 0.8)
+
+ggarrange(proj_A, proj_B, 
+          labels = c("A", "B"),
+          ncol = 2, nrow = 1)
 
 ################################################################################
 # Plot case data
