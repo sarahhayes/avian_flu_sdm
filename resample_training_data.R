@@ -10,6 +10,7 @@ library(flexsdm)
 library(ibis.iSDM)
 library(terra)
 library(sf)
+library(patchwork)
 
 # Set ratio of pseudoabsences to positives (x:1)
 pseud_ratio <- 1
@@ -20,6 +21,7 @@ pseud_ratio <- 1
 
 # Read in extent of Europe mapped
 base_map <- terra::rast("output/euro_rast_10k.tif")
+euro_map_st <- st_read("output/euro_map.shp") # country borders
 
 # Read in weighting layers for pseudoabsence sampling
 # weight_layer <- terra::rast("variable_manipulation/variable_outputs/human_density.tif")
@@ -109,6 +111,52 @@ ggsave(paste("plots/timeplot.png"),
        plot = timeplot,
        width = 12,
        height = 3)
+
+points_a <- st_as_sf(df_A, coords = c("X", "Y"), crs = crs(base_map)) %>% 
+  mutate(serotype_HN = case_when(
+    serotype_HN == "H5N1" ~ "H5N1",
+    serotype_HN == "H5N8" ~ "H5N8",
+    serotype_HN == "H5N6" ~ "H5N6",
+    TRUE ~ "other"
+  ))
+points_b <- st_as_sf(df_B, coords = c("X", "Y"), crs = crs(base_map)) %>% 
+  mutate(serotype_HN = case_when(
+    serotype_HN == "H5N1" ~ "H5N1",
+    serotype_HN == "H5N8" ~ "H5N8",
+    serotype_HN == "H5N6" ~ "H5N6",
+    TRUE ~ "other"
+  ))
+
+map_a_data <- 
+  ggplot() +
+  geom_sf(data = euro_map_st, fill = "grey", color = "black", alpha = 0.4)  +
+  # geom_sf(data = points_a, color = "#00BFC4", size = 0.2) +
+  geom_sf(data = points_a, aes(color = serotype_HN), size = 0.2, alpha = 0.6, show.legend = F) +
+  theme_minimal() +
+  theme(legend.position="none") +
+  labs(x = "Longitude",
+       y = "Latitude",
+       color = "Serotype")
+
+map_b_data <- 
+  ggplot() +
+  geom_sf(data = euro_map_st, fill = "grey", color = "black", alpha = 0.4)  +
+  geom_sf(data = points_b, aes(color = serotype_HN), size = 0.2, alpha = 0.6, show.legend = F) +
+  theme_minimal() +
+  theme(legend.position="none") +
+  labs(x = "Longitude",
+       y = "Latitude",
+       color = "Serotype")
+
+fig_data_combi <- (map_a_data|map_b_data)/(timeplot) +
+  plot_annotation(tag_levels = 'A') +
+  plot_layout(heights = c(4,1)) &
+  theme(legend.position = 'bottom')
+
+ggsave(paste("plots/data_fig.png"),
+       plot = fig_data_combi,
+       width = 10,
+       height = 8.5)
 
 
 bind_rows(df_A, df_B)  %>% 

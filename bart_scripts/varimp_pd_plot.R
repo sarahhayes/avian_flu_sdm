@@ -227,7 +227,7 @@ fig_varimp_A <- ggplot(df, aes(x = mean, y = var, xmin = lower, xmax = upper, co
   geom_errorbar(width=0, position=position_dodge(0.6)) + 
   geom_point(position=position_dodge(0.6)) +
   geom_hline(yintercept=seq(1.5, nrow(df)-0.5, 1), lwd=.5, colour="grey75") +  # add custom gridlines
-  geom_hline(yintercept=c(4.5,5.5,10.5), lwd=1, colour="grey75") + # separate bioclimatic, topographic, livestock, host ecological variables - must set manually each recalculation!
+  geom_hline(yintercept=c(6.5,11.5,12.5), lwd=1.5, colour="grey75") + # separate bioclimatic, topographic, livestock, host ecological variables - must set manually each recalculation!
   scale_x_continuous() +
   scale_y_discrete() +
   scale_colour_manual(name = element_blank(),
@@ -711,7 +711,7 @@ fig_varimp_B <- ggplot(df, aes(x = mean, y = var, xmin = lower, xmax = upper, co
   geom_errorbar(width=0, position=position_dodge(0.6)) + 
   geom_point(position=position_dodge(0.6)) +
   geom_hline(yintercept=seq(1.5, nrow(df)-0.5, 1), lwd=.5, colour="grey75") +  # add custom gridlines
-  geom_hline(yintercept=c(4.5,5.5,10.5), lwd=1, colour="grey75") + # separate bioclimatic, topographic, livestock, host ecological variables - must set manually each recalculation!
+  geom_hline(yintercept=c(7.5,13.5), lwd=1.5, colour="grey75") + # separate bioclimatic, topographic, livestock, host ecological variables - must set manually each recalculation!
   scale_x_continuous() +
   scale_y_discrete() +
   scale_colour_manual(name = element_blank(),
