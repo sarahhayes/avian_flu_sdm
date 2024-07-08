@@ -79,6 +79,44 @@ get_sens_and_spec <- function(sdm, xtest, ytest, ri, cutoff){
                   "auc"=auc))
 }
 
+get_sens_and_spec_for_single_model <- function(perf, pred){
+  tss_list <- (perf@x.values[[1]] + perf@y.values[[1]] - 1)
+  tss_df <- data.frame(alpha=perf@alpha.values[[1]],tss=tss_list)
+  # cutoff <- min(tss_df$alpha[which(tss_df$tss==max(tss_df$tss))])
+  sens <- perf@x.values[[1]][which.min(abs(perf@alpha.values[[1]]-cutoff))]
+  spec <- perf@y.values[[1]][which.min(abs(perf@alpha.values[[1]]-cutoff))]
+  tss <- tss_df[which.min(abs(tss_df$alpha-cutoff)),'tss']
+  auc <- performance(pred,"auc")@y.values[[1]]
+  return(pairlist("sens"=sens,
+                  "spec"=spec,
+                  "tss"=tss,
+                  "auc"=auc))
+}
+
+get_sens_and_spec_ci <- function(sdm, xtest, ytest, ri, cutoff){
+  predmat <- xtest[which(complete.cases(xtest)), ] %>%
+    stats::predict(object=sdm, type = "bart", group.by=ri) %>%
+    pnorm()
+  pred_by_model <- sapply(1:nrow(predmat),
+                          FUN=function(i){predmat[i,] %>%
+                              prediction(labels = ytest[which(complete.cases(xtest))])})
+  perf_by_model <-  sapply(pred_by_model, FUN=function(pred){performance(pred, measure = "sens", x.measure = "spec")})
+  metrics_by_model <- lapply(1:length(pred_by_model),
+                             FUN=function(i){
+                               get_sens_and_spec_for_single_model(perf_by_model[[i]], pred_by_model[[i]])})
+  sens_by_model <- sapply(1:length(metrics_by_model),
+                         FUN=function(i){metrics_by_model[[i]]$sens})
+  spec_by_model <- sapply(1:length(metrics_by_model),
+                         FUN=function(i){metrics_by_model[[i]]$spec})
+  tss_by_model <- sapply(1:length(metrics_by_model),
+                         FUN=function(i){metrics_by_model[[i]]$tss})
+  auc_by_model <- sapply(1:length(metrics_by_model),
+                         FUN=function(i){metrics_by_model[[i]]$auc})
+  return(pairlist("sens"=quantile(sens_by_model, c(.025, .975), names=FALSE),
+                  "spec"=quantile(spec_by_model, c(.025, .975), names=FALSE),
+                  "tss"=quantile(tss_by_model, c(.025, .975), names=FALSE),
+                  "auc"=quantile(auc_by_model, c(.025, .975), names=FALSE)))
+}
 
 #### Bring in year-round covariates ####
 
@@ -99,18 +137,28 @@ sdm_A_Q1 <- sdm
 cutoff <- get_threshold(sdm)
 if (CV_OR_RI=="ri"){
   metrics_A_Q1 <- get_sens_and_spec(sdm, xtest, ytest, countrytest, cutoff)
+  metric_cis_A_Q1 <- get_sens_and_spec_ci(sdm, xtest, ytest, countrytest, cutoff)
 }else{
   metrics_A_Q1 <- get_sens_and_spec(sdm, xtest, ytest, NULL, cutoff)
+  metric_cis_A_Q1 <- get_sens_and_spec_ci(sdm, xtest, ytest, NULL, cutoff)
 }
-cat("Dataset A Q1, test metrics: sens =",
+cat("Dataset A Q1, test metrics:\n sens =",
     metrics_A_Q1$sens,
-    ", spec =",
+    " (",
+    metric_cis_A_Q1$sens,
+    "),\n spec =",
     metrics_A_Q1$spec,
-    ", AUC =",
-    metrics_A_Q1$auc, "\n")
+    " (",
+    metric_cis_A_Q1$spec,
+    "),\n AUC =",
+    metrics_A_Q1$auc,
+    " (",
+    metric_cis_A_Q1$auc,
+    ")\n")
 
 if (SAVE_OUTPUTS){
   save(metrics_A_Q1,
+       metric_cis_A_Q1,
        file = paste(PATH_TO_OUTPUTS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_metrics_A_Q1.rds", sep = ""))
 }
 
@@ -141,18 +189,28 @@ sdm_A_Q2 <- sdm
 cutoff <- get_threshold(sdm)
 if (CV_OR_RI=="ri"){
   metrics_A_Q2 <- get_sens_and_spec(sdm, xtest, ytest, countrytest, cutoff)
+  metric_cis_A_Q2 <- get_sens_and_spec_ci(sdm, xtest, ytest, countrytest, cutoff)
 }else{
   metrics_A_Q2 <- get_sens_and_spec(sdm, xtest, ytest, NULL, cutoff)
+  metric_cis_A_Q2 <- get_sens_and_spec_ci(sdm, xtest, ytest, NULL, cutoff)
 }
-cat("Dataset A Q2, test metrics: sens =",
+cat("Dataset A Q2, test metrics:\n sens =",
     metrics_A_Q2$sens,
-    ", spec =",
+    " (",
+    metric_cis_A_Q2$sens,
+    "),\n spec =",
     metrics_A_Q2$spec,
-    ", AUC =",
-    metrics_A_Q2$auc, "\n")
+    " (",
+    metric_cis_A_Q2$spec,
+    "),\n AUC =",
+    metrics_A_Q2$auc,
+    " (",
+    metric_cis_A_Q2$auc,
+    ")\n")
 
 if (SAVE_OUTPUTS){
   save(metrics_A_Q2,
+       metric_cis_A_Q2,
        file = paste(PATH_TO_OUTPUTS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_metrics_A_Q2.rds", sep = ""))
 }
 
@@ -183,18 +241,28 @@ sdm_A_Q3 <- sdm
 cutoff <- get_threshold(sdm)
 if (CV_OR_RI=="ri"){
   metrics_A_Q3 <- get_sens_and_spec(sdm, xtest, ytest, countrytest, cutoff)
+  metric_cis_A_Q3 <- get_sens_and_spec_ci(sdm, xtest, ytest, countrytest, cutoff)
 }else{
   metrics_A_Q3 <- get_sens_and_spec(sdm, xtest, ytest, NULL, cutoff)
+  metric_cis_A_Q3 <- get_sens_and_spec_ci(sdm, xtest, ytest, NULL, cutoff)
 }
-cat("Dataset A Q3, test metrics: sens =",
+cat("Dataset A Q3, test metrics:\n sens =",
     metrics_A_Q3$sens,
-    ", spec =",
+    " (",
+    metric_cis_A_Q3$sens,
+    "),\n spec =",
     metrics_A_Q3$spec,
-    ", AUC =",
-    metrics_A_Q3$auc, "\n")
+    " (",
+    metric_cis_A_Q3$spec,
+    "),\n AUC =",
+    metrics_A_Q3$auc,
+    " (",
+    metric_cis_A_Q3$auc,
+    ")\n")
 
 if (SAVE_OUTPUTS){
   save(metrics_A_Q3,
+       metric_cis_A_Q3,
        file = paste(PATH_TO_OUTPUTS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_metrics_A_Q3.rds", sep = ""))
 }
 
@@ -225,18 +293,28 @@ sdm_A_Q4 <- sdm
 cutoff <- get_threshold(sdm)
 if (CV_OR_RI=="ri"){
   metrics_A_Q4 <- get_sens_and_spec(sdm, xtest, ytest, countrytest, cutoff)
+  metric_cis_A_Q4 <- get_sens_and_spec_ci(sdm, xtest, ytest, countrytest, cutoff)
 }else{
   metrics_A_Q4 <- get_sens_and_spec(sdm, xtest, ytest, NULL, cutoff)
+  metric_cis_A_Q4 <- get_sens_and_spec_ci(sdm, xtest, ytest, NULL, cutoff)
 }
-cat("Dataset A Q4, test metrics: sens =",
+cat("Dataset A Q4, test metrics:\n sens =",
     metrics_A_Q4$sens,
-    ", spec =",
+    " (",
+    metric_cis_A_Q4$sens,
+    "),\n spec =",
     metrics_A_Q4$spec,
-    ", AUC =",
-    metrics_A_Q4$auc, "\n")
+    " (",
+    metric_cis_A_Q4$spec,
+    "),\n AUC =",
+    metrics_A_Q4$auc,
+    " (",
+    metric_cis_A_Q4$auc,
+    ")\n")
 
 if (SAVE_OUTPUTS){
   save(metrics_A_Q4,
+       metric_cis_A_Q4,
        file = paste(PATH_TO_OUTPUTS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_metrics_A_Q4.rds", sep = ""))
 }
 
@@ -268,18 +346,28 @@ if (B_TEST_DATA_AVAILABLE){
   cutoff <- get_threshold(sdm)
   if (CV_OR_RI=="ri"){
     metrics_B_Q1 <- get_sens_and_spec(sdm, xtest, ytest, countrytest, cutoff)
+    metric_cis_B_Q1 <- get_sens_and_spec_ci(sdm, xtest, ytest, countrytest, cutoff)
   }else{
     metrics_B_Q1 <- get_sens_and_spec(sdm, xtest, ytest, NULL, cutoff)
+    metric_cis_B_Q1 <- get_sens_and_spec_ci(sdm, xtest, ytest, NULL, cutoff)
   }
-  cat("Dataset B Q1, test metrics: sens =",
+  cat("Dataset B Q1, test metrics:\n sens =",
       metrics_B_Q1$sens,
-      ", spec =",
+      " (",
+      metric_cis_B_Q1$sens,
+      "),\n spec =",
       metrics_B_Q1$spec,
-      ", AUC =",
-      metrics_B_Q1$auc, "\n")
+      " (",
+      metric_cis_B_Q1$spec,
+      "),\n AUC =",
+      metrics_B_Q1$auc,
+      " (",
+      metric_cis_B_Q1$auc,
+      ")\n")
   
   if (SAVE_OUTPUTS){
     save(metrics_B_Q1,
+         metric_cis_B_Q1,
          file = paste(PATH_TO_OUTPUTS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_metrics_B_Q1.rds", sep = ""))
   }
 }
@@ -314,18 +402,28 @@ if (B_TEST_DATA_AVAILABLE){
   cutoff <- get_threshold(sdm)
   if (CV_OR_RI=="ri"){
     metrics_B_Q2 <- get_sens_and_spec(sdm, xtest, ytest, countrytest, cutoff)
+    metric_cis_B_Q2 <- get_sens_and_spec_ci(sdm, xtest, ytest, countrytest, cutoff)
   }else{
     metrics_B_Q2 <- get_sens_and_spec(sdm, xtest, ytest, NULL, cutoff)
+    metric_cis_B_Q2 <- get_sens_and_spec_ci(sdm, xtest, ytest, NULL, cutoff)
   }
-  cat("Dataset B Q2, test metrics: sens =",
+  cat("Dataset B Q2, test metrics:\n sens =",
       metrics_B_Q2$sens,
-      ", spec =",
+      " (",
+      metric_cis_B_Q2$sens,
+      "),\n spec =",
       metrics_B_Q2$spec,
-      ", AUC =",
-      metrics_B_Q2$auc, "\n")
+      " (",
+      metric_cis_B_Q2$spec,
+      "),\n AUC =",
+      metrics_B_Q2$auc,
+      " (",
+      metric_cis_B_Q2$auc,
+      ")\n")
   
   if (SAVE_OUTPUTS){
     save(metrics_B_Q2,
+         metric_cis_B_Q2,
          file = paste(PATH_TO_OUTPUTS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_metrics_B_Q2.rds", sep = ""))
   }
 }
@@ -361,18 +459,28 @@ if (B_TEST_DATA_AVAILABLE){
   cutoff <- get_threshold(sdm)
   if (CV_OR_RI=="ri"){
     metrics_B_Q3 <- get_sens_and_spec(sdm, xtest, ytest, countrytest, cutoff)
+    metric_cis_B_Q3 <- get_sens_and_spec_ci(sdm, xtest, ytest, countrytest, cutoff)
   }else{
     metrics_B_Q3 <- get_sens_and_spec(sdm, xtest, ytest, NULL, cutoff)
+    metric_cis_B_Q3 <- get_sens_and_spec_ci(sdm, xtest, ytest, NULL, cutoff)
   }
-  cat("Dataset B Q3, test metrics: sens =",
+  cat("Dataset B Q3, test metrics:\n sens =",
       metrics_B_Q3$sens,
-      ", spec =",
+      " (",
+      metric_cis_B_Q3$sens,
+      "),\n spec =",
       metrics_B_Q3$spec,
-      ", AUC =",
-      metrics_B_Q3$auc, "\n")
+      " (",
+      metric_cis_B_Q3$spec,
+      "),\n AUC =",
+      metrics_B_Q3$auc,
+      " (",
+      metric_cis_B_Q3$auc,
+      ")\n")
   
   if (SAVE_OUTPUTS){
     save(metrics_B_Q3,
+         metric_cis_B_Q3,
          file = paste(PATH_TO_OUTPUTS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_metrics_B_Q3.rds", sep = ""))
   }
 }
@@ -408,18 +516,28 @@ if (B_TEST_DATA_AVAILABLE){
   cutoff <- get_threshold(sdm)
   if (CV_OR_RI=="ri"){
     metrics_B_Q4 <- get_sens_and_spec(sdm, xtest, ytest, countrytest, cutoff)
+    metric_cis_B_Q4 <- get_sens_and_spec_ci(sdm, xtest, ytest, countrytest, cutoff)
   }else{
     metrics_B_Q4 <- get_sens_and_spec(sdm, xtest, ytest, NULL, cutoff)
+    metric_cis_B_Q4 <- get_sens_and_spec_ci(sdm, xtest, ytest, NULL, cutoff)
   }
-  cat("Dataset B Q4, test metrics: sens =",
+  cat("Dataset B Q4, test metrics:\n sens =",
       metrics_B_Q4$sens,
-      ", spec =",
+      " (",
+      metric_cis_B_Q4$sens,
+      "),\n spec =",
       metrics_B_Q4$spec,
-      ", AUC =",
-      metrics_B_Q4$auc, "\n")
+      " (",
+      metric_cis_B_Q4$spec,
+      "),\n AUC =",
+      metrics_B_Q4$auc,
+      " (",
+      metric_cis_B_Q4$auc,
+      ")\n")
   
   if (SAVE_OUTPUTS){
     save(metrics_B_Q4,
+         metric_cis_B_Q4,
          file = paste(PATH_TO_OUTPUTS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_metrics_B_Q4.rds", sep = ""))
   }
 }
