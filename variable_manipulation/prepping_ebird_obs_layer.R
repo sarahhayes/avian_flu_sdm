@@ -80,7 +80,7 @@ points_rast <- mask(subst(points_rast %>% as("SpatRaster"), NA, 0),
 plot(points_rast)
 
 png(paste0("plots//ebird_records.png"), width = 8, height = 8, units = "in", res = 600)
-plot(app(points_rast, function(x) log(x+1)), main = NULL, axes = TRUE, box = TRUE)
+plot(app(points_rast, function(x) log(x+1)), axes = TRUE, box = TRUE, col = map.pal("plasma", 100))
 text(x=7650000, y=3000000, "log(eBird sightings)", srt=90, cex=1, xpd=NA, pos=4)
 plot(spdf_world[1], add = TRUE, color = NA)
 dev.off()

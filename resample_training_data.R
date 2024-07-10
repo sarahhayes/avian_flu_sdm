@@ -100,7 +100,7 @@ timeplot <- pos_sites %>%
   geom_text(aes(x = as.Date("2021-09-01")+(as.Date("2023-03-30")-as.Date("2021-09-01"))/2, y = 185 ,label = "B. Train", hjust = 0.5)) +
   geom_text(aes(x = as.Date("2024-03-01"), y = 185 ,label = "B. Test", hjust = 0.5)) +
   scale_x_date(date_labels = "%Y", date_breaks = "2 year") +
-  ylab("Weekly cases") +
+  ylab("Weekly reports") +
   xlab("Date") +
   labs(fill = "subtype") +
   theme_bw() +

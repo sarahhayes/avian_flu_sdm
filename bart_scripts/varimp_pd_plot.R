@@ -29,59 +29,165 @@ library(tidyverse)
 library(dbarts)
 library(patchwork)
 
-### Set plot variable order (should match tables)
+### Set plot variable order (should match tables) and names
 
-ordered_var <- c(
-  "mean relative humidity",
-  "temperature range",
-  "mean temperature",
-  "temperature variation",
-  "max temperature",
-  "min temperature",
-  "mean isotherm",
-  "frequency of days w/ isotherm <1m",
-  "total rainfall",
-  "min altitude",
-  "max altitude",
-  "modal altitude",
-  "altitude range",
-  "vegetation index",
-  "water bodies",
-  "evergreen needleleaf forests",
-  "evergreen broadleaf forests",
-  "deciduous needleleaf forests",
-  "deciduous broadleaf forests",
-  "mixed forests",
-  "closed shrublands",
-  "open_shrublands",
-  "woody savannas",
-  "savannas",
-  "grasslands",
-  "permanent wetlands",
-  "croplands",
-  "urban and built-up lands",
-  "cropland/natural vegetation mosaics",
-  "non-vegetated lands",
-  "unclassified land",
-  "dist. to coast",
-  "dist. to inland water",
-  "chicken density",
-  "dom. duck density", 
-  "abundance: anatinae", 
-  "abundance: anserinae", 
-  "abundance: ardeidae",
-  "combined abundance: arenaria/calidris",
-  "abundance: aythyini",
-  "abundance: laridae", 
-  "abundance: surface-feeders",
-  "abundance: sub-surface feeders",
-  "abundance: plant diet",
-  "abundance: scavengers",
-  "abundance: endotherm diet",
-  "abundance: congregative",
-  "abundance: migratory",
-  "species richness",
-  "avg. phylo dist to host"
+plot_labels <- data.frame(
+  var = c(
+    "mean_relative_humidity",
+    "mean_diff",
+    "mean_temp",
+    "variation_in_quarterly_mean_temp",
+    "mean_tmax",
+    "mean_tmin",
+    "isotherm_mean",
+    "isotherm_midday_days_below1",
+    "mean_prec",
+    "elevation_min",
+    "elevation_max",
+    "elevation_mode",
+    "elevation_diff",
+    "ndvi",
+    "Water_bodies",
+    "Evergreen_Needleleaf_Forests",
+    "Evergreen_Broadleaf_Forests", 
+    "Deciduous_Needleleaf_Forests",
+    "Deciduous_Broadleaf_Forests",
+    "Mixed_Forests",
+    "Closed_Shrublands",
+    "Open_Shrublands",
+    "Woody_Savannas",
+    "Savannas",
+    "Grasslands",
+    "Permanent_Wetlands",
+    "Croplands",
+    "Urban_and_Built-up_Lands",
+    "Cropland/Natural_Vegetation_Mosaics",
+    "Non-Vegetated_Lands",
+    "Unclassified",
+    "dist_to_coast_km",
+    "dist_to_water",
+    "chicken_density_2010",
+    "duck_density_2010",
+    "anatinae",
+    "anserinae",
+    "ardeidae",
+    "arenaria_calidris",
+    "aythyini",
+    "laridae",
+    "around_surf",
+    "below_surf",
+    "plant",
+    "scav",
+    "vend",
+    "cong",
+    "migr",
+    "species_richness",
+    "host_dist"
+  ),
+  label = c(
+    "mean relative humidity",
+    "monthly temp. range",
+    "mean temp.",
+    "quarterly temp. variation",
+    "max. temp.",
+    "min. temp.",
+    "mean 0° isotherm",
+    "n days 0° isotherm <1m",
+    "total precipitation",
+    "min. elevation",
+    "max. elevation",
+    "modal elevation",
+    "elevation diff.",
+    "vegetation index",
+    "water body",
+    "evergreen needleleaf forest",
+    "evergreen broadleaf forest",
+    "deciduous needleleaf forest",
+    "deciduous broadleaf forest",
+    "mixed forest",
+    "closed shrubland",
+    "open shrubland",
+    "woody savanna",
+    "savanna",
+    "grassland",
+    "permanent wetland",
+    "cropland",
+    "urban and built-up land",
+    "cropland/natural vegetation mosaic",
+    "non-vegetated land",
+    "unclassified land",
+    "dist. to coast",
+    "dist. to inland water",
+    "chicken density",
+    "dom. duck density", 
+    "Anatinae", 
+    "Anserinae", 
+    "Ardeidae",
+    "Arenaria/Calidris",
+    "Aythyini",
+    "Laridae", 
+    "water surface feeding",
+    "below water surface feeding",
+    "plant diet",
+    "scavenging diet",
+    "endotherm vert. diet",
+    "congregative birds",
+    "migratory birds",
+    "species richness",
+    "below phylo threshold"
+  ),
+  label_units = c(
+    "mean relative humidity (%)",
+    "monthly temp. range (°C)",
+    "mean temp. (°C)",
+    "quarterly temp. variation (°C)",
+    "max. temp. (°C)",
+    "min. temp. (°C)",
+    "mean 0° isotherm (m)",
+    "n days 0° isotherm <1m",
+    "total precipitation (mm)",
+    "min. elevation (m)",
+    "max. elevation (m)",
+    "modal elevation (m)",
+    "elevation diff. (m)",
+    "vegetation index",
+    "water body",
+    "evergreen needleleaf forest",
+    "evergreen broadleaf forest",
+    "deciduous needleleaf forest",
+    "deciduous broadleaf forest",
+    "mixed forest",
+    "closed shrubland",
+    "open shrubland",
+    "woody savanna",
+    "savanna",
+    "grassland",
+    "permanent wetland",
+    "cropland",
+    "urban and built-up land",
+    "cropland/natural vegetation mosaic",
+    "non-vegetated land",
+    "unclassified land",
+    "dist. to coast (km)",
+    "dist. to inland water (m)",
+    "chicken density (headcount)",
+    "dom. duck density (headcount)", 
+    "Anatinae (log(abundance index))", 
+    "Anserinae (log(abundance index))", 
+    "Ardeidae (log(abundance index))",
+    "Arenaria/Calidris (log(abundance index))",
+    "Aythyini (log(abundance index))",
+    "Laridae (log(abundance index))", 
+    "water surface feeding (log(abundance index))",
+    "below water surface feeding (log(abundance index))",
+    "plant diet (log(abundance index))",
+    "scavenging diet (log(abundance index))",
+    "endotherm vert. diet (log(abundance index))",
+    "congregative birds (log(abundance index))",
+    "migratory birds (log(abundance index))",
+    "species richness",
+    "below phylo threshold (log(abundance index))"
+  )
 )
 
 #### First do dataset A ####
@@ -156,74 +262,21 @@ pal <- c("#2271B2",
 
 df <- varimp_summ %>% 
   bind_rows %>%
-  # Set plotting labels
-  mutate(orig_var = var,
-         var = gsub("anatinae" , "abundance: anatinae", var),
-         var = gsub("anserinae" , "abundance: anserinae", var),
-         var = gsub("ardeidae" , "abundance: ardeidae", var),
-         var = gsub("arenaria_calidris" , "combined abundance: arenaria/calidris", var),
-         var = gsub("aythyini" , "abundance: aythyini", var),
-         var = gsub("laridae" , "abundance: laridae", var),
-         var = gsub("around_surf" , "abundance: surface-feeders", var),
-         var = gsub("below_surf" , "abundance: sub-surface feeders", var),
-         var = gsub("plant" , "abundance: plant diet", var),
-         var = gsub("scav" , "abundance: scavengers", var),
-         var = gsub("vend" , "abundance: endotherm diet", var),
-         var = gsub("host_dist" , "avg. phylo dist to host", var),
-         var = gsub("migr" , "abundance: migratory", var),
-         var = gsub("cong" , "abundance: congregative", var),
-         var = gsub("species_richness" , "species richness", var),
-         var = gsub("chicken_density_2010" , "chicken density", var),
-         var = gsub("duck_density_2010" , "dom. duck density", var),
-         var = gsub("mean_relative_humidity" , "mean relative humidity", var),
-         var = gsub("mean_diff" , "temperature range", var),
-         var = gsub("variation_in_quarterly_mean_temp" , "temperature variation", var),
-         var = gsub("mean_temp" , "mean temperature", var),
-         var = gsub("mean_tmax" , "max temperature", var),
-         var = gsub("mean_tmin" , "min temperature", var),
-         var = gsub("isotherm_mean" , "mean isotherm", var),
-         var = gsub("isotherm_midday_days_below1" , "frequency of days w/ isotherm <1m", var),
-         var = gsub("mean_prec" , "total rainfall", var),
-         var = gsub("dist_to_coast_km" , "dist. to coast", var),
-         var = gsub("dist_to_water" , "dist. to inland water", var),
-         var = gsub("elevation_min" , "min altitude", var),
-         var = gsub("elevation_max" , "max altitude", var),
-         var = gsub("elevation_mode" , "modal altitude", var),
-         var = gsub("elevation_diff" , "altitude range", var),
-         var = gsub("ndvi" , "vegetation index", var),
-         var = gsub("Water_bodies" , "water bodies", var),
-         var = gsub("Evergreen_Needleleaf_Forests" , "evergreen needleleaf forests", var),
-         var = gsub("Evergreen_Broadleaf_Forests" , "evergreen broadleaf forests", var),
-         var = gsub("Deciduous_Needleleaf_Forests" , "deciduous needleleaf forests", var),
-         var = gsub("Deciduous_Broadleaf_Forests" , "deciduous broadleaf forests", var),
-         var = gsub("Mixed_Forests" , "mixed forests", var),
-         var = gsub("Closed_Shrublands" , "closed shrublands", var),
-         var = gsub("Open_Shrublands" , "open_shrublands", var),
-         var = gsub("Woody_Savannas" , "woody savannas", var),
-         var = gsub("Savannas" , "savannas", var),
-         var = gsub("Grasslands" , "grasslands", var),
-         var = gsub("Permanent_Wetlands" , "permanent wetlands", var),
-         var = gsub("Croplands" , "croplands", var),
-         var = gsub("Urban_and_Built-up_Lands" , "urban and built-up lands", var),
-         var = gsub("Cropland/Natural_Vegetation_Mosaics" , "cropland/natural vegetation mosaics", var),
-         var = gsub("Non-Vegetated_Lands" , "non-vegetated lands", var),
-         var = gsub("Unclassified" , "unclassified land", var),
-         orig_var = gsub("_2022", "", orig_var),
-         orig_var = gsub("_lag.$", "", orig_var),
-         var = gsub("_2022", "", var),
+  mutate(var = gsub("_2022", "", var),
          var = gsub("_lag.$", "", var),
          Q = case_when(Q == "Q1" ~ "Q1 (Jan - Mar)",
                        Q == "Q2" ~ "Q2 (Apr - Jun)",
                        Q == "Q3" ~ "Q3 (Jul - Sep)",
                        Q == "Q4" ~ "Q4 (Oct - Dec)"
          )
-  )
+  ) %>% 
+  left_join(plot_labels)
 
-top_var <- df %>% group_by(var, orig_var) %>% summarise(g_mean = mean(mean), count = n()) # Data frame to order variables by mean varimp or n times selected
-df <- df %>% mutate(var = fct_relevel(var, ordered_var),
-                    upper = mean + sd, lower = mean - sd) %>% mutate(var = fct_relevel(var, ordered_var)) %>% arrange(var)
+top_var <- df %>% group_by(var, label) %>% summarise(g_mean = mean(mean), count = n()) # Data frame to order variables by mean varimp or n times selected
+df <- df %>% mutate(label = fct_relevel(label, plot_labels$label) %>% suppressWarnings(),
+                    upper = mean + sd, lower = mean - sd) %>% mutate(label = fct_relevel(label, plot_labels$label) %>% suppressWarnings()) %>% arrange(label)
 
-fig_varimp_A <- ggplot(df, aes(x = mean, y = var, xmin = lower, xmax = upper, color = lag)) + 
+fig_varimp_A <- ggplot(df, aes(x = mean, y = label, xmin = lower, xmax = upper, color = lag)) + 
   geom_errorbar(width=0, position=position_dodge(0.6)) + 
   geom_point(position=position_dodge(0.6)) +
   geom_hline(yintercept=seq(1.5, nrow(df)-0.5, 1), lwd=.5, colour="grey75") +  # add custom gridlines
@@ -260,8 +313,7 @@ ggsave(paste("plots/",
 # Calc and bind pd across all quarters for given variables by name. All you need to do is set names of variables of interest (or don't do anything and let it plot all of them) :)
 
 # Define variables of interest
-varorigs <- top_var %>% arrange(-g_mean) %>% pull(orig_var) %>% .[1:6]
-varlabs <- top_var %>% arrange(-g_mean) %>% pull(var) %>% .[1:6]
+selected_vars <- top_var %>% arrange(-g_mean) %>% pull(var) %>% .[1:6]
 
 pd_summ <- lapply(1:4, function(x) list()) # initialise empty list of lists
 
@@ -280,7 +332,7 @@ for(idx in 1:4){
   if (ALL_VARS_FOR_PD){
     vars <- sdm$varcount %>% as.data.frame %>% names
   }else{
-    vars <- varorigs
+    vars <- selected_vars
   }
   
   load(file = paste(PATH_TO_OUTPUTS,
@@ -350,72 +402,22 @@ if (ALL_VARS_FOR_PD){
     
     pd_df <- pd_summ[[idx]] %>%
       bind_rows %>%
-      as.data.frame %>%
-      # Set plotting labels
-      mutate(var = gsub("anatinae" , "abundance: anatinae", var),
-             var = gsub("anserinae" , "abundance: anserinae", var),
-             var = gsub("ardeidae" , "abundance: ardeidae", var),
-             var = gsub("arenaria_calidris" , "combined abundance: arenaria/calidris", var),
-             var = gsub("aythyini" , "abundance: aythyini", var),
-             var = gsub("laridae" , "abundance: laridae", var),
-             var = gsub("around_surf" , "abundance: surface-feeders", var),
-             var = gsub("below_surf" , "abundance: sub-surface feeders", var),
-             var = gsub("plant" , "abundance: plant diet", var),
-             var = gsub("scav" , "abundance: scavengers", var),
-             var = gsub("vend" , "abundance: endotherm diet", var),
-             var = gsub("host_dist" , "avg. phylo dist to host", var),
-             var = gsub("migr" , "abundance: migratory", var),
-             var = gsub("cong" , "abundance: congregative", var),
-             var = gsub("species_richness" , "species richness", var),
-             var = gsub("chicken_density_2010" , "chicken density", var),
-             var = gsub("duck_density_2010" , "dom. duck density", var),
-             var = gsub("mean_relative_humidity" , "mean relative humidity", var),
-             var = gsub("mean_diff" , "temperature range", var),
-             var = gsub("variation_in_quarterly_mean_temp" , "temperature variation", var),
-             var = gsub("mean_temp" , "mean temperature", var),
-             var = gsub("mean_tmax" , "max temperature", var),
-             var = gsub("mean_tmin" , "min temperature", var),
-             var = gsub("isotherm_mean" , "mean isotherm", var),
-             var = gsub("isotherm_midday_days_below1" , "frequency of days w/ isotherm <1m", var),
-             var = gsub("mean_prec" , "total rainfall", var),
-             var = gsub("dist_to_coast_km" , "dist. to coast", var),
-             var = gsub("dist_to_water" , "dist. to inland water", var),
-             var = gsub("elevation_min" , "min altitude", var),
-             var = gsub("elevation_max" , "max altitude", var),
-             var = gsub("elevation_mode" , "modal altitude", var),
-             var = gsub("elevation_diff" , "altitude range", var),
-             var = gsub("ndvi" , "vegetation index", var),
-             var = gsub("Water_bodies" , "water bodies", var),
-             var = gsub("Evergreen_Needleleaf_Forests" , "evergreen needleleaf forests", var),
-             var = gsub("Evergreen_Broadleaf_Forests" , "evergreen broadleaf forests", var),
-             var = gsub("Deciduous_Needleleaf_Forests" , "deciduous needleleaf forests", var),
-             var = gsub("Deciduous_Broadleaf_Forests" , "deciduous broadleaf forests", var),
-             var = gsub("Mixed_Forests" , "mixed forests", var),
-             var = gsub("Closed_Shrublands" , "closed shrublands", var),
-             var = gsub("Open_Shrublands" , "open_shrublands", var),
-             var = gsub("Woody_Savannas" , "woody savannas", var),
-             var = gsub("Savannas" , "savannas", var),
-             var = gsub("Grasslands" , "grasslands", var),
-             var = gsub("Permanent_Wetlands" , "permanent wetlands", var),
-             var = gsub("Croplands" , "croplands", var),
-             var = gsub("Urban_and_Built-up_Lands" , "urban and built-up lands", var),
-             var = gsub("Cropland/Natural_Vegetation_Mosaics" , "cropland/natural vegetation mosaics", var),
-             var = gsub("Non-Vegetated_Lands" , "non-vegetated lands", var),
-             var = gsub("Unclassified" , "unclassified land", var),
-             var = gsub("_2022", "", var),
-             var = gsub("_lag.$", "", var),
-      ) %>%
-      mutate(var = fct_relevel(var, ordered_var)) %>% 
+      mutate(var = gsub("_2022", "", var),
+             var = gsub("_lag.$", "", var)
+      ) %>% 
+      left_join(plot_labels) %>%
+      mutate(label_units = as.factor(label_units),
+             label_units = fct_relevel(label_units, plot_labels$label_units) %>% suppressWarnings()) %>% 
       mutate(Q = as.factor(Q),
              lag = as.factor(lag)) %>%
-      arrange(var)
+      arrange(label_units)
     
     for(j in 1:length(unique(pd_df$var))){
       
       df <- pd_df %>%
         filter(var == unique(pd_df$var)[j])
       
-      xlab <- unique(df$var)
+      xlab <- unique(df$label_units)
       
       panel_list[[j]] <- df %>% 
         ggplot(aes(x = x, y = y, ymin = lower, ymax = upper, fill = lag, color = lag)) +
@@ -437,6 +439,13 @@ if (ALL_VARS_FOR_PD){
           list(
             geom_pointrange(aes(x = factor(x)), size = 0.7, position = position_dodge(width = 0.5), alpha = 0.8, color = "black", fill = "black")
           )} +
+        {if(all(df$var %in% c("anatinae", "anserinae", "ardeidae", "arenaria_calidris", "aythyini", 
+                              "laridae", "around_surf", "below_surf", "plant", "scav", "vend", 
+                              "cong", "migr", "host_dist"))) 
+          list(
+            scale_x_continuous(trans = "log10", expand = c(0,0))
+          )} +
+        scale_y_continuous(limits = c(0, 1), expand = c(0, 0)) +
         xlab(xlab) +
         ylab("Probability") +
         theme_bw()
@@ -444,7 +453,8 @@ if (ALL_VARS_FOR_PD){
     }
     
     plot_list[[idx]] <- wrap_plots(panel_list, ncol = 3) +
-      plot_layout(guides = "collect", axis_titles = "collect")
+      plot_annotation(tag_levels = 'i') +
+      plot_layout(guides = "collect")
     
     ggsave(paste("plots/",
                  INCLUDE_CROSSTERMS,
@@ -453,7 +463,7 @@ if (ALL_VARS_FOR_PD){
                  "_partial_dependence_A_Q", idx, ".png", sep=""),
            plot = plot_list[[idx]],
            width = 12,
-           height = 6)
+           height = length(plot_list[[idx]])*2/3)
     
   }
   
@@ -461,71 +471,21 @@ if (ALL_VARS_FOR_PD){
   
   pd_df <- pd_summ %>%
     bind_rows %>%
-    as.data.frame %>%
-    # Set plotting labels
-    mutate(var = gsub("anatinae" , "abundance: anatinae", var),
-           var = gsub("anserinae" , "abundance: anserinae", var),
-           var = gsub("ardeidae" , "abundance: ardeidae", var),
-           var = gsub("arenaria_calidris" , "combined abundance: arenaria/calidris", var),
-           var = gsub("aythyini" , "abundance: aythyini", var),
-           var = gsub("laridae" , "abundance: laridae", var),
-           var = gsub("around_surf" , "abundance: surface-feeders", var),
-           var = gsub("below_surf" , "abundance: sub-surface feeders", var),
-           var = gsub("plant" , "abundance: plant diet", var),
-           var = gsub("scav" , "abundance: scavengers", var),
-           var = gsub("vend" , "abundance: endotherm diet", var),
-           var = gsub("host_dist" , "avg. phylo dist to host", var),
-           var = gsub("migr" , "abundance: migratory", var),
-           var = gsub("cong" , "abundance: congregative", var),
-           var = gsub("species_richness" , "species richness", var),
-           var = gsub("chicken_density_2010" , "chicken density", var),
-           var = gsub("duck_density_2010" , "dom. duck density", var),
-           var = gsub("mean_relative_humidity" , "mean relative humidity", var),
-           var = gsub("mean_diff" , "temperature range", var),
-           var = gsub("variation_in_quarterly_mean_temp" , "temperature variation", var),
-           var = gsub("mean_temp" , "mean temperature", var),
-           var = gsub("mean_tmax" , "max temperature", var),
-           var = gsub("mean_tmin" , "min temperature", var),
-           var = gsub("isotherm_mean" , "mean isotherm", var),
-           var = gsub("isotherm_midday_days_below1" , "frequency of days w/ isotherm <1m", var),
-           var = gsub("mean_prec" , "total rainfall", var),
-           var = gsub("dist_to_coast_km" , "dist. to coast", var),
-           var = gsub("dist_to_water" , "dist. to inland water", var),
-           var = gsub("elevation_min" , "min altitude", var),
-           var = gsub("elevation_max" , "max altitude", var),
-           var = gsub("elevation_mode" , "modal altitude", var),
-           var = gsub("elevation_diff" , "altitude range", var),
-           var = gsub("ndvi" , "vegetation index", var),
-           var = gsub("Water_bodies" , "water bodies", var),
-           var = gsub("Evergreen_Needleleaf_Forests" , "evergreen needleleaf forests", var),
-           var = gsub("Evergreen_Broadleaf_Forests" , "evergreen broadleaf forests", var),
-           var = gsub("Deciduous_Needleleaf_Forests" , "deciduous needleleaf forests", var),
-           var = gsub("Deciduous_Broadleaf_Forests" , "deciduous broadleaf forests", var),
-           var = gsub("Mixed_Forests" , "mixed forests", var),
-           var = gsub("Closed_Shrublands" , "closed shrublands", var),
-           var = gsub("Open_Shrublands" , "open_shrublands", var),
-           var = gsub("Woody_Savannas" , "woody savannas", var),
-           var = gsub("Savannas" , "savannas", var),
-           var = gsub("Grasslands" , "grasslands", var),
-           var = gsub("Permanent_Wetlands" , "permanent wetlands", var),
-           var = gsub("Croplands" , "croplands", var),
-           var = gsub("Urban_and_Built-up_Lands" , "urban and built-up lands", var),
-           var = gsub("Cropland/Natural_Vegetation_Mosaics" , "cropland/natural vegetation mosaics", var),
-           var = gsub("Non-Vegetated_Lands" , "non-vegetated lands", var),
-           var = gsub("Unclassified" , "unclassified land", var),
-           var = gsub("_2022", "", var),
-           var = gsub("_lag.$", "", var),
-    ) %>%
-    mutate(var = fct_relevel(var, ordered_var)) %>% 
+    mutate(var = gsub("_2022", "", var),
+           var = gsub("_lag.$", "", var)
+    ) %>% 
+    left_join(plot_labels) %>%
+    mutate(label_units = as.factor(label_units),
+           label_units = fct_relevel(label_units, plot_labels$label_units) %>% suppressWarnings()) %>%
     mutate(Q = as.factor(Q),
            lag = as.factor(lag)) %>%
-    arrange(var)
+    arrange(label_units)
   
   panel_list <- list()
   
   for(j in 1:length(unique(pd_df$var))){
     
-    xlab <- unique(pd_df$var)[j]
+    xlab <- unique(pd_df$label_units)[j]
     
     panel_list[[j]] <- pd_df %>% 
       filter(var == unique(pd_df$var)[j]) %>%
@@ -539,31 +499,41 @@ if (ALL_VARS_FOR_PD){
         list(
           geom_pointrange(aes(x = factor(x)), size = 0.7, position = position_dodge(width = 0.5))
         )} +
+      {if(all(df$x %in% c("anatinae", "anserinae", "ardeidae", "arenaria_calidris", "aythyini", 
+                          "laridae", "around_surf", "below_surf", "plant", "scav", "vend", 
+                          "cong", "migr", "host_dist"))) 
+        list(
+          scale_x_continuous(trans = "log10", expand = c(0,0))
+        )} +
       scale_colour_manual("",
-                          breaks = c("Q1", "Q2", "Q3", "Q4"),
-                          values = pal,
+                          breaks = c("Q1", "Q2", "Q3", "Q4", "ns"),
+                          values = c(pal, "black"),
                           drop = FALSE) +
       scale_fill_manual("",
-                        breaks = c("Q1", "Q2", "Q3", "Q4"),
-                        values = pal,
+                        breaks = c("Q1", "Q2", "Q3", "Q4", "ns"),
+                        values = c(pal, "black"),
                         drop = FALSE) +
-      scale_linetype_manual(values = c("solid", "longdash", "twodash", "dotted"),
+      scale_linetype_manual("",
+                            breaks = c("ns",0,1,2,3),
+                            values = c("solid", "solid", "longdash", "twodash", "dotted"),
                             drop = FALSE) +
+      scale_y_continuous(limits = c(0, 1), expand = c(0, 0)) +
       xlab(xlab) +
       ylab("Probability") +
       theme_bw()
   }
   
-  fig_pd_chosen <- wrap_plots(panel_list, ncol = 2) +
-    plot_layout(guides = "collect", axis_titles = "collect") &
-    theme(legend.position = 'bottom')
-    
+  fig_pd_chosen_A <- wrap_plots(panel_list, ncol = 2) +
+    plot_layout(guides = "collect") &
+    theme(legend.position = 'bottom', legend.key.size = unit(1.05, "cm"),
+          plot.tag = element_text(size = 12))
+  
   ggsave(paste("plots/",
                INCLUDE_CROSSTERMS,
                "_",
                CV_OR_RI,
                "_partial_dependence_top_mean_A.png", sep=""),
-         plot = fig_pd_chosen,
+         plot = fig_pd_chosen_A,
          width = 9,
          height = 7)
 }
@@ -640,74 +610,21 @@ pal <- c("#2271B2",
 
 df <- varimp_summ %>% 
   bind_rows %>%
-  # Set plotting labels
-  mutate(orig_var = var,
-         var = gsub("anatinae" , "abundance: anatinae", var),
-         var = gsub("anserinae" , "abundance: anserinae", var),
-         var = gsub("ardeidae" , "abundance: ardeidae", var),
-         var = gsub("arenaria_calidris" , "combined abundance: arenaria/calidris", var),
-         var = gsub("aythyini" , "abundance: aythyini", var),
-         var = gsub("laridae" , "abundance: laridae", var),
-         var = gsub("around_surf" , "abundance: surface-feeders", var),
-         var = gsub("below_surf" , "abundance: sub-surface feeders", var),
-         var = gsub("plant" , "abundance: plant diet", var),
-         var = gsub("scav" , "abundance: scavengers", var),
-         var = gsub("vend" , "abundance: endotherm diet", var),
-         var = gsub("host_dist" , "avg. phylo dist to host", var),
-         var = gsub("migr" , "abundance: migratory", var),
-         var = gsub("cong" , "abundance: congregative", var),
-         var = gsub("species_richness" , "species richness", var),
-         var = gsub("chicken_density_2010" , "chicken density", var),
-         var = gsub("duck_density_2010" , "dom. duck density", var),
-         var = gsub("mean_relative_humidity" , "mean relative humidity", var),
-         var = gsub("mean_diff" , "temperature range", var),
-         var = gsub("variation_in_quarterly_mean_temp" , "temperature variation", var),
-         var = gsub("mean_temp" , "mean temperature", var),
-         var = gsub("mean_tmax" , "max temperature", var),
-         var = gsub("mean_tmin" , "min temperature", var),
-         var = gsub("isotherm_mean" , "mean isotherm", var),
-         var = gsub("isotherm_midday_days_below1" , "frequency of days w/ isotherm <1m", var),
-         var = gsub("mean_prec" , "total rainfall", var),
-         var = gsub("dist_to_coast_km" , "dist. to coast", var),
-         var = gsub("dist_to_water" , "dist. to inland water", var),
-         var = gsub("elevation_min" , "min altitude", var),
-         var = gsub("elevation_max" , "max altitude", var),
-         var = gsub("elevation_mode" , "modal altitude", var),
-         var = gsub("elevation_diff" , "altitude range", var),
-         var = gsub("ndvi" , "vegetation index", var),
-         var = gsub("Water_bodies" , "water bodies", var),
-         var = gsub("Evergreen_Needleleaf_Forests" , "evergreen needleleaf forests", var),
-         var = gsub("Evergreen_Broadleaf_Forests" , "evergreen broadleaf forests", var),
-         var = gsub("Deciduous_Needleleaf_Forests" , "deciduous needleleaf forests", var),
-         var = gsub("Deciduous_Broadleaf_Forests" , "deciduous broadleaf forests", var),
-         var = gsub("Mixed_Forests" , "mixed forests", var),
-         var = gsub("Closed_Shrublands" , "closed shrublands", var),
-         var = gsub("Open_Shrublands" , "open_shrublands", var),
-         var = gsub("Woody_Savannas" , "woody savannas", var),
-         var = gsub("Savannas" , "savannas", var),
-         var = gsub("Grasslands" , "grasslands", var),
-         var = gsub("Permanent_Wetlands" , "permanent wetlands", var),
-         var = gsub("Croplands" , "croplands", var),
-         var = gsub("Urban_and_Built-up_Lands" , "urban and built-up lands", var),
-         var = gsub("Cropland/Natural_Vegetation_Mosaics" , "cropland/natural vegetation mosaics", var),
-         var = gsub("Non-Vegetated_Lands" , "non-vegetated lands", var),
-         var = gsub("Unclassified" , "unclassified land", var),
-         orig_var = gsub("_2022", "", orig_var),
-         orig_var = gsub("_lag.$", "", orig_var),
-         var = gsub("_2022", "", var),
+  mutate(var = gsub("_2022", "", var),
          var = gsub("_lag.$", "", var),
          Q = case_when(Q == "Q1" ~ "Q1 (Jan - Mar)",
                        Q == "Q2" ~ "Q2 (Apr - Jun)",
                        Q == "Q3" ~ "Q3 (Jul - Sep)",
                        Q == "Q4" ~ "Q4 (Oct - Dec)"
          )
-  )
+  ) %>% 
+  left_join(plot_labels)
 
-top_var <- df %>% group_by(var, orig_var) %>% summarise(g_mean = mean(mean), count = n()) # Data frame to order variables by mean varimp or n times selected
-df <- df %>% mutate(var = fct_relevel(var, ordered_var),
-                    upper = mean + sd, lower = mean - sd) %>% mutate(var = fct_relevel(var, ordered_var)) %>% arrange(var)
+top_var <- df %>% group_by(var, label) %>% summarise(g_mean = mean(mean), count = n()) # Data frame to order variables by mean varimp or n times selected
+df <- df %>% mutate(label = fct_relevel(label, plot_labels$label) %>% suppressWarnings(),
+                    upper = mean + sd, lower = mean - sd) %>% mutate(label = fct_relevel(label, plot_labels$label) %>% suppressWarnings()) %>% arrange(label)
 
-fig_varimp_B <- ggplot(df, aes(x = mean, y = var, xmin = lower, xmax = upper, color = lag)) + 
+fig_varimp_B <- ggplot(df, aes(x = mean, y = label, xmin = lower, xmax = upper, color = lag)) + 
   geom_errorbar(width=0, position=position_dodge(0.6)) + 
   geom_point(position=position_dodge(0.6)) +
   geom_hline(yintercept=seq(1.5, nrow(df)-0.5, 1), lwd=.5, colour="grey75") +  # add custom gridlines
@@ -741,12 +658,10 @@ ggsave(paste("plots/",
        width = 10,
        height = 6)
 
-
 # Calc and bind pd across all quarters for given variables by name. All you need to do is set names of variables of interest (or don't do anything and let it plot all of them) :)
 
 # Define variables of interest
-varorigs <- top_var %>% arrange(-g_mean) %>% pull(orig_var) %>% .[1:6]
-varlabs <- top_var %>% arrange(-g_mean) %>% pull(var) %>% .[1:6]
+selected_vars <- top_var %>% arrange(-g_mean) %>% pull(var) %>% .[1:6]
 
 pd_summ <- lapply(1:4, function(x) list()) # initialise empty list of lists
 
@@ -765,7 +680,7 @@ for(idx in 1:4){
   if (ALL_VARS_FOR_PD){
     vars <- sdm$varcount %>% as.data.frame %>% names
   }else{
-    vars <- varorigs
+    vars <- selected_vars
   }
   
   load(file = paste(PATH_TO_OUTPUTS,
@@ -835,72 +750,22 @@ if (ALL_VARS_FOR_PD){
     
     pd_df <- pd_summ[[idx]] %>%
       bind_rows %>%
-      as.data.frame %>%
-      # Set plotting labels
-      mutate(var = gsub("anatinae" , "abundance: anatinae", var),
-             var = gsub("anserinae" , "abundance: anserinae", var),
-             var = gsub("ardeidae" , "abundance: ardeidae", var),
-             var = gsub("arenaria_calidris" , "combined abundance: arenaria/calidris", var),
-             var = gsub("aythyini" , "abundance: aythyini", var),
-             var = gsub("laridae" , "abundance: laridae", var),
-             var = gsub("around_surf" , "abundance: surface-feeders", var),
-             var = gsub("below_surf" , "abundance: sub-surface feeders", var),
-             var = gsub("plant" , "abundance: plant diet", var),
-             var = gsub("scav" , "abundance: scavengers", var),
-             var = gsub("vend" , "abundance: endotherm diet", var),
-             var = gsub("host_dist" , "avg. phylo dist to host", var),
-             var = gsub("migr" , "abundance: migratory", var),
-             var = gsub("cong" , "abundance: congregative", var),
-             var = gsub("species_richness" , "species richness", var),
-             var = gsub("chicken_density_2010" , "chicken density", var),
-             var = gsub("duck_density_2010" , "dom. duck density", var),
-             var = gsub("mean_relative_humidity" , "mean relative humidity", var),
-             var = gsub("mean_diff" , "temperature range", var),
-             var = gsub("variation_in_quarterly_mean_temp" , "temperature variation", var),
-             var = gsub("mean_temp" , "mean temperature", var),
-             var = gsub("mean_tmax" , "max temperature", var),
-             var = gsub("mean_tmin" , "min temperature", var),
-             var = gsub("isotherm_mean" , "mean isotherm", var),
-             var = gsub("isotherm_midday_days_below1" , "frequency of days w/ isotherm <1m", var),
-             var = gsub("mean_prec" , "total rainfall", var),
-             var = gsub("dist_to_coast_km" , "dist. to coast", var),
-             var = gsub("dist_to_water" , "dist. to inland water", var),
-             var = gsub("elevation_min" , "min altitude", var),
-             var = gsub("elevation_max" , "max altitude", var),
-             var = gsub("elevation_mode" , "modal altitude", var),
-             var = gsub("elevation_diff" , "altitude range", var),
-             var = gsub("ndvi" , "vegetation index", var),
-             var = gsub("Water_bodies" , "water bodies", var),
-             var = gsub("Evergreen_Needleleaf_Forests" , "evergreen needleleaf forests", var),
-             var = gsub("Evergreen_Broadleaf_Forests" , "evergreen broadleaf forests", var),
-             var = gsub("Deciduous_Needleleaf_Forests" , "deciduous needleleaf forests", var),
-             var = gsub("Deciduous_Broadleaf_Forests" , "deciduous broadleaf forests", var),
-             var = gsub("Mixed_Forests" , "mixed forests", var),
-             var = gsub("Closed_Shrublands" , "closed shrublands", var),
-             var = gsub("Open_Shrublands" , "open_shrublands", var),
-             var = gsub("Woody_Savannas" , "woody savannas", var),
-             var = gsub("Savannas" , "savannas", var),
-             var = gsub("Grasslands" , "grasslands", var),
-             var = gsub("Permanent_Wetlands" , "permanent wetlands", var),
-             var = gsub("Croplands" , "croplands", var),
-             var = gsub("Urban_and_Built-up_Lands" , "urban and built-up lands", var),
-             var = gsub("Cropland/Natural_Vegetation_Mosaics" , "cropland/natural vegetation mosaics", var),
-             var = gsub("Non-Vegetated_Lands" , "non-vegetated lands", var),
-             var = gsub("Unclassified" , "unclassified land", var),
-             var = gsub("_2022", "", var),
-             var = gsub("_lag.$", "", var),
-      ) %>%
-      mutate(var = fct_relevel(var, ordered_var)) %>% 
+      mutate(var = gsub("_2022", "", var),
+             var = gsub("_lag.$", "", var)
+      ) %>% 
+      left_join(plot_labels) %>%
+      mutate(label_units = as.factor(label_units),
+             label_units = fct_relevel(label_units, plot_labels$label_units) %>% suppressWarnings()) %>% 
       mutate(Q = as.factor(Q),
              lag = as.factor(lag)) %>%
-      arrange(var)
+      arrange(label_units)
     
     for(j in 1:length(unique(pd_df$var))){
       
       df <- pd_df %>%
         filter(var == unique(pd_df$var)[j])
       
-      xlab <- unique(df$var)
+      xlab <- unique(df$label_units)
       
       panel_list[[j]] <- df %>% 
         ggplot(aes(x = x, y = y, ymin = lower, ymax = upper, fill = lag, color = lag)) +
@@ -922,6 +787,13 @@ if (ALL_VARS_FOR_PD){
           list(
             geom_pointrange(aes(x = factor(x)), size = 0.7, position = position_dodge(width = 0.5), alpha = 0.8, color = "black", fill = "black")
           )} +
+        {if(all(df$var %in% c("anatinae", "anserinae", "ardeidae", "arenaria_calidris", "aythyini", 
+                              "laridae", "around_surf", "below_surf", "plant", "scav", "vend", 
+                              "cong", "migr", "host_dist"))) 
+          list(
+            scale_x_continuous(trans = "log10", expand = c(0,0))
+          )} +
+        scale_y_continuous(limits = c(0, 1), expand = c(0, 0)) +
         xlab(xlab) +
         ylab("Probability") +
         theme_bw()
@@ -929,7 +801,8 @@ if (ALL_VARS_FOR_PD){
     }
     
     plot_list[[idx]] <- wrap_plots(panel_list, ncol = 3) +
-      plot_layout(guides = "collect", axis_titles = "collect")
+      plot_annotation(tag_levels = 'i') +
+      plot_layout(guides = "collect")
     
     ggsave(paste("plots/",
                  INCLUDE_CROSSTERMS,
@@ -938,7 +811,7 @@ if (ALL_VARS_FOR_PD){
                  "_partial_dependence_B_Q", idx, ".png", sep=""),
            plot = plot_list[[idx]],
            width = 12,
-           height = 6)
+           height = length(plot_list[[idx]])*2/3)
     
   }
   
@@ -946,71 +819,21 @@ if (ALL_VARS_FOR_PD){
   
   pd_df <- pd_summ %>%
     bind_rows %>%
-    as.data.frame %>%
-    # Set plotting labels
-    mutate(var = gsub("anatinae" , "abundance: anatinae", var),
-           var = gsub("anserinae" , "abundance: anserinae", var),
-           var = gsub("ardeidae" , "abundance: ardeidae", var),
-           var = gsub("arenaria_calidris" , "combined abundance: arenaria/calidris", var),
-           var = gsub("aythyini" , "abundance: aythyini", var),
-           var = gsub("laridae" , "abundance: laridae", var),
-           var = gsub("around_surf" , "abundance: surface-feeders", var),
-           var = gsub("below_surf" , "abundance: sub-surface feeders", var),
-           var = gsub("plant" , "abundance: plant diet", var),
-           var = gsub("scav" , "abundance: scavengers", var),
-           var = gsub("vend" , "abundance: endotherm diet", var),
-           var = gsub("host_dist" , "avg. phylo dist to host", var),
-           var = gsub("migr" , "abundance: migratory", var),
-           var = gsub("cong" , "abundance: congregative", var),
-           var = gsub("species_richness" , "species richness", var),
-           var = gsub("chicken_density_2010" , "chicken density", var),
-           var = gsub("duck_density_2010" , "dom. duck density", var),
-           var = gsub("mean_relative_humidity" , "mean relative humidity", var),
-           var = gsub("mean_diff" , "temperature range", var),
-           var = gsub("variation_in_quarterly_mean_temp" , "temperature variation", var),
-           var = gsub("mean_temp" , "mean temperature", var),
-           var = gsub("mean_tmax" , "max temperature", var),
-           var = gsub("mean_tmin" , "min temperature", var),
-           var = gsub("isotherm_mean" , "mean isotherm", var),
-           var = gsub("isotherm_midday_days_below1" , "frequency of days w/ isotherm <1m", var),
-           var = gsub("mean_prec" , "total rainfall", var),
-           var = gsub("dist_to_coast_km" , "dist. to coast", var),
-           var = gsub("dist_to_water" , "dist. to inland water", var),
-           var = gsub("elevation_min" , "min altitude", var),
-           var = gsub("elevation_max" , "max altitude", var),
-           var = gsub("elevation_mode" , "modal altitude", var),
-           var = gsub("elevation_diff" , "altitude range", var),
-           var = gsub("ndvi" , "vegetation index", var),
-           var = gsub("Water_bodies" , "water bodies", var),
-           var = gsub("Evergreen_Needleleaf_Forests" , "evergreen needleleaf forests", var),
-           var = gsub("Evergreen_Broadleaf_Forests" , "evergreen broadleaf forests", var),
-           var = gsub("Deciduous_Needleleaf_Forests" , "deciduous needleleaf forests", var),
-           var = gsub("Deciduous_Broadleaf_Forests" , "deciduous broadleaf forests", var),
-           var = gsub("Mixed_Forests" , "mixed forests", var),
-           var = gsub("Closed_Shrublands" , "closed shrublands", var),
-           var = gsub("Open_Shrublands" , "open_shrublands", var),
-           var = gsub("Woody_Savannas" , "woody savannas", var),
-           var = gsub("Savannas" , "savannas", var),
-           var = gsub("Grasslands" , "grasslands", var),
-           var = gsub("Permanent_Wetlands" , "permanent wetlands", var),
-           var = gsub("Croplands" , "croplands", var),
-           var = gsub("Urban_and_Built-up_Lands" , "urban and built-up lands", var),
-           var = gsub("Cropland/Natural_Vegetation_Mosaics" , "cropland/natural vegetation mosaics", var),
-           var = gsub("Non-Vegetated_Lands" , "non-vegetated lands", var),
-           var = gsub("Unclassified" , "unclassified land", var),
-           var = gsub("_2022", "", var),
-           var = gsub("_lag.$", "", var),
-    ) %>%
-    mutate(var = fct_relevel(var, ordered_var)) %>% 
+    mutate(var = gsub("_2022", "", var),
+           var = gsub("_lag.$", "", var)
+    ) %>% 
+    left_join(plot_labels) %>%
+    mutate(label_units = as.factor(label_units),
+           label_units = fct_relevel(label_units, plot_labels$label_units) %>% suppressWarnings()) %>%
     mutate(Q = as.factor(Q),
            lag = as.factor(lag)) %>%
-    arrange(var)
+    arrange(label_units)
   
   panel_list <- list()
   
   for(j in 1:length(unique(pd_df$var))){
     
-    xlab <- unique(pd_df$var)[j]
+    xlab <- unique(pd_df$label_units)[j]
     
     panel_list[[j]] <- pd_df %>% 
       filter(var == unique(pd_df$var)[j]) %>%
@@ -1024,31 +847,41 @@ if (ALL_VARS_FOR_PD){
         list(
           geom_pointrange(aes(x = factor(x)), size = 0.7, position = position_dodge(width = 0.5))
         )} +
+      {if(all(df$x %in% c("anatinae", "anserinae", "ardeidae", "arenaria_calidris", "aythyini", 
+                          "laridae", "around_surf", "below_surf", "plant", "scav", "vend", 
+                          "cong", "migr", "host_dist"))) 
+        list(
+          scale_x_continuous(trans = "log10", expand = c(0,0))
+        )} +
       scale_colour_manual("",
-                          breaks = c("Q1", "Q2", "Q3", "Q4"),
-                          values = pal,
+                          breaks = c("Q1", "Q2", "Q3", "Q4", "ns"),
+                          values = c(pal, "black"),
                           drop = FALSE) +
       scale_fill_manual("",
-                        breaks = c("Q1", "Q2", "Q3", "Q4"),
-                        values = pal,
+                        breaks = c("Q1", "Q2", "Q3", "Q4", "ns"),
+                        values = c(pal, "black"),
                         drop = FALSE) +
-      scale_linetype_manual(values = c("solid", "longdash", "twodash", "dotted"),
+      scale_linetype_manual("",
+                            breaks = c("ns",0,1,2,3),
+                            values = c("solid", "solid", "longdash", "twodash", "dotted"),
                             drop = FALSE) +
+      scale_y_continuous(limits = c(0, 1), expand = c(0, 0)) +
       xlab(xlab) +
       ylab("Probability") +
       theme_bw()
   }
   
-  fig_pd_chosen <- wrap_plots(panel_list, ncol = 2) +
-    plot_layout(guides = "collect", axis_titles = "collect") &
-    theme(legend.position = 'bottom')
+  fig_pd_chosen_B <- wrap_plots(panel_list, ncol = 2) +
+    plot_layout(guides = "collect") &
+    theme(legend.position = 'bottom', legend.key.size = unit(1.05, "cm"),
+          plot.tag = element_text(size = 12))
   
   ggsave(paste("plots/",
                INCLUDE_CROSSTERMS,
                "_",
                CV_OR_RI,
                "_partial_dependence_top_mean_B.png", sep=""),
-         plot = fig_pd_chosen,
+         plot = fig_pd_chosen_B,
          width = 9,
          height = 7)
 }
@@ -1063,6 +896,12 @@ fig_varimp_combi <- wrap_plots(list(fig_varimp_A, fig_varimp_B), ncol = 2) +
   theme(legend.position = 'bottom',
         plot.tag = element_text(size = 14))
 
+# Ensure same y ranges for all plots; adapted from https://stackoverflow.com/a/60018428
+flipped_y_range <- c(ggplot_build(fig_varimp_combi[[1]])$layout$panel_scales_x[[1]]$range$range,
+                     ggplot_build(fig_varimp_combi[[2]])$layout$panel_scales_x[[1]]$range$range)
+
+fig_varimp_combi <- fig_varimp_combi & xlim(min(flipped_y_range), max(flipped_y_range))
+
 ggsave(paste("plots/",
              INCLUDE_CROSSTERMS,
              "_",
@@ -1071,3 +910,18 @@ ggsave(paste("plots/",
        plot = fig_varimp_combi,
        width = 16,
        height = 8)
+
+fig_pd_combi <- (fig_pd_chosen_A)/(fig_pd_chosen_B) +
+  plot_annotation(tag_levels = list(c("A.i", "ii", "iii", "iv", "v", "vi", "B.i", "ii", "iii", "iv", "v", "vi"))) +
+  plot_layout(guides = "collect", axis_titles = "collect") &
+  theme(legend.position = 'bottom',
+        plot.tag = element_text(size = 12))
+
+ggsave(paste("plots/",
+             INCLUDE_CROSSTERMS,
+             "_",
+             CV_OR_RI,
+             "_partial_dependence_top_mean_combi.png", sep=""),
+       plot = fig_pd_combi,
+       width = 9,
+       height = 14.5)
