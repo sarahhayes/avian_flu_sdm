@@ -29,7 +29,15 @@ library(tidyverse)
 library(dbarts)
 library(patchwork)
 
+# Set plot palette
+
+pal <- c("#2271B2",
+         "#F748A5",
+         "#359B73",
+         "#e69f00")
+
 ### Set plot variable order (should match tables) and names
+# note re-indexing of land use variables as initially coded with old schema
 
 plot_labels <- data.frame(
   var = c(
@@ -99,7 +107,6 @@ plot_labels <- data.frame(
     "modal elevation",
     "elevation diff.",
     "vegetation index",
-    "water body",
     "evergreen needleleaf forest",
     "evergreen broadleaf forest",
     "deciduous needleleaf forest",
@@ -114,8 +121,9 @@ plot_labels <- data.frame(
     "cropland",
     "urban and built-up land",
     "cropland/natural vegetation mosaic",
+    "permanent snow/ice",
     "non-vegetated land",
-    "unclassified land",
+    "water body",
     "dist. to coast",
     "dist. to inland water",
     "chicken density",
@@ -151,7 +159,6 @@ plot_labels <- data.frame(
     "modal elevation (m)",
     "elevation diff. (m)",
     "vegetation index",
-    "water body",
     "evergreen needleleaf forest",
     "evergreen broadleaf forest",
     "deciduous needleleaf forest",
@@ -166,8 +173,9 @@ plot_labels <- data.frame(
     "cropland",
     "urban and built-up land",
     "cropland/natural vegetation mosaic",
+    "permanent snow/ice",
     "non-vegetated land",
-    "unclassified land",
+    "water body",
     "dist. to coast (km)",
     "dist. to inland water (m)",
     "chicken density (headcount)",
@@ -254,11 +262,6 @@ if (INCLUDE_CROSSTERMS=="with-crossterms"){
                                 "lag 2 covs",
                                 "lag 3 covs"))
 }
-
-pal <- c("#2271B2",
-         "#F748A5",
-         "#359B73",
-         "#e69f00")
 
 df <- varimp_summ %>% 
   bind_rows %>%
@@ -602,11 +605,6 @@ if (INCLUDE_CROSSTERMS=="with-crossterms"){
                                 "lag 2 covs",
                                 "lag 3 covs"))
 }
-
-pal <- c("#2271B2",
-         "#F748A5",
-         "#359B73",
-         "#e69f00")
 
 df <- varimp_summ %>% 
   bind_rows %>%
