@@ -3,7 +3,7 @@
 ~$*
 .Rproj.user
 data
-.tif
+*.tif
 LandCoverData
 data_offline/
 Z_old_or_unused_scripts/test_ebird_sightings.R
@@ -11,3 +11,4 @@ Z_old_or_unused_scripts/resample_training_data_barkla.R
 plots/resampling/retired
 training_sets/raw
 data/eco_phylo_data
+plots/old_plots

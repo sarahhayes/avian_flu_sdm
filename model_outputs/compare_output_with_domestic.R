@@ -113,24 +113,30 @@ masked_bq4 <- terra::mask(pred_layers_B_Q4_mean, dom_bq4)
 #set the colour palette
 library(viridis)
 
-dev.off()
-png("plots/dom_over_predsB_masked.png")
+#dev.off()
+png("plots/dom_over_predsB_masked.png", width = 700, height = 600)
+#pdf("plots/dom_over_predsB_masked.pdf", width = 7, height = 6)
 par(mfrow = c(2,2))
+par(mar = c(0,0,0,0))
 plot(euro_rast, col = "black", alpha = 0.4, legend = F)
-plot(masked_bq1, add = T, col = turbo(100))
-title("Q1", adj = 0)
+#plot(masked_bq1, add = T, col = turbo(100))
+plot(masked_bq1, add = T, col = viridis(100))
+title("B-Q1", adj = 0)
 
 plot(euro_rast, col = "black", alpha = 0.4, legend = F)
-plot(masked_bq2, add = T, col = turbo(100))
-title("Q2", adj = 0)
+#plot(masked_bq2, add = T, col = turbo(100))
+plot(masked_bq2, add = T, col = viridis(100))
+title("B-Q2", adj = 0)
 
 plot(euro_rast, col = "black", alpha = 0.4, legend = F)
-plot(masked_bq3, add = T, col = turbo(100))
-title("Q3", adj = 0)
+#plot(masked_bq3, add = T, col = turbo(100))
+plot(masked_bq3, add = T, col = viridis(100))
+title("B-Q3", adj = 0)
 
 plot(euro_rast, col = "black", alpha = 0.4, legend = F)
-plot(masked_bq4, add = T, col = turbo(100))
-title("Q4", adj = 0)
+#plot(masked_bq4, add = T, col = turbo(100))
+plot(masked_bq4, add = T, col = viridis(100))
+title("B-Q4", adj = 0)
 dev.off()
 
 
@@ -179,15 +185,16 @@ chucks_2010 == ducks_n_chucks
 
 dev.off()
 hist(ducks_n_chucks) # values are too spread out
-hist(log(ducks_n_chucks), breaks = seq(-5,15,0.5))
+hist(log(ducks_n_chucks), breaks = seq(-5,15,0.5), main = "Histogram of combined chicken and duck density", 
+     xlab = "log of density")
 
-## initially use a value of 500 for the cutoff
+## trial some different values for the cutoff
 
 dnc_1000 <- ducks_n_chucks
 dnc_1000[dnc_1000 <= 1000] <- NA
 plot(dnc_1000)
 dnc_1000
-table(values(dnc_1000))
+#table(values(dnc_1000))
 
 dnc_5000 <- ducks_n_chucks
 dnc_5000[dnc_5000 <= 5000] <- NA
@@ -292,8 +299,8 @@ na_in_raster1_not_in_raster2 <- na_raster1 & not_na_raster2
 na_count <- sum(values(na_in_raster1_not_in_raster2))
 plot(na_in_raster1_not_in_raster2)
 
-# so it seems that there are cells that have a value for chicken and ducks but don't have a prediction, which is why they don't match
-
+# so it seems that there are cells that have a value for chicken and ducks but don't have a prediction, 
+# which is why they don't match
 # this is probably where the missing values are. 
 # so produce the histograms from the numbers that I have,
 
@@ -305,7 +312,7 @@ bq1_hist_dat <- data.frame(
 
 # Create a bar plot
 q1_hist <- ggplot(bq1_hist_dat, aes(x = Predicted_prob, y = BQ1_odds)) +
-  geom_bar(stat = "identity", fill = "skyblue") +
+  geom_bar(stat = "identity", fill = "#2271B2",) +
   labs(title = "B-Q1", x = "Predicted probability", y = "Odds") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
@@ -335,7 +342,7 @@ bq2_hist_dat <- data.frame(
 
 # Create a bar plot
 q2_hist <- ggplot(bq2_hist_dat, aes(x = Predicted_prob, y = BQ2_odds)) +
-  geom_bar(stat = "identity", fill = "turquoise") +
+  geom_bar(stat = "identity", fill = "#F748A5") +
   labs(title = "B-Q2", x = "Predicted probability", y = "Odds") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
@@ -366,7 +373,7 @@ bq3_hist_dat <- data.frame(
 
 # Create a bar plot
 q3_hist <- ggplot(bq3_hist_dat, aes(x = Predicted_prob, y = BQ3_odds)) +
-  geom_bar(stat = "identity", fill = "purple", alpha = 0.5) +
+  geom_bar(stat = "identity", fill = "#359B73") +
   labs(title = "B-Q3", x = "Predicted probability", y = "Odds") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
@@ -396,7 +403,7 @@ bq4_hist_dat <- data.frame(
 
 # Create a bar plot
 q4_hist <- ggplot(bq4_hist_dat, aes(x = Predicted_prob, y = BQ4_odds)) +
-  geom_bar(stat = "identity", fill = "orange", alpha = 0.6) +
+  geom_bar(stat = "identity", fill = "#e69f00") +
   labs(title = "B-Q4", x = "Predicted probability", y = "Odds") +
   theme_minimal() + 
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
@@ -404,7 +411,7 @@ q4_hist
 
 
 combo_hists_B <- gridExtra::grid.arrange(q1_hist, q2_hist, q3_hist, q4_hist, ncol = 2, nrow = 2)
-ggsave("plots/histograms_for_B_with_cnd.png", combo_hists_B)
+#ggsave("plots/histograms_for_B_with_cnd.png", combo_hists_B)
 
 
 ##################################################################################################
@@ -412,7 +419,7 @@ ggsave("plots/histograms_for_B_with_cnd.png", combo_hists_B)
 # Repeat for A
 
 
-## For outputs from model B 
+## For outputs from model A
 PATH_TO_OUTPUTSA <- "model_outputs/preds_A/"
 
 for (idx in 1:4){
@@ -444,6 +451,171 @@ dom_aq1 <- terra::rast("data/flu_data/prepped_data/domestic_cases_rasters/dom_a_
 dom_aq2 <- terra::rast("data/flu_data/prepped_data/domestic_cases_rasters/dom_a_q2_pres_abs.tif")
 dom_aq3 <- terra::rast("data/flu_data/prepped_data/domestic_cases_rasters/dom_a_q3_pres_abs.tif")
 dom_aq4 <- terra::rast("data/flu_data/prepped_data/domestic_cases_rasters/dom_a_q4_pres_abs.tif")
+
+
+masked_aq1 <- terra::mask(pred_layers_A_Q1_mean, dom_aq1) 
+masked_aq2 <- terra::mask(pred_layers_A_Q2_mean, dom_aq2) 
+masked_aq3 <- terra::mask(pred_layers_A_Q3_mean, dom_aq3) 
+masked_aq4 <- terra::mask(pred_layers_A_Q4_mean, dom_aq4) 
+
+
+# four panel plot of these maps
+
+#dev.off()
+png("plots/dom_over_predsA_masked.png", width = 700, height = 600)
+#pdf("plots/dom_over_predsA_masked.pdf", width = 7, height = 6)
+par(mfrow = c(2,2))
+par(mar = c(0,0,0,0))
+plot(euro_rast, col = "black", alpha = 0.4, legend = F)
+plot(masked_aq1, add = T, col = viridis(100))
+title("A-Q1", adj = 0)
+
+plot(euro_rast, col = "black", alpha = 0.4, legend = F)
+plot(masked_aq2, add = T, col = viridis(100))
+title("A-Q2", adj = 0)
+
+plot(euro_rast, col = "black", alpha = 0.4, legend = F)
+plot(masked_aq3, add = T, col = viridis(100))
+title("A-Q3", adj = 0)
+
+plot(euro_rast, col = "black", alpha = 0.4, legend = F)
+plot(masked_aq4, add = T, col = viridis(100))
+title("A-Q4", adj = 0)
+dev.off()
+
+
+### Look at producing some histograms
+
+
+AQ1_inf_cells <- c()
+AQ1_non_inf_cells <- c()
+AQ1_odds <- c()
+
+for (i in 1:length(min_prob_vect)) {
+  ressy <- odds_fun(prediction_rast =  pred_layers_A_Q1_mean,
+                    cd_rast = dnc_1000,
+                    min_prob = min_prob_vect[i],
+                    max_prob = max_prob_vect[i],
+                    dom_rast = dom_aq1)
+  AQ1_inf_cells[i] <- ressy[1]
+  AQ1_non_inf_cells[i] <- ressy[2]
+  AQ1_odds[i] <- ressy[3]
+}
+
+sum(AQ1_inf_cells) + sum(AQ1_non_inf_cells)
+
+aq1_hist_dat <- data.frame(
+  Odds = AQ1_odds,
+  Predicted_prob = c("0.0-0.1", "0.1-0.2", "0.2-0.3", "0.3-0.4", "0.4-0.5", "0.5-0.6", 
+                     "0.6-0.7", "0.7-0.8", "0.8-0.9", "0.9-1.0")
+)
+
+# Create a bar plot
+aq1_hist <- ggplot(aq1_hist_dat, aes(x = Predicted_prob, y = AQ1_odds)) +
+  geom_bar(stat = "identity", fill = "#2271B2") +
+  labs(title = "A-Q1", x = "Predicted probability", y = "Odds") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+aq1_hist
+
+## Rpt for the other quarters
+AQ2_inf_cells <- c()
+AQ2_non_inf_cells <- c()
+AQ2_odds <- c()
+
+for (i in 1:length(min_prob_vect)) {
+  ressy <- odds_fun(prediction_rast =  pred_layers_A_Q2_mean,
+                    cd_rast = dnc_1000,
+                    min_prob = min_prob_vect[i],
+                    max_prob = max_prob_vect[i],
+                    dom_rast = dom_aq2)
+  AQ2_inf_cells[i] <- ressy[1]
+  AQ2_non_inf_cells[i] <- ressy[2]
+  AQ2_odds[i] <- ressy[3]
+}
+
+aq2_hist_dat <- data.frame(
+  Odds = AQ2_odds,
+  Predicted_prob = c("0.0-0.1", "0.1-0.2", "0.2-0.3", "0.3-0.4", "0.4-0.5", "0.5-0.6", 
+                     "0.6-0.7", "0.7-0.8", "0.8-0.9", "0.9-1.0")
+)
+
+# Create a bar plot
+aq2_hist <- ggplot(aq2_hist_dat, aes(x = Predicted_prob, y = AQ2_odds)) +
+  geom_bar(stat = "identity", fill = "#F748A5") +
+  labs(title = "A-Q2", x = "Predicted probability", y = "Odds") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+aq2_hist
+
+# Q3
+
+AQ3_inf_cells <- c()
+AQ3_non_inf_cells <- c()
+AQ3_odds <- c()
+
+for (i in 1:length(min_prob_vect)) {
+  ressy <- odds_fun(prediction_rast =  pred_layers_A_Q3_mean,
+                    cd_rast = dnc_1000,
+                    min_prob = min_prob_vect[i],
+                    max_prob = max_prob_vect[i],
+                    dom_rast = dom_aq3)
+  AQ3_inf_cells[i] <- ressy[1]
+  AQ3_non_inf_cells[i] <- ressy[2]
+  AQ3_odds[i] <- ressy[3]
+}
+
+aq3_hist_dat <- data.frame(
+  Odds = AQ3_odds,
+  Predicted_prob = c("0.0-0.1", "0.1-0.2", "0.2-0.3", "0.3-0.4", "0.4-0.5", "0.5-0.6", 
+                     "0.6-0.7", "0.7-0.8", "0.8-0.9", "0.9-1.0")
+)
+
+# Create a bar plot
+aq3_hist <- ggplot(aq3_hist_dat, aes(x = Predicted_prob, y = AQ3_odds)) +
+  geom_bar(stat = "identity", fill = "#359B73") +
+  labs(title = "A-Q3", x = "Predicted probability", y = "Odds") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+aq3_hist
+
+# Q4
+AQ4_inf_cells <- c()
+AQ4_non_inf_cells <- c()
+AQ4_odds <- c()
+
+for (i in 1:length(min_prob_vect)) {
+  ressy <- odds_fun(prediction_rast =  pred_layers_A_Q4_mean,
+                    cd_rast = dnc_1000,
+                    min_prob = min_prob_vect[i],
+                    max_prob = max_prob_vect[i],
+                    dom_rast = dom_aq4)
+  AQ4_inf_cells[i] <- ressy[1]
+  AQ4_non_inf_cells[i] <- ressy[2]
+  AQ4_odds[i] <- ressy[3]
+}
+
+aq4_hist_dat <- data.frame(
+  Odds = AQ4_odds,
+  Predicted_prob = c("0.0-0.1", "0.1-0.2", "0.2-0.3", "0.3-0.4", "0.4-0.5", "0.5-0.6", 
+                     "0.6-0.7", "0.7-0.8", "0.8-0.9", "0.9-1.0")
+)
+
+# Create a bar plot
+aq4_hist <- ggplot(aq4_hist_dat, aes(x = Predicted_prob, y = AQ4_odds)) +
+  geom_bar(stat = "identity", fill = "#e69f00") +
+  labs(title = "A-Q4", x = "Predicted probability", y = "Odds") +
+  theme_minimal() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+aq4_hist
+
+
+combo_hists_A <- gridExtra::grid.arrange(aq1_hist, aq2_hist, aq3_hist, aq4_hist, ncol = 2, nrow = 2)
+#ggsave("plots/histograms_for_A_with_cnd.png", combo_hists_A)
+
+
+
+
 
 # 
 # png("plots/dom_over_preds_a1.png")
