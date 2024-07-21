@@ -4,7 +4,7 @@
 # Optional command line arguments, must be passed as strings:
 args <- commandArgs(trailingOnly = T)
 if (length(args)<4){
-  INCLUDE_CROSSTERMS <- "no-crossterms" # Set to "no-crossterms" to do model without crossterms or "with-crossterms" to do model with crossterms
+  INCLUDE_CROSSTERMS <- "with-crossterms" # Set to "no-crossterms" to do model without crossterms or "with-crossterms" to do model with crossterms
 }else{
   INCLUDE_CROSSTERMS <- args[4]
 }
@@ -28,7 +28,7 @@ if (length(args)<1){
 
 SAVE_OUTPUTS <- TRUE
 
-B_TEST_DATA_AVAILABLE <- FALSE # Set to TRUE if we have test data for dataset B, otherwise this should be FALSE
+B_TEST_DATA_AVAILABLE <- TRUE # Set to TRUE if we have test data for dataset B, otherwise this should be FALSE
 
 library(dplyr)
 library(embarcadero)
@@ -79,7 +79,8 @@ get_sens_and_spec <- function(sdm, xtest, ytest, ri, cutoff){
                   "auc"=auc))
 }
 
-get_sens_and_spec_for_single_model <- function(perf, pred){
+get_sens_and_spec_for_single_model <- function(pred){
+  perf <-  performance(pred, measure = "sens", x.measure = "spec")
   tss_list <- (perf@x.values[[1]] + perf@y.values[[1]] - 1)
   tss_df <- data.frame(alpha=perf@alpha.values[[1]],tss=tss_list)
   # cutoff <- min(tss_df$alpha[which(tss_df$tss==max(tss_df$tss))])
@@ -100,10 +101,9 @@ get_sens_and_spec_ci <- function(sdm, xtest, ytest, ri, cutoff){
   pred_by_model <- sapply(1:nrow(predmat),
                           FUN=function(i){predmat[i,] %>%
                               prediction(labels = ytest[which(complete.cases(xtest))])})
-  perf_by_model <-  sapply(pred_by_model, FUN=function(pred){performance(pred, measure = "sens", x.measure = "spec")})
   metrics_by_model <- lapply(1:length(pred_by_model),
                              FUN=function(i){
-                               get_sens_and_spec_for_single_model(perf_by_model[[i]], pred_by_model[[i]])})
+                               get_sens_and_spec_for_single_model(pred_by_model[[i]])})
   sens_by_model <- sapply(1:length(metrics_by_model),
                          FUN=function(i){metrics_by_model[[i]]$sens})
   spec_by_model <- sapply(1:length(metrics_by_model),
@@ -142,19 +142,6 @@ if (CV_OR_RI=="ri"){
   metrics_A_Q1 <- get_sens_and_spec(sdm, xtest, ytest, NULL, cutoff)
   metric_cis_A_Q1 <- get_sens_and_spec_ci(sdm, xtest, ytest, NULL, cutoff)
 }
-cat("Dataset A Q1, test metrics:\n sens =",
-    metrics_A_Q1$sens,
-    " (",
-    metric_cis_A_Q1$sens,
-    "),\n spec =",
-    metrics_A_Q1$spec,
-    " (",
-    metric_cis_A_Q1$spec,
-    "),\n AUC =",
-    metrics_A_Q1$auc,
-    " (",
-    metric_cis_A_Q1$auc,
-    ")\n")
 
 if (SAVE_OUTPUTS){
   save(metrics_A_Q1,
@@ -162,7 +149,7 @@ if (SAVE_OUTPUTS){
        file = paste(PATH_TO_OUTPUTS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_metrics_A_Q1.rds", sep = ""))
 }
 
-# Generate risk map with percentiles
+Generate risk map with percentiles
 pred_layers_A_Q1 <- predict(object = sdm,
                       x.layers = covstack,
                       quantiles = c(0.025, 0.975),
@@ -194,19 +181,6 @@ if (CV_OR_RI=="ri"){
   metrics_A_Q2 <- get_sens_and_spec(sdm, xtest, ytest, NULL, cutoff)
   metric_cis_A_Q2 <- get_sens_and_spec_ci(sdm, xtest, ytest, NULL, cutoff)
 }
-cat("Dataset A Q2, test metrics:\n sens =",
-    metrics_A_Q2$sens,
-    " (",
-    metric_cis_A_Q2$sens,
-    "),\n spec =",
-    metrics_A_Q2$spec,
-    " (",
-    metric_cis_A_Q2$spec,
-    "),\n AUC =",
-    metrics_A_Q2$auc,
-    " (",
-    metric_cis_A_Q2$auc,
-    ")\n")
 
 if (SAVE_OUTPUTS){
   save(metrics_A_Q2,
@@ -246,19 +220,6 @@ if (CV_OR_RI=="ri"){
   metrics_A_Q3 <- get_sens_and_spec(sdm, xtest, ytest, NULL, cutoff)
   metric_cis_A_Q3 <- get_sens_and_spec_ci(sdm, xtest, ytest, NULL, cutoff)
 }
-cat("Dataset A Q3, test metrics:\n sens =",
-    metrics_A_Q3$sens,
-    " (",
-    metric_cis_A_Q3$sens,
-    "),\n spec =",
-    metrics_A_Q3$spec,
-    " (",
-    metric_cis_A_Q3$spec,
-    "),\n AUC =",
-    metrics_A_Q3$auc,
-    " (",
-    metric_cis_A_Q3$auc,
-    ")\n")
 
 if (SAVE_OUTPUTS){
   save(metrics_A_Q3,
@@ -298,19 +259,60 @@ if (CV_OR_RI=="ri"){
   metrics_A_Q4 <- get_sens_and_spec(sdm, xtest, ytest, NULL, cutoff)
   metric_cis_A_Q4 <- get_sens_and_spec_ci(sdm, xtest, ytest, NULL, cutoff)
 }
-cat("Dataset A Q4, test metrics:\n sens =",
-    metrics_A_Q4$sens,
+{
+cat("Dataset A Q1, test metrics:\n sens =",
+    signif(metrics_A_Q1$sens, digits=2),
     " (",
-    metric_cis_A_Q4$sens,
+    signif(metric_cis_A_Q1$sens, digits=2),
     "),\n spec =",
-    metrics_A_Q4$spec,
+    signif(metrics_A_Q1$spec, digits=2),
     " (",
-    metric_cis_A_Q4$spec,
+    signif(metric_cis_A_Q1$spec, digits=2),
     "),\n AUC =",
-    metrics_A_Q4$auc,
+    signif(metrics_A_Q1$auc, digits=2),
     " (",
-    metric_cis_A_Q4$auc,
+    signif(metric_cis_A_Q1$auc, digits=2),
     ")\n")
+cat("Dataset A Q2, test metrics:\n sens =",
+    signif(metrics_A_Q2$sens, digits=2),
+    " (",
+    signif(metric_cis_A_Q2$sens, digits=2),
+    "),\n spec =",
+    signif(metrics_A_Q2$spec, digits=2),
+    " (",
+    signif(metric_cis_A_Q2$spec, digits=2),
+    "),\n AUC =",
+    signif(metrics_A_Q2$auc, digits=2),
+    " (",
+    signif(metric_cis_A_Q2$auc, digits=2),
+    ")\n")
+cat("Dataset A Q3, test metrics:\n sens =",
+    signif(metrics_A_Q3$sens, digits=2),
+    " (",
+    signif(metric_cis_A_Q3$sens, digits=2),
+    "),\n spec =",
+    signif(metrics_A_Q3$spec, digits=2),
+    " (",
+    signif(metric_cis_A_Q3$spec, digits=2),
+    "),\n AUC =",
+    signif(metrics_A_Q3$auc, digits=2),
+    " (",
+    signif(metric_cis_A_Q3$auc, digits=2),
+    ")\n")
+cat("Dataset A Q4, test metrics:\n sens =",
+    signif(metrics_A_Q4$sens, digits=2),
+    " (",
+    signif(metric_cis_A_Q4$sens, digits=2),
+    "),\n spec =",
+    signif(metrics_A_Q4$spec, digits=2),
+    " (",
+    signif(metric_cis_A_Q4$spec, digits=2),
+    "),\n AUC =",
+    signif(metrics_A_Q4$auc, digits=2),
+    " (",
+    signif(metric_cis_A_Q4$auc, digits=2),
+    ")\n")
+}
 
 if (SAVE_OUTPUTS){
   save(metrics_A_Q4,
@@ -351,19 +353,6 @@ if (B_TEST_DATA_AVAILABLE){
     metrics_B_Q1 <- get_sens_and_spec(sdm, xtest, ytest, NULL, cutoff)
     metric_cis_B_Q1 <- get_sens_and_spec_ci(sdm, xtest, ytest, NULL, cutoff)
   }
-  cat("Dataset B Q1, test metrics:\n sens =",
-      metrics_B_Q1$sens,
-      " (",
-      metric_cis_B_Q1$sens,
-      "),\n spec =",
-      metrics_B_Q1$spec,
-      " (",
-      metric_cis_B_Q1$spec,
-      "),\n AUC =",
-      metrics_B_Q1$auc,
-      " (",
-      metric_cis_B_Q1$auc,
-      ")\n")
   
   if (SAVE_OUTPUTS){
     save(metrics_B_Q1,
@@ -407,19 +396,6 @@ if (B_TEST_DATA_AVAILABLE){
     metrics_B_Q2 <- get_sens_and_spec(sdm, xtest, ytest, NULL, cutoff)
     metric_cis_B_Q2 <- get_sens_and_spec_ci(sdm, xtest, ytest, NULL, cutoff)
   }
-  cat("Dataset B Q2, test metrics:\n sens =",
-      metrics_B_Q2$sens,
-      " (",
-      metric_cis_B_Q2$sens,
-      "),\n spec =",
-      metrics_B_Q2$spec,
-      " (",
-      metric_cis_B_Q2$spec,
-      "),\n AUC =",
-      metrics_B_Q2$auc,
-      " (",
-      metric_cis_B_Q2$auc,
-      ")\n")
   
   if (SAVE_OUTPUTS){
     save(metrics_B_Q2,
@@ -464,19 +440,6 @@ if (B_TEST_DATA_AVAILABLE){
     metrics_B_Q3 <- get_sens_and_spec(sdm, xtest, ytest, NULL, cutoff)
     metric_cis_B_Q3 <- get_sens_and_spec_ci(sdm, xtest, ytest, NULL, cutoff)
   }
-  cat("Dataset B Q3, test metrics:\n sens =",
-      metrics_B_Q3$sens,
-      " (",
-      metric_cis_B_Q3$sens,
-      "),\n spec =",
-      metrics_B_Q3$spec,
-      " (",
-      metric_cis_B_Q3$spec,
-      "),\n AUC =",
-      metrics_B_Q3$auc,
-      " (",
-      metric_cis_B_Q3$auc,
-      ")\n")
   
   if (SAVE_OUTPUTS){
     save(metrics_B_Q3,
@@ -521,18 +484,57 @@ if (B_TEST_DATA_AVAILABLE){
     metrics_B_Q4 <- get_sens_and_spec(sdm, xtest, ytest, NULL, cutoff)
     metric_cis_B_Q4 <- get_sens_and_spec_ci(sdm, xtest, ytest, NULL, cutoff)
   }
-  cat("Dataset B Q4, test metrics:\n sens =",
-      metrics_B_Q4$sens,
+  cat("Dataset B Q1, test metrics:\n sens =",
+      signif(metrics_B_Q1$sens, digits=2),
       " (",
-      metric_cis_B_Q4$sens,
+      signif(metric_cis_B_Q1$sens, digits=2),
       "),\n spec =",
-      metrics_B_Q4$spec,
+      signif(metrics_B_Q1$spec, digits=2),
       " (",
-      metric_cis_B_Q4$spec,
+      signif(metric_cis_B_Q1$spec, digits=2),
       "),\n AUC =",
-      metrics_B_Q4$auc,
+      signif(metrics_B_Q1$auc, digits=2),
       " (",
-      metric_cis_B_Q4$auc,
+      signif(metric_cis_B_Q1$auc, digits=2),
+      ")\n")
+  cat("Dataset B Q2, test metrics:\n sens =",
+      signif(metrics_B_Q2$sens, digits=2),
+      " (",
+      signif(metric_cis_B_Q2$sens, digits=2),
+      "),\n spec =",
+      signif(metrics_B_Q2$spec, digits=2),
+      " (",
+      signif(metric_cis_B_Q2$spec, digits=2),
+      "),\n AUC =",
+      signif(metrics_B_Q2$auc, digits=2),
+      " (",
+      signif(metric_cis_B_Q2$auc, digits=2),
+      ")\n")
+  cat("Dataset B Q3, test metrics:\n sens =",
+      signif(metrics_B_Q3$sens, digits=2),
+      " (",
+      signif(metric_cis_B_Q3$sens, digits=2),
+      "),\n spec =",
+      signif(metrics_B_Q3$spec, digits=2),
+      " (",
+      signif(metric_cis_B_Q3$spec, digits=2),
+      "),\n AUC =",
+      signif(metrics_B_Q3$auc, digits=2),
+      " (",
+      signif(metric_cis_B_Q3$auc, digits=2),
+      ")\n")
+  cat("Dataset B Q4, test metrics:\n sens =",
+      signif(metrics_B_Q4$sens, digits=2),
+      " (",
+      signif(metric_cis_B_Q4$sens, digits=2),
+      "),\n spec =",
+      signif(metrics_B_Q4$spec, digits=2),
+      " (",
+      signif(metric_cis_B_Q4$spec, digits=2),
+      "),\n AUC =",
+      signif(metrics_B_Q4$auc, digits=2),
+      " (",
+      signif(metric_cis_B_Q4$auc, digits=2),
       ")\n")
   
   if (SAVE_OUTPUTS){

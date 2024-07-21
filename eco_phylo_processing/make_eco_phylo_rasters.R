@@ -374,6 +374,16 @@ CLOVER_df <- CLOVER_df[which((CLOVER_df$Detection_NotSpecified == "TRUE") |
 species_list <- unique(CLOVER_df$Host)
 no_host_species <- length(species_list)
 
+# Quick check to make sure none of the species we dropped in previous section
+# are known hosts:
+missing_species_df$status_in_CLOVER <- sapply(1:nrow(missing_species_df),
+                                              FUN=function(i){
+                                                (missing_species_df$Species1_BirdLife[1] %in% species_list)|
+                                                  (missing_species_df$Species2_eBird[1] %in% species_list)|
+                                                  (missing_species_df$Species3_BirdTree[1] %in% species_list)})
+cat(length(which(missing_species_df$status_in_CLOVER)),
+    "species dropped in previous section are known hosts.")
+
 # Alternatively, we could count the number of times each species appears if we
 # want to restrict to species with incidence above a certain window:
 
