@@ -1,0 +1,760 @@
+<VRTDataset rasterXSize="28800" rasterYSize="14400">
+  <SRS dataAxisToSRSAxisMapping="1,2">PROJCS["unnamed",GEOGCS["Unknown datum based upon the custom spheroid",DATUM["Not specified (based on custom spheroid)",SPHEROID["Custom spheroid",6371007.181,0]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]]],PROJECTION["Sinusoidal"],PARAMETER["longitude_of_center",0],PARAMETER["false_easting",0],PARAMETER["false_northing",0],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH]]</SRS>
+  <GeoTransform> -4.4478020786669999e+06,  4.6331271652779253e+02,  0.0000000000000000e+00,  1.0007554676999999e+07,  0.0000000000000000e+00, -4.6331271652777457e+02</GeoTransform>
+  <VRTRasterBand dataType="Byte" band="1">
+    <NoDataValue>255</NoDataValue>
+    <ColorInterp>Gray</ColorInterp>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/1.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="0" yOff="7200" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/10.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="7200" yOff="0" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/11.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="7200" yOff="2400" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/12.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="7200" yOff="4800" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/13.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="7200" yOff="7200" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/14.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="7200" yOff="9600" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/15.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="7200" yOff="12000" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/16.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="9600" yOff="0" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/17.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="9600" yOff="2400" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/18.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="9600" yOff="4800" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/19.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="9600" yOff="7200" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/2.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="0" yOff="9600" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/20.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="9600" yOff="9600" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/21.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="9600" yOff="12000" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/22.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="12000" yOff="0" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/23.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="12000" yOff="2400" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/24.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="12000" yOff="4800" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/25.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="12000" yOff="7200" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/26.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="12000" yOff="9600" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/27.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="12000" yOff="12000" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/28.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="14400" yOff="2400" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/29.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="14400" yOff="4800" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/3.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="2400" yOff="2400" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/30.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="14400" yOff="7200" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/31.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="14400" yOff="9600" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/32.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="14400" yOff="12000" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/33.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="16800" yOff="2400" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/34.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="16800" yOff="4800" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/35.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="16800" yOff="7200" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/36.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="16800" yOff="9600" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/37.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="16800" yOff="12000" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/38.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="19200" yOff="4800" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/39.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="19200" yOff="7200" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/4.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="2400" yOff="4800" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/40.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="19200" yOff="9600" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/41.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="19200" yOff="12000" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/42.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="21600" yOff="7200" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/43.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="21600" yOff="9600" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/44.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="21600" yOff="12000" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/45.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="24000" yOff="9600" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/46.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="24000" yOff="12000" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/47.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="26400" yOff="12000" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/48.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="0" yOff="7200" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/49.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="0" yOff="9600" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/5.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="2400" yOff="7200" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/50.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="2400" yOff="2400" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/51.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="2400" yOff="4800" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/52.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="2400" yOff="7200" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/53.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="2400" yOff="12000" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/54.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="4800" yOff="2400" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/55.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="4800" yOff="4800" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/56.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="4800" yOff="12000" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/57.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="7200" yOff="0" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/58.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="7200" yOff="2400" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/59.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="7200" yOff="4800" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/6.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="2400" yOff="12000" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/60.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="7200" yOff="7200" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/61.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="7200" yOff="9600" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/62.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="7200" yOff="12000" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/63.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="9600" yOff="0" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/64.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="9600" yOff="2400" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/65.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="9600" yOff="4800" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/66.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="9600" yOff="7200" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/67.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="9600" yOff="9600" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/68.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="9600" yOff="12000" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/69.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="12000" yOff="0" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/7.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="4800" yOff="2400" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/70.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="12000" yOff="2400" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/71.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="12000" yOff="4800" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/72.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="12000" yOff="7200" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/73.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="12000" yOff="9600" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/74.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="12000" yOff="12000" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/75.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="14400" yOff="2400" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/76.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="14400" yOff="4800" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/77.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="14400" yOff="7200" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/78.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="14400" yOff="9600" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/79.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="14400" yOff="12000" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/8.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="4800" yOff="4800" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/80.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="16800" yOff="2400" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/81.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="16800" yOff="4800" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/82.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="16800" yOff="7200" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/83.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="16800" yOff="9600" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/84.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="16800" yOff="12000" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/85.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="19200" yOff="4800" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/86.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="19200" yOff="7200" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/87.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="19200" yOff="9600" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/88.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="19200" yOff="12000" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/89.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="21600" yOff="7200" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/9.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="4800" yOff="12000" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/90.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="21600" yOff="9600" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/91.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="21600" yOff="12000" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/92.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="24000" yOff="9600" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/93.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="24000" yOff="12000" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\hayes\OneDrive - Nexus365\Documents\GitHub\avian_flu_sdm\data/landcover_data/landcover_LC_Type1/94.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2400" RasterYSize="2400" DataType="Byte" BlockXSize="2400" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="2400" ySize="2400" />
+      <DstRect xOff="26400" yOff="12000" xSize="2400" ySize="2400" />
+      <NODATA>255</NODATA>
+    </ComplexSource>
+  </VRTRasterBand>
+</VRTDataset>
