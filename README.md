@@ -11,16 +11,16 @@ Below we outline the steps involved in using the code to conduct the analysis.
 
 *Avian influenza (AI) data* 
 
-Compiling the outcome data using publicly available data on avian influenza in wild birds from FAO and WOAH.
+Compiling the outcome data using publicly available data sources on avian influenza in wild birds from FAO (EMPRES-i data product) and WOAH (WAHIS data product).
 
-Main script for this is *create_flu_csv_no_bvbrc.R*
+Main script for this is *avian_flu_scripts/create_flu_csv_no_bvbrc.R*
 
 
 *Pseudoabsence generation*  
 
-Select pseudoabsences at ~1:1 ratio from same 10km^2 grid, weighted sample by eBird surveillance records (10km^2 gridded counts of unique date/user/lat-long combinations recorded between 7/10/2005 and 30/6/2023, regardless of species sighted (or not sighted)) 
+Select pseudoabsences at ~1:1 ratio from same 10km^2 grid, weighted sample by log-eBird surveillance records (10km^2 gridded counts of unique date/user/lat-long combinations recorded between 7/10/2005 and 30/6/2023, regardless of species sighted (or not sighted)) 
 
-Pseudoabsences are also sampled with restriction they must be > 25km from positives 
+Pseudoabsences are also sampled with restriction they must be > 25km from positives.
 
  
 
@@ -28,9 +28,10 @@ Pseudoabsences are also sampled with restriction they must be > 25km from positi
 
 Thin records and pseudoabsences on the 10km^2 grid independently by environmental filtering (sometimes caled “occfilt env”/”occfilter env”): divide environmental space into m x n strata (where m = number of environment layers and n = number of bins) and stratified sample from each 
 
-We thin based on 9 purely environmental layers taking just one if a feature represented by multiple (distance to coast, distance to inland water, max elevation, diurnal temp range, precipitation, humidity, mean monthy temp, temp seasonality, ndvi) and use 6 bins 
+We thin based on 9 purely environmental layers each divided into 6 strata (distance to coast, distance to inland water, max elevation, diurnal temp range, precipitation, humidity, mean monthly temp, temp seasonality, ndvi) Only one data point is retained per combination of strata in this 9-dimensional environmental space
 
- 
+Both pseudoabsence generation and data thinning are handled by *resample_training_data.R*
+
 
 *Construction of training and testing data sets* 
 
