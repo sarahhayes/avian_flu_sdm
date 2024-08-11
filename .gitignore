@@ -2,7 +2,7 @@
 .DS_Store
 ~$*
 .Rproj.user
-data
+data/
 *.tif
 LandCoverData
 data_offline/
@@ -12,3 +12,4 @@ plots/resampling/retired
 training_sets/raw
 data/eco_phylo_data
 plots/old_plots
+ebird/ebird_data
