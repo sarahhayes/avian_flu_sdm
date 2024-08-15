@@ -7,46 +7,40 @@ Below we outline the steps involved in using the code to conduct the analysis.
 
 ## Data preparation
 
-*Avian influenza (AI) data* 
+### Avian influenza (AI) data 
 
-Compiling the outcome data using publicly available data sources on avian influenza in wild birds from FAO (EMPRES-i data product) and WOAH (WAHIS data product).
-
-Main script for this is *avian_flu_scripts/create_flu_csv_no_bvbrc.R*
+Avian influenza detection data is compiled into a .csv file using publicly available data sources on avian influenza in wild birds from FAO (EMPRES-i data product) and WOAH (WAHIS data product) in *avian_flu_scripts/create_flu_csv_no_bvbrc.R*.
 
 
-*Pseudoabsence generation*  
-
-Select pseudoabsences at ~1:1 ratio from same 10km^2 grid, weighted sample by log-eBird surveillance records (10km^2 gridded counts of unique date/user/lat-long combinations recorded between 7/10/2005 and 30/6/2023, regardless of species sighted (or not sighted)) 
-
-Pseudoabsences are also sampled with restriction they must be > 25km from positives.
-
- 
-
-*Thinning of avian influenza incidence data* 
-
-Thin records and pseudoabsences on the 10km^2 grid independently by environmental filtering (sometimes caled “occfilt env”/”occfilter env”): divide environmental space into m x n strata (where m = number of environment layers and n = number of bins) and stratified sample from each 
-
-We thin based on 9 purely environmental layers each divided into 6 strata (distance to coast, distance to inland water, max elevation, diurnal temp range, precipitation, humidity, mean monthly temp, temp seasonality, ndvi) Only one data point is retained per combination of strata in this 9-dimensional environmental space
+### Pseudoabsence generation
 
 Both pseudoabsence generation and data thinning are handled by *resample_training_data.R*
 
+Pseudoabsences are selected at an approximately 1:1 ratio relative to the number of detections from same 10km^2 grid, weighted sample by log-eBird surveillance records (10km^2 gridded counts of unique date/user/lat-long combinations recorded between 7/10/2005 and 30/6/2023, regardless of species sighted (or not sighted)) and with the restriction that they must be greater than 25km from any positive detection.
 
-*Construction of training and testing data sets* 
+### Thinning of avian influenza incidence data 
 
-Training set A: all flu records before 2020/21 H5N8 outbreak (therefore includes 2017 H5N8 outbreak), plus pseudoabsences and thinned  
-Test set A: 2020/21 H5N8 outbreak 
+We thin the detection records and pseudoabsences on the 10km^2 grid independently by environmental filtering (sometimes caled “occfilt env”/”occfilter env”): this divides the environmental space into m x n strata (where m = number of environment layers and n = number of bins) and takes a stratified sample from each.
+
+We thin based on 9 purely environmental layers each divided into 6 strata (distance to coast, distance to inland water, max elevation, diurnal temp range, precipitation, humidity, mean monthly temp, temp seasonality, ndvi) Only one data point is retained per combination of strata in this 9-dimensional environmental space
+
+
+### Construction of training and testing data sets 
+
+Training set A: 7/10/2005 to 31/12/2019 (all thinned flu records and pseudoabsences before 2020/21 H5N8 outbreak, including 2017 H5N8 outbreak)
+Test set A: 1/1/2020 to 31/8/2021 (2020/21 H5N8 outbreak)
  
-Training set B: all flu records post-2020/21 H5N8 outbreak (vast majority is 2021- H5N1 outbreak) 
-
+Training set B: 1/9/2021 to 30/3/2023 (early part of 2020/21 H5N8 outbreak period)
+Test set B: 1/4/2023 to 30/3/2024 (early part of 2020/21 H5N8 outbreak period)
  
 
-*Variables for inclusion:* 
+### Variables for inclusion: 
 
-**Environmental**
+#### Environmental
 
-Scripts for processing of the environmental variables are in the folder *variable_manipulation*
+Scripts for processing of the environmental variables are in the folder *variable_manipulation*.
 
-**Ecological** 
+#### Ecological 
 
 A preliminary analysis to identify species-level factors associated with avian flu host status is performed in *host_species_analysis_all_ET.R* (host_species_analysis.R looks at only those species present in Europe according to eBird and is thus less comprehensive than *host_species_analysis_all_ET.R*, which covers a maximal set of species found in eBird, EltonTraits, and the IUCN Red List). Based on the findings around variable importance obtained in this script, we choose specific species-level factors to include in our geospatial model, outlined below. The rasters of ecological covariates are constructed in *make_eco_phylo_rasters.R.* 
 
