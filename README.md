@@ -11,30 +11,39 @@ Below we outline the steps involved in using the code to conduct the analysis.
 
 Avian influenza detection data is compiled into a .csv file using publicly available data sources on avian influenza in wild birds from FAO (EMPRES-i data product) and WOAH (WAHIS data product) in *avian_flu_scripts/create_flu_csv_no_bvbrc.R*.
 
+### Construction of training and testing data sets 
+
+*resample_training_data.R* defines scope of training and testing periods. Cleaned avian influenza data is read in before splitting as follows:
+
+Training set A: 7/10/2005 to 31/12/2019 (avian influenza records before 2020/21 H5N8 outbreak, including 2017 H5N8 outbreak; all HPAI subtypes)
+Test set A: 1/1/2020 to 31/8/2021 (2020/21 H5N8 outbreak; H5N8 subtype only)
+ 
+Training set B: 1/9/2021 to 30/3/2023 (start of ongoing 2021- H5N1 outbreak; H5N1 only)
+Test set B: 1/4/2023 to 30/3/2024 (most recent complete calendar year of ongoing 2021- H5N1 outbreak; H5N1 only)
+
+Raw records are plotted in time and space as `data_fig.png`, before stratifying by calendar quarter and assigning cells on a 10km^2 grid as either positives (regardless of number of influenza records) or negatives.
 
 ### Pseudoabsence generation
 
 Both pseudoabsence generation and data thinning are handled by *resample_training_data.R*
 
-Pseudoabsences are selected at an approximately 1:1 ratio relative to the number of detections from same 10km^2 grid, weighted sample by log-eBird surveillance records (10km^2 gridded counts of unique date/user/lat-long combinations recorded between 7/10/2005 and 30/6/2023, regardless of species sighted (or not sighted)) and with the restriction that they must be greater than 25km from any positive detection.
+Pseudoabsences are selected for each quarter of each dataset at an approximately 1:1 ratio relative to the number of positives from same 10km^2 grid, in a sample weighted by log-eBird surveillance records (see *Weighting layer* below) and with further restriction that they must be greater than 25km from any positive detection.
 
 ### Thinning of avian influenza incidence data 
 
-We thin the detection records and pseudoabsences on the 10km^2 grid independently by environmental filtering (sometimes caled “occfilt env”/”occfilter env”): this divides the environmental space into m x n strata (where m = number of environment layers and n = number of bins) and takes a stratified sample from each.
+Positives and pseudoabsences on the 10km^2 grid are then thinned independently by environmental filtering (sometimes caled “occfilt env”/”occfilter env”): this divides the environmental space into m x n strata (where m = number of environment layers and n = number of bins) and takes a stratified sample from each (see [Varela et al. 2014](https://doi.org/10.1111/j.1600-0587.2013.00441.x)).
 
-We thin based on 9 purely environmental layers each divided into 6 strata (distance to coast, distance to inland water, max elevation, diurnal temp range, precipitation, humidity, mean monthly temp, temp seasonality, ndvi) Only one data point is retained per combination of strata in this 9-dimensional environmental space
+We thin based on 9 purely environmental layers each divided into 6 strata (distance to coast, distance to inland water, max elevation, diurnal temp range, precipitation, humidity, mean monthly temp, temp seasonality, ndvi) Only one data point is retained per combination of strata in this 9-dimensional environmental space.
+
+Thinned positives and thinned pseudoabsences are finally combined to create single training and test set files for each quarter of each dataset, which are saved in folder `training_sets`.
 
 
-### Construction of training and testing data sets 
 
-Training set A: 7/10/2005 to 31/12/2019 (all thinned flu records and pseudoabsences before 2020/21 H5N8 outbreak, including 2017 H5N8 outbreak)
-Test set A: 1/1/2020 to 31/8/2021 (2020/21 H5N8 outbreak)
- 
-Training set B: 1/9/2021 to 30/3/2023 (early part of 2020/21 H5N8 outbreak period)
-Test set B: 1/4/2023 to 30/3/2024 (early part of 2020/21 H5N8 outbreak period)
- 
+### Variable manipulation: 
 
-### Variables for inclusion: 
+#### Weighting layer
+
+*prepping_ebird_obs_layer.R* reads in the [eBird Basic Dataset (EBD)](https://science.ebird.org/en/use-ebird-data/download-ebird-data-products) and filters to reported citizen science bird sightings in Europe between 7/10/2005 and 30/6/2023 based on spatial extent. These are then mapped to a 10km^2 grid and summed as counts of unique date/user/lat-long combinations (regardless of species sighted or not sighted) to represent bird surveillance accessibility. The outputted raster is used in pseudoabsence selection, but is **not** used as input to BART models.
 
 #### Environmental
 
