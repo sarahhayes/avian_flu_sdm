@@ -1,7 +1,7 @@
 # avian_flu_sdm
 
 The code in this repository was used to conduct the analysis outlined in the following biorXiv prerprint:
-* Sarah Hayes, Joe Hilton, Joaquin Mould-Quevedo, Christl Donnelly, Matthew Baylis, Liam Brierley (2024) &quot;Ecology and environment predict spatially stratified risk of highly pathogenic avian influenza in wild birds across Europe.&quot; <i>bioRXiv</i> doi:10.1101/2024.07.17.603912
+* Sarah Hayes, Joe Hilton, Joaquin Mould-Quevedo, Christl Donnelly, Matthew Baylis, Liam Brierley (2024) &quot;Ecology and environment predict spatially stratified risk of highly pathogenic avian influenza in wild birds across Europe.&quot; <i>bioRxiv</i> doi:10.1101/2024.07.17.603912
 
 Below we outline the steps involved in using the code to conduct the analysis.
 
@@ -39,7 +39,7 @@ Thinned positives and thinned pseudoabsences are finally combined to create sing
 
 
 
-### Variable manipulation: 
+### Variable manipulation
 
 #### Weighting layer
 
@@ -47,7 +47,7 @@ Thinned positives and thinned pseudoabsences are finally combined to create sing
 
 #### Environmental
 
-Scripts for processing of the environmental variables are in the folder *variable_manipulation*.
+Scripts for processing of the environmental covariates are in the folder *variable_manipulation*.
 
 #### Ecological 
 
@@ -75,5 +75,21 @@ Model construction, fitting, and analysis is done across these scripts:
 2. *assemble_datasets.R* loads in the multilayer covariate raster generated in *assemble_covariates.R* along with all of the training/test coordinates. For each coordinate dataset (12 overall, A/B, Q1 to Q4, test/train for A, training only for B) it creates a CSV file containing the complete machine learning model output for that season. The CSV file contains the pos/neg status of each coordinate datapoint (column y), the country that coordinate lies in (column ri), and the values of the covariates at that coordinate. 
 3a. *fit_avian_flu_model_with_cv.R* loads in each dataset generated in assemble_covariates.R and performs the BART fitting for each of the datasets. The embarcadero package does not natively allow for custom BART parameters in the variable selection function bart.step. We would like to use this functionality since we can then improve model performance by optimising these parameters through crossvalidation and using them in the model. We thus define versions of a few embarcadero functions, rewritten to take BART parameters as arguments. We also define functions based on operations within the embarcadero::summary function which calculate test performance metrics (TSS, AUC, sensitivity, specificity) for a fitted model. For each dataset (A/B, Q1 to Q4) we first perform 5-fold crossvalidation using a for loop sweeping over a range of values for the BART parameters k, base, and power, and choose the values that give the highest mean AUC across the five folds. We then fit a BART model with these parameters and save it as cv_model_*_Q*.rds. We then use our customised version of the bart.step function to perform variable selection, leaving us with an optimally parsimonious model. We save this model as cv_model_with_vs_*_Q*.rds.
 3b. *fit_avian_flu_model_with_ri.R* does the same tasks as *fit_avian_flu_model_with_cv.rds*, but adds a random intercept on country to the model. This requires some light “exploitation” of the embarcadero and dbarts packages – dbarts throws an error if custom values of the BART parameter k are passed to a random intercept model as function parameters in a nested function, but does not if this parameter is passed as a global variable. We can thus make the random intercept + custom parameters structure work by defining and redefining a global variable K_OPT, the optimal value for k obtained through crossvalidation. The other two BART parameters (power and base) do not have any such problems. Analogously to in *fit_avian_flu_model_with_cv.rds* , the fitted models from this script are saved as ri_model_*_Q*.rds and ri_model_with_vs_*_Q*.rds 
-4. *predictions_from_fitted_models.R* generates Europe-level geospatial avian flu presence probability projections with 95% confidence intervals (i.e. 2.5% and 97.5% layers) for each dataset/quarter combination based on the model fits obtained in *fit_avian_flu_model_with_cv.R*.  These are saved as predictions_*_Q*.rds. For dataset A, test metrics are calculated for each model and saved as metrics_A_Q*.rds.
+4. *predictions_from_fitted_models.R* generates Europe-level geospatial avian flu presence probability projections with 95% credible intervals (i.e. 2.5% and 97.5% percentile layers) for each dataset/quarter combination based on the model fits obtained in *fit_avian_flu_model_with_cv.R*.  These are saved as predictions_*_Q*.rds and plots produced via *plot_projections.R*. For dataset A, test metrics are calculated for each model and saved as metrics_A_Q*.rds.
 5. We provide bash shell scripts with names in the format *sbatch_fit_\*.sh* specifying the different combinations of random intercepts and cross-seasonal covariates which can be used to run the *fit_avian_flu_model_\*.R* scripts on Unix-based high performance computing environments.
+
+### Model interpretation
+
+##### Variable importance
+
+Both variable importance and partial dependence are handled by *varimp_pd_plot.R*.
+
+Models fits for each dataset/quarter combination are loaded and variable importance calculated as relative frequency of retention of each individual covariate across component trees within posterior draws of the BART model, rescaled by the maximum frequency count. Means and standard deviations are then calculated in relative variable importance for each covariate and plotted as `variable_importance_quarterly_*.png`
+
+##### Partial dependence
+
+Partial dependence is then calculated for model fits for each dataset/quarter combination, for either the top six covariates per model by variable importance (if `ALL_VARS_FOR_PD = FALSE`) or all covariates per model (if `ALL_VARS_FOR_PD = TRUE`). Partial dependence is calculated for continuous covariates by generating model predicted probabilities for shifting values of the focal covariate whilst averaging over all observed values for other covariates (marginal predictions), and for binary covariates by generating predictions for `x = 0` and `x = 1` in the same way. Medians, 2.5th, and 97.5th percentiles in predicted probabilities are then calculated for each covariate and plotted as either `partial_dependence_top_mean_*.png` (if `ALL_VARS_FOR_PD = FALSE`) or `partial_dependence_*_Q*.png`(if `ALL_VARS_FOR_PD = TRUE`).
+
+Plots of variable importance and partial dependence combining all dataset/quarter combinations are also generated as `variable_importance_quarterly_combi.png` and `partial_dependence_top_mean_combi.png`
+
+
