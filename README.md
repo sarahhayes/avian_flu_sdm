@@ -31,9 +31,9 @@ Pseudoabsences are selected for each quarter of each dataset at an approximately
 
 ### Thinning of avian influenza incidence data 
 
-Positives and pseudoabsences on the 10km^2 grid are then thinned independently by environmental filtering (sometimes caled “occfilt env”/”occfilter env”): this divides the environmental space into m x n strata (where m = number of environment layers and n = number of bins) and takes a stratified sample from each (see [Varela et al. 2014](https://doi.org/10.1111/j.1600-0587.2013.00441.x)).
+Positives and pseudoabsences on the 10km^2 grid are then thinned independently by environmental filtering (sometimes called “occfilt env”/”occfilter env”): this divides the environmental space into m x n strata (where m = number of environment layers and n = number of bins) and takes a stratified sample from each (see [Varela et al. 2014](https://doi.org/10.1111/j.1600-0587.2013.00441.x)).
 
-We thin based on 9 purely environmental layers each divided into 6 strata (distance to coast, distance to inland water, max elevation, diurnal temp range, precipitation, humidity, mean monthly temp, temp seasonality, ndvi) Only one data point is retained per combination of strata in this 9-dimensional environmental space.
+We thin based on 9 purely environmental layers each divided into 6 strata (distance to coast, distance to inland water, max elevation, diurnal temperature range, precipitation, humidity, mean monthly temperature, temperature seasonality, normalised difference vegetation index (ndvi)) Only one data point is retained per combination of strata in this 9-dimensional environmental space.
 
 Thinned positives and thinned pseudoabsences are finally combined to create single training and test set files for each quarter of each dataset, which are saved in folder `training_sets`.
 
