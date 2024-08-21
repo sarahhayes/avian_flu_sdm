@@ -1,6 +1,6 @@
 # avian_flu_sdm
 
-The code in this repository was used to conduct the analysis outlined in the following biorXiv prerprint:
+The code in this repository was used to conduct the analysis outlined in the following bioRxiv preprint:
 * Sarah Hayes, Joe Hilton, Joaquin Mould-Quevedo, Christl Donnelly, Matthew Baylis, Liam Brierley (2024) &quot;Ecology and environment predict spatially stratified risk of highly pathogenic avian influenza in wild birds across Europe.&quot; <i>bioRxiv</i> doi:10.1101/2024.07.17.603912
 
 Below we outline the steps involved in using the code to conduct the analysis.
