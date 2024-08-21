@@ -9,7 +9,7 @@ Below we outline the steps involved in using the code to conduct the analysis.
 
 ### Avian influenza (AI) data 
 
-Avian influenza detection data is compiled into a .csv file using publicly available data sources on avian influenza in wild birds from FAO (EMPRES-i data product) and WOAH (WAHIS data product) in *avian_flu_scripts/create_flu_csv_no_bvbrc.R*.
+Avian influenza detection data is compiled into a .csv file using publicly available data sources on avian influenza in wild birds from FAO (EMPRES-i data product) and WOAH (WAHIS data product) in *avian_flu_scripts/create_flu_csv_no_bvbrc.R*. Only high pathogenicity avian influenza (HPAI) subtypes are included. 
 
 ### Construction of training and testing data sets 
 
