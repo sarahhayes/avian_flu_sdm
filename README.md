@@ -43,7 +43,7 @@ Thinned positives and thinned pseudoabsences are finally combined to create sing
 
 #### Weighting layer
 
-*prepping_ebird_obs_layer.R* reads in the [eBird Basic Dataset (EBD)](https://science.ebird.org/en/use-ebird-data/download-ebird-data-products) and filters to reported citizen science bird sightings in Europe between 7/10/2005 and 30/6/2023 based on spatial extent. These are then mapped to a 10km^2 grid and summed as counts of unique date/user/lat-long combinations (regardless of species sighted or not sighted) to represent bird surveillance accessibility. The outputted raster is used in pseudoabsence selection, but is **not** used as input to BART models.
+*prepping_ebird_obs_layer.R* reads in the [eBird Basic Dataset (EBD)](https://science.ebird.org/en/use-ebird-data/download-ebird-data-products) and filters to reported citizen science bird sightings in Europe between 7/10/2005 and 30/6/2023 based on spatial extent. These are then mapped to a 10km^2 grid and summed as counts of unique date/user/latitude-longitude combinations (regardless of species sighted or not sighted) to represent bird surveillance accessibility. The outputted raster is used in pseudoabsence selection, but is **not** used as input to BART models.
 
 #### Environmental
 
