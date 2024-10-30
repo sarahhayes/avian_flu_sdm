@@ -31,6 +31,17 @@ sp_df$scientific_name <- sapply(sp_df$scientific_name,
                                 tolower,
                                 USE.NAMES = FALSE)
 
+# Get codes for species in Europe
+euro_bird_codes <- read.csv("ebird/codes_for_europe_clean.csv")
+
+# euro_bird_codes <- read.csv("ebird/species_europe_2024_after_pkg_update.csv")
+# euro_bird_codes <- euro_bird_codes[, c("common_name", "sci_code")]
+
+no_euro_birds <- nrow(euro_bird_codes)
+
+#Restrict to species in Europe list
+sp_df <- sp_df[which(sp_df$species_code %in% euro_bird_codes$code), ]
+
 p <- ggplot(sp_df) +
   geom_point(aes(x=breeding_start, y=breeding_end, colour="Breeding")) +
   geom_point(aes(x=nonbreeding_start, y=nonbreeding_end, colour="Nonbreeding")) +
@@ -90,8 +101,28 @@ nonbreeding_start <- date_seq[(is_largest[,3] %>% which() %>% max()) + 1]
 postbreeding_start <- date_seq[is_largest[,3] %>% which() %>% min()]
 prebreeding_start <- date_seq[is_largest[,4] %>% which() %>% min()]
 
+cat("Based on plurality season limits are\n",
+    nonbreeding_start %>% as.character(),
+    "\n",
+    prebreeding_start %>% as.character(),
+    "\n",
+    breeding_start %>% as.character(),
+    "\n",
+    postbreeding_start %>% as.character()
+    )
+
 is_maj <- season_df_short[,2:5]> 0.5 * rowSums(season_df_short[,2:5])
 breeding_start <- date_seq[is_maj[,1] %>% which() %>% min()]
 nonbreeding_start <- date_seq[(is_maj[,3] %>% which() %>% max()) + 1]
 postbreeding_start <- date_seq[is_maj[,3] %>% which() %>% min()]
 prebreeding_start <- date_seq[is_maj[,4] %>% which() %>% min()]
+
+cat("Based on first majority date season limits are\n",
+    nonbreeding_start %>% as.character(),
+    "\n",
+    prebreeding_start %>% as.character(),
+    "\n",
+    breeding_start %>% as.character(),
+    "\n",
+    postbreeding_start %>% as.character()
+)

@@ -10,11 +10,23 @@ QUALITY_METHOD <- "HQ_WEIGHTED" # Options are: "HQ_ONLY" to only use species wit
                   # weeks as zero (not currently implemented!); "ALL" to use all species including those with
                   # lower-quality abundance estimates.
 QUARTERLY <- TRUE # Generate quarterly (weeks 1-13 etc) rasters, otherwise do weekly
+ECO_QTR_BNDS <- FALSE
 SAVE_RAST <- FALSE # Save output rasters
 
 if (QUARTERLY){
   nlyrs <- 4
-  qrtr_bds <- c(1, 14, 27, 40, 53)
+  if (ECO_QTR_BNDS){
+    qrtr_bds <- c("2021-11-30",
+                  "2021-03-01",
+                  "2021-06-07",
+                  "2021-08-10") %>%
+      as.Date() %>%
+      format("%W") %>%
+      sort() %>%
+      as.integer()
+  }else{
+    qrtr_bds <- c(1, 14, 27, 40, 53)
+  }
 }else{
   nlyrs <- 52
 }
@@ -1240,21 +1252,39 @@ idx_to_download <- which(sp_df$species_code %in% not_downloaded)
 }
 
 if (SAVE_RAST){
-  writeRaster(cong_rast, "output/cong_rast.tif", overwrite=TRUE)
-  writeRaster(migr_rast, "output/migr_rast.tif", overwrite=TRUE)
-  writeRaster(around_surf_rast, "output/around_surf_rast.tif", overwrite=TRUE)
-  writeRaster(below_surf_rast, "output/below_surf_rast.tif", overwrite=TRUE)
-  writeRaster(plant_rast, "output/plant_rast.tif", overwrite=TRUE)
-  writeRaster(scav_rast, "output/scav_rast.tif", overwrite=TRUE)
-  writeRaster(vend_rast, "output/vend_rast.tif", overwrite=TRUE)
-  writeRaster(host_dist_rast, "output/host_dist_rast.tif", overwrite=TRUE)
-  writeRaster(species_rast, "output/species_richness_rast.tif", overwrite=TRUE)
-  writeRaster(ardeidae_rast, "output/ardeidae_rast.tif", overwrite=TRUE)
-  writeRaster(arenaria_calidris_rast, "output/arenaria_calidris_rast.tif", overwrite=TRUE)
-  writeRaster(laridae_rast, "output/laridae_rast.tif", overwrite=TRUE)
-  writeRaster(anserinae_rast, "output/anserinae_rast.tif", overwrite=TRUE)
-  writeRaster(aythyini_rast, "output/aythyini_rast.tif", overwrite=TRUE)
-  writeRaster(anatinae_rast, "output/anatinae_rast.tif", overwrite=TRUE)
+  if (ECO_QTR_BNDS){
+    writeRaster(cong_rast, "output/cong_rast_eco_bds.tif", overwrite=TRUE)
+    writeRaster(migr_rast, "output/migr_rast_eco_bds.tif", overwrite=TRUE)
+    writeRaster(around_surf_rast, "output/around_surf_rast_eco_bds.tif", overwrite=TRUE)
+    writeRaster(below_surf_rast, "output/below_surf_rast_eco_bds.tif", overwrite=TRUE)
+    writeRaster(plant_rast, "output/plant_rast_eco_bds.tif", overwrite=TRUE)
+    writeRaster(scav_rast, "output/scav_rast_eco_bds.tif", overwrite=TRUE)
+    writeRaster(vend_rast, "output/vend_rast_eco_bds.tif", overwrite=TRUE)
+    writeRaster(host_dist_rast, "output/host_dist_rast_eco_bds.tif", overwrite=TRUE)
+    writeRaster(species_rast, "output/species_richness_rast_eco_bds.tif", overwrite=TRUE)
+    writeRaster(ardeidae_rast, "output/ardeidae_rast_eco_bds.tif", overwrite=TRUE)
+    writeRaster(arenaria_calidris_rast, "output/arenaria_calidris_rast_eco_bds.tif", overwrite=TRUE)
+    writeRaster(laridae_rast, "output/laridae_rast_eco_bds.tif", overwrite=TRUE)
+    writeRaster(anserinae_rast, "output/anserinae_rast_eco_bds.tif", overwrite=TRUE)
+    writeRaster(aythyini_rast, "output/aythyini_rast_eco_bds.tif", overwrite=TRUE)
+    writeRaster(anatinae_rast, "output/anatinae_rast_eco_bds.tif", overwrite=TRUE)
+  }else{
+    writeRaster(cong_rast, "output/cong_rast.tif", overwrite=TRUE)
+    writeRaster(migr_rast, "output/migr_rast.tif", overwrite=TRUE)
+    writeRaster(around_surf_rast, "output/around_surf_rast.tif", overwrite=TRUE)
+    writeRaster(below_surf_rast, "output/below_surf_rast.tif", overwrite=TRUE)
+    writeRaster(plant_rast, "output/plant_rast.tif", overwrite=TRUE)
+    writeRaster(scav_rast, "output/scav_rast.tif", overwrite=TRUE)
+    writeRaster(vend_rast, "output/vend_rast.tif", overwrite=TRUE)
+    writeRaster(host_dist_rast, "output/host_dist_rast.tif", overwrite=TRUE)
+    writeRaster(species_rast, "output/species_richness_rast.tif", overwrite=TRUE)
+    writeRaster(ardeidae_rast, "output/ardeidae_rast.tif", overwrite=TRUE)
+    writeRaster(arenaria_calidris_rast, "output/arenaria_calidris_rast.tif", overwrite=TRUE)
+    writeRaster(laridae_rast, "output/laridae_rast.tif", overwrite=TRUE)
+    writeRaster(anserinae_rast, "output/anserinae_rast.tif", overwrite=TRUE)
+    writeRaster(aythyini_rast, "output/aythyini_rast.tif", overwrite=TRUE)
+    writeRaster(anatinae_rast, "output/anatinae_rast.tif", overwrite=TRUE)
+  }
 }
 
 if (PLOT){
