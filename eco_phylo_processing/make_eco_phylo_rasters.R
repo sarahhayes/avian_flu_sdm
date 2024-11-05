@@ -10,7 +10,7 @@ QUALITY_METHOD <- "HQ_WEIGHTED" # Options are: "HQ_ONLY" to only use species wit
                   # weeks as zero (not currently implemented!); "ALL" to use all species including those with
                   # lower-quality abundance estimates.
 QUARTERLY <- TRUE # Generate quarterly (weeks 1-13 etc) rasters, otherwise do weekly
-ECO_QTR_BNDS <- FALSE
+ECO_QTR_BNDS <- TRUE
 SAVE_RAST <- FALSE # Save output rasters
 
 if (QUARTERLY){
@@ -24,6 +24,7 @@ if (QUARTERLY){
       format("%W") %>%
       sort() %>%
       as.integer()
+    q1_idxs <- c(seq(1, qrtr_bds[1]), seq(qrtr_bds[4], 53)) # Extra object to store indices for overlapping season
   }else{
     qrtr_bds <- c(1, 14, 27, 40, 53)
   }
@@ -1150,26 +1151,63 @@ idx_to_download <- which(sp_df$species_code %in% not_downloaded)
     
     if (QUARTERLY){
       if ((QUALITY_METHOD=="HQ_ONlY")|(QUALITY_METHOD=="ALL")){
-      this_rast <- lapply(1:nlyrs,
-                          FUN = function(i){
-                            app(this_rast[[qrtr_bds[i]:(qrtr_bds[i+1]-1)]], mean)}
-                          ) %>%
-                    rast
-      }
-      else if (QUALITY_METHOD=="HQ_WEIGHTED"){
-        qual_wks_by_qrtr <- lapply(1:nlyrs,
-                                   FUN = function(i){
-                                   qual_wks <- which(species_factors$wkly_quality[[1]][qrtr_bds[i]:(qrtr_bds[i+1]-1)]>1)
-                                   if (length(qual_wks)==0){
-                                     return(c(-100))} # Note: doing this means low-quality quarters will initially be assigned mean across whole year, but then set to zero later
-                                   else{return(qual_wks)}
-                                    }
-        )
+        if (ECO_QTR_BNDS){
         this_rast <- lapply(1:nlyrs,
                             FUN = function(i){
-                              app(this_rast[[(qrtr_bds[i]-1) + qual_wks_by_qrtr[[i]]]], mean)}
+                              if (i==1){
+                                app(this_rast[[q1_idxs]], mean)
+                              }else{
+                                app(this_rast[[qrtr_bds[i-1]:(qrtr_bds[i]-1)]], mean)}
+                              }
+                            ) %>%
+                      rast
+      }else{
+        this_rast <- lapply(1:nlyrs,
+                            FUN = function(i){
+                              app(this_rast[[qrtr_bds[i]:(qrtr_bds[i+1]-1)]], mean)}
         ) %>%
           rast
+        }
+      }
+      else if (QUALITY_METHOD=="HQ_WEIGHTED"){
+        if (ECO_QTR_BNDS){
+          qual_wks_by_qrtr <- lapply(1:nlyrs,
+                                     FUN = function(i){
+                                       if (i==1){
+                                         qual_wks <- which(species_factors$wkly_quality[[1]][q1_idxs]>1)
+                                       }else{
+                                         qual_wks <- which(species_factors$wkly_quality[[1]][qrtr_bds[i-1]:(qrtr_bds[i]-1)]>1)
+                                     }
+                                       if (length(qual_wks)==0){
+                                         return(c(-100))} # Note: doing this means low-quality quarters will initially be assigned mean across whole year, but then set to zero later
+                                       else{return(qual_wks)}
+                                     }
+          )
+          this_rast <- lapply(1:nlyrs,
+                              FUN = function(i){
+                                if (i==1){
+                                  app(this_rast[[q1_idxs[qual_wks_by_qrtr[[i]]]]], mean)
+                                }else{
+                                  app(this_rast[[(qrtr_bds[i-1]-1) + qual_wks_by_qrtr[[i]]]], mean)}
+                              }
+                                
+          ) %>%
+            rast
+        }else{
+          qual_wks_by_qrtr <- lapply(1:nlyrs,
+                                     FUN = function(i){
+                                       qual_wks <- which(species_factors$wkly_quality[[1]][qrtr_bds[i]:(qrtr_bds[i+1]-1)]>1)
+                                       if (length(qual_wks)==0){
+                                         return(c(-100))} # Note: doing this means low-quality quarters will initially be assigned mean across whole year, but then set to zero later
+                                       else{return(qual_wks)}
+                                     }
+          )
+          this_rast <- lapply(1:nlyrs,
+                              FUN = function(i){
+                                app(this_rast[[(qrtr_bds[i]-1) + qual_wks_by_qrtr[[i]]]], mean)}
+          ) %>%
+            rast
+        }
         if (!species_factors$include_q1){
           this_rast[[1]] <- 0
         }
