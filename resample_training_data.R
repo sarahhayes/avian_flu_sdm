@@ -132,6 +132,7 @@ map_a_data <-
   geom_sf(data = euro_map_st, fill = "grey", color = "black", alpha = 0.4)  +
   # geom_sf(data = points_a, color = "#00BFC4", size = 0.2) +
   geom_sf(data = points_a, aes(color = serotype_HN), size = 0.2, alpha = 0.6, show.legend = F) +
+  scale_color_manual(values = c("H5N1" = "#F8766D", "H5N6" = "#7CAE00", "H5N8" = "#00BFC4", "other" = "#C77CFF")) +
   theme_minimal() +
   theme(legend.position="none") +
   labs(x = "Longitude",
@@ -142,6 +143,7 @@ map_b_data <-
   ggplot() +
   geom_sf(data = euro_map_st, fill = "grey", color = "black", alpha = 0.4)  +
   geom_sf(data = points_b, aes(color = serotype_HN), size = 0.2, alpha = 0.6, show.legend = F) +
+  scale_color_manual(values = c("H5N1" = "#F8766D", "H5N6" = "#7CAE00", "H5N8" = "#00BFC4", "other" = "#C77CFF")) +
   theme_minimal() +
   theme(legend.position="none") +
   labs(x = "Longitude",
