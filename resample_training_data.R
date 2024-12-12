@@ -32,29 +32,40 @@ layername <- "eBird record"
 
 #weight_layer_log <- weight_layer %>% app(function(x) log(x+1))
 
+# Define starts of ecological seasons
+year_start <- as.Date("0000-01-01")
+q2_start <- as.Date("0000-03-01") # pre-breeding migration
+q3_start <- as.Date("0000-06-07") # breeding season
+q4_start <- as.Date("0000-08-10") # post-breeding migration
+q1_start <- as.Date("0000-11-30") # non-breeding season
+year_end <- as.Date("0000-12-31")
+
 # Read in positive flu site data 
 pos_sites <- read.csv("data_offline\\Avian flu data\\hpai_pos_birds_nobvbrc.csv") %>% 
   rename(date = observation.date) %>%
   mutate(date = as.Date(date),
-         Q = case_when(months(date) %in% month.name[1:3] ~ "Q1",
-                       months(date) %in% month.name[4:6] ~ "Q2",
-                       months(date) %in% month.name[7:9] ~ "Q3",
-                       months(date) %in% month.name[10:12] ~ "Q4"))
+         Q = case_when((format(date, "%m%-%d") >= format(year_start, "%m%-%d")) & (format(date, "%m%-%d") < format(q2_start-1, "%m%-%d)")) ~ "Q1",
+                       (format(date, "%m%-%d") >= format(q2_start, "%m%-%d")) & (format(date, "%m%-%d") < format(q3_start-1, "%m%-%d)")) ~ "Q2",
+                       (format(date, "%m%-%d") >= format(q3_start, "%m%-%d")) & (format(date, "%m%-%d") < format(q4_start-1, "%m%-%d)")) ~ "Q3",
+                       (format(date, "%m%-%d") >= format(q4_start, "%m%-%d")) & (format(date, "%m%-%d") < format(q1_start-1, "%m%-%d)")) ~ "Q4",
+                       (format(date, "%m%-%d") >= format(q1_start, "%m%-%d")) & (format(date, "%m%-%d") <= format(year_end, "%m%-%d)")) ~ "Q1"))
 
 pos_sites %>% pull(Q) %>% table
 pos_sites %>% pull(serotype_HN) %>% table
 
-# Data set A: roughly, "enzootic AI"
-# Training set A: all AI before 2020/21 H5N8 outbreak (which includes a H5N8 outbreak in 2017)
-# Test set A: 2020/21 H5N8 outbreak
-df_A <- pos_sites %>% filter(date < as.Date("2020-01-01")|date > as.Date("2020-01-01") & date < as.Date("2023-01-01") & serotype_HN == "H5N8") %>%
+# Data set A: 2.3.4.4b H5NX before H5N1  (includes H5N8, H5N6, retain ambiguous H5 or unlabelled [n = 80])
+# Training set A: 2.3.4.4b H5NX in distinct 2016/2017 outbreak
+# Test set A: 2.3.4.4b H5NX in distinct 2020/2021 outbreak
+df_A <- pos_sites %>% 
+  filter(date > as.Date("2016-01-01") & date < as.Date("2021-09-01") & serotype_HN %in% c("H5N8", "H5N6", "H5", "")) %>%
   mutate(df = case_when(date < as.Date("2020-01-01") ~ "train_A",
-                        date > as.Date("2020-01-01") & serotype_HN == "H5N8" ~ "test_A"))
+                        date > as.Date("2020-01-01") ~ "test_A"))
 
-# Data set B: roughly, "epizootic AI"
-# Training set B: H5N1 outbreak from Sep 21 until Mar 23 (retain ambiguous H5 or unlabelled)
-# Test set B: H5N1 outbreak Apr 23 - Mar 24 
-df_B <- pos_sites %>% filter(date > as.Date("2021-09-01") & serotype_HN %in% c("H5N1", "H5", "")) %>%
+# Data set B: 2.3.4.4b H5N1 (retain ambiguous H5 or unlabelled [n = 64])
+# Training set B: 2.3.4.4b H5N1 from Sep 21 - Mar 23
+# Test set B: H5N1 from Apr 23 - Mar 24 
+df_B <- pos_sites %>% 
+  filter(date >= as.Date("2021-09-01") & serotype_HN %in% c("H5N1", "H5", "")) %>%
   mutate(df = case_when(date <= as.Date("2023-03-30") ~ "train_B",
                         date > as.Date("2023-03-30") ~ "test_B"))
 
@@ -237,13 +248,13 @@ post_table
 #   terra::rast(type = "xyz", crs = "epsg:3035") %>%
 #   c(.,
 #     terra::rast("data_offline\\Environmental rasters\\elevation_max_10kres.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\isotherm_mean_q1.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\mean_diff_first_quart_10kres.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\mean_prec_first_quart_10kres.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\mean_relative_humidity_q1_10kres.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\mean_temp_q1_10kres.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\ndvi_first_quart_2022_10kres.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\variation_in_quarterly_mean_temp_q1_10kres.tif"))
+#     terra::rast("data_offline\\Environmental rasters\\isotherm_mean_q1_eco_quarts.tif"),
+#     terra::rast("data_offline\\Environmental rasters\\q1_mean_diff_eco_rasts.tif"),
+#     terra::rast("data_offline\\Environmental rasters\\q1_prec_eco_rasts.tif"),
+#     terra::rast("data_offline\\Environmental rasters\\mean_relative_humidity_q1_10kres_eco_quarts.tif"),
+#     terra::rast("data_offline\\Environmental rasters\\q1_mean_mean_eco_rasts.tif"),
+#     terra::rast("data_offline\\Environmental rasters\\ndvi_first_quart_2022_eco_rasts.tif"),
+#     terra::rast("data_offline\\Environmental rasters\\variation_in_quarterly_mean_temp_q1_eco_rasts.tif"))
 # t %>% set.names(c("dist_to_coast_km", "dist_to_water", "elev_max", "isotherm_mean", "diurn_temp", "prec", "humid", "mean_temp", "ndvi", "seas_temp"))
 # t %>% writeRaster("data_offline\\combi_rasters\\env_vars_Q1.tif", overwrite=TRUE)
 # 
@@ -255,13 +266,13 @@ post_table
 #   terra::rast(type = "xyz", crs = "epsg:3035") %>%
 #   c(.,
 #     terra::rast("data_offline\\Environmental rasters\\elevation_max_10kres.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\isotherm_mean_q2.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\mean_diff_second_quart_10kres.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\mean_prec_second_quart_10kres.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\mean_relative_humidity_q2_10kres.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\mean_temp_q2_10kres.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\ndvi_second_quart_2022_10kres.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\variation_in_quarterly_mean_temp_q2_10kres.tif"))
+#     terra::rast("data_offline\\Environmental rasters\\isotherm_mean_q2_eco_quarts.tif"),
+#     terra::rast("data_offline\\Environmental rasters\\q2_mean_diff_eco_rasts.tif"),
+#     terra::rast("data_offline\\Environmental rasters\\q2_prec_eco_rasts.tif"),
+#     terra::rast("data_offline\\Environmental rasters\\mean_relative_humidity_q2_10kres_eco_quarts.tif"),
+#     terra::rast("data_offline\\Environmental rasters\\q2_mean_mean_eco_rasts.tif"),
+#     terra::rast("data_offline\\Environmental rasters\\ndvi_second_quart_2022_eco_rasts.tif"),
+#     terra::rast("data_offline\\Environmental rasters\\variation_in_quarterly_mean_temp_q2_eco_rasts.tif"))
 # t %>% set.names(c("dist_to_coast_km", "dist_to_water", "elev_max", "isotherm_mean", "diurn_temp", "prec", "humid", "mean_temp", "ndvi", "seas_temp"))
 # t %>% writeRaster("data_offline\\combi_rasters\\env_vars_Q2.tif", overwrite=TRUE)
 # 
@@ -273,13 +284,13 @@ post_table
 #   terra::rast(type = "xyz", crs = "epsg:3035") %>%
 #   c(.,
 #     terra::rast("data_offline\\Environmental rasters\\elevation_max_10kres.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\isotherm_mean_q3.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\mean_diff_third_quart_10kres.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\mean_prec_third_quart_10kres.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\mean_relative_humidity_q3_10kres.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\mean_temp_q3_10kres.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\ndvi_third_quart_2022_10kres.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\variation_in_quarterly_mean_temp_q3_10kres.tif"))
+#     terra::rast("data_offline\\Environmental rasters\\isotherm_mean_q3_eco_quarts.tif"),
+#     terra::rast("data_offline\\Environmental rasters\\q3_mean_diff_eco_rasts.tif"),
+#     terra::rast("data_offline\\Environmental rasters\\q3_prec_eco_rasts.tif"),
+#     terra::rast("data_offline\\Environmental rasters\\mean_relative_humidity_q3_10kres_eco_quarts.tif"),
+#     terra::rast("data_offline\\Environmental rasters\\q3_mean_mean_eco_rasts.tif"),
+#     terra::rast("data_offline\\Environmental rasters\\ndvi_third_quart_2022_eco_rasts.tif"),
+#     terra::rast("data_offline\\Environmental rasters\\variation_in_quarterly_mean_temp_q3_eco_rasts.tif"))
 # t %>% set.names(c("dist_to_coast_km", "dist_to_water", "elev_max", "isotherm_mean", "diurn_temp", "prec", "humid", "mean_temp", "ndvi", "seas_temp"))
 # t %>% writeRaster("data_offline\\combi_rasters\\env_vars_Q3.tif", overwrite=TRUE)
 # 
@@ -291,13 +302,13 @@ post_table
 #   terra::rast(type = "xyz", crs = "epsg:3035") %>%
 #   c(.,
 #     terra::rast("data_offline\\Environmental rasters\\elevation_max_10kres.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\isotherm_mean_q4.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\mean_diff_fourth_quart_10kres.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\mean_prec_fourth_quart_10kres.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\mean_relative_humidity_q4_10kres.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\mean_temp_q4_10kres.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\ndvi_fourth_quart_2022_10kres.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\variation_in_quarterly_mean_temp_q4_10kres.tif"))
+#     terra::rast("data_offline\\Environmental rasters\\isotherm_mean_q4_eco_quarts.tif"),
+#     terra::rast("data_offline\\Environmental rasters\\q4_mean_diff_eco_rasts.tif"),
+#     terra::rast("data_offline\\Environmental rasters\\q4_prec_eco_rasts.tif"),
+#     terra::rast("data_offline\\Environmental rasters\\mean_relative_humidity_q4_10kres_eco_quarts.tif"),
+#     terra::rast("data_offline\\Environmental rasters\\q4_mean_mean_eco_rasts.tif"),
+#     terra::rast("data_offline\\Environmental rasters\\ndvi_fourth_quart_2022_eco_rasts.tif"),
+#     terra::rast("data_offline\\Environmental rasters\\variation_in_quarterly_mean_temp_q4_eco_rasts.tif"))
 # t %>% set.names(c("dist_to_coast_km", "dist_to_water", "elev_max", "isotherm_mean", "diurn_temp", "prec", "humid", "mean_temp", "ndvi", "seas_temp"))
 # t %>% writeRaster("data_offline\\combi_rasters\\env_vars_Q4.tif", overwrite=TRUE)
 # 
