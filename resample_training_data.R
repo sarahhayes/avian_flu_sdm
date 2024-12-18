@@ -53,21 +53,21 @@ pos_sites <- read.csv("data_offline\\Avian flu data\\hpai_pos_birds_nobvbrc.csv"
 pos_sites %>% pull(Q) %>% table
 pos_sites %>% pull(serotype_HN) %>% table
 
-# Data set A: 2.3.4.4b H5NX before H5N1  (includes H5N8, H5N6, retain ambiguous H5 or unlabelled [n = 80])
+# Data set A: 2.3.4.4b H5NX before H5N1  (includes H5N8, H5N6, retain ambiguous H5 or unlabelled HPAI [n = 80])
 # Training set A: 2.3.4.4b H5NX in distinct 2016/2017 outbreak
 # Test set A: 2.3.4.4b H5NX in distinct 2020/2021 outbreak
 df_A <- pos_sites %>% 
-  filter(date > as.Date("2016-01-01") & date < as.Date("2021-09-01") & serotype_HN %in% c("H5N8", "H5N6", "H5", "")) %>%
-  mutate(df = case_when(date < as.Date("2020-01-01") ~ "train_A",
-                        date > as.Date("2020-01-01") ~ "test_A"))
+  filter(date >= as.Date("2016-08-10") & date < as.Date("2021-08-10") & serotype_HN %in% c("H5N8", "H5N6", "H5", "")) %>%
+  mutate(df = case_when(date < as.Date("2020-08-10") ~ "train_A",
+                        date >= as.Date("2020-08-10") ~ "test_A"))
 
-# Data set B: 2.3.4.4b H5N1 (retain ambiguous H5 or unlabelled [n = 64])
-# Training set B: 2.3.4.4b H5N1 from Sep 21 - Mar 23
+# Data set B: 2.3.4.4b H5N1 (retain ambiguous H5 or unlabelled HPAI [n = 64])
+# Training set B: 2.3.4.4b H5N1 from Sep 21 - Mar 23 %>% 
 # Test set B: H5N1 from Apr 23 - Mar 24 
 df_B <- pos_sites %>% 
-  filter(date >= as.Date("2021-09-01") & serotype_HN %in% c("H5N1", "H5", "")) %>%
-  mutate(df = case_when(date <= as.Date("2023-03-30") ~ "train_B",
-                        date > as.Date("2023-03-30") ~ "test_B"))
+  filter(date >= as.Date("2021-08-10") & date < as.Date("2024-03-01") & serotype_HN %in% c("H5N1", "H5", "")) %>%
+  mutate(df = case_when(date < as.Date("2023-03-01") ~ "train_B",
+                        date >= as.Date("2023-03-01") ~ "test_B"))
 
 # How many per quarter
 pre_table <- bind_rows(df_A, df_B) %>% with(., table(df, Q))
@@ -95,31 +95,93 @@ bind_rows(df_A, df_B) %>%
   geom_histogram(bins=100)
 
 timeplot <- pos_sites %>% 
+  filter(date > as.Date("2016-08-10") & serotype_HN %in% c("H5N8", "H5N6", "H5N1", "H5", "")) %>%
   mutate(serotype_HN = case_when(
     serotype_HN == "H5N1" ~ "H5N1",
     serotype_HN == "H5N8" ~ "H5N8",
     serotype_HN == "H5N6" ~ "H5N6",
-    TRUE ~ "other"
+    TRUE ~ "H5NX"
   )) %>%
   ggplot(aes(x = date, fill = serotype_HN)) +
-  geom_histogram(bins = round(as.numeric((max(pos_sites$date)-min(pos_sites$date))/7)), position = "stack") +
-  geom_vline(xintercept = as.Date("2020-01-01")) +
-  geom_vline(xintercept = as.Date("2021-09-01")) +
-  geom_vline(xintercept = as.Date("2023-03-30")) +
-  geom_text(aes(x = as.Date("2013-01-01"), y = 185 ,label = "A. Train", hjust = 0.5)) +
-  geom_text(aes(x = as.Date("2020-01-01")+(as.Date("2021-09-01")-as.Date("2020-01-01"))/2, y = 185 ,label = "A. Test", hjust = 0.5)) +
-  geom_text(aes(x = as.Date("2021-09-01")+(as.Date("2023-03-30")-as.Date("2021-09-01"))/2, y = 185 ,label = "B. Train", hjust = 0.5)) +
-  geom_text(aes(x = as.Date("2024-03-01"), y = 185 ,label = "B. Test", hjust = 0.5)) +
-  scale_x_date(date_labels = "%Y", date_breaks = "2 year") +
-  ylab("Weekly reports") +
+  geom_histogram(bins = round(as.numeric((max(pos_sites$date)-min(pos_sites$date))/30)), position = "stack") +
+  geom_vline(xintercept = as.Date("2020-08-10")) +
+  geom_vline(xintercept = as.Date("2021-08-10")) +
+  geom_vline(xintercept = as.Date("2023-03-01")) +
+  geom_text(aes(x = as.Date("2016-08-10")+(as.Date("2020-08-10")-as.Date("2016-08-10"))/2, y = 330 ,label = "A. Train", hjust = 0.5)) +
+  geom_text(aes(x = as.Date("2020-08-10")+(as.Date("2021-08-10")-as.Date("2020-08-10"))/2, y = 330 ,label = "A. Test", hjust = 0.5)) +
+  geom_text(aes(x = as.Date("2021-08-10")+(as.Date("2023-03-01")-as.Date("2021-08-10"))/2, y = 330 ,label = "B. Train", hjust = 0.5)) +
+  geom_text(aes(x = as.Date("2024-01-01"), y = 330 ,label = "B. Test", hjust = 0.5)) +
+  scale_x_date(date_labels = "%Y", date_breaks = "1 year") +
+  ylab("Monthly reports") +
   xlab("Date") +
   labs(fill = "subtype") +
   theme_bw() +
-  theme(legend.position = c(0.05,0.75),
-        legend.title=element_blank())
+  theme(legend.position = c(0.05,0.77),
+        legend.title=element_blank(),
+        legend.margin=margin(c(1,5,5,5)))
+
+timeplot_seas <- pos_sites %>% 
+  filter(date > as.Date("2016-08-10") & serotype_HN %in% c("H5N8", "H5N6", "H5N1", "H5", "")) %>%
+  mutate(serotype_HN = case_when(
+    serotype_HN == "H5N1" ~ "H5N1",
+    serotype_HN == "H5N8" ~ "H5N8",
+    serotype_HN == "H5N6" ~ "H5N6",
+    TRUE ~ "H5NX"
+  )) %>%
+  ggplot(aes(x = date, fill = serotype_HN)) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2016-08-10"), xmax = as.Date("2016-11-30"), ymin = -Inf, ymax = Inf), fill = "limegreen", alpha = 0.1) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2017-08-10"), xmax = as.Date("2017-11-30"), ymin = -Inf, ymax = Inf), fill = "limegreen", alpha = 0.1) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2018-08-10"), xmax = as.Date("2018-11-30"), ymin = -Inf, ymax = Inf), fill = "limegreen", alpha = 0.1) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2019-08-10"), xmax = as.Date("2019-11-30"), ymin = -Inf, ymax = Inf), fill = "limegreen", alpha = 0.1) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2020-08-10"), xmax = as.Date("2020-11-30"), ymin = -Inf, ymax = Inf), fill = "limegreen", alpha = 0.1) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2021-08-10"), xmax = as.Date("2021-11-30"), ymin = -Inf, ymax = Inf), fill = "limegreen", alpha = 0.1) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2022-08-10"), xmax = as.Date("2022-11-30"), ymin = -Inf, ymax = Inf), fill = "limegreen", alpha = 0.1) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2023-08-10"), xmax = as.Date("2023-11-30"), ymin = -Inf, ymax = Inf), fill = "limegreen", alpha = 0.1) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2016-11-30"), xmax = as.Date("2017-03-01"), ymin = -Inf, ymax = Inf), fill = "red", alpha = 0.1) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2017-11-30"), xmax = as.Date("2018-03-01"), ymin = -Inf, ymax = Inf), fill = "red", alpha = 0.1) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2018-11-30"), xmax = as.Date("2019-03-01"), ymin = -Inf, ymax = Inf), fill = "red", alpha = 0.1) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2019-11-30"), xmax = as.Date("2020-03-01"), ymin = -Inf, ymax = Inf), fill = "red", alpha = 0.1) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2020-11-30"), xmax = as.Date("2021-03-01"), ymin = -Inf, ymax = Inf), fill = "red", alpha = 0.1) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2021-11-30"), xmax = as.Date("2022-03-01"), ymin = -Inf, ymax = Inf), fill = "red", alpha = 0.1) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2022-11-30"), xmax = as.Date("2023-03-01"), ymin = -Inf, ymax = Inf), fill = "red", alpha = 0.1) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2023-11-30"), xmax = as.Date("2024-03-01"), ymin = -Inf, ymax = Inf), fill = "red", alpha = 0.1) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2017-03-01"), xmax = as.Date("2017-06-07"), ymin = -Inf, ymax = Inf), fill = "orange", alpha = 0.1) + geom_vline(xintercept = as.Date("2020-08-10")) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2018-03-01"), xmax = as.Date("2018-06-07"), ymin = -Inf, ymax = Inf), fill = "orange", alpha = 0.1) + geom_vline(xintercept = as.Date("2020-08-10")) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2019-03-01"), xmax = as.Date("2019-06-07"), ymin = -Inf, ymax = Inf), fill = "orange", alpha = 0.1) + geom_vline(xintercept = as.Date("2020-08-10")) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2020-03-01"), xmax = as.Date("2020-06-07"), ymin = -Inf, ymax = Inf), fill = "orange", alpha = 0.1) + geom_vline(xintercept = as.Date("2020-08-10")) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2021-03-01"), xmax = as.Date("2021-06-07"), ymin = -Inf, ymax = Inf), fill = "orange", alpha = 0.1) + geom_vline(xintercept = as.Date("2020-08-10")) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2022-03-01"), xmax = as.Date("2022-06-07"), ymin = -Inf, ymax = Inf), fill = "orange", alpha = 0.1) + geom_vline(xintercept = as.Date("2020-08-10")) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2023-03-01"), xmax = as.Date("2023-06-07"), ymin = -Inf, ymax = Inf), fill = "orange", alpha = 0.1) + geom_vline(xintercept = as.Date("2020-08-10")) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2017-06-07"), xmax = as.Date("2017-08-10"), ymin = -Inf, ymax = Inf), fill = "yellow", alpha = 0.1) + geom_vline(xintercept = as.Date("2020-08-10")) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2018-06-07"), xmax = as.Date("2018-08-10"), ymin = -Inf, ymax = Inf), fill = "yellow", alpha = 0.1) + geom_vline(xintercept = as.Date("2020-08-10")) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2019-06-07"), xmax = as.Date("2019-08-10"), ymin = -Inf, ymax = Inf), fill = "yellow", alpha = 0.1) + geom_vline(xintercept = as.Date("2020-08-10")) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2020-06-07"), xmax = as.Date("2020-08-10"), ymin = -Inf, ymax = Inf), fill = "yellow", alpha = 0.1) + geom_vline(xintercept = as.Date("2020-08-10")) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2021-06-07"), xmax = as.Date("2021-08-10"), ymin = -Inf, ymax = Inf), fill = "yellow", alpha = 0.1) + geom_vline(xintercept = as.Date("2020-08-10")) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2022-06-07"), xmax = as.Date("2022-08-10"), ymin = -Inf, ymax = Inf), fill = "yellow", alpha = 0.1) + geom_vline(xintercept = as.Date("2020-08-10")) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2023-06-07"), xmax = as.Date("2023-08-10"), ymin = -Inf, ymax = Inf), fill = "yellow", alpha = 0.1) + geom_vline(xintercept = as.Date("2020-08-10")) +
+  geom_histogram(bins = round(as.numeric((max(pos_sites$date)-min(pos_sites$date))/30)), position = "stack") +
+  geom_vline(xintercept = as.Date("2021-08-10")) +
+  geom_vline(xintercept = as.Date("2023-03-01")) +
+  geom_text(aes(x = as.Date("2016-08-10")+(as.Date("2020-08-10")-as.Date("2016-08-10"))/2, y = 330 ,label = "A. Train", hjust = 0.5)) +
+  geom_text(aes(x = as.Date("2020-08-10")+(as.Date("2021-08-10")-as.Date("2020-08-10"))/2, y = 330 ,label = "A. Test", hjust = 0.5)) +
+  geom_text(aes(x = as.Date("2021-08-10")+(as.Date("2023-03-01")-as.Date("2021-08-10"))/2, y = 330 ,label = "B. Train", hjust = 0.5)) +
+  geom_text(aes(x = as.Date("2024-01-01"), y = 330 ,label = "B. Test", hjust = 0.5)) +
+  scale_x_date(date_labels = "%Y", date_breaks = "1 year") +
+  ylab("Monthly reports") +
+  xlab("Date") +
+  labs(fill = "subtype") +
+  theme_bw() +
+  theme(legend.position = c(0.05,0.77),
+        legend.title=element_blank(),
+        legend.margin=margin(c(1,5,5,5)))
 
 ggsave(paste("plots/timeplot.png"),
        plot = timeplot,
+       width = 12,
+       height = 3)
+
+ggsave(paste("plots/timeplot_seas.png"),
+       plot = timeplot_seas,
        width = 12,
        height = 3)
 
@@ -128,14 +190,14 @@ points_a <- st_as_sf(df_A, coords = c("X", "Y"), crs = crs(base_map)) %>%
     serotype_HN == "H5N1" ~ "H5N1",
     serotype_HN == "H5N8" ~ "H5N8",
     serotype_HN == "H5N6" ~ "H5N6",
-    TRUE ~ "other"
+    TRUE ~ "H5NX"
   ))
 points_b <- st_as_sf(df_B, coords = c("X", "Y"), crs = crs(base_map)) %>% 
   mutate(serotype_HN = case_when(
     serotype_HN == "H5N1" ~ "H5N1",
     serotype_HN == "H5N8" ~ "H5N8",
     serotype_HN == "H5N6" ~ "H5N6",
-    TRUE ~ "other"
+    TRUE ~ "H5NX"
   ))
 
 map_a_data <- 
@@ -143,7 +205,7 @@ map_a_data <-
   geom_sf(data = euro_map_st, fill = "grey", color = "black", alpha = 0.4)  +
   # geom_sf(data = points_a, color = "#00BFC4", size = 0.2) +
   geom_sf(data = points_a, aes(color = serotype_HN), size = 0.2, alpha = 0.6, show.legend = F) +
-  scale_color_manual(values = c("H5N1" = "#F8766D", "H5N6" = "#7CAE00", "H5N8" = "#00BFC4", "other" = "#C77CFF")) +
+  scale_color_manual(values = c("H5N1" = "#F8766D", "H5N6" = "#7CAE00", "H5N8" = "#00BFC4", "H5NX" = "#C77CFF")) +
   theme_minimal() +
   theme(legend.position="none") +
   labs(x = "Longitude",
@@ -154,7 +216,7 @@ map_b_data <-
   ggplot() +
   geom_sf(data = euro_map_st, fill = "grey", color = "black", alpha = 0.4)  +
   geom_sf(data = points_b, aes(color = serotype_HN), size = 0.2, alpha = 0.6, show.legend = F) +
-  scale_color_manual(values = c("H5N1" = "#F8766D", "H5N6" = "#7CAE00", "H5N8" = "#00BFC4", "other" = "#C77CFF")) +
+  scale_color_manual(values = c("H5N1" = "#F8766D", "H5N6" = "#7CAE00", "H5N8" = "#00BFC4", "H5NX" = "#C77CFF")) +
   theme_minimal() +
   theme(legend.position="none") +
   labs(x = "Longitude",
@@ -163,12 +225,12 @@ map_b_data <-
 
 fig_data_combi <- (map_a_data|map_b_data)/(timeplot) +
   plot_annotation(tag_levels = 'A') +
-  plot_layout(heights = c(4,1)) &
+  plot_layout(heights = c(4,1.2)) &
   theme(legend.position = 'bottom')
 
 ggsave(paste("plots/data_fig.png"),
        plot = fig_data_combi,
-       width = 10,
+       width = 11,
        height = 8.5)
 
 
@@ -229,8 +291,8 @@ df_B <- bind_rows(rast_train_B_list, rast_test_B_list)
 # How many per quarter after counting at grid cell level?
 post_table <- bind_rows(df_A, df_B) %>% with(., table(df, Q))
 
-pre_table
-post_table
+pre_table[c(3,1,4,2),]
+post_table[c(3,1,4,2),]
 
 #######################
 # One-time processing #

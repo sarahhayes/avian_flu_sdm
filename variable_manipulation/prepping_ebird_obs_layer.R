@@ -13,14 +13,14 @@ library(rnaturalearth)
 spdf_world <- ne_download(scale = 110, type = "countries")
 plot(spdf_world)
 
-setwd("~/avian_flu_sdm_fork/")
+#setwd("~/avian_flu_sdm/")
 auk_set_ebd_path("data_offline/EBD/sampling")
 
 # Filter to Europe study area; takes up to 10 mins to conduct filtering
-base_map <- terra::rast("output/euro_rast_latlong.tif")
-auk_sampling("ebd_sampling_relDec-2023.txt") %>%
+base_map <- raster::raster("output/euro_rast_latlong.tif")
+auk_sampling("ebd_sampling_relNov-2024.txt") %>%
   auk_bbox(bbox = base_map) %>% # limit to area of flu sampling records
-  auk_date(date = c("2005-10-07", "2023-06-30")) %>% # limit to dates of flu sampling records
+  auk_date(date = c("2016-08-10", "2024-02-29")) %>% # limit to dates of flu sampling records
   auk_filter(file = "output/ebd_sampling_eur.txt")
 
 # Filter to country codes of the Americas
