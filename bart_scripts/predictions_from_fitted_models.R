@@ -120,14 +120,14 @@ get_sens_and_spec_ci <- function(sdm, xtest, ytest, ri, cutoff){
 
 #### Bring in year-round covariates ####
 
-covstack <- raster::stack(paste(PATH_TO_COVS, "quarterly_covariates/all_q_covs_10k.tif", sep = ""))
+covstack <- raster::stack(paste(PATH_TO_COVS, "quarterly_covariates_eco_seasons/all_q_covs_10k.tif", sep = ""))
 
 # Drop unclassified land layer
 covstack <- dropLayer(covstack, "lc_17")
 
 #### Dataset A Q1 ####
 
-test_data <- read.csv("training_sets/test_data_A_Q1.csv")
+test_data <- read.csv("training_sets/test_data_eco_seasons_A_Q1.csv")
 xtest <- test_data %>% dplyr::select(!("y"|"ri"))
 ytest <- test_data$y
 countrytest <- test_data$ri
@@ -149,7 +149,7 @@ if (SAVE_OUTPUTS){
        file = paste(PATH_TO_OUTPUTS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_metrics_A_Q1.rds", sep = ""))
 }
 
-Generate risk map with percentiles
+# Generate risk map with percentiles
 pred_layers_A_Q1 <- predict(object = sdm,
                       x.layers = covstack,
                       quantiles = c(0.025, 0.975),
@@ -166,7 +166,7 @@ if (SAVE_OUTPUTS){
 
 #### Dataset A Q2 ####
 
-test_data <- read.csv("training_sets/test_data_A_Q2.csv")
+test_data <- read.csv("training_sets/test_data_eco_seasons_A_Q2.csv")
 xtest <- test_data %>% dplyr::select(!("y"|"ri"))
 ytest <- test_data$y
 countrytest <- test_data$ri
@@ -205,7 +205,7 @@ if (SAVE_OUTPUTS){
 
 #### Dataset A Q3 ####
 
-test_data <- read.csv("training_sets/test_data_A_Q3.csv")
+test_data <- read.csv("training_sets/test_data_eco_seasons_A_Q3.csv")
 xtest <- test_data %>% dplyr::select(!("y"|"ri"))
 ytest <- test_data$y
 countrytest <- test_data$ri
@@ -244,7 +244,7 @@ if (SAVE_OUTPUTS){
 
 #### Dataset A Q4 ####
 
-test_data <- read.csv("training_sets/test_data_A_Q4.csv")
+test_data <- read.csv("training_sets/test_data_eco_seasons_A_Q4.csv")
 xtest <- test_data %>% dplyr::select(!("y"|"ri"))
 ytest <- test_data$y
 countrytest <- test_data$ri
@@ -341,7 +341,7 @@ load(file = paste(PATH_TO_OUTPUTS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/"
 sdm_B_Q1 <- sdm
 
 if (B_TEST_DATA_AVAILABLE){
-  test_data <- read.csv("training_sets/test_data_B_Q1.csv")
+  test_data <- read.csv("training_sets/test_data_eco_seasons_B_Q1.csv")
   xtest <- test_data %>% dplyr::select(!("y"|"ri"))
   ytest <- test_data$y
   countrytest <- test_data$ri
@@ -384,7 +384,7 @@ load(file = paste(PATH_TO_OUTPUTS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/"
 sdm_B_Q2 <- sdm
 
 if (B_TEST_DATA_AVAILABLE){
-  test_data <- read.csv("training_sets/test_data_B_Q2.csv")
+  test_data <- read.csv("training_sets/test_data_eco_seasons_B_Q2.csv")
   xtest <- test_data %>% dplyr::select(!("y"|"ri"))
   ytest <- test_data$y
   countrytest <- test_data$ri
@@ -428,7 +428,7 @@ load(file = paste(PATH_TO_OUTPUTS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/"
 sdm_B_Q3 <- sdm
 
 if (B_TEST_DATA_AVAILABLE){
-  test_data <- read.csv("training_sets/test_data_B_Q3.csv")
+  test_data <- read.csv("training_sets/test_data_eco_seasons_B_Q3.csv")
   xtest <- test_data %>% dplyr::select(!("y"|"ri"))
   ytest <- test_data$y
   countrytest <- test_data$ri
@@ -472,7 +472,7 @@ load(file = paste(PATH_TO_OUTPUTS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/"
 sdm_B_Q4 <- sdm
 
 if (B_TEST_DATA_AVAILABLE){
-  test_data <- read.csv("training_sets/test_data_B_Q4.csv")
+  test_data <- read.csv("training_sets/test_data_eco_seasons_B_Q4.csv")
   xtest <- test_data %>% dplyr::select(!("y"|"ri"))
   ytest <- test_data$y
   countrytest <- test_data$ri

@@ -5,6 +5,8 @@
 # Global storing optimised k value for BART - which may be updated
 K_OPT <- 2
 
+SKIP_AQ3 <- TRUE # Set to TRUE to skip small period A quarter 3 dataset
+
 # Optional command line arguments, must be passed as strings:
 args <- commandArgs(trailingOnly = T)
 if (length(args)<3){
@@ -24,7 +26,7 @@ if (length(args)<1){
   PATH_TO_DATA <- args[1]
 }
 
-dir.create(file.path(PATH_TO_DATA, "fitted-BART-models-", INCLUDE_CROSSTERMS, "/"), showWarnings = FALSE)
+dir.create(file.path(PATH_TO_DATA, "fitted-BART-models-", INCLUDE_CROSSTERMS, "/", fsep = ""), showWarnings = FALSE)
 
 library(caret)
 library(dplyr)
@@ -361,7 +363,7 @@ get_sens_and_spec <- function(sdm, xtest, ytest, ri, cutoff){
 
 #### Period A Q1 ####
 
-training_data <- read.csv(paste(PATH_TO_DATA, "training_sets/training_data_A_Q1.csv", sep=""))
+training_data <- read.csv(paste(PATH_TO_DATA, "training_sets/training_data_eco_seasons_A_Q1.csv", sep=""))
 if (INCLUDE_CROSSTERMS=="no-crossterms"){
   all_excludes <- grep("quart|_q", colnames(training_data), value = TRUE)
   q1_excludes <- grep("first|q1", all_excludes, value = TRUE, invert = TRUE)
@@ -448,7 +450,7 @@ power_opt <- cv_results$power[argmax]
 base_opt <- cv_results$base[argmax]
 
 
-test_data <- read.csv(paste(PATH_TO_DATA, "training_sets/test_data_A_Q1.csv", sep=""))
+test_data <- read.csv(paste(PATH_TO_DATA, "training_sets/test_data_eco_seasons_A_Q1.csv", sep=""))
 xtest <- test_data %>% dplyr::select(!("y"|"ri"))
 ytest <- test_data$y
 
@@ -488,7 +490,7 @@ if (SAVE_FITS){
 # 
 #### Period A Q2 ####
 
-training_data <- read.csv(paste(PATH_TO_DATA, "training_sets/training_data_A_Q2.csv", sep=""))
+training_data <- read.csv(paste(PATH_TO_DATA, "training_sets/training_data_eco_seasons_A_Q2.csv", sep=""))
 if (INCLUDE_CROSSTERMS=="no-crossterms"){
   all_excludes <- grep("quart|_q", colnames(training_data), value = TRUE)
   q2_excludes <- grep("second|q2", all_excludes, value = TRUE, invert = TRUE)
@@ -576,7 +578,7 @@ power_opt <- cv_results$power[argmax]
 base_opt <- cv_results$base[argmax]
 
 
-test_data <- read.csv(paste(PATH_TO_DATA, "training_sets/test_data_A_Q2.csv", sep=""))
+test_data <- read.csv(paste(PATH_TO_DATA, "training_sets/test_data_eco_seasons_A_Q2.csv", sep=""))
 xtest <- test_data %>% dplyr::select(!("y"|"ri"))
 ytest <- test_data$y
 
@@ -612,131 +614,132 @@ if (SAVE_FITS){
 
 #### Period A Q3 ####
 
-training_data <- read.csv(paste(PATH_TO_DATA, "training_sets/training_data_A_Q3.csv", sep=""))
-if (INCLUDE_CROSSTERMS=="no-crossterms"){
-  all_excludes <- grep("quart|_q", colnames(training_data), value = TRUE)
-  q3_excludes <- grep("third|q3", all_excludes, value = TRUE, invert = TRUE)
-  training_data <- training_data[, setdiff(colnames(training_data), q3_excludes)]
-}
-xtrain <- training_data %>% dplyr::select(!("y"|"ri"))
-ytrain <- training_data$y
-
-
-# Fold construction
-
-fold_ids <- caret::createFolds(training_data$y, k = 5)
-
-folds <- lapply(1:length(fold_ids),
-                FUN = function(i){
-                  training_data[-fold_ids[[i]],]})
-antifolds <- lapply(1:length(fold_ids),
-                    FUN = function(i){
-                      training_data[fold_ids[[i]],]})
-
-
-
-
-
-k_vals = c(1, 2, 3)
-power_vals = c(1.6, 1.8, 2)
-base_vals = c(0.75, 0.85, 0.95)
-kl <- length(k_vals)
-pl <- length(power_vals)
-bl <- length(base_vals)
-cv_results <- data.frame(k=numeric(),
-                         power=numeric(),
-                         base=numeric(),
-                         auc1=numeric(),
-                         auc2=numeric(),
-                         auc3=numeric(),
-                         auc4=numeric(),
-                         auc5=numeric())
-cv_results[1:kl*pl*bl, ] <- 0
-for (i in 1:length(k_vals)){
-  k_val <- k_vals[i]
-  for (j in 1:length(power_vals)){
-    power_val <- power_vals[j]
-    for (m in 1:length(base_vals)){
-      base_val <- base_vals[m]
-      idx <- (i-1)*pl*bl + (j-1)*bl + m
-      #cat("Crossvalidating parameter set ", idx, " of ", kl*pl*bl,"\n")
-      cv_results$k[idx] <- k_val
-      cv_results$power[idx] <- power_val
-      cv_results$base[idx] <- base_val
-      for (fold_no in 1:length(folds)){
-        model <- bart2(y ~ . - ri,
-                       folds[[fold_no]],
-                       test = antifolds[[fold_no]],
-                       k = k_val,
-                       power = power_val,
-                       base = base_val,
-                       n.trees = 200,
-                       n.chains = 1L,
-                       n.threads = 1L,
-                       keepTrees = TRUE,
-                       verbose = FALSE)
-        antifold_x <- subset(antifolds[[fold_no]], select=-c(y, ri))
-        antifold_y <- antifolds[[fold_no]]$y
-        antifold_ri <- antifolds[[fold_no]]$ri
-        cutoff <- get_threshold(model)
-        auc <- get_sens_and_spec(model, antifold_x, antifold_y, antifold_ri, cutoff)$auc
-        cv_results[idx, 3+fold_no] <- auc
-        rm(model)
+if (!SKIP_AQ3){
+  training_data <- read.csv(paste(PATH_TO_DATA, "training_sets/training_data_eco_seasons_A_Q3.csv", sep=""))
+  if (INCLUDE_CROSSTERMS=="no-crossterms"){
+    all_excludes <- grep("quart|_q", colnames(training_data), value = TRUE)
+    q3_excludes <- grep("third|q3", all_excludes, value = TRUE, invert = TRUE)
+    training_data <- training_data[, setdiff(colnames(training_data), q3_excludes)]
+  }
+  xtrain <- training_data %>% dplyr::select(!("y"|"ri"))
+  ytrain <- training_data$y
+  
+  
+  # Fold construction
+  
+  fold_ids <- caret::createFolds(training_data$y, k = 5)
+  
+  folds <- lapply(1:length(fold_ids),
+                  FUN = function(i){
+                    training_data[-fold_ids[[i]],]})
+  antifolds <- lapply(1:length(fold_ids),
+                      FUN = function(i){
+                        training_data[fold_ids[[i]],]})
+  
+  
+  
+  
+  
+  k_vals = c(1, 2, 3)
+  power_vals = c(1.6, 1.8, 2)
+  base_vals = c(0.75, 0.85, 0.95)
+  kl <- length(k_vals)
+  pl <- length(power_vals)
+  bl <- length(base_vals)
+  cv_results <- data.frame(k=numeric(),
+                           power=numeric(),
+                           base=numeric(),
+                           auc1=numeric(),
+                           auc2=numeric(),
+                           auc3=numeric(),
+                           auc4=numeric(),
+                           auc5=numeric())
+  cv_results[1:kl*pl*bl, ] <- 0
+  for (i in 1:length(k_vals)){
+    k_val <- k_vals[i]
+    for (j in 1:length(power_vals)){
+      power_val <- power_vals[j]
+      for (m in 1:length(base_vals)){
+        base_val <- base_vals[m]
+        idx <- (i-1)*pl*bl + (j-1)*bl + m
+        #cat("Crossvalidating parameter set ", idx, " of ", kl*pl*bl,"\n")
+        cv_results$k[idx] <- k_val
+        cv_results$power[idx] <- power_val
+        cv_results$base[idx] <- base_val
+        for (fold_no in 1:length(folds)){
+          model <- bart2(y ~ . - ri,
+                         folds[[fold_no]],
+                         test = antifolds[[fold_no]],
+                         k = k_val,
+                         power = power_val,
+                         base = base_val,
+                         n.trees = 200,
+                         n.chains = 1L,
+                         n.threads = 1L,
+                         keepTrees = TRUE,
+                         verbose = FALSE)
+          antifold_x <- subset(antifolds[[fold_no]], select=-c(y, ri))
+          antifold_y <- antifolds[[fold_no]]$y
+          antifold_ri <- antifolds[[fold_no]]$ri
+          cutoff <- get_threshold(model)
+          auc <- get_sens_and_spec(model, antifold_x, antifold_y, antifold_ri, cutoff)$auc
+          cv_results[idx, 3+fold_no] <- auc
+          rm(model)
+        }
       }
     }
   }
+  
+  cv_results <- cv_results %>%
+    rowwise() %>%
+    mutate(mean_auc = mean(auc1,
+                           auc2,
+                           auc3,
+                           auc4,
+                           auc5))
+  argmax <- which.max(cv_results$mean_auc)
+  K_OPT <- cv_results$k[argmax]
+  power_opt <- cv_results$power[argmax]
+  base_opt <- cv_results$base[argmax]
+  
+  
+  test_data <- read.csv(paste(PATH_TO_DATA, "training_sets/test_data_eco_seasons_A_Q3.csv", sep=""))
+  xtest <- test_data %>% dplyr::select(!("y"|"ri"))
+  ytest <- test_data$y
+  
+  # Basic all-parameter model
+  basic_model <- bart(xtrain,
+                      ytrain,
+                      k = K_OPT,
+                           power = power_opt,
+                           base = base_opt)
+  invisible(basic_model$fit$state)
+  
+  
+  if (SAVE_FITS){
+    save(basic_model,
+         file = paste(PATH_TO_DATA, "fitted-BART-models-", INCLUDE_CROSSTERMS, "/cv_model_A_Q3.rds", sep = ""))
+  }
+  
+  sdm <- bart.step(x.data = xtrain,
+                   y.data = ytrain,
+                   k = K_OPT,
+                   power = power_opt,
+                   base = base_opt,
+                   full = TRUE,
+                   quiet = TRUE)
+  invisible(sdm$fit$state)
+  
+  if (SAVE_FITS){
+    save(sdm,
+         file = paste(PATH_TO_DATA, "fitted-BART-models-", INCLUDE_CROSSTERMS, "/cv_model_with_vs_A_Q3.rds", sep = ""))
+  }
+
 }
-
-cv_results <- cv_results %>%
-  rowwise() %>%
-  mutate(mean_auc = mean(auc1,
-                         auc2,
-                         auc3,
-                         auc4,
-                         auc5))
-argmax <- which.max(cv_results$mean_auc)
-K_OPT <- cv_results$k[argmax]
-power_opt <- cv_results$power[argmax]
-base_opt <- cv_results$base[argmax]
-
-
-test_data <- read.csv(paste(PATH_TO_DATA, "training_sets/test_data_A_Q3.csv", sep=""))
-xtest <- test_data %>% dplyr::select(!("y"|"ri"))
-ytest <- test_data$y
-
-# Basic all-parameter model
-basic_model <- bart(xtrain,
-                    ytrain,
-                    k = K_OPT,
-                         power = power_opt,
-                         base = base_opt)
-invisible(basic_model$fit$state)
-
-
-if (SAVE_FITS){
-  save(basic_model,
-       file = paste(PATH_TO_DATA, "fitted-BART-models-", INCLUDE_CROSSTERMS, "/cv_model_A_Q3.rds", sep = ""))
-}
-
-sdm <- bart.step(x.data = xtrain,
-                 y.data = ytrain,
-                 k = K_OPT,
-                 power = power_opt,
-                 base = base_opt,
-                 full = TRUE,
-                 quiet = TRUE)
-invisible(sdm$fit$state)
-
-if (SAVE_FITS){
-  save(sdm,
-       file = paste(PATH_TO_DATA, "fitted-BART-models-", INCLUDE_CROSSTERMS, "/cv_model_with_vs_A_Q3.rds", sep = ""))
-}
-
-
 
 #### Period A Q4 ####
 
-training_data <- read.csv(paste(PATH_TO_DATA, "training_sets/training_data_A_Q4.csv", sep=""))
+training_data <- read.csv(paste(PATH_TO_DATA, "training_sets/training_data_eco_seasons_A_Q4.csv", sep=""))
 if (INCLUDE_CROSSTERMS=="no-crossterms"){
   all_excludes <- grep("quart|_q", colnames(training_data), value = TRUE)
   q4_excludes <- grep("fourth|q4", all_excludes, value = TRUE, invert = TRUE)
@@ -824,7 +827,7 @@ power_opt <- cv_results$power[argmax]
 base_opt <- cv_results$base[argmax]
 
 
-test_data <- read.csv(paste(PATH_TO_DATA, "training_sets/test_data_A_Q4.csv", sep=""))
+test_data <- read.csv(paste(PATH_TO_DATA, "training_sets/test_data_eco_seasons_A_Q4.csv", sep=""))
 xtest <- test_data %>% dplyr::select(!("y"|"ri"))
 ytest <- test_data$y
 
@@ -860,7 +863,7 @@ if (SAVE_FITS){
 
 #### Period B Q1 ####
 
-training_data <- read.csv(paste(PATH_TO_DATA, "training_sets/training_data_B_Q1.csv", sep=""))
+training_data <- read.csv(paste(PATH_TO_DATA, "training_sets/training_data_eco_seasons_B_Q1.csv", sep=""))
 if (INCLUDE_CROSSTERMS=="no-crossterms"){
   all_excludes <- grep("quart|_q", colnames(training_data), value = TRUE)
   q1_excludes <- grep("first|q1", all_excludes, value = TRUE, invert = TRUE)
@@ -978,7 +981,7 @@ if (SAVE_FITS){
 
 #### Period B Q2 ####
 
-training_data <- read.csv(paste(PATH_TO_DATA, "training_sets/training_data_B_Q2.csv", sep=""))
+training_data <- read.csv(paste(PATH_TO_DATA, "training_sets/training_data_eco_seasons_B_Q2.csv", sep=""))
 if (INCLUDE_CROSSTERMS=="no-crossterms"){
   all_excludes <- grep("quart|_q", colnames(training_data), value = TRUE)
   q2_excludes <- grep("second|q2", all_excludes, value = TRUE, invert = TRUE)
@@ -1096,7 +1099,7 @@ if (SAVE_FITS){
 
 #### Period B Q3 ####
 
-training_data <- read.csv(paste(PATH_TO_DATA, "training_sets/training_data_B_Q3.csv", sep=""))
+training_data <- read.csv(paste(PATH_TO_DATA, "training_sets/training_data_eco_seasons_B_Q3.csv", sep=""))
 if (INCLUDE_CROSSTERMS=="no-crossterms"){
   all_excludes <- grep("quart|_q", colnames(training_data), value = TRUE)
   q3_excludes <- grep("third|q3", all_excludes, value = TRUE, invert = TRUE)
@@ -1214,7 +1217,7 @@ if (SAVE_FITS){
 
 #### Period B Q4 ####
 
-training_data <- read.csv(paste(PATH_TO_DATA, "training_sets/training_data_B_Q4.csv", sep=""))
+training_data <- read.csv(paste(PATH_TO_DATA, "training_sets/training_data_eco_seasons_B_Q4.csv", sep=""))
 if (INCLUDE_CROSSTERMS=="no-crossterms"){
   all_excludes <- grep("quart|_q", colnames(training_data), value = TRUE)
   q4_excludes <- grep("fourth|q4", all_excludes, value = TRUE, invert = TRUE)
