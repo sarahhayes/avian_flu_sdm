@@ -1,7 +1,7 @@
 # In this script we plot risk projections using the outputs from
 # fit_avian_flu_model.R.
 
-rm(list = ls())
+SKIP_AQ3 <- TRUE # Set to TRUE to skip small period A quarter 3 dataset
 
 PLOT_RAW_CASE_DATA <- FALSE 
 
@@ -24,6 +24,16 @@ if (length(args)<1){
   PATH_TO_OUTPUTS <- args[1]
 }
 
+# Decide whether to use models with ecological season boundaries
+ECO_SEASONS <- TRUE
+if (ECO_SEASONS){
+  PATH_TO_MODELS <- paste(PATH_TO_OUTPUTS,
+                          "fitted-BART-models-eco-seasons/",
+                          sep="")
+}else{
+  PATH_TO_MODELS <- PATH_TO_OUTPUTS
+}
+
 library(embarcadero)
 library(raster)
 library(terra)
@@ -32,14 +42,19 @@ set.seed(12345)
 
 preds <- list()
 
+if (!SKIP_AQ3){
+  plt_idx <- 1:4
+}else{
+  plt_idx <- c(1, 2, 4) %>% as.integer()
+}
 
-for (idx in 1:4){
+for (idx in plt_idx){
   # Slightly hacky way to load in predictions and give it an arbitrary name.
   # This is needed because readRDS appears to be deprecated and the load
   # function brings in the original variable name. If you do x<-load(x.rds) then
   # x just gives you the variable name; when we pipe with get() we can get the
   # value of the thing with that variable name, provided it's been loaded in.
-  load(file = paste(PATH_TO_OUTPUTS,
+  load(file = paste(PATH_TO_MODELS,
                     "fitted-BART-models-",
                     INCLUDE_CROSSTERMS,
                     "/",
@@ -48,7 +63,7 @@ for (idx in 1:4){
                     idx,
                     ".rds",
                     sep = ""))
-  pred_layer <- load(file = paste(PATH_TO_OUTPUTS,
+  pred_layer <- load(file = paste(PATH_TO_MODELS,
                                      "fitted-BART-models-",
                                      INCLUDE_CROSSTERMS,
                                      "/",
@@ -120,23 +135,24 @@ grid::grid.text("Probability", x=grid::unit(0.98, "npc"), y=grid::unit(0.50, "np
 dev.off()
 
 
-png(paste("plots/",
-          INCLUDE_CROSSTERMS,
-          "_",
-          CV_OR_RI,
-          "_A_q3_uncertainty.png", sep=""),
-          width = 21,
-          height = 7,
-    units = "in", res = 330)
-spplot(stack(preds[[3]][[2]],
-             preds[[3]][[1]],
-             preds[[3]][[3]]),
-       col.regions = viridis_pal()(100),
-       at = seq(0,1,0.01),
-       cex = 0.8)
-grid::grid.text("Probability", x=grid::unit(0.98, "npc"), y=grid::unit(0.50, "npc"), rot=-90)
-dev.off()
-
+if (!SKIP_AQ3){
+  png(paste("plots/",
+            INCLUDE_CROSSTERMS,
+            "_",
+            CV_OR_RI,
+            "_A_q3_uncertainty.png", sep=""),
+            width = 21,
+            height = 7,
+      units = "in", res = 330)
+  spplot(stack(preds[[3]][[2]],
+               preds[[3]][[1]],
+               preds[[3]][[3]]),
+         col.regions = viridis_pal()(100),
+         at = seq(0,1,0.01),
+         cex = 0.8)
+  grid::grid.text("Probability", x=grid::unit(0.98, "npc"), y=grid::unit(0.50, "npc"), rot=-90)
+  dev.off()
+}
 
 png(paste("plots/",
           INCLUDE_CROSSTERMS,
@@ -220,7 +236,7 @@ for (idx in 1:4){
   # function brings in the original variable name. If you do x<-load(x.rds) then
   # x just gives you the variable name; when we pipe with get() we can get the
   # value of the thing with that variable name, provided it's been loaded in.
-  load(file = paste(PATH_TO_OUTPUTS,
+  load(file = paste(PATH_TO_MODELS,
                     "fitted-BART-models-",
                     INCLUDE_CROSSTERMS,
                     "/",
@@ -229,7 +245,7 @@ for (idx in 1:4){
                     idx,
                     ".rds",
                     sep = ""))
-  pred_layer <- load(file = paste(PATH_TO_OUTPUTS,
+  pred_layer <- load(file = paste(PATH_TO_MODELS,
                                   "fitted-BART-models-",
                                   INCLUDE_CROSSTERMS,
                                   "/",

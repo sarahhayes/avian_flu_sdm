@@ -1,6 +1,8 @@
 # In this script we load the fitted models, calculate performance metrics, and
 # perform Europe-wide predictions.
 
+SKIP_AQ3 <- TRUE # Set to TRUE to skip small period A quarter 3 dataset
+
 # Optional command line arguments, must be passed as strings:
 args <- commandArgs(trailingOnly = T)
 if (length(args)<4){
@@ -24,6 +26,16 @@ if (length(args)<1){
   PATH_TO_OUTPUTS <- "../../../OneDrive - The University of Liverpool/AI_S2_SDM_storage/"
 }else{
   PATH_TO_OUTPUTS <- args[1]
+}
+
+# Decide whether to use models with ecological season boundaries
+ECO_SEASONS <- TRUE
+if (ECO_SEASONS){
+  PATH_TO_MODELS <- paste(PATH_TO_OUTPUTS,
+                          "fitted-BART-models-eco-seasons/",
+                          sep = "")
+}else{
+  PATH_TO_MODELS <- PATH_TO_OUTPUTS
 }
 
 SAVE_OUTPUTS <- TRUE
@@ -132,7 +144,7 @@ xtest <- test_data %>% dplyr::select(!("y"|"ri"))
 ytest <- test_data$y
 countrytest <- test_data$ri
 
-load(file = paste(PATH_TO_OUTPUTS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_model_with_vs_A_Q1.rds", sep = ""))
+load(file = paste(PATH_TO_MODELS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_model_with_vs_A_Q1.rds", sep = ""))
 sdm_A_Q1 <- sdm
 cutoff <- get_threshold(sdm)
 if (CV_OR_RI=="ri"){
@@ -146,7 +158,7 @@ if (CV_OR_RI=="ri"){
 if (SAVE_OUTPUTS){
   save(metrics_A_Q1,
        metric_cis_A_Q1,
-       file = paste(PATH_TO_OUTPUTS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_metrics_A_Q1.rds", sep = ""))
+       file = paste(PATH_TO_MODELS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_metrics_A_Q1.rds", sep = ""))
 }
 
 # Generate risk map with percentiles
@@ -160,7 +172,7 @@ names(pred_layers_A_Q1) <- c("Mean",
                              "Upper 95 percent confidence bound")
 if (SAVE_OUTPUTS){
   save(pred_layers_A_Q1,
-       file = paste(PATH_TO_OUTPUTS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_predictions_A_Q1.rds", sep = ""))
+       file = paste(PATH_TO_MODELS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_predictions_A_Q1.rds", sep = ""))
 }
 
 
@@ -171,7 +183,7 @@ xtest <- test_data %>% dplyr::select(!("y"|"ri"))
 ytest <- test_data$y
 countrytest <- test_data$ri
 
-load(file = paste(PATH_TO_OUTPUTS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_model_with_vs_A_Q2.rds", sep = ""))
+load(file = paste(PATH_TO_MODELS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_model_with_vs_A_Q2.rds", sep = ""))
 sdm_A_Q2 <- sdm
 cutoff <- get_threshold(sdm)
 if (CV_OR_RI=="ri"){
@@ -185,7 +197,7 @@ if (CV_OR_RI=="ri"){
 if (SAVE_OUTPUTS){
   save(metrics_A_Q2,
        metric_cis_A_Q2,
-       file = paste(PATH_TO_OUTPUTS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_metrics_A_Q2.rds", sep = ""))
+       file = paste(PATH_TO_MODELS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_metrics_A_Q2.rds", sep = ""))
 }
 
 # Generate risk map with percentiles
@@ -199,49 +211,50 @@ names(pred_layers_A_Q2) <- c("Mean",
                              "Upper 95 percent confidence bound")
 if (SAVE_OUTPUTS){
   save(pred_layers_A_Q2,
-       file = paste(PATH_TO_OUTPUTS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_predictions_A_Q2.rds", sep = ""))
+       file = paste(PATH_TO_MODELS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_predictions_A_Q2.rds", sep = ""))
 }
 
 
 #### Dataset A Q3 ####
 
-test_data <- read.csv("training_sets/test_data_eco_seasons_A_Q3.csv")
-xtest <- test_data %>% dplyr::select(!("y"|"ri"))
-ytest <- test_data$y
-countrytest <- test_data$ri
+if (!SKIP_AQ3){
+  test_data <- read.csv("training_sets/test_data_eco_seasons_A_Q3.csv")
+  xtest <- test_data %>% dplyr::select(!("y"|"ri"))
+  ytest <- test_data$y
+  countrytest <- test_data$ri
+  
+  load(file = paste(PATH_TO_MODELS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_model_with_vs_A_Q3.rds", sep = ""))
+  sdm_A_Q3 <- sdm
+  cutoff <- get_threshold(sdm)
+  if (CV_OR_RI=="ri"){
+    metrics_A_Q3 <- get_sens_and_spec(sdm, xtest, ytest, countrytest, cutoff)
+    metric_cis_A_Q3 <- get_sens_and_spec_ci(sdm, xtest, ytest, countrytest, cutoff)
+  }else{
+    metrics_A_Q3 <- get_sens_and_spec(sdm, xtest, ytest, NULL, cutoff)
+    metric_cis_A_Q3 <- get_sens_and_spec_ci(sdm, xtest, ytest, NULL, cutoff)
+  }
+  
+  if (SAVE_OUTPUTS){
+    save(metrics_A_Q3,
+         metric_cis_A_Q3,
+         file = paste(PATH_TO_MODELS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_metrics_A_Q3.rds", sep = ""))
+  }
+  
+  # Generate risk map with percentiles
+  pred_layers_A_Q3 <- predict(object = sdm,
+                              x.layers = covstack,
+                              quantiles = c(0.025, 0.975),
+                              splitby = 20
+  )
+  names(pred_layers_A_Q3) <- c("Mean",
+                               "Lower 95 percent confidence bound",
+                               "Upper 95 percent confidence bound")
+  if (SAVE_OUTPUTS){
+    save(pred_layers_A_Q3,
+         file = paste(PATH_TO_MODELS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_predictions_A_Q3.rds", sep = ""))
+  }
 
-load(file = paste(PATH_TO_OUTPUTS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_model_with_vs_A_Q3.rds", sep = ""))
-sdm_A_Q3 <- sdm
-cutoff <- get_threshold(sdm)
-if (CV_OR_RI=="ri"){
-  metrics_A_Q3 <- get_sens_and_spec(sdm, xtest, ytest, countrytest, cutoff)
-  metric_cis_A_Q3 <- get_sens_and_spec_ci(sdm, xtest, ytest, countrytest, cutoff)
-}else{
-  metrics_A_Q3 <- get_sens_and_spec(sdm, xtest, ytest, NULL, cutoff)
-  metric_cis_A_Q3 <- get_sens_and_spec_ci(sdm, xtest, ytest, NULL, cutoff)
 }
-
-if (SAVE_OUTPUTS){
-  save(metrics_A_Q3,
-       metric_cis_A_Q3,
-       file = paste(PATH_TO_OUTPUTS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_metrics_A_Q3.rds", sep = ""))
-}
-
-# Generate risk map with percentiles
-pred_layers_A_Q3 <- predict(object = sdm,
-                            x.layers = covstack,
-                            quantiles = c(0.025, 0.975),
-                            splitby = 20
-)
-names(pred_layers_A_Q3) <- c("Mean",
-                             "Lower 95 percent confidence bound",
-                             "Upper 95 percent confidence bound")
-if (SAVE_OUTPUTS){
-  save(pred_layers_A_Q3,
-       file = paste(PATH_TO_OUTPUTS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_predictions_A_Q3.rds", sep = ""))
-}
-
-
 #### Dataset A Q4 ####
 
 test_data <- read.csv("training_sets/test_data_eco_seasons_A_Q4.csv")
@@ -249,7 +262,7 @@ xtest <- test_data %>% dplyr::select(!("y"|"ri"))
 ytest <- test_data$y
 countrytest <- test_data$ri
 
-load(file = paste(PATH_TO_OUTPUTS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_model_with_vs_A_Q4.rds", sep = ""))
+load(file = paste(PATH_TO_MODELS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_model_with_vs_A_Q4.rds", sep = ""))
 sdm_A_Q4 <- sdm
 cutoff <- get_threshold(sdm)
 if (CV_OR_RI=="ri"){
@@ -286,19 +299,21 @@ cat("Dataset A Q2, test metrics:\n sens =",
     " (",
     signif(metric_cis_A_Q2$auc, digits=2),
     ")\n")
-cat("Dataset A Q3, test metrics:\n sens =",
-    signif(metrics_A_Q3$sens, digits=2),
-    " (",
-    signif(metric_cis_A_Q3$sens, digits=2),
-    "),\n spec =",
-    signif(metrics_A_Q3$spec, digits=2),
-    " (",
-    signif(metric_cis_A_Q3$spec, digits=2),
-    "),\n AUC =",
-    signif(metrics_A_Q3$auc, digits=2),
-    " (",
-    signif(metric_cis_A_Q3$auc, digits=2),
-    ")\n")
+if (!SKIP_AQ3){
+  cat("Dataset A Q3, test metrics:\n sens =",
+      signif(metrics_A_Q3$sens, digits=2),
+      " (",
+      signif(metric_cis_A_Q3$sens, digits=2),
+      "),\n spec =",
+      signif(metrics_A_Q3$spec, digits=2),
+      " (",
+      signif(metric_cis_A_Q3$spec, digits=2),
+      "),\n AUC =",
+      signif(metrics_A_Q3$auc, digits=2),
+      " (",
+      signif(metric_cis_A_Q3$auc, digits=2),
+      ")\n")
+}
 cat("Dataset A Q4, test metrics:\n sens =",
     signif(metrics_A_Q4$sens, digits=2),
     " (",
@@ -317,7 +332,7 @@ cat("Dataset A Q4, test metrics:\n sens =",
 if (SAVE_OUTPUTS){
   save(metrics_A_Q4,
        metric_cis_A_Q4,
-       file = paste(PATH_TO_OUTPUTS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_metrics_A_Q4.rds", sep = ""))
+       file = paste(PATH_TO_MODELS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_metrics_A_Q4.rds", sep = ""))
 }
 
 # Generate risk map with percentiles
@@ -331,13 +346,13 @@ names(pred_layers_A_Q4) <- c("Mean",
                              "Upper 95 percent confidence bound")
 if (SAVE_OUTPUTS){
   save(pred_layers_A_Q4,
-       file = paste(PATH_TO_OUTPUTS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_predictions_A_Q4.rds", sep = ""))
+       file = paste(PATH_TO_MODELS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_predictions_A_Q4.rds", sep = ""))
 }
 
 
 #### Dataset B Q1 ####
 
-load(file = paste(PATH_TO_OUTPUTS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_model_with_vs_B_Q1.rds", sep = ""))
+load(file = paste(PATH_TO_MODELS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_model_with_vs_B_Q1.rds", sep = ""))
 sdm_B_Q1 <- sdm
 
 if (B_TEST_DATA_AVAILABLE){
@@ -357,7 +372,7 @@ if (B_TEST_DATA_AVAILABLE){
   if (SAVE_OUTPUTS){
     save(metrics_B_Q1,
          metric_cis_B_Q1,
-         file = paste(PATH_TO_OUTPUTS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_metrics_B_Q1.rds", sep = ""))
+         file = paste(PATH_TO_MODELS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_metrics_B_Q1.rds", sep = ""))
   }
 }
 
@@ -372,7 +387,7 @@ names(pred_layers_B_Q1) <- c("Mean",
                              "Upper 95 percent confidence bound")
 if (SAVE_OUTPUTS){
   save(pred_layers_B_Q1,
-       file = paste(PATH_TO_OUTPUTS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_predictions_B_Q1.rds", sep = ""))
+       file = paste(PATH_TO_MODELS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_predictions_B_Q1.rds", sep = ""))
 }
 
 
@@ -380,7 +395,7 @@ if (SAVE_OUTPUTS){
 
 #### Dataset B Q2 ####
 
-load(file = paste(PATH_TO_OUTPUTS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_model_with_vs_B_Q2.rds", sep = ""))
+load(file = paste(PATH_TO_MODELS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_model_with_vs_B_Q2.rds", sep = ""))
 sdm_B_Q2 <- sdm
 
 if (B_TEST_DATA_AVAILABLE){
@@ -400,7 +415,7 @@ if (B_TEST_DATA_AVAILABLE){
   if (SAVE_OUTPUTS){
     save(metrics_B_Q2,
          metric_cis_B_Q2,
-         file = paste(PATH_TO_OUTPUTS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_metrics_B_Q2.rds", sep = ""))
+         file = paste(PATH_TO_MODELS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_metrics_B_Q2.rds", sep = ""))
   }
 }
 
@@ -415,7 +430,7 @@ names(pred_layers_B_Q2) <- c("Mean",
                              "Upper 95 percent confidence bound")
 if (SAVE_OUTPUTS){
   save(pred_layers_B_Q2,
-       file = paste(PATH_TO_OUTPUTS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_predictions_B_Q2.rds", sep = ""))
+       file = paste(PATH_TO_MODELS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_predictions_B_Q2.rds", sep = ""))
 }
 
 
@@ -424,7 +439,7 @@ if (SAVE_OUTPUTS){
 
 #### Dataset B Q3 ####
 
-load(file = paste(PATH_TO_OUTPUTS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_model_with_vs_B_Q3.rds", sep = ""))
+load(file = paste(PATH_TO_MODELS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_model_with_vs_B_Q3.rds", sep = ""))
 sdm_B_Q3 <- sdm
 
 if (B_TEST_DATA_AVAILABLE){
@@ -444,7 +459,7 @@ if (B_TEST_DATA_AVAILABLE){
   if (SAVE_OUTPUTS){
     save(metrics_B_Q3,
          metric_cis_B_Q3,
-         file = paste(PATH_TO_OUTPUTS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_metrics_B_Q3.rds", sep = ""))
+         file = paste(PATH_TO_MODELS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_metrics_B_Q3.rds", sep = ""))
   }
 }
 
@@ -459,7 +474,7 @@ names(pred_layers_B_Q3) <- c("Mean",
                              "Upper 95 percent confidence bound")
 if (SAVE_OUTPUTS){
   save(pred_layers_B_Q3,
-       file = paste(PATH_TO_OUTPUTS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_predictions_B_Q3.rds", sep = ""))
+       file = paste(PATH_TO_MODELS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_predictions_B_Q3.rds", sep = ""))
 }
 
 
@@ -468,7 +483,7 @@ if (SAVE_OUTPUTS){
 
 #### Dataset B Q4 ####
 
-load(file = paste(PATH_TO_OUTPUTS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_model_with_vs_B_Q4.rds", sep = ""))
+load(file = paste(PATH_TO_MODELS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_model_with_vs_B_Q4.rds", sep = ""))
 sdm_B_Q4 <- sdm
 
 if (B_TEST_DATA_AVAILABLE){
@@ -540,7 +555,7 @@ if (B_TEST_DATA_AVAILABLE){
   if (SAVE_OUTPUTS){
     save(metrics_B_Q4,
          metric_cis_B_Q4,
-         file = paste(PATH_TO_OUTPUTS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_metrics_B_Q4.rds", sep = ""))
+         file = paste(PATH_TO_MODELS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_metrics_B_Q4.rds", sep = ""))
   }
 }
 
@@ -555,7 +570,7 @@ names(pred_layers_B_Q4) <- c("Mean",
                              "Upper 95 percent confidence bound")
 if (SAVE_OUTPUTS){
   save(pred_layers_B_Q4,
-       file = paste(PATH_TO_OUTPUTS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_predictions_B_Q4.rds", sep = ""))
+       file = paste(PATH_TO_MODELS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_predictions_B_Q4.rds", sep = ""))
 }
 
 
