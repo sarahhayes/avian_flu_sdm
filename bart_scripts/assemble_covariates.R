@@ -70,7 +70,7 @@ q3_env_layers <- subset(env_layers, setdiff(env_lyrnames, q3_excludes))
 q4_env_layers <- subset(env_layers, setdiff(env_lyrnames, q4_excludes))
 
 cov_coast <- read.csv(paste(PATH_TO_DATA, "AI_S2_SDM_storage/Env-Rasters-Eco-Seasons/dist_to_coast_10kres.csv", sep = "")) %>%
-  rename(x = X, y = Y) %>%
+  dplyr::rename(x = X, y = Y) %>%
   dplyr::select(-X.1) %>% 
   relocate(x,y) %>%
   rast(type = "xyz", crs = "epsg:3035")
