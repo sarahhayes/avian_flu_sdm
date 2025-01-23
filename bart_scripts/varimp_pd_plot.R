@@ -295,10 +295,10 @@ df <- varimp_summ %>%
   bind_rows %>%
   mutate(var = gsub("_2022", "", var),
          var = gsub("_lag.$", "", var),
-         Q = case_when(Q == "Q1" ~ "Q1 (Jan - Mar)",
-                       Q == "Q2" ~ "Q2 (Apr - Jun)",
-                       Q == "Q3" ~ "Q3 (Jul - Sep)",
-                       Q == "Q4" ~ "Q4 (Oct - Dec)"
+         Q = case_when(Q == "Q1" ~ "Nonbreeding\n (Nov - Feb)",
+                       Q == "Q2" ~ "Pre-breeding\n migration\n (Mar - Jun)",
+                       Q == "Q3" ~ "Breeding\n (Jun - Aug)",
+                       Q == "Q4" ~ "Post-breeding\n migration\n (Aug - Nov)"
          )
   ) %>% 
   left_join(plot_labels)
@@ -640,10 +640,10 @@ df <- varimp_summ %>%
   bind_rows %>%
   mutate(var = gsub("_2022", "", var),
          var = gsub("_lag.$", "", var),
-         Q = case_when(Q == "Q1" ~ "Q1 (Jan - Mar)",
-                       Q == "Q2" ~ "Q2 (Apr - Jun)",
-                       Q == "Q3" ~ "Q3 (Jul - Sep)",
-                       Q == "Q4" ~ "Q4 (Oct - Dec)"
+         Q = case_when(Q == "Q1" ~ "Nonbreeding\n (Nov - Feb)",
+                       Q == "Q2" ~ "Pre-breeding\n migration\n (Mar - Jun)",
+                       Q == "Q3" ~ "Breeding\n (Jun - Aug)",
+                       Q == "Q4" ~ "Post-breeding\n migration\n (Aug - Nov)"
          )
   ) %>% 
   left_join(plot_labels)
@@ -748,6 +748,12 @@ for(idx in 1:4){
                var = gsub("second_quart", "q2", var),
                var = gsub("third_quart", "q3", var),
                var = gsub("fourth_quart", "q4", var)) %>%
+        mutate(var = gsub("_rast_eco_bds.tif", "", var),
+               var = gsub("_eco_quarts", "", var),
+               var = gsub("_eco_bds", "", var),
+               var = gsub("_eco", "", var),
+               var = gsub("_rasts", "", var),
+               var = gsub("_2022", "", var)) %>%
         mutate(varq = str_extract(var, "_q\\d") %>% str_sub(-1) %>% as.numeric) %>%
         rowwise %>%
         mutate(lag = idx-varq) %>%
