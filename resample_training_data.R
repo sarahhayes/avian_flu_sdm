@@ -15,6 +15,11 @@ library(patchwork)
 # Set ratio of pseudoabsences to positives (x:1)
 pseud_ratio <- 1
 
+# Do you need to initialise the environmental rasters for use in environmental thinning?
+# If this is the first time this script is run, should be set to TRUE
+
+INIT_ENV_VARS <- FALSE
+
 #############
 # Read data #
 #############
@@ -298,83 +303,87 @@ post_table[c(3,1,4,2),]
 # One-time processing #
 #######################
 
-# # Read in and assemble environmental predictor layers from individual csvs and rasters
-# cov_coast <- read.csv("data_offline\\Environmental variable csvs\\dist_to_coast_output_10kres.csv") %>% rename(x = X, y = Y) %>% select(-X.1)
-# cov_water <- read.csv("data_offline\\Environmental variable csvs\\dist_to_water_output_10kres.csv") %>% select(-ID)
-# 
-# t <- purrr::reduce(
-#   list(cov_coast, cov_water),
-#   dplyr::left_join,
-#   by = c("x", "y")) %>%
-#   relocate(x, y) %>%
-#   terra::rast(type = "xyz", crs = "epsg:3035") %>%
-#   c(.,
-#     terra::rast("data_offline\\Environmental rasters\\elevation_max_10kres.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\isotherm_mean_q1_eco_quarts.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\q1_mean_diff_eco_rasts.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\q1_prec_eco_rasts.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\mean_relative_humidity_q1_10kres_eco_quarts.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\q1_mean_mean_eco_rasts.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\ndvi_first_quart_2022_eco_rasts.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\variation_in_quarterly_mean_temp_q1_eco_rasts.tif"))
-# t %>% set.names(c("dist_to_coast_km", "dist_to_water", "elev_max", "isotherm_mean", "diurn_temp", "prec", "humid", "mean_temp", "ndvi", "seas_temp"))
-# t %>% writeRaster("data_offline\\combi_rasters\\env_vars_Q1.tif", overwrite=TRUE)
-# 
-# t <- purrr::reduce(
-#   list(cov_coast, cov_water),
-#   dplyr::left_join,
-#   by = c("x", "y")) %>%
-#   relocate(x, y) %>%
-#   terra::rast(type = "xyz", crs = "epsg:3035") %>%
-#   c(.,
-#     terra::rast("data_offline\\Environmental rasters\\elevation_max_10kres.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\isotherm_mean_q2_eco_quarts.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\q2_mean_diff_eco_rasts.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\q2_prec_eco_rasts.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\mean_relative_humidity_q2_10kres_eco_quarts.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\q2_mean_mean_eco_rasts.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\ndvi_second_quart_2022_eco_rasts.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\variation_in_quarterly_mean_temp_q2_eco_rasts.tif"))
-# t %>% set.names(c("dist_to_coast_km", "dist_to_water", "elev_max", "isotherm_mean", "diurn_temp", "prec", "humid", "mean_temp", "ndvi", "seas_temp"))
-# t %>% writeRaster("data_offline\\combi_rasters\\env_vars_Q2.tif", overwrite=TRUE)
-# 
-# t <- purrr::reduce(
-#   list(cov_coast, cov_water),
-#   dplyr::left_join,
-#   by = c("x", "y")) %>%
-#   relocate(x, y) %>%
-#   terra::rast(type = "xyz", crs = "epsg:3035") %>%
-#   c(.,
-#     terra::rast("data_offline\\Environmental rasters\\elevation_max_10kres.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\isotherm_mean_q3_eco_quarts.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\q3_mean_diff_eco_rasts.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\q3_prec_eco_rasts.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\mean_relative_humidity_q3_10kres_eco_quarts.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\q3_mean_mean_eco_rasts.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\ndvi_third_quart_2022_eco_rasts.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\variation_in_quarterly_mean_temp_q3_eco_rasts.tif"))
-# t %>% set.names(c("dist_to_coast_km", "dist_to_water", "elev_max", "isotherm_mean", "diurn_temp", "prec", "humid", "mean_temp", "ndvi", "seas_temp"))
-# t %>% writeRaster("data_offline\\combi_rasters\\env_vars_Q3.tif", overwrite=TRUE)
-# 
-# t <- purrr::reduce(
-#   list(cov_coast, cov_water),
-#   dplyr::left_join,
-#   by = c("x", "y")) %>%
-#   relocate(x, y) %>%
-#   terra::rast(type = "xyz", crs = "epsg:3035") %>%
-#   c(.,
-#     terra::rast("data_offline\\Environmental rasters\\elevation_max_10kres.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\isotherm_mean_q4_eco_quarts.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\q4_mean_diff_eco_rasts.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\q4_prec_eco_rasts.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\mean_relative_humidity_q4_10kres_eco_quarts.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\q4_mean_mean_eco_rasts.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\ndvi_fourth_quart_2022_eco_rasts.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\variation_in_quarterly_mean_temp_q4_eco_rasts.tif"))
-# t %>% set.names(c("dist_to_coast_km", "dist_to_water", "elev_max", "isotherm_mean", "diurn_temp", "prec", "humid", "mean_temp", "ndvi", "seas_temp"))
-# t %>% writeRaster("data_offline\\combi_rasters\\env_vars_Q4.tif", overwrite=TRUE)
-# 
-# gc()
+if (INIT_ENV_VARS == TRUE){
+  
+  # Read in and assemble environmental predictor layers from individual csvs and rasters
+  cov_coast <- read.csv("data_offline\\Environmental variable csvs\\dist_to_coast_output_10kres.csv") %>% rename(x = X, y = Y) %>% select(-X.1)
+  cov_water <- read.csv("data_offline\\Environmental variable csvs\\dist_to_water_output_10kres.csv") %>% select(-ID)
+  
+  t <- purrr::reduce(
+    list(cov_coast, cov_water),
+    dplyr::left_join,
+    by = c("x", "y")) %>%
+    relocate(x, y) %>%
+    terra::rast(type = "xyz", crs = "epsg:3035") %>%
+    c(.,
+      terra::rast("data_offline\\Environmental rasters\\elevation_max_10kres.tif"),
+      terra::rast("data_offline\\Environmental rasters\\isotherm_mean_q1_eco_quarts.tif"),
+      terra::rast("data_offline\\Environmental rasters\\mean_diff_first_quart_eco_rasts.tif"),
+      terra::rast("data_offline\\Environmental rasters\\mean_prec_first_quart_eco_rasts.tif"),
+      terra::rast("data_offline\\Environmental rasters\\mean_relative_humidity_q1_10kres_eco_quarts.tif"),
+      terra::rast("data_offline\\Environmental rasters\\mean_mean_first_quart_eco_rasts.tif"),
+      terra::rast("data_offline\\Environmental rasters\\ndvi_first_quart_2022_eco_rasts.tif"),
+      terra::rast("data_offline\\Environmental rasters\\variation_in_quarterly_mean_temp_q1_eco_rasts.tif"))
+  t %>% set.names(c("dist_to_coast_km", "dist_to_water", "elev_max", "isotherm_mean", "diurn_temp", "prec", "humid", "mean_temp", "ndvi", "seas_temp"))
+  t %>% writeRaster("data_offline\\combi_rasters\\env_vars_Q1.tif", overwrite=TRUE)
+  
+  t <- purrr::reduce(
+    list(cov_coast, cov_water),
+    dplyr::left_join,
+    by = c("x", "y")) %>%
+    relocate(x, y) %>%
+    terra::rast(type = "xyz", crs = "epsg:3035") %>%
+    c(.,
+      terra::rast("data_offline\\Environmental rasters\\elevation_max_10kres.tif"),
+      terra::rast("data_offline\\Environmental rasters\\isotherm_mean_q2_eco_quarts.tif"),
+      terra::rast("data_offline\\Environmental rasters\\mean_diff_second_quart_eco_rasts.tif"),
+      terra::rast("data_offline\\Environmental rasters\\mean_prec_second_quart_eco_rasts.tif"),
+      terra::rast("data_offline\\Environmental rasters\\mean_relative_humidity_q2_10kres_eco_quarts.tif"),
+      terra::rast("data_offline\\Environmental rasters\\mean_mean_second_quart_eco_rasts.tif"),
+      terra::rast("data_offline\\Environmental rasters\\ndvi_second_quart_2022_eco_rasts.tif"),
+      terra::rast("data_offline\\Environmental rasters\\variation_in_quarterly_mean_temp_q2_eco_rasts.tif"))
+  t %>% set.names(c("dist_to_coast_km", "dist_to_water", "elev_max", "isotherm_mean", "diurn_temp", "prec", "humid", "mean_temp", "ndvi", "seas_temp"))
+  t %>% writeRaster("data_offline\\combi_rasters\\env_vars_Q2.tif", overwrite=TRUE)
+  
+  t <- purrr::reduce(
+    list(cov_coast, cov_water),
+    dplyr::left_join,
+    by = c("x", "y")) %>%
+    relocate(x, y) %>%
+    terra::rast(type = "xyz", crs = "epsg:3035") %>%
+    c(.,
+      terra::rast("data_offline\\Environmental rasters\\elevation_max_10kres.tif"),
+      terra::rast("data_offline\\Environmental rasters\\isotherm_mean_q3_eco_quarts.tif"),
+      terra::rast("data_offline\\Environmental rasters\\mean_diff_third_quart_eco_rasts.tif"),
+      terra::rast("data_offline\\Environmental rasters\\mean_prec_third_quart_eco_rasts.tif"),
+      terra::rast("data_offline\\Environmental rasters\\mean_relative_humidity_q3_10kres_eco_quarts.tif"),
+      terra::rast("data_offline\\Environmental rasters\\mean_mean_third_quart_eco_rasts.tif"),
+      terra::rast("data_offline\\Environmental rasters\\ndvi_third_quart_2022_eco_rasts.tif"),
+      terra::rast("data_offline\\Environmental rasters\\variation_in_quarterly_mean_temp_q3_eco_rasts.tif"))
+  t %>% set.names(c("dist_to_coast_km", "dist_to_water", "elev_max", "isotherm_mean", "diurn_temp", "prec", "humid", "mean_temp", "ndvi", "seas_temp"))
+  t %>% writeRaster("data_offline\\combi_rasters\\env_vars_Q3.tif", overwrite=TRUE)
+  
+  t <- purrr::reduce(
+    list(cov_coast, cov_water),
+    dplyr::left_join,
+    by = c("x", "y")) %>%
+    relocate(x, y) %>%
+    terra::rast(type = "xyz", crs = "epsg:3035") %>%
+    c(.,
+      terra::rast("data_offline\\Environmental rasters\\elevation_max_10kres.tif"),
+      terra::rast("data_offline\\Environmental rasters\\isotherm_mean_q4_eco_quarts.tif"),
+      terra::rast("data_offline\\Environmental rasters\\mean_diff_fourth_quart_eco_rasts.tif"),
+      terra::rast("data_offline\\Environmental rasters\\mean_prec_fourth_quart_eco_rasts.tif"),
+      terra::rast("data_offline\\Environmental rasters\\mean_relative_humidity_q4_10kres_eco_quarts.tif"),
+      terra::rast("data_offline\\Environmental rasters\\mean_mean_fourth_quart_eco_rasts.tif"),
+      terra::rast("data_offline\\Environmental rasters\\ndvi_fourth_quart_2022_eco_rasts.tif"),
+      terra::rast("data_offline\\Environmental rasters\\variation_in_quarterly_mean_temp_q4_eco_rasts.tif"))
+  t %>% set.names(c("dist_to_coast_km", "dist_to_water", "elev_max", "isotherm_mean", "diurn_temp", "prec", "humid", "mean_temp", "ndvi", "seas_temp"))
+  t %>% writeRaster("data_offline\\combi_rasters\\env_vars_Q4.tif", overwrite=TRUE)
+  
+  gc()
+  
+}
 
 #########################
 # Sample pseudoabsences #
@@ -705,39 +714,39 @@ for (i in 1:4){
 # Combine presences and pseudoabsences into test sets
 
 for (i in 1:4){
- df <- bind_rows(
+  df <- bind_rows(
     test_A %>% filter(Q == paste0("Q",i)) %>% select(X, Y, pos),
     pseudoabs_test_A %>% filter(Q == paste0("Q",i)) %>% rename(pos = pr_ab) %>% select(X, Y, pos) # Add in test pseudoabsences
-    ) 
- 
- png(paste0("plots\\resampling\\test\\test_A_Q", i, ".png"), width = 10, height = 10, units = "in", res = 600)
- plot(base_map, col = "gray95", main = paste0("test set A, Q",i," (pos = green, pseudoabs = red)"))
- points(df %>% filter(pos == 1) %>% pull(X),
-        df %>% filter(pos == 1) %>% pull(Y), 
-        pch=16, cex=0.2, col = "green3")
- points(df %>% filter(pos == 0) %>% pull(X),
-        df %>% filter(pos == 0) %>% pull(Y), 
-        pch=16, cex=0.2, col = "firebrick1")
- dev.off()
- 
- df %>% saveRDS(paste0("training_sets\\test_coords_A_Q", i, ".RDS"))
- 
+  ) 
+  
+  png(paste0("plots\\resampling\\test\\test_A_Q", i, ".png"), width = 10, height = 10, units = "in", res = 600)
+  plot(base_map, col = "gray95", main = paste0("test set A, Q",i," (pos = green, pseudoabs = red)"))
+  points(df %>% filter(pos == 1) %>% pull(X),
+         df %>% filter(pos == 1) %>% pull(Y), 
+         pch=16, cex=0.2, col = "green3")
+  points(df %>% filter(pos == 0) %>% pull(X),
+         df %>% filter(pos == 0) %>% pull(Y), 
+         pch=16, cex=0.2, col = "firebrick1")
+  dev.off()
+  
+  df %>% saveRDS(paste0("training_sets\\test_coords_A_Q", i, ".RDS"))
+  
   df <- bind_rows(
     test_B %>% filter(Q == paste0("Q",i)) %>% select(X, Y, pos),
     pseudoabs_test_B %>% filter(Q == paste0("Q",i)) %>% rename(pos = pr_ab) %>% select(X, Y, pos) # Add in test pseudoabsences
-    ) 
- 
- png(paste0("plots\\resampling\\test\\test_B_Q", i, ".png"), width = 10, height = 10, units = "in", res = 600)
- plot(base_map, col = "gray95", main = paste0("test set B, Q",i," (pos = green, pseudoabs = red)"))
- points(df %>% filter(pos == 1) %>% pull(X),
-        df %>% filter(pos == 1) %>% pull(Y), 
-        pch=16, cex=0.2, col = "green3")
- points(df %>% filter(pos == 0) %>% pull(X),
-        df %>% filter(pos == 0) %>% pull(Y), 
-        pch=16, cex=0.2, col = "firebrick1")
- dev.off()
- 
- df %>% saveRDS(paste0("training_sets\\test_coords_B_Q", i, ".RDS"))
+  ) 
+  
+  png(paste0("plots\\resampling\\test\\test_B_Q", i, ".png"), width = 10, height = 10, units = "in", res = 600)
+  plot(base_map, col = "gray95", main = paste0("test set B, Q",i," (pos = green, pseudoabs = red)"))
+  points(df %>% filter(pos == 1) %>% pull(X),
+         df %>% filter(pos == 1) %>% pull(Y), 
+         pch=16, cex=0.2, col = "green3")
+  points(df %>% filter(pos == 0) %>% pull(X),
+         df %>% filter(pos == 0) %>% pull(Y), 
+         pch=16, cex=0.2, col = "firebrick1")
+  dev.off()
+  
+  df %>% saveRDS(paste0("training_sets\\test_coords_B_Q", i, ".RDS"))
 }
 
 # Plot all in single plot
@@ -762,7 +771,7 @@ for (i in 1:4){
          ts %>% filter(pos == 0) %>% pull(Y), 
          pch=16, cex=0.3, col = rgb(red = 133/255, green = 81/255, blue = 81/255, alpha = 0.4))
   dev.off()
-
+  
   tr <- readRDS(paste0("training_sets/training_coords_B_Q", i, ".RDS"))
   ts <- readRDS(paste0("training_sets/test_coords_B_Q", i, ".RDS"))
   
