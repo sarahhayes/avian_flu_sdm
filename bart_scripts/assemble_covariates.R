@@ -13,11 +13,11 @@ crs <- "epsg:3035"
 
 euro_ext <- terra::ext(2000000, 6000000, 1000000, 5500000) # swap to base raster later
 
-eco_paths <- list.files(paste(PATH_TO_DATA, "AI_S2_SDM_storage/Eco-Rasters", sep = ""),
+eco_paths <- list.files(paste(PATH_TO_DATA, "AI_S2_SDM_storage/Eco-Rasters-Eco-Seasons", sep = ""),
                         pattern = "*.tif",
                         full.names = TRUE)
 eco_lyrnames <- eco_paths %>%
-  sub(pattern = paste(PATH_TO_DATA, "AI_S2_SDM_storage/Eco-Rasters/", sep = ""),
+  sub(pattern = paste(PATH_TO_DATA, "AI_S2_SDM_storage/Eco-Rasters-Eco-Seasons/", sep = ""),
       replacement = "") %>%
   sub(pattern = "_rast.tif",
       replacement = "") %>%
@@ -37,18 +37,18 @@ q3_eco_layers <- eco_layers[[seq(3, nlyr(eco_layers), 4)]]
 q4_eco_layers <- eco_layers[[seq(4, nlyr(eco_layers), 4)]]
 
 # Now do environmental:
-env_paths <- list.files(paste(PATH_TO_DATA, "AI_S2_SDM_storage/Environmental rasters/10k_res", sep = ""),
+env_paths <- list.files(paste(PATH_TO_DATA, "AI_S2_SDM_storage/Env-Rasters-Eco-Seasons", sep = ""),
                         pattern = "*.tif",
                         full.names = TRUE)
 env_paths <- env_paths[-grep("landcover_output_full", env_paths)]
 env_paths <- env_paths[-grep("chicken_density_2015", env_paths)]
 env_paths <- env_paths[-grep("duck_density_2015", env_paths)]
-env_paths <- env_paths[-grep("mean_tmax", env_paths)]
-env_paths <- env_paths[-grep("mean_tmin", env_paths)]
-env_paths <- env_paths[-grep("isotherm_midnight", env_paths)]
+# env_paths <- env_paths[-grep("mean_tmax", env_paths)]
+# env_paths <- env_paths[-grep("mean_tmin", env_paths)]
+# env_paths <- env_paths[-grep("isotherm_midnight", env_paths)]
 env_paths <- env_paths[-grep("isotherm_min", env_paths)]
 env_lyrnames <- env_paths %>%
-  sub(pattern = paste(PATH_TO_DATA, "AI_S2_SDM_storage/Environmental rasters/10k_res/", sep = ""),
+  sub(pattern = paste(PATH_TO_DATA, "AI_S2_SDM_storage/Env-Rasters-Eco-Seasons/", sep = ""),
       replacement = "") %>%
   sub(pattern = "_10kres",
       replacement = "") %>%
@@ -69,17 +69,17 @@ q2_env_layers <- subset(env_layers, setdiff(env_lyrnames, q2_excludes))
 q3_env_layers <- subset(env_layers, setdiff(env_lyrnames, q3_excludes))
 q4_env_layers <- subset(env_layers, setdiff(env_lyrnames, q4_excludes))
 
-cov_coast <- read.csv(paste(PATH_TO_DATA, "AI_S2_SDM_storage/Environmental rasters/10k_res/dist_to_coast_10kres.csv", sep = "")) %>%
-  rename(x = X, y = Y) %>%
+cov_coast <- read.csv(paste(PATH_TO_DATA, "AI_S2_SDM_storage/Env-Rasters-Eco-Seasons/dist_to_coast_10kres.csv", sep = "")) %>%
+  dplyr::rename(x = X, y = Y) %>%
   dplyr::select(-X.1) %>% 
   relocate(x,y) %>%
   rast(type = "xyz", crs = "epsg:3035")
-cov_water <- read.csv(paste(PATH_TO_DATA, "AI_S2_SDM_storage/Environmental rasters/10k_res/dist_to_water_output_10kres.csv", sep = "")) %>%
+cov_water <- read.csv(paste(PATH_TO_DATA, "AI_S2_SDM_storage/Env-Rasters-Eco-Seasons/dist_to_water_output_10kres.csv", sep = "")) %>%
   dplyr::select(-ID) %>% 
   relocate(x,y) %>%
   rast(type = "xyz", crs = "epsg:3035")
 
-landcover_rast <- rast(paste(PATH_TO_DATA, "AI_S2_SDM_storage/Environmental rasters/10k_res/landcover_output_full_2022_10kres.tif", sep = ""))
+landcover_rast <- rast(paste(PATH_TO_DATA, "AI_S2_SDM_storage/Env-Rasters-Eco-Seasons/landcover_output_full_2022_10kres.tif", sep = ""))
 n_landtypes <- 17
 landcover_layers <- lapply(1:n_landtypes,
                            FUN = function(i){landcover_rast == i}) %>%
@@ -118,7 +118,7 @@ all_covs <- c(resample(eco_layers, env_layers, method = "near"),
               landcover_layers,
               cov_coast,
               cov_water)  
-writeRaster(all_covs, paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covariates/all_q_covs_10k.tif", sep = ""), overwrite = TRUE)
+writeRaster(all_covs, paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covariates_eco_seasons/all_q_covs_10k.tif", sep = ""), overwrite = TRUE)
 rm(all_covs)
 gc()
 
@@ -127,7 +127,7 @@ q1_covs <- c(resample(q1_eco_layers, env_layers, method = "near"),
              landcover_layers,
              cov_coast,
              cov_water)  
-writeRaster(q1_covs, paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covariates/q1_covs_10k.tif", sep = ""), overwrite = TRUE)
+writeRaster(q1_covs, paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covariates_eco_seasons/q1_covs_10k.tif", sep = ""), overwrite = TRUE)
 rm(q1_covs)
 gc()
 q2_covs <- c(resample(q2_eco_layers, env_layers, method = "near"),
@@ -135,7 +135,7 @@ q2_covs <- c(resample(q2_eco_layers, env_layers, method = "near"),
              landcover_layers,
              cov_coast,
              cov_water)
-writeRaster(q2_covs, paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covariates/q2_covs_10k.tif", sep = ""), overwrite = TRUE)
+writeRaster(q2_covs, paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covariates_eco_seasons/q2_covs_10k.tif", sep = ""), overwrite = TRUE)
 rm(q2_covs)
 gc()
 q3_covs <- c(resample(q3_eco_layers, env_layers, method = "near"),
@@ -143,7 +143,7 @@ q3_covs <- c(resample(q3_eco_layers, env_layers, method = "near"),
              landcover_layers,
              cov_coast,
              cov_water)
-writeRaster(q3_covs, paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covariates/q3_covs_10k.tif", sep = ""), overwrite = TRUE)
+writeRaster(q3_covs, paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covariates_eco_seasons/q3_covs_10k.tif", sep = ""), overwrite = TRUE)
 rm(q3_covs)
 gc()
 q4_covs <- c(resample(q4_eco_layers, env_layers, method = "near"),
@@ -151,6 +151,6 @@ q4_covs <- c(resample(q4_eco_layers, env_layers, method = "near"),
              landcover_layers,
              cov_coast,
              cov_water)
-writeRaster(q4_covs, paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covariates/q4_covs_10k.tif", sep = ""), overwrite = TRUE)
+writeRaster(q4_covs, paste(PATH_TO_DATA, "AI_S2_SDM_storage/quarterly_covariates_eco_seasons/q4_covs_10k.tif", sep = ""), overwrite = TRUE)
 rm(q4_covs)
 gc()

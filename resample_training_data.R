@@ -15,6 +15,11 @@ library(patchwork)
 # Set ratio of pseudoabsences to positives (x:1)
 pseud_ratio <- 1
 
+# Do you need to initialise the environmental rasters for use in environmental thinning?
+# If this is the first time this script is run, should be set to TRUE
+
+INIT_ENV_VARS <- FALSE
+
 #############
 # Read data #
 #############
@@ -32,31 +37,42 @@ layername <- "eBird record"
 
 #weight_layer_log <- weight_layer %>% app(function(x) log(x+1))
 
+# Define starts of ecological seasons
+year_start <- as.Date("0000-01-01")
+q2_start <- as.Date("0000-03-01") # pre-breeding migration
+q3_start <- as.Date("0000-06-07") # breeding season
+q4_start <- as.Date("0000-08-10") # post-breeding migration
+q1_start <- as.Date("0000-11-30") # non-breeding season
+year_end <- as.Date("0000-12-31")
+
 # Read in positive flu site data 
 pos_sites <- read.csv("data_offline\\Avian flu data\\hpai_pos_birds_nobvbrc.csv") %>% 
   rename(date = observation.date) %>%
   mutate(date = as.Date(date),
-         Q = case_when(months(date) %in% month.name[1:3] ~ "Q1",
-                       months(date) %in% month.name[4:6] ~ "Q2",
-                       months(date) %in% month.name[7:9] ~ "Q3",
-                       months(date) %in% month.name[10:12] ~ "Q4"))
+         Q = case_when((format(date, "%m%-%d") >= format(year_start, "%m%-%d")) & (format(date, "%m%-%d") < format(q2_start-1, "%m%-%d)")) ~ "Q1",
+                       (format(date, "%m%-%d") >= format(q2_start, "%m%-%d")) & (format(date, "%m%-%d") < format(q3_start-1, "%m%-%d)")) ~ "Q2",
+                       (format(date, "%m%-%d") >= format(q3_start, "%m%-%d")) & (format(date, "%m%-%d") < format(q4_start-1, "%m%-%d)")) ~ "Q3",
+                       (format(date, "%m%-%d") >= format(q4_start, "%m%-%d")) & (format(date, "%m%-%d") < format(q1_start-1, "%m%-%d)")) ~ "Q4",
+                       (format(date, "%m%-%d") >= format(q1_start, "%m%-%d")) & (format(date, "%m%-%d") <= format(year_end, "%m%-%d)")) ~ "Q1"))
 
 pos_sites %>% pull(Q) %>% table
 pos_sites %>% pull(serotype_HN) %>% table
 
-# Data set A: roughly, "enzootic AI"
-# Training set A: all AI before 2020/21 H5N8 outbreak (which includes a H5N8 outbreak in 2017)
-# Test set A: 2020/21 H5N8 outbreak
-df_A <- pos_sites %>% filter(date < as.Date("2020-01-01")|date > as.Date("2020-01-01") & date < as.Date("2023-01-01") & serotype_HN == "H5N8") %>%
-  mutate(df = case_when(date < as.Date("2020-01-01") ~ "train_A",
-                        date > as.Date("2020-01-01") & serotype_HN == "H5N8" ~ "test_A"))
+# Data set A: 2.3.4.4b H5NX before H5N1  (includes H5N8, H5N6, retain ambiguous H5 or unlabelled HPAI [n = 80])
+# Training set A: 2.3.4.4b H5NX in distinct 2016/2017 outbreak
+# Test set A: 2.3.4.4b H5NX in distinct 2020/2021 outbreak
+df_A <- pos_sites %>% 
+  filter(date >= as.Date("2016-08-10") & date < as.Date("2021-08-10") & serotype_HN %in% c("H5N8", "H5N6", "H5", "")) %>%
+  mutate(df = case_when(date < as.Date("2020-08-10") ~ "train_A",
+                        date >= as.Date("2020-08-10") ~ "test_A"))
 
-# Data set B: roughly, "epizootic AI"
-# Training set B: H5N1 outbreak from Sep 21 until Mar 23 (retain ambiguous H5 or unlabelled)
-# Test set B: H5N1 outbreak Apr 23 - Mar 24 
-df_B <- pos_sites %>% filter(date > as.Date("2021-09-01") & serotype_HN %in% c("H5N1", "H5", "")) %>%
-  mutate(df = case_when(date <= as.Date("2023-03-30") ~ "train_B",
-                        date > as.Date("2023-03-30") ~ "test_B"))
+# Data set B: 2.3.4.4b H5N1 (retain ambiguous H5 or unlabelled HPAI [n = 64])
+# Training set B: 2.3.4.4b H5N1 from Sep 21 - Mar 23 %>% 
+# Test set B: H5N1 from Apr 23 - Mar 24 
+df_B <- pos_sites %>% 
+  filter(date >= as.Date("2021-08-10") & date < as.Date("2024-03-01") & serotype_HN %in% c("H5N1", "H5", "")) %>%
+  mutate(df = case_when(date < as.Date("2023-03-01") ~ "train_B",
+                        date >= as.Date("2023-03-01") ~ "test_B"))
 
 # How many per quarter
 pre_table <- bind_rows(df_A, df_B) %>% with(., table(df, Q))
@@ -84,31 +100,93 @@ bind_rows(df_A, df_B) %>%
   geom_histogram(bins=100)
 
 timeplot <- pos_sites %>% 
+  filter(date > as.Date("2016-08-10") & serotype_HN %in% c("H5N8", "H5N6", "H5N1", "H5", "")) %>%
   mutate(serotype_HN = case_when(
     serotype_HN == "H5N1" ~ "H5N1",
     serotype_HN == "H5N8" ~ "H5N8",
     serotype_HN == "H5N6" ~ "H5N6",
-    TRUE ~ "other"
+    TRUE ~ "H5NX"
   )) %>%
   ggplot(aes(x = date, fill = serotype_HN)) +
-  geom_histogram(bins = round(as.numeric((max(pos_sites$date)-min(pos_sites$date))/7)), position = "stack") +
-  geom_vline(xintercept = as.Date("2020-01-01")) +
-  geom_vline(xintercept = as.Date("2021-09-01")) +
-  geom_vline(xintercept = as.Date("2023-03-30")) +
-  geom_text(aes(x = as.Date("2013-01-01"), y = 185 ,label = "A. Train", hjust = 0.5)) +
-  geom_text(aes(x = as.Date("2020-01-01")+(as.Date("2021-09-01")-as.Date("2020-01-01"))/2, y = 185 ,label = "A. Test", hjust = 0.5)) +
-  geom_text(aes(x = as.Date("2021-09-01")+(as.Date("2023-03-30")-as.Date("2021-09-01"))/2, y = 185 ,label = "B. Train", hjust = 0.5)) +
-  geom_text(aes(x = as.Date("2024-03-01"), y = 185 ,label = "B. Test", hjust = 0.5)) +
-  scale_x_date(date_labels = "%Y", date_breaks = "2 year") +
-  ylab("Weekly reports") +
+  geom_histogram(bins = round(as.numeric((max(pos_sites$date)-min(pos_sites$date))/30)), position = "stack") +
+  geom_vline(xintercept = as.Date("2020-08-10")) +
+  geom_vline(xintercept = as.Date("2021-08-10")) +
+  geom_vline(xintercept = as.Date("2023-03-01")) +
+  geom_text(aes(x = as.Date("2016-08-10")+(as.Date("2020-08-10")-as.Date("2016-08-10"))/2, y = 330 ,label = "A. Train", hjust = 0.5)) +
+  geom_text(aes(x = as.Date("2020-08-10")+(as.Date("2021-08-10")-as.Date("2020-08-10"))/2, y = 330 ,label = "A. Test", hjust = 0.5)) +
+  geom_text(aes(x = as.Date("2021-08-10")+(as.Date("2023-03-01")-as.Date("2021-08-10"))/2, y = 330 ,label = "B. Train", hjust = 0.5)) +
+  geom_text(aes(x = as.Date("2024-01-01"), y = 330 ,label = "B. Test", hjust = 0.5)) +
+  scale_x_date(date_labels = "%Y", date_breaks = "1 year") +
+  ylab("Monthly reports") +
   xlab("Date") +
   labs(fill = "subtype") +
   theme_bw() +
-  theme(legend.position = c(0.05,0.75),
-        legend.title=element_blank())
+  theme(legend.position = c(0.05,0.77),
+        legend.title=element_blank(),
+        legend.margin=margin(c(1,5,5,5)))
+
+timeplot_seas <- pos_sites %>% 
+  filter(date > as.Date("2016-08-10") & serotype_HN %in% c("H5N8", "H5N6", "H5N1", "H5", "")) %>%
+  mutate(serotype_HN = case_when(
+    serotype_HN == "H5N1" ~ "H5N1",
+    serotype_HN == "H5N8" ~ "H5N8",
+    serotype_HN == "H5N6" ~ "H5N6",
+    TRUE ~ "H5NX"
+  )) %>%
+  ggplot(aes(x = date, fill = serotype_HN)) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2016-08-10"), xmax = as.Date("2016-11-30"), ymin = -Inf, ymax = Inf), fill = "limegreen", alpha = 0.1) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2017-08-10"), xmax = as.Date("2017-11-30"), ymin = -Inf, ymax = Inf), fill = "limegreen", alpha = 0.1) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2018-08-10"), xmax = as.Date("2018-11-30"), ymin = -Inf, ymax = Inf), fill = "limegreen", alpha = 0.1) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2019-08-10"), xmax = as.Date("2019-11-30"), ymin = -Inf, ymax = Inf), fill = "limegreen", alpha = 0.1) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2020-08-10"), xmax = as.Date("2020-11-30"), ymin = -Inf, ymax = Inf), fill = "limegreen", alpha = 0.1) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2021-08-10"), xmax = as.Date("2021-11-30"), ymin = -Inf, ymax = Inf), fill = "limegreen", alpha = 0.1) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2022-08-10"), xmax = as.Date("2022-11-30"), ymin = -Inf, ymax = Inf), fill = "limegreen", alpha = 0.1) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2023-08-10"), xmax = as.Date("2023-11-30"), ymin = -Inf, ymax = Inf), fill = "limegreen", alpha = 0.1) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2016-11-30"), xmax = as.Date("2017-03-01"), ymin = -Inf, ymax = Inf), fill = "red", alpha = 0.1) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2017-11-30"), xmax = as.Date("2018-03-01"), ymin = -Inf, ymax = Inf), fill = "red", alpha = 0.1) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2018-11-30"), xmax = as.Date("2019-03-01"), ymin = -Inf, ymax = Inf), fill = "red", alpha = 0.1) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2019-11-30"), xmax = as.Date("2020-03-01"), ymin = -Inf, ymax = Inf), fill = "red", alpha = 0.1) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2020-11-30"), xmax = as.Date("2021-03-01"), ymin = -Inf, ymax = Inf), fill = "red", alpha = 0.1) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2021-11-30"), xmax = as.Date("2022-03-01"), ymin = -Inf, ymax = Inf), fill = "red", alpha = 0.1) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2022-11-30"), xmax = as.Date("2023-03-01"), ymin = -Inf, ymax = Inf), fill = "red", alpha = 0.1) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2023-11-30"), xmax = as.Date("2024-03-01"), ymin = -Inf, ymax = Inf), fill = "red", alpha = 0.1) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2017-03-01"), xmax = as.Date("2017-06-07"), ymin = -Inf, ymax = Inf), fill = "orange", alpha = 0.1) + geom_vline(xintercept = as.Date("2020-08-10")) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2018-03-01"), xmax = as.Date("2018-06-07"), ymin = -Inf, ymax = Inf), fill = "orange", alpha = 0.1) + geom_vline(xintercept = as.Date("2020-08-10")) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2019-03-01"), xmax = as.Date("2019-06-07"), ymin = -Inf, ymax = Inf), fill = "orange", alpha = 0.1) + geom_vline(xintercept = as.Date("2020-08-10")) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2020-03-01"), xmax = as.Date("2020-06-07"), ymin = -Inf, ymax = Inf), fill = "orange", alpha = 0.1) + geom_vline(xintercept = as.Date("2020-08-10")) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2021-03-01"), xmax = as.Date("2021-06-07"), ymin = -Inf, ymax = Inf), fill = "orange", alpha = 0.1) + geom_vline(xintercept = as.Date("2020-08-10")) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2022-03-01"), xmax = as.Date("2022-06-07"), ymin = -Inf, ymax = Inf), fill = "orange", alpha = 0.1) + geom_vline(xintercept = as.Date("2020-08-10")) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2023-03-01"), xmax = as.Date("2023-06-07"), ymin = -Inf, ymax = Inf), fill = "orange", alpha = 0.1) + geom_vline(xintercept = as.Date("2020-08-10")) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2017-06-07"), xmax = as.Date("2017-08-10"), ymin = -Inf, ymax = Inf), fill = "yellow", alpha = 0.1) + geom_vline(xintercept = as.Date("2020-08-10")) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2018-06-07"), xmax = as.Date("2018-08-10"), ymin = -Inf, ymax = Inf), fill = "yellow", alpha = 0.1) + geom_vline(xintercept = as.Date("2020-08-10")) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2019-06-07"), xmax = as.Date("2019-08-10"), ymin = -Inf, ymax = Inf), fill = "yellow", alpha = 0.1) + geom_vline(xintercept = as.Date("2020-08-10")) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2020-06-07"), xmax = as.Date("2020-08-10"), ymin = -Inf, ymax = Inf), fill = "yellow", alpha = 0.1) + geom_vline(xintercept = as.Date("2020-08-10")) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2021-06-07"), xmax = as.Date("2021-08-10"), ymin = -Inf, ymax = Inf), fill = "yellow", alpha = 0.1) + geom_vline(xintercept = as.Date("2020-08-10")) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2022-06-07"), xmax = as.Date("2022-08-10"), ymin = -Inf, ymax = Inf), fill = "yellow", alpha = 0.1) + geom_vline(xintercept = as.Date("2020-08-10")) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2023-06-07"), xmax = as.Date("2023-08-10"), ymin = -Inf, ymax = Inf), fill = "yellow", alpha = 0.1) + geom_vline(xintercept = as.Date("2020-08-10")) +
+  geom_histogram(bins = round(as.numeric((max(pos_sites$date)-min(pos_sites$date))/30)), position = "stack") +
+  geom_vline(xintercept = as.Date("2021-08-10")) +
+  geom_vline(xintercept = as.Date("2023-03-01")) +
+  geom_text(aes(x = as.Date("2016-08-10")+(as.Date("2020-08-10")-as.Date("2016-08-10"))/2, y = 330 ,label = "A. Train", hjust = 0.5)) +
+  geom_text(aes(x = as.Date("2020-08-10")+(as.Date("2021-08-10")-as.Date("2020-08-10"))/2, y = 330 ,label = "A. Test", hjust = 0.5)) +
+  geom_text(aes(x = as.Date("2021-08-10")+(as.Date("2023-03-01")-as.Date("2021-08-10"))/2, y = 330 ,label = "B. Train", hjust = 0.5)) +
+  geom_text(aes(x = as.Date("2024-01-01"), y = 330 ,label = "B. Test", hjust = 0.5)) +
+  scale_x_date(date_labels = "%Y", date_breaks = "1 year") +
+  ylab("Monthly reports") +
+  xlab("Date") +
+  labs(fill = "subtype") +
+  theme_bw() +
+  theme(legend.position = c(0.05,0.77),
+        legend.title=element_blank(),
+        legend.margin=margin(c(1,5,5,5)))
 
 ggsave(paste("plots/timeplot.png"),
        plot = timeplot,
+       width = 12,
+       height = 3)
+
+ggsave(paste("plots/timeplot_seas.png"),
+       plot = timeplot_seas,
        width = 12,
        height = 3)
 
@@ -117,14 +195,14 @@ points_a <- st_as_sf(df_A, coords = c("X", "Y"), crs = crs(base_map)) %>%
     serotype_HN == "H5N1" ~ "H5N1",
     serotype_HN == "H5N8" ~ "H5N8",
     serotype_HN == "H5N6" ~ "H5N6",
-    TRUE ~ "other"
+    TRUE ~ "H5NX"
   ))
 points_b <- st_as_sf(df_B, coords = c("X", "Y"), crs = crs(base_map)) %>% 
   mutate(serotype_HN = case_when(
     serotype_HN == "H5N1" ~ "H5N1",
     serotype_HN == "H5N8" ~ "H5N8",
     serotype_HN == "H5N6" ~ "H5N6",
-    TRUE ~ "other"
+    TRUE ~ "H5NX"
   ))
 
 map_a_data <- 
@@ -132,6 +210,7 @@ map_a_data <-
   geom_sf(data = euro_map_st, fill = "grey", color = "black", alpha = 0.4)  +
   # geom_sf(data = points_a, color = "#00BFC4", size = 0.2) +
   geom_sf(data = points_a, aes(color = serotype_HN), size = 0.2, alpha = 0.6, show.legend = F) +
+  scale_color_manual(values = c("H5N1" = "#F8766D", "H5N6" = "#7CAE00", "H5N8" = "#00BFC4", "H5NX" = "#C77CFF")) +
   theme_minimal() +
   theme(legend.position="none") +
   labs(x = "Longitude",
@@ -142,6 +221,7 @@ map_b_data <-
   ggplot() +
   geom_sf(data = euro_map_st, fill = "grey", color = "black", alpha = 0.4)  +
   geom_sf(data = points_b, aes(color = serotype_HN), size = 0.2, alpha = 0.6, show.legend = F) +
+  scale_color_manual(values = c("H5N1" = "#F8766D", "H5N6" = "#7CAE00", "H5N8" = "#00BFC4", "H5NX" = "#C77CFF")) +
   theme_minimal() +
   theme(legend.position="none") +
   labs(x = "Longitude",
@@ -150,12 +230,12 @@ map_b_data <-
 
 fig_data_combi <- (map_a_data|map_b_data)/(timeplot) +
   plot_annotation(tag_levels = 'A') +
-  plot_layout(heights = c(4,1)) &
+  plot_layout(heights = c(4,1.2)) &
   theme(legend.position = 'bottom')
 
 ggsave(paste("plots/data_fig.png"),
        plot = fig_data_combi,
-       width = 10,
+       width = 11,
        height = 8.5)
 
 
@@ -216,90 +296,94 @@ df_B <- bind_rows(rast_train_B_list, rast_test_B_list)
 # How many per quarter after counting at grid cell level?
 post_table <- bind_rows(df_A, df_B) %>% with(., table(df, Q))
 
-pre_table
-post_table
+pre_table[c(3,1,4,2),]
+post_table[c(3,1,4,2),]
 
 #######################
 # One-time processing #
 #######################
 
-# # Read in and assemble environmental predictor layers from individual csvs and rasters
-# cov_coast <- read.csv("data_offline\\Environmental variable csvs\\dist_to_coast_output_10kres.csv") %>% rename(x = X, y = Y) %>% select(-X.1)
-# cov_water <- read.csv("data_offline\\Environmental variable csvs\\dist_to_water_output_10kres.csv") %>% select(-ID)
-# 
-# t <- purrr::reduce(
-#   list(cov_coast, cov_water),
-#   dplyr::left_join,
-#   by = c("x", "y")) %>%
-#   relocate(x, y) %>%
-#   terra::rast(type = "xyz", crs = "epsg:3035") %>%
-#   c(.,
-#     terra::rast("data_offline\\Environmental rasters\\elevation_max_10kres.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\isotherm_mean_q1.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\mean_diff_first_quart_10kres.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\mean_prec_first_quart_10kres.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\mean_relative_humidity_q1_10kres.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\mean_temp_q1_10kres.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\ndvi_first_quart_2022_10kres.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\variation_in_quarterly_mean_temp_q1_10kres.tif"))
-# t %>% set.names(c("dist_to_coast_km", "dist_to_water", "elev_max", "isotherm_mean", "diurn_temp", "prec", "humid", "mean_temp", "ndvi", "seas_temp"))
-# t %>% writeRaster("data_offline\\combi_rasters\\env_vars_Q1.tif", overwrite=TRUE)
-# 
-# t <- purrr::reduce(
-#   list(cov_coast, cov_water),
-#   dplyr::left_join,
-#   by = c("x", "y")) %>%
-#   relocate(x, y) %>%
-#   terra::rast(type = "xyz", crs = "epsg:3035") %>%
-#   c(.,
-#     terra::rast("data_offline\\Environmental rasters\\elevation_max_10kres.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\isotherm_mean_q2.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\mean_diff_second_quart_10kres.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\mean_prec_second_quart_10kres.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\mean_relative_humidity_q2_10kres.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\mean_temp_q2_10kres.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\ndvi_second_quart_2022_10kres.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\variation_in_quarterly_mean_temp_q2_10kres.tif"))
-# t %>% set.names(c("dist_to_coast_km", "dist_to_water", "elev_max", "isotherm_mean", "diurn_temp", "prec", "humid", "mean_temp", "ndvi", "seas_temp"))
-# t %>% writeRaster("data_offline\\combi_rasters\\env_vars_Q2.tif", overwrite=TRUE)
-# 
-# t <- purrr::reduce(
-#   list(cov_coast, cov_water),
-#   dplyr::left_join,
-#   by = c("x", "y")) %>%
-#   relocate(x, y) %>%
-#   terra::rast(type = "xyz", crs = "epsg:3035") %>%
-#   c(.,
-#     terra::rast("data_offline\\Environmental rasters\\elevation_max_10kres.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\isotherm_mean_q3.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\mean_diff_third_quart_10kres.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\mean_prec_third_quart_10kres.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\mean_relative_humidity_q3_10kres.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\mean_temp_q3_10kres.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\ndvi_third_quart_2022_10kres.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\variation_in_quarterly_mean_temp_q3_10kres.tif"))
-# t %>% set.names(c("dist_to_coast_km", "dist_to_water", "elev_max", "isotherm_mean", "diurn_temp", "prec", "humid", "mean_temp", "ndvi", "seas_temp"))
-# t %>% writeRaster("data_offline\\combi_rasters\\env_vars_Q3.tif", overwrite=TRUE)
-# 
-# t <- purrr::reduce(
-#   list(cov_coast, cov_water),
-#   dplyr::left_join,
-#   by = c("x", "y")) %>%
-#   relocate(x, y) %>%
-#   terra::rast(type = "xyz", crs = "epsg:3035") %>%
-#   c(.,
-#     terra::rast("data_offline\\Environmental rasters\\elevation_max_10kres.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\isotherm_mean_q4.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\mean_diff_fourth_quart_10kres.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\mean_prec_fourth_quart_10kres.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\mean_relative_humidity_q4_10kres.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\mean_temp_q4_10kres.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\ndvi_fourth_quart_2022_10kres.tif"),
-#     terra::rast("data_offline\\Environmental rasters\\variation_in_quarterly_mean_temp_q4_10kres.tif"))
-# t %>% set.names(c("dist_to_coast_km", "dist_to_water", "elev_max", "isotherm_mean", "diurn_temp", "prec", "humid", "mean_temp", "ndvi", "seas_temp"))
-# t %>% writeRaster("data_offline\\combi_rasters\\env_vars_Q4.tif", overwrite=TRUE)
-# 
-# gc()
+if (INIT_ENV_VARS == TRUE){
+  
+  # Read in and assemble environmental predictor layers from individual csvs and rasters
+  cov_coast <- read.csv("data_offline\\Environmental variable csvs\\dist_to_coast_output_10kres.csv") %>% rename(x = X, y = Y) %>% select(-X.1)
+  cov_water <- read.csv("data_offline\\Environmental variable csvs\\dist_to_water_output_10kres.csv") %>% select(-ID)
+  
+  t <- purrr::reduce(
+    list(cov_coast, cov_water),
+    dplyr::left_join,
+    by = c("x", "y")) %>%
+    relocate(x, y) %>%
+    terra::rast(type = "xyz", crs = "epsg:3035") %>%
+    c(.,
+      terra::rast("data_offline\\Environmental rasters\\elevation_max_10kres.tif"),
+      terra::rast("data_offline\\Environmental rasters\\isotherm_mean_q1_eco_quarts.tif"),
+      terra::rast("data_offline\\Environmental rasters\\mean_diff_first_quart_eco_rasts.tif"),
+      terra::rast("data_offline\\Environmental rasters\\mean_prec_first_quart_eco_rasts.tif"),
+      terra::rast("data_offline\\Environmental rasters\\mean_relative_humidity_q1_10kres_eco_quarts.tif"),
+      terra::rast("data_offline\\Environmental rasters\\mean_mean_first_quart_eco_rasts.tif"),
+      terra::rast("data_offline\\Environmental rasters\\ndvi_first_quart_2022_eco_rasts.tif"),
+      terra::rast("data_offline\\Environmental rasters\\variation_in_quarterly_mean_temp_q1_eco_rasts.tif"))
+  t %>% set.names(c("dist_to_coast_km", "dist_to_water", "elev_max", "isotherm_mean", "diurn_temp", "prec", "humid", "mean_temp", "ndvi", "seas_temp"))
+  t %>% writeRaster("data_offline\\combi_rasters\\env_vars_Q1.tif", overwrite=TRUE)
+  
+  t <- purrr::reduce(
+    list(cov_coast, cov_water),
+    dplyr::left_join,
+    by = c("x", "y")) %>%
+    relocate(x, y) %>%
+    terra::rast(type = "xyz", crs = "epsg:3035") %>%
+    c(.,
+      terra::rast("data_offline\\Environmental rasters\\elevation_max_10kres.tif"),
+      terra::rast("data_offline\\Environmental rasters\\isotherm_mean_q2_eco_quarts.tif"),
+      terra::rast("data_offline\\Environmental rasters\\mean_diff_second_quart_eco_rasts.tif"),
+      terra::rast("data_offline\\Environmental rasters\\mean_prec_second_quart_eco_rasts.tif"),
+      terra::rast("data_offline\\Environmental rasters\\mean_relative_humidity_q2_10kres_eco_quarts.tif"),
+      terra::rast("data_offline\\Environmental rasters\\mean_mean_second_quart_eco_rasts.tif"),
+      terra::rast("data_offline\\Environmental rasters\\ndvi_second_quart_2022_eco_rasts.tif"),
+      terra::rast("data_offline\\Environmental rasters\\variation_in_quarterly_mean_temp_q2_eco_rasts.tif"))
+  t %>% set.names(c("dist_to_coast_km", "dist_to_water", "elev_max", "isotherm_mean", "diurn_temp", "prec", "humid", "mean_temp", "ndvi", "seas_temp"))
+  t %>% writeRaster("data_offline\\combi_rasters\\env_vars_Q2.tif", overwrite=TRUE)
+  
+  t <- purrr::reduce(
+    list(cov_coast, cov_water),
+    dplyr::left_join,
+    by = c("x", "y")) %>%
+    relocate(x, y) %>%
+    terra::rast(type = "xyz", crs = "epsg:3035") %>%
+    c(.,
+      terra::rast("data_offline\\Environmental rasters\\elevation_max_10kres.tif"),
+      terra::rast("data_offline\\Environmental rasters\\isotherm_mean_q3_eco_quarts.tif"),
+      terra::rast("data_offline\\Environmental rasters\\mean_diff_third_quart_eco_rasts.tif"),
+      terra::rast("data_offline\\Environmental rasters\\mean_prec_third_quart_eco_rasts.tif"),
+      terra::rast("data_offline\\Environmental rasters\\mean_relative_humidity_q3_10kres_eco_quarts.tif"),
+      terra::rast("data_offline\\Environmental rasters\\mean_mean_third_quart_eco_rasts.tif"),
+      terra::rast("data_offline\\Environmental rasters\\ndvi_third_quart_2022_eco_rasts.tif"),
+      terra::rast("data_offline\\Environmental rasters\\variation_in_quarterly_mean_temp_q3_eco_rasts.tif"))
+  t %>% set.names(c("dist_to_coast_km", "dist_to_water", "elev_max", "isotherm_mean", "diurn_temp", "prec", "humid", "mean_temp", "ndvi", "seas_temp"))
+  t %>% writeRaster("data_offline\\combi_rasters\\env_vars_Q3.tif", overwrite=TRUE)
+  
+  t <- purrr::reduce(
+    list(cov_coast, cov_water),
+    dplyr::left_join,
+    by = c("x", "y")) %>%
+    relocate(x, y) %>%
+    terra::rast(type = "xyz", crs = "epsg:3035") %>%
+    c(.,
+      terra::rast("data_offline\\Environmental rasters\\elevation_max_10kres.tif"),
+      terra::rast("data_offline\\Environmental rasters\\isotherm_mean_q4_eco_quarts.tif"),
+      terra::rast("data_offline\\Environmental rasters\\mean_diff_fourth_quart_eco_rasts.tif"),
+      terra::rast("data_offline\\Environmental rasters\\mean_prec_fourth_quart_eco_rasts.tif"),
+      terra::rast("data_offline\\Environmental rasters\\mean_relative_humidity_q4_10kres_eco_quarts.tif"),
+      terra::rast("data_offline\\Environmental rasters\\mean_mean_fourth_quart_eco_rasts.tif"),
+      terra::rast("data_offline\\Environmental rasters\\ndvi_fourth_quart_2022_eco_rasts.tif"),
+      terra::rast("data_offline\\Environmental rasters\\variation_in_quarterly_mean_temp_q4_eco_rasts.tif"))
+  t %>% set.names(c("dist_to_coast_km", "dist_to_water", "elev_max", "isotherm_mean", "diurn_temp", "prec", "humid", "mean_temp", "ndvi", "seas_temp"))
+  t %>% writeRaster("data_offline\\combi_rasters\\env_vars_Q4.tif", overwrite=TRUE)
+  
+  gc()
+  
+}
 
 #########################
 # Sample pseudoabsences #
@@ -630,39 +714,39 @@ for (i in 1:4){
 # Combine presences and pseudoabsences into test sets
 
 for (i in 1:4){
- df <- bind_rows(
+  df <- bind_rows(
     test_A %>% filter(Q == paste0("Q",i)) %>% select(X, Y, pos),
     pseudoabs_test_A %>% filter(Q == paste0("Q",i)) %>% rename(pos = pr_ab) %>% select(X, Y, pos) # Add in test pseudoabsences
-    ) 
- 
- png(paste0("plots\\resampling\\test\\test_A_Q", i, ".png"), width = 10, height = 10, units = "in", res = 600)
- plot(base_map, col = "gray95", main = paste0("test set A, Q",i," (pos = green, pseudoabs = red)"))
- points(df %>% filter(pos == 1) %>% pull(X),
-        df %>% filter(pos == 1) %>% pull(Y), 
-        pch=16, cex=0.2, col = "green3")
- points(df %>% filter(pos == 0) %>% pull(X),
-        df %>% filter(pos == 0) %>% pull(Y), 
-        pch=16, cex=0.2, col = "firebrick1")
- dev.off()
- 
- df %>% saveRDS(paste0("training_sets\\test_coords_A_Q", i, ".RDS"))
- 
+  ) 
+  
+  png(paste0("plots\\resampling\\test\\test_A_Q", i, ".png"), width = 10, height = 10, units = "in", res = 600)
+  plot(base_map, col = "gray95", main = paste0("test set A, Q",i," (pos = green, pseudoabs = red)"))
+  points(df %>% filter(pos == 1) %>% pull(X),
+         df %>% filter(pos == 1) %>% pull(Y), 
+         pch=16, cex=0.2, col = "green3")
+  points(df %>% filter(pos == 0) %>% pull(X),
+         df %>% filter(pos == 0) %>% pull(Y), 
+         pch=16, cex=0.2, col = "firebrick1")
+  dev.off()
+  
+  df %>% saveRDS(paste0("training_sets\\test_coords_A_Q", i, ".RDS"))
+  
   df <- bind_rows(
     test_B %>% filter(Q == paste0("Q",i)) %>% select(X, Y, pos),
     pseudoabs_test_B %>% filter(Q == paste0("Q",i)) %>% rename(pos = pr_ab) %>% select(X, Y, pos) # Add in test pseudoabsences
-    ) 
- 
- png(paste0("plots\\resampling\\test\\test_B_Q", i, ".png"), width = 10, height = 10, units = "in", res = 600)
- plot(base_map, col = "gray95", main = paste0("test set B, Q",i," (pos = green, pseudoabs = red)"))
- points(df %>% filter(pos == 1) %>% pull(X),
-        df %>% filter(pos == 1) %>% pull(Y), 
-        pch=16, cex=0.2, col = "green3")
- points(df %>% filter(pos == 0) %>% pull(X),
-        df %>% filter(pos == 0) %>% pull(Y), 
-        pch=16, cex=0.2, col = "firebrick1")
- dev.off()
- 
- df %>% saveRDS(paste0("training_sets\\test_coords_B_Q", i, ".RDS"))
+  ) 
+  
+  png(paste0("plots\\resampling\\test\\test_B_Q", i, ".png"), width = 10, height = 10, units = "in", res = 600)
+  plot(base_map, col = "gray95", main = paste0("test set B, Q",i," (pos = green, pseudoabs = red)"))
+  points(df %>% filter(pos == 1) %>% pull(X),
+         df %>% filter(pos == 1) %>% pull(Y), 
+         pch=16, cex=0.2, col = "green3")
+  points(df %>% filter(pos == 0) %>% pull(X),
+         df %>% filter(pos == 0) %>% pull(Y), 
+         pch=16, cex=0.2, col = "firebrick1")
+  dev.off()
+  
+  df %>% saveRDS(paste0("training_sets\\test_coords_B_Q", i, ".RDS"))
 }
 
 # Plot all in single plot
@@ -687,7 +771,7 @@ for (i in 1:4){
          ts %>% filter(pos == 0) %>% pull(Y), 
          pch=16, cex=0.3, col = rgb(red = 133/255, green = 81/255, blue = 81/255, alpha = 0.4))
   dev.off()
-
+  
   tr <- readRDS(paste0("training_sets/training_coords_B_Q", i, ".RDS"))
   ts <- readRDS(paste0("training_sets/test_coords_B_Q", i, ".RDS"))
   

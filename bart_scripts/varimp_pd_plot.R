@@ -1,6 +1,6 @@
 # Varimp plot
 
-rm(list = ls())
+SKIP_AQ3 <- TRUE # Set to TRUE to skip small period A quarter 3 dataset
 
 ALL_VARS_FOR_PD = FALSE # If set to true we do partial dependence on everything
 
@@ -25,6 +25,16 @@ if (length(args)<1){
 
 #PATH_TO_OUTPUTS <- "H:/Working/avian_flu_sdm/output/"
 
+# Decide whether to use models with ecological season boundaries
+ECO_SEASONS <- TRUE
+if (ECO_SEASONS){
+  PATH_TO_MODELS <- paste(PATH_TO_OUTPUTS,
+                          "fitted-BART-models-eco-seasons/",
+                          sep="")
+}else{
+  PATH_TO_MODELS <- PATH_TO_OUTPUTS
+}
+
 library(tidyverse)
 library(dbarts)
 library(patchwork)
@@ -43,10 +53,11 @@ plot_labels <- data.frame(
   var = c(
     "mean_relative_humidity",
     "mean_diff",
-    "mean_temp",
+    "mean_mean",
     "variation_in_quarterly_mean_temp",
     "mean_tmax",
     "mean_tmin",
+    "mean_diff",
     "isotherm_mean",
     "isotherm_midday_days_below1",
     "mean_prec",
@@ -96,9 +107,10 @@ plot_labels <- data.frame(
     "mean relative humidity",
     "monthly temp. range",
     "mean temp.",
-    "quarterly temp. variation",
+    "seasonal temp. variation",
     "max. temp.",
     "min. temp.",
+    "mean daily temperature range",
     "mean 0° isotherm",
     "n days 0° isotherm <1m",
     "total precipitation",
@@ -148,9 +160,10 @@ plot_labels <- data.frame(
     "mean relative humidity (%)",
     "monthly temp. range (°C)",
     "mean temp. (°C)",
-    "quarterly temp. variation (°C)",
+    "seasonal temp. variation (°C)",
     "max. temp. (°C)",
     "min. temp. (°C)",
+    "mean temp. range (°C)",
     "mean 0° isotherm (m)",
     "n days 0° isotherm <1m",
     "total precipitation (mm)",
@@ -202,9 +215,15 @@ plot_labels <- data.frame(
 
 varimp_summ <- list()
 
-for(idx in 1:4){
+if (!SKIP_AQ3){
+  plt_idx <- 1:4
+}else{
+  plt_idx <- c(1, 2, 4) %>% as.integer()
+}
+
+for (idx in plt_idx){
   
-  load(file = paste(PATH_TO_OUTPUTS,
+  load(file = paste(PATH_TO_MODELS,
                     "fitted-BART-models-",
                     INCLUDE_CROSSTERMS,
                     "/",
@@ -224,11 +243,17 @@ for(idx in 1:4){
     t() %>%
     data.frame(Q = paste0("Q",idx)) %>%
     rownames_to_column(var = "var") %>%
-    rename("mean" = "X1", "sd" = "X2") %>%
+    dplyr::rename("mean" = "X1", "sd" = "X2") %>%
     mutate(var = gsub("first_quart", "q1", var),
            var = gsub("second_quart", "q2", var),
            var = gsub("third_quart", "q3", var),
            var = gsub("fourth_quart", "q4", var)) %>%
+    mutate(var = gsub("_rast_eco_bds.tif", "", var),
+           var = gsub("_eco_quarts", "", var),
+           var = gsub("_eco_bds", "", var),
+           var = gsub("_eco", "", var),
+           var = gsub("_rasts", "", var),
+           var = gsub("_2022", "", var)) %>%
     mutate(varq = str_extract(var, "_q\\d") %>% str_sub(-1) %>% as.numeric) %>%
     rowwise %>%
     mutate(lag = idx-varq) %>%
@@ -241,7 +266,7 @@ for(idx in 1:4){
     mutate(var = gsub("_q[1-4]", paste0("_lag", lag), var)) %>%
     mutate(lag = as.character(lag)) %>%
     mutate(lag = replace_na(lag, "ns")) %>%
-    select(-varq)
+    dplyr::select(-varq)
 }  
 
 if (INCLUDE_CROSSTERMS=="with-crossterms"){
@@ -253,11 +278,11 @@ if (INCLUDE_CROSSTERMS=="with-crossterms"){
                              length(grep("lag2",varimp_summ[[i]]$var)),
                              length(grep("lag3",varimp_summ[[i]]$var))
                            )}) %>%
-    as.data.frame(row.names = c("Q1 model",
+    as.data.frame(col.names = c("Q1 model",
                                 "Q2 model",
-                                "Q3 model",
+                                ifelse(SKIP_AQ3, NA, "Q3 model"),
                                 "Q4 model"),
-                  col.names = c("lag 0 covs",
+                  row.names = c("lag 0 covs",
                                 "lag 1 covs",
                                 "lag 2 covs",
                                 "lag 3 covs"))
@@ -267,10 +292,10 @@ df <- varimp_summ %>%
   bind_rows %>%
   mutate(var = gsub("_2022", "", var),
          var = gsub("_lag.$", "", var),
-         Q = case_when(Q == "Q1" ~ "Q1 (Jan - Mar)",
-                       Q == "Q2" ~ "Q2 (Apr - Jun)",
-                       Q == "Q3" ~ "Q3 (Jul - Sep)",
-                       Q == "Q4" ~ "Q4 (Oct - Dec)"
+         Q = case_when(Q == "Q1" ~ "Nonbreeding\n (Nov - Feb)",
+                       Q == "Q2" ~ "Pre-breeding\n migration\n (Mar - Jun)",
+                       Q == "Q3" ~ "Breeding\n (Jun - Aug)",
+                       Q == "Q4" ~ "Post-breeding\n migration\n (Aug - Nov)"
          )
   ) %>% 
   left_join(plot_labels)
@@ -304,14 +329,14 @@ fig_varimp_A <- ggplot(df, aes(x = mean, y = label, xmin = lower, xmax = upper, 
         strip.text.y = element_text(size = 10)) +
   xlab("Relative variable importance")
 
-ggsave(paste("plots/",
-             INCLUDE_CROSSTERMS,
-             "_",
-             CV_OR_RI,
-             "_variable_importance_quarterly_A.png", sep=""),
-       plot = fig_varimp_A,
-       width = 10,
-       height = 6)
+# ggsave(paste("plots/",
+#              INCLUDE_CROSSTERMS,
+#              "_",
+#              CV_OR_RI,
+#              "_variable_importance_quarterly_A.png", sep=""),
+#        plot = fig_varimp_A,
+#        width = 10,
+#        height = 6)
 
 # Calc and bind pd across all quarters for given variables by name. All you need to do is set names of variables of interest (or don't do anything and let it plot all of them) :)
 
@@ -320,9 +345,9 @@ selected_vars <- top_var %>% arrange(-g_mean) %>% pull(var) %>% .[1:6]
 
 pd_summ <- lapply(1:4, function(x) list()) # initialise empty list of lists
 
-for(idx in 1:4){
+for(idx in plt_idx){
   
-  load(file = paste(PATH_TO_OUTPUTS,
+  load(file = paste(PATH_TO_MODELS,
                     "fitted-BART-models-",
                     INCLUDE_CROSSTERMS,
                     "/",
@@ -337,16 +362,6 @@ for(idx in 1:4){
   }else{
     vars <- selected_vars
   }
-  
-  load(file = paste(PATH_TO_OUTPUTS,
-                    "fitted-BART-models-",
-                    INCLUDE_CROSSTERMS,
-                    "/",
-                    CV_OR_RI,
-                    "_model_with_vs_A_Q",
-                    idx,
-                    ".rds",
-                    sep = ""))
   
   for(j in 1:length(vars)){ # for variables for interest..
     
@@ -375,6 +390,12 @@ for(idx in 1:4){
                var = gsub("second_quart", "q2", var),
                var = gsub("third_quart", "q3", var),
                var = gsub("fourth_quart", "q4", var)) %>%
+        mutate(var = gsub("_rast_eco_bds.tif", "", var),
+               var = gsub("_eco_quarts", "", var),
+               var = gsub("_eco_bds", "", var),
+               var = gsub("_eco", "", var),
+               var = gsub("_rasts", "", var),
+               var = gsub("_2022", "", var)) %>%
         mutate(varq = str_extract(var, "_q\\d") %>% str_sub(-1) %>% as.numeric) %>%
         rowwise %>%
         mutate(lag = idx-varq) %>%
@@ -387,7 +408,7 @@ for(idx in 1:4){
         mutate(var = gsub("_q[1-4]", paste0("_lag", lag), var)) %>%
         mutate(lag = as.character(lag)) %>%
         mutate(lag = replace_na(lag, "ns")) %>%
-        select(-varq)
+        dplyr::select(-varq)
       
       pd_summ[[idx]] <- append(pd_summ[[idx]], list(pd_var))
       
@@ -547,7 +568,7 @@ varimp_summ <- list()
 
 for(idx in 1:4){
   
-  load(file = paste(PATH_TO_OUTPUTS,
+  load(file = paste(PATH_TO_MODELS,
                     "fitted-BART-models-",
                     INCLUDE_CROSSTERMS,
                     "/",
@@ -567,11 +588,17 @@ for(idx in 1:4){
     t() %>%
     data.frame(Q = paste0("Q",idx)) %>%
     rownames_to_column(var = "var") %>%
-    rename("mean" = "X1", "sd" = "X2") %>%
+    dplyr::rename("mean" = "X1", "sd" = "X2") %>%
     mutate(var = gsub("first_quart", "q1", var),
            var = gsub("second_quart", "q2", var),
            var = gsub("third_quart", "q3", var),
            var = gsub("fourth_quart", "q4", var)) %>%
+    mutate(var = gsub("_rast_eco_bds.tif", "", var),
+           var = gsub("_eco_quarts", "", var),
+           var = gsub("_eco_bds", "", var),
+           var = gsub("_eco", "", var),
+           var = gsub("_rasts", "", var),
+           var = gsub("_2022", "", var)) %>%
     mutate(varq = str_extract(var, "_q\\d") %>% str_sub(-1) %>% as.numeric) %>%
     rowwise %>%
     mutate(lag = idx-varq) %>%
@@ -584,7 +611,7 @@ for(idx in 1:4){
     mutate(var = gsub("_q[1-4]", paste0("_lag", lag), var)) %>%
     mutate(lag = as.character(lag)) %>%
     mutate(lag = replace_na(lag, "ns")) %>%
-    select(-varq)
+    dplyr::select(-varq)
 }  
 
 if (INCLUDE_CROSSTERMS=="with-crossterms"){
@@ -596,11 +623,11 @@ if (INCLUDE_CROSSTERMS=="with-crossterms"){
                              length(grep("lag2",varimp_summ[[i]]$var)),
                              length(grep("lag3",varimp_summ[[i]]$var))
                            )}) %>%
-    as.data.frame(row.names = c("Q1 model",
+    as.data.frame(col.names = c("Q1 model",
                                 "Q2 model",
                                 "Q3 model",
                                 "Q4 model"),
-                  col.names = c("lag 0 covs",
+                  row.names = c("lag 0 covs",
                                 "lag 1 covs",
                                 "lag 2 covs",
                                 "lag 3 covs"))
@@ -610,10 +637,10 @@ df <- varimp_summ %>%
   bind_rows %>%
   mutate(var = gsub("_2022", "", var),
          var = gsub("_lag.$", "", var),
-         Q = case_when(Q == "Q1" ~ "Q1 (Jan - Mar)",
-                       Q == "Q2" ~ "Q2 (Apr - Jun)",
-                       Q == "Q3" ~ "Q3 (Jul - Sep)",
-                       Q == "Q4" ~ "Q4 (Oct - Dec)"
+         Q = case_when(Q == "Q1" ~ "Nonbreeding\n (Nov - Feb)",
+                       Q == "Q2" ~ "Pre-breeding\n migration\n (Mar - Jun)",
+                       Q == "Q3" ~ "Breeding\n (Jun - Aug)",
+                       Q == "Q4" ~ "Post-breeding\n migration\n (Aug - Nov)"
          )
   ) %>% 
   left_join(plot_labels)
@@ -665,7 +692,7 @@ pd_summ <- lapply(1:4, function(x) list()) # initialise empty list of lists
 
 for(idx in 1:4){
   
-  load(file = paste(PATH_TO_OUTPUTS,
+  load(file = paste(PATH_TO_MODELS,
                     "fitted-BART-models-",
                     INCLUDE_CROSSTERMS,
                     "/",
@@ -681,7 +708,7 @@ for(idx in 1:4){
     vars <- selected_vars
   }
   
-  load(file = paste(PATH_TO_OUTPUTS,
+  load(file = paste(PATH_TO_MODELS,
                     "fitted-BART-models-",
                     INCLUDE_CROSSTERMS,
                     "/",
@@ -718,6 +745,12 @@ for(idx in 1:4){
                var = gsub("second_quart", "q2", var),
                var = gsub("third_quart", "q3", var),
                var = gsub("fourth_quart", "q4", var)) %>%
+        mutate(var = gsub("_rast_eco_bds.tif", "", var),
+               var = gsub("_eco_quarts", "", var),
+               var = gsub("_eco_bds", "", var),
+               var = gsub("_eco", "", var),
+               var = gsub("_rasts", "", var),
+               var = gsub("_2022", "", var)) %>%
         mutate(varq = str_extract(var, "_q\\d") %>% str_sub(-1) %>% as.numeric) %>%
         rowwise %>%
         mutate(lag = idx-varq) %>%
@@ -730,7 +763,7 @@ for(idx in 1:4){
         mutate(var = gsub("_q[1-4]", paste0("_lag", lag), var)) %>%
         mutate(lag = as.character(lag)) %>%
         mutate(lag = replace_na(lag, "ns")) %>%
-        select(-varq)
+        dplyr::select(-varq)
       
       pd_summ[[idx]] <- append(pd_summ[[idx]], list(pd_var))
       
