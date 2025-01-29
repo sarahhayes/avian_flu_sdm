@@ -59,7 +59,7 @@ q1_prec_wt_mean_prj <- terra::project(x = q1_prec_wt_mean, y = blank_3035, metho
 q1_prec_wt_mean_prj
 plot(q1_prec_wt_mean_prj)
 #terra::writeRaster(q1_prec_wt_mean_prj, 
-#                   "data/variables/climate/climate_prepped/q1_prec_eco_rasts.tif", overwrite = T)
+#                   "data/variables/climate/climate_prepped/mean_prec_first_quart_eco_rasts.tif", overwrite = T)
 
 # Q2
 q2_prec_wt_mean <- terra::weighted.mean(q2_prec_files, q2_wts)
@@ -67,7 +67,7 @@ q2_prec_wt_mean_prj <- terra::project(x = q2_prec_wt_mean, y = blank_3035, metho
 q2_prec_wt_mean_prj
 plot(q2_prec_wt_mean_prj)
 #terra::writeRaster(q2_prec_wt_mean_prj, 
-#                   "data/variables/climate/climate_prepped/q2_prec_eco_rasts.tif", overwrite = T)
+#                   "data/variables/climate/climate_prepped/mean_prec_second_quart_eco_rasts.tif", overwrite = T)
 
 # Q3
 q3_prec_wt_mean <- terra::weighted.mean(q3_prec_files, q3_wts)
@@ -75,7 +75,7 @@ q3_prec_wt_mean_prj <- terra::project(x = q3_prec_wt_mean, y = blank_3035, metho
 q3_prec_wt_mean_prj
 plot(q3_prec_wt_mean_prj)
 #terra::writeRaster(q3_prec_wt_mean_prj, 
-#                   "data/variables/climate/climate_prepped/q3_prec_eco_rasts.tif", overwrite = T)
+#                   "data/variables/climate/climate_prepped/mean_prec_third_quart_eco_rasts.tif", overwrite = T)
 
 # Q4
 q4_prec_wt_mean <- terra::weighted.mean(q4_prec_files, q4_wts)
@@ -83,7 +83,7 @@ q4_prec_wt_mean_prj <- terra::project(x = q4_prec_wt_mean, y = blank_3035, metho
 q4_prec_wt_mean_prj
 plot(q4_prec_wt_mean_prj)
 #terra::writeRaster(q4_prec_wt_mean_prj, 
-#                   "data/variables/climate/climate_prepped/q4_prec_eco_rasts.tif", overwrite = T)
+#                   "data/variables/climate/climate_prepped/mean_prec_fourth_quart_eco_rasts.tif", overwrite = T)
 
 ####################################################################
 
@@ -145,7 +145,7 @@ q1_diff_wt_mean_prj <- terra::project(x = q1_diff_wt_mean, y = blank_3035, metho
 q1_diff_wt_mean_prj
 plot(q1_diff_wt_mean_prj)
 #terra::writeRaster(q1_diff_wt_mean_prj, 
-#                   "data/variables/climate/climate_prepped/q1_mean_diff_eco_rasts.tif", overwrite = T)
+#                   "data/variables/climate/climate_prepped/mean_diff_first_quart_eco_rasts.tif", overwrite = T)
 
 
 #Q2
@@ -154,7 +154,7 @@ q2_diff_wt_mean_prj <- terra::project(x = q2_diff_wt_mean, y = blank_3035, metho
 q2_diff_wt_mean_prj
 plot(q2_diff_wt_mean_prj)
 #terra::writeRaster(q2_diff_wt_mean_prj, 
-#                   "data/variables/climate/climate_prepped/q2_mean_diff_eco_rasts.tif", overwrite = T)
+#                   "data/variables/climate/climate_prepped/mean_diff_second_quart_eco_rasts.tif", overwrite = T)
 
 
 #Q3
@@ -163,7 +163,7 @@ q3_diff_wt_mean_prj <- terra::project(x = q3_diff_wt_mean, y = blank_3035, metho
 q3_diff_wt_mean_prj
 plot(q3_diff_wt_mean_prj)
 #terra::writeRaster(q3_diff_wt_mean_prj, 
-#                   "data/variables/climate/climate_prepped/q3_mean_diff_eco_rasts.tif", overwrite = T)
+#                   "data/variables/climate/climate_prepped/mean_diff_third_quart_eco_rasts.tif", overwrite = T)
 
 #Q4
 q4_diff_wt_mean <- terra::weighted.mean(q4_diff_files, q4_wts)
@@ -171,7 +171,7 @@ q4_diff_wt_mean_prj <- terra::project(x = q4_diff_wt_mean, y = blank_3035, metho
 q4_diff_wt_mean_prj
 plot(q4_diff_wt_mean_prj)
 #terra::writeRaster(q4_diff_wt_mean_prj, 
-#                   "data/variables/climate/climate_prepped/q4_mean_diff_eco_rasts.tif", overwrite = T)
+#                   "data/variables/climate/climate_prepped/mean_diff_fourth_quart_eco_rasts.tif", overwrite = T)
 
 
 ###############################################################################
@@ -207,7 +207,7 @@ q1_mean_wt_mean_prj <- terra::project(x = q1_mean_wt_mean, y = blank_3035, metho
 q1_mean_wt_mean_prj
 plot(q1_mean_wt_mean_prj)
 #terra::writeRaster(q1_mean_wt_mean_prj, 
-#                   "data/variables/climate/climate_prepped/q1_mean_mean_eco_rasts.tif", overwrite = T)
+#                   "data/variables/climate/climate_prepped/mean_mean_first_quart_eco_rasts.tif", overwrite = T)
 
 #Q2
 q2_mean_wt_mean <- terra::weighted.mean(q2_mean_files, q2_wts)
@@ -215,7 +215,7 @@ q2_mean_wt_mean_prj <- terra::project(x = q2_mean_wt_mean, y = blank_3035, metho
 q2_mean_wt_mean_prj
 plot(q2_mean_wt_mean_prj)
 #terra::writeRaster(q2_mean_wt_mean_prj, 
-#                   "data/variables/climate/climate_prepped/q2_mean_mean_eco_rasts.tif", overwrite = T)
+#                   "data/variables/climate/climate_prepped/mean_mean_second_quart_eco_rasts.tif", overwrite = T)
 
 #Q3
 q3_mean_wt_mean <- terra::weighted.mean(q3_mean_files, q3_wts)
@@ -223,7 +223,7 @@ q3_mean_wt_mean_prj <- terra::project(x = q3_mean_wt_mean, y = blank_3035, metho
 q3_mean_wt_mean_prj
 plot(q3_mean_wt_mean_prj)
 #terra::writeRaster(q3_mean_wt_mean_prj, 
-#                   "data/variables/climate/climate_prepped/q3_mean_mean_eco_rasts.tif", overwrite = T)
+#                   "data/variables/climate/climate_prepped/mean_mean_third_quart_eco_rasts.tif", overwrite = T)
 
 #Q4
 q4_mean_wt_mean <- terra::weighted.mean(q4_mean_files, q4_wts)
@@ -231,7 +231,7 @@ q4_mean_wt_mean_prj <- terra::project(x = q4_mean_wt_mean, y = blank_3035, metho
 q4_mean_wt_mean_prj
 plot(q4_mean_wt_mean_prj)
 #terra::writeRaster(q4_mean_wt_mean_prj, 
-#                   "data/variables/climate/climate_prepped/q4_mean_mean_eco_rasts.tif", overwrite = T)
+#                   "data/variables/climate/climate_prepped/mean_mean_fourth_quart_eco_rasts.tif", overwrite = T)
 
 
 ###########################################################################
@@ -263,7 +263,7 @@ q1_mean_range
 plot(q1_mean_range)
 q1_mean_range_prj <- terra::project(x = q1_mean_range, y = blank_3035, method = "bilinear") 
 plot(q1_mean_range_prj)
-# terra::writeRaster(q1_mean_range_prj, "data/variables/climate/climate_prepped/q1_variation_in_quarterly_mean_temp_eco_rasts.tif")
+# terra::writeRaster(q1_mean_range_prj, "data/variables/climate/climate_prepped/variation_in_quarterly_mean_temp_q1_eco_rasts.tif")
 
 #Q2
 q2_min_means <- terra::app(q2_quart_var_files, min)
@@ -276,7 +276,7 @@ q2_mean_range
 plot(q2_mean_range)
 q2_mean_range_prj <- terra::project(x = q2_mean_range, y = blank_3035, method = "bilinear") 
 plot(q2_mean_range_prj)
-#terra::writeRaster(q2_mean_range_prj, "data/variables/climate/climate_prepped/q2_variation_in_quarterly_mean_temp_eco_rasts.tif")
+#terra::writeRaster(q2_mean_range_prj, "data/variables/climate/climate_prepped/variation_in_quarterly_mean_temp_q2_eco_rasts.tif")
 
 #Q3
 q3_min_means <- terra::app(q3_quart_var_files, min)
@@ -286,7 +286,7 @@ q3_mean_range <- terra::diff(q3_max_min)
 plot(q3_mean_range)
 q3_mean_range_prj <- terra::project(x = q3_mean_range, y = blank_3035, method = "bilinear") 
 plot(q3_mean_range_prj)
-#terra::writeRaster(q3_mean_range_prj, "data/variables/climate/climate_prepped/q3_variation_in_quarterly_mean_temp_eco_rasts.tif")
+#terra::writeRaster(q3_mean_range_prj, "data/variables/climate/climate_prepped/variation_in_quarterly_mean_temp_q3_eco_rasts.tif")
 
 #Q4
 q4_min_means <- terra::app(q4_quart_var_files, min)
@@ -296,4 +296,4 @@ q4_mean_range <- terra::diff(q4_max_min)
 plot(q4_mean_range)
 q4_mean_range_prj <- terra::project(x = q4_mean_range, y = blank_3035, method = "bilinear") 
 plot(q4_mean_range_prj)
-#terra::writeRaster(q4_mean_range_prj, "data/variables/climate/climate_prepped/q4_variation_in_quarterly_mean_temp_eco_rasts.tif")
+#terra::writeRaster(q4_mean_range_prj, "data/variables/climate/climate_prepped/variation_in_quarterly_mean_temp_q4_eco_rasts.tif")
