@@ -57,7 +57,6 @@ plot_labels <- data.frame(
     "variation_in_quarterly_mean_temp",
     "mean_tmax",
     "mean_tmin",
-    "mean_diff",
     "isotherm_mean",
     "isotherm_midday_days_below1",
     "mean_prec",
@@ -110,7 +109,6 @@ plot_labels <- data.frame(
     "seasonal temp. variation",
     "max. temp.",
     "min. temp.",
-    "mean daily temperature range",
     "mean 0° isotherm",
     "n days 0° isotherm <1m",
     "total precipitation",
@@ -163,7 +161,6 @@ plot_labels <- data.frame(
     "seasonal temp. variation (°C)",
     "max. temp. (°C)",
     "min. temp. (°C)",
-    "mean temp. range (°C)",
     "mean 0° isotherm (m)",
     "n days 0° isotherm <1m",
     "total precipitation (mm)",
@@ -296,7 +293,13 @@ df <- varimp_summ %>%
                        Q == "Q2" ~ "Pre-breeding\n migration\n (Mar - Jun)",
                        Q == "Q3" ~ "Breeding\n (Jun - Aug)",
                        Q == "Q4" ~ "Post-breeding\n migration\n (Aug - Nov)"
-         )
+         ),
+         Q = factor(Q, levels = c(
+           "Nonbreeding\n (Nov - Feb)",
+           "Pre-breeding\n migration\n (Mar - Jun)",
+           "Breeding\n (Jun - Aug)",
+           "Post-breeding\n migration\n (Aug - Nov)"
+         ))
   ) %>% 
   left_join(plot_labels)
 
@@ -329,18 +332,19 @@ fig_varimp_A <- ggplot(df, aes(x = mean, y = label, xmin = lower, xmax = upper, 
         strip.text.y = element_text(size = 10)) +
   xlab("Relative variable importance")
 
-# ggsave(paste("plots/",
-#              INCLUDE_CROSSTERMS,
-#              "_",
-#              CV_OR_RI,
-#              "_variable_importance_quarterly_A.png", sep=""),
-#        plot = fig_varimp_A,
-#        width = 10,
-#        height = 6)
+ggsave(paste("plots/",
+             INCLUDE_CROSSTERMS,
+             "_",
+             CV_OR_RI,
+             "_variable_importance_quarterly_A.png", sep=""),
+       plot = fig_varimp_A,
+       width = 10,
+       height = 6)
 
 # Calc and bind pd across all quarters for given variables by name. All you need to do is set names of variables of interest (or don't do anything and let it plot all of them) :)
 
-# Define variables of interest
+# Define variables of interest 
+### NB this could alternatively be done by count across models!
 selected_vars <- top_var %>% arrange(-g_mean) %>% pull(var) %>% .[1:6]
 
 pd_summ <- lapply(1:4, function(x) list()) # initialise empty list of lists
@@ -418,7 +422,7 @@ for(idx in plt_idx){
 
 if (ALL_VARS_FOR_PD){
   
-  for(idx in 1:4){
+  for(idx in plt_idx){
     
     # Make individual panels of a partial dependence plot, automatically assigning line or point depending on whether variable is continuous or binary
     panel_list <- list() # initialise empty lists
@@ -447,8 +451,8 @@ if (ALL_VARS_FOR_PD){
         ggplot(aes(x = x, y = y, ymin = lower, ymax = upper, fill = lag, color = lag)) +
         {if(!(all(df$x %in% 0:1)))
           list(
-            geom_ribbon(alpha = 0.08, colour = NA),
-            geom_line(lwd = 0.8, alpha = 0.4),
+            geom_ribbon(alpha = 0.08, colour = NA, show.legend=TRUE),
+            geom_line(lwd = 0.8, alpha = 0.4, show.legend=TRUE),
             scale_x_continuous(expand = c(0, 0)),
             scale_fill_manual(name = element_blank(),
                               breaks = c("0", "1", "2", "3"),
@@ -486,8 +490,8 @@ if (ALL_VARS_FOR_PD){
                  CV_OR_RI,
                  "_partial_dependence_A_Q", idx, ".png", sep=""),
            plot = plot_list[[idx]],
-           width = 12,
-           height = length(plot_list[[idx]])*2/3)
+           width = 14,
+           height = 2 * floor((length(plot_list[[idx]]) - 1) / 3) + 2)
     
   }
   
@@ -509,23 +513,25 @@ if (ALL_VARS_FOR_PD){
   
   for(j in 1:length(unique(pd_df$var))){
     
-    xlab <- unique(pd_df$label_units)[j]
+    plot_df <- pd_df %>% filter(var == unique(pd_df$var)[j])
     
-    panel_list[[j]] <- pd_df %>% 
-      filter(var == unique(pd_df$var)[j]) %>%
+    xlab <- unique(plot_df$label_units) %>% as.character
+    
+    panel_list[[j]] <- plot_df %>%
       ggplot(aes(x = x, y = y, ymin = lower, ymax = upper, fill = Q, color = Q, lty = lag)) +
-      {if(!(all(pd_df$x %in% 0:1)))
+      {if(!(all(plot_df$x %in% 0:1)))
         list(
-          geom_line(lwd = 0.8, alpha = 0.7),
+          geom_line(lwd = 0.8, alpha = 0.7, show.legend=TRUE),
           scale_x_continuous(expand = c(0, 0))
         )} +
-      {if(all(pd_df$x %in% 0:1)) 
+      {if(all(plot_df$x %in% 0:1)) 
         list(
-          geom_pointrange(aes(x = factor(x)), size = 0.7, position = position_dodge(width = 0.5))
+          geom_pointrange(aes(x = factor(x)), size = 0.7, position = position_dodge(width = 0.5)),
+          guides(fill = "none", linetype = "none", colour = "none")
         )} +
-      {if(all(df$x %in% c("anatinae", "anserinae", "ardeidae", "arenaria_calidris", "aythyini", 
-                          "laridae", "around_surf", "below_surf", "plant", "scav", "vend", 
-                          "cong", "migr", "host_dist"))) 
+      {if(unique(plot_df$var) %in% c("anatinae", "anserinae", "ardeidae", "arenaria_calidris", "aythyini", 
+                                     "laridae", "around_surf", "below_surf", "plant", "scav", "vend", 
+                                     "cong", "migr", "host_dist")) 
         list(
           scale_x_continuous(trans = "log10", expand = c(0,0))
         )} +
@@ -542,9 +548,10 @@ if (ALL_VARS_FOR_PD){
                             values = c("solid", "solid", "longdash", "twodash", "dotted"),
                             drop = FALSE) +
       scale_y_continuous(limits = c(0, 1), expand = c(0, 0)) +
+      
+      theme_bw() +
       xlab(xlab) +
-      ylab("Probability") +
-      theme_bw()
+      ylab("Probability")
   }
   
   fig_pd_chosen_A <- wrap_plots(panel_list, ncol = 2) +
@@ -641,7 +648,13 @@ df <- varimp_summ %>%
                        Q == "Q2" ~ "Pre-breeding\n migration\n (Mar - Jun)",
                        Q == "Q3" ~ "Breeding\n (Jun - Aug)",
                        Q == "Q4" ~ "Post-breeding\n migration\n (Aug - Nov)"
-         )
+         ),
+         Q = factor(Q, levels = c(
+           "Nonbreeding\n (Nov - Feb)",
+           "Pre-breeding\n migration\n (Mar - Jun)",
+           "Breeding\n (Jun - Aug)",
+           "Post-breeding\n migration\n (Aug - Nov)"
+         ))
   ) %>% 
   left_join(plot_labels)
 
@@ -802,8 +815,8 @@ if (ALL_VARS_FOR_PD){
         ggplot(aes(x = x, y = y, ymin = lower, ymax = upper, fill = lag, color = lag)) +
         {if(!(all(df$x %in% 0:1)))
           list(
-            geom_ribbon(alpha = 0.08, colour = NA),
-            geom_line(lwd = 0.8, alpha = 0.4),
+            geom_ribbon(alpha = 0.08, colour = NA, show.legend=TRUE),
+            geom_line(lwd = 0.8, alpha = 0.4, show.legend=TRUE),
             scale_x_continuous(expand = c(0, 0)),
             scale_fill_manual(name = element_blank(),
                               breaks = c("0", "1", "2", "3"),
@@ -842,7 +855,7 @@ if (ALL_VARS_FOR_PD){
                  "_partial_dependence_B_Q", idx, ".png", sep=""),
            plot = plot_list[[idx]],
            width = 12,
-           height = length(plot_list[[idx]])*2/3)
+           height = 2 * floor((length(plot_list[[idx]]) - 1) / 3) + 2)
     
   }
   
@@ -864,23 +877,25 @@ if (ALL_VARS_FOR_PD){
   
   for(j in 1:length(unique(pd_df$var))){
     
-    xlab <- unique(pd_df$label_units)[j]
+    plot_df <- pd_df %>% filter(var == unique(pd_df$var)[j])
     
-    panel_list[[j]] <- pd_df %>% 
-      filter(var == unique(pd_df$var)[j]) %>%
+    xlab <- unique(plot_df$label_units) %>% as.character
+    
+    panel_list[[j]] <- plot_df %>%
       ggplot(aes(x = x, y = y, ymin = lower, ymax = upper, fill = Q, color = Q, lty = lag)) +
-      {if(!(all(pd_df$x %in% 0:1)))
+      {if(!(all(plot_df$x %in% 0:1)))
         list(
-          geom_line(lwd = 0.8, alpha = 0.7),
+          geom_line(lwd = 0.8, alpha = 0.7, show.legend=TRUE),
           scale_x_continuous(expand = c(0, 0))
         )} +
-      {if(all(pd_df$x %in% 0:1)) 
+      {if(all(plot_df$x %in% 0:1)) 
         list(
-          geom_pointrange(aes(x = factor(x)), size = 0.7, position = position_dodge(width = 0.5))
+          geom_pointrange(aes(x = factor(x)), size = 0.7, position = position_dodge(width = 0.5)),
+          guides(fill = "none", linetype = "none", colour = "none")
         )} +
-      {if(all(df$x %in% c("anatinae", "anserinae", "ardeidae", "arenaria_calidris", "aythyini", 
-                          "laridae", "around_surf", "below_surf", "plant", "scav", "vend", 
-                          "cong", "migr", "host_dist"))) 
+      {if(unique(plot_df$var) %in% c("anatinae", "anserinae", "ardeidae", "arenaria_calidris", "aythyini", 
+                                     "laridae", "around_surf", "below_surf", "plant", "scav", "vend", 
+                                     "cong", "migr", "host_dist")) 
         list(
           scale_x_continuous(trans = "log10", expand = c(0,0))
         )} +
@@ -897,9 +912,10 @@ if (ALL_VARS_FOR_PD){
                             values = c("solid", "solid", "longdash", "twodash", "dotted"),
                             drop = FALSE) +
       scale_y_continuous(limits = c(0, 1), expand = c(0, 0)) +
+      
+      theme_bw() +
       xlab(xlab) +
-      ylab("Probability") +
-      theme_bw()
+      ylab("Probability")
   }
   
   fig_pd_chosen_B <- wrap_plots(panel_list, ncol = 2) +
