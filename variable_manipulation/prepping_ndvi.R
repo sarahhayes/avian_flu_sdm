@@ -98,38 +98,79 @@ plot(NDVI_raster)
 # this works but we probably want them in the separate seasons so do as 4 sections. 
 # these files are generated q 16 days so won't fit exactly into quarters. 
 
+# first_quart <- c("data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_001.tif",
+#                  "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_017.tif",
+#                  "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_033.tif",
+#                  "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_049.tif",
+#                  "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_065.tif",
+#                  "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_081.tif")
+# 
+# 
+# second_quart <- c("data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_097.tif",
+#                  "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_113.tif",
+#                  "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_129.tif",
+#                  "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_145.tif",
+#                  "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_161.tif",
+#                  "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_177.tif")
+# 
+# third_quart <- c("data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_193.tif",
+#                   "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_209.tif",
+#                   "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_225.tif",
+#                   "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_241.tif",
+#                   "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_257.tif")
+# 
+# fourth_quart <- c("data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_273.tif",
+#                   "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_289.tif",
+#                   "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_305.tif",
+#                   "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_321.tif",
+#                   "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_337.tif",
+#                   "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_353.tif")
+
+# first_stack <- terra::rast(first_quart)
+# second_stack <- terra::rast(second_quart)
+# third_stack <- terra::rast(third_quart)
+# fourth_stack <- terra::rast(fourth_quart)
+
+### Ecological quarters have different cut offs 
+# Q1 334 - 59 
+# Q2 60 - 157
+# Q3 158 - 221
+# Q4 222 - 333
+
 first_quart <- c("data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_001.tif",
                  "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_017.tif",
                  "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_033.tif",
                  "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_049.tif",
-                 "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_065.tif",
-                 "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_081.tif")
+                 "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_337.tif",
+                 "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_353.tif")
 
 
-second_quart <- c("data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_097.tif",
-                 "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_113.tif",
-                 "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_129.tif",
-                 "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_145.tif",
-                 "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_161.tif",
-                 "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_177.tif")
+second_quart <- c("data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_065.tif",
+                  "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_081.tif",
+                  "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_097.tif",
+                  "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_113.tif",
+                  "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_129.tif",
+                  "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_145.tif")
 
-third_quart <- c("data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_193.tif",
-                  "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_209.tif",
-                  "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_225.tif",
+third_quart <- c("data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_161.tif",
+                 "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_177.tif",
+                 "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_193.tif",
+                 "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_209.tif")
+
+fourth_quart <- c("data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_225.tif",
                   "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_241.tif",
-                  "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_257.tif")
-
-fourth_quart <- c("data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_273.tif",
+                  "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_257.tif",
+                  "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_273.tif",
                   "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_289.tif",
                   "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_305.tif",
-                  "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_321.tif",
-                  "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_337.tif",
-                  "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_353.tif")
+                  "data/vegetation_data/vegetation_data_2022/VI_16Days_1Km_v61/NDVI/battling_with_ndvi/MOD13A2_NDVI_2022_321.tif")
 
 first_stack <- terra::rast(first_quart)
 second_stack <- terra::rast(second_quart)
 third_stack <- terra::rast(third_quart)
 fourth_stack <- terra::rast(fourth_quart)
+
+
 
 ## calculate the mean
 # for the very early and very late parts of the year, some of the time there
@@ -210,6 +251,18 @@ dev.off()
 #                    "variable_manipulation/variable_outputs/ndvi_third_quart_2022_10kres.tif")
 # terra::writeRaster(fourth_stack_prj, 
 #                    "variable_manipulation/variable_outputs/ndvi_fourth_quart_2022_10kres.tif")
+
+# eco rasters
+# save the rasters
+# terra::writeRaster(first_stack_prj,
+#                    "variable_manipulation/variable_outputs/ndvi_first_quart_2022_eco_rasts.tif")
+# terra::writeRaster(second_stack_prj,
+#                    "variable_manipulation/variable_outputs/ndvi_second_quart_2022_eco_rasts.tif")
+# terra::writeRaster(third_stack_prj,
+#                    "variable_manipulation/variable_outputs/ndvi_third_quart_2022_eco_rasts.tif")
+# terra::writeRaster(fourth_stack_prj,
+#                    "variable_manipulation/variable_outputs/ndvi_fourth_quart_2022_eco_rasts.tif")
+
 
 
 ## As don't use the points - below not updated for 2022. CSV is thus still 2019

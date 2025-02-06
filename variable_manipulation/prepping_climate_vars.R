@@ -139,10 +139,21 @@ files_prec_fourth_quart <- c("data/variables/climate/climate_raw/wc2.1_2.5m_prec
 # mean_prec_fourth_quart <- climate_mean_fun(files_prec_fourth_quart, blank_raster = blank_3035, name_to_save = "mean_prec_fourth_quart")
 
 # 10k res
-mean_prec_first_quart <- climate_mean_fun(files_prec_first_quart, blank_raster = blank_3035, name_to_save = "mean_prec_first_quart_10kres")
-mean_prec_second_quart <- climate_mean_fun(files_prec_second_quart, blank_raster = blank_3035, name_to_save = "mean_prec_second_quart_10kres")
-mean_prec_third_quart <- climate_mean_fun(files_prec_third_quart, blank_raster = blank_3035, name_to_save = "mean_prec_third_quart_10kres")
-mean_prec_fourth_quart <- climate_mean_fun(files_prec_fourth_quart, blank_raster = blank_3035, name_to_save = "mean_prec_fourth_quart_10kres")
+#mean_prec_first_quart <- climate_mean_fun(files_prec_first_quart, blank_raster = blank_3035, name_to_save = "mean_prec_first_quart_10kres")
+#mean_prec_second_quart <- climate_mean_fun(files_prec_second_quart, blank_raster = blank_3035, name_to_save = "mean_prec_second_quart_10kres")
+#mean_prec_third_quart <- climate_mean_fun(files_prec_third_quart, blank_raster = blank_3035, name_to_save = "mean_prec_third_quart_10kres")
+#mean_prec_fourth_quart <- climate_mean_fun(files_prec_fourth_quart, blank_raster = blank_3035, name_to_save = "mean_prec_fourth_quart_10kres")
+
+### For ecological variables, have different quarters. 
+### Use number of days in each month to make the means. 
+
+q1_wts <- c(1,31,31,28)
+q2_wts <- c(31,30,31,6)
+q3_wts <- c(24,31,9)
+q4_wts <- c(22,30,31,29)
+
+
+
 
 
 ## Next step is to calculate the temperature variability. 
@@ -305,22 +316,22 @@ dec_diffs <- diff_fun("data/variables/climate/climate_raw/wc2.1_2.5m_tmin_2018-1
 #                              "data/variables/climate/climate_prepped/dec_diffs.tif")
 
 
-#10k res
-files_diff_first_quart <- c("data/variables/climate/climate_prepped/jan_diffs_10kres.tif",
-                            "data/variables/climate/climate_prepped/feb_diffs_10kres.tif",
-                            "data/variables/climate/climate_prepped/mar_diffs_10kres.tif")
-
-files_diff_second_quart <- c("data/variables/climate/climate_prepped/apr_diffs_10kres.tif",
-                             "data/variables/climate/climate_prepped/may_diffs_10kres.tif",
-                             "data/variables/climate/climate_prepped/jun_diffs_10kres.tif")
-
-files_diff_third_quart <- c("data/variables/climate/climate_prepped/jul_diffs_10kres.tif",
-                            "data/variables/climate/climate_prepped/aug_diffs_10kres.tif",
-                            "data/variables/climate/climate_prepped/sep_diffs_10kres.tif")
-
-files_diff_fourth_quart <- c("data/variables/climate/climate_prepped/oct_diffs_10kres.tif",
-                             "data/variables/climate/climate_prepped/nov_diffs_10kres.tif",
-                             "data/variables/climate/climate_prepped/dec_diffs_10kres.tif")
+# #10k res
+# files_diff_first_quart <- c("data/variables/climate/climate_prepped/jan_diffs_10kres.tif",
+#                             "data/variables/climate/climate_prepped/feb_diffs_10kres.tif",
+#                             "data/variables/climate/climate_prepped/mar_diffs_10kres.tif")
+# 
+# files_diff_second_quart <- c("data/variables/climate/climate_prepped/apr_diffs_10kres.tif",
+#                              "data/variables/climate/climate_prepped/may_diffs_10kres.tif",
+#                              "data/variables/climate/climate_prepped/jun_diffs_10kres.tif")
+# 
+# files_diff_third_quart <- c("data/variables/climate/climate_prepped/jul_diffs_10kres.tif",
+#                             "data/variables/climate/climate_prepped/aug_diffs_10kres.tif",
+#                             "data/variables/climate/climate_prepped/sep_diffs_10kres.tif")
+# 
+# files_diff_fourth_quart <- c("data/variables/climate/climate_prepped/oct_diffs_10kres.tif",
+#                              "data/variables/climate/climate_prepped/nov_diffs_10kres.tif",
+#                              "data/variables/climate/climate_prepped/dec_diffs_10kres.tif")
 
 
 # 1k res
@@ -329,13 +340,69 @@ files_diff_fourth_quart <- c("data/variables/climate/climate_prepped/oct_diffs_1
 # mean_diff_third_quart <- climate_mean_fun(files_diff_third_quart, blank_raster = blank_3035, name_to_save = "mean_diff_third_quart")
 # mean_diff_fourth_quart <- climate_mean_fun(files_diff_fourth_quart, blank_raster = blank_3035, name_to_save = "mean_diff_fourth_quart")
 
-#10k res
-mean_diff_first_quart <- climate_mean_fun(files_diff_first_quart, blank_raster = blank_3035, name_to_save = "mean_diff_first_quart_10kres")
-mean_diff_second_quart <- climate_mean_fun(files_diff_second_quart, blank_raster = blank_3035, name_to_save = "mean_diff_second_quart_10kres")
-mean_diff_third_quart <- climate_mean_fun(files_diff_third_quart, blank_raster = blank_3035, name_to_save = "mean_diff_third_quart_10kres")
-mean_diff_fourth_quart <- climate_mean_fun(files_diff_fourth_quart, blank_raster = blank_3035, name_to_save = "mean_diff_fourth_quart_10kres")
+# #10k res
+# mean_diff_first_quart <- climate_mean_fun(files_diff_first_quart, blank_raster = blank_3035, name_to_save = "mean_diff_first_quart_10kres")
+# mean_diff_second_quart <- climate_mean_fun(files_diff_second_quart, blank_raster = blank_3035, name_to_save = "mean_diff_second_quart_10kres")
+# mean_diff_third_quart <- climate_mean_fun(files_diff_third_quart, blank_raster = blank_3035, name_to_save = "mean_diff_third_quart_10kres")
+# mean_diff_fourth_quart <- climate_mean_fun(files_diff_fourth_quart, blank_raster = blank_3035, name_to_save = "mean_diff_fourth_quart_10kres")
+
+#####################################
+# Using the ecological quarters, we want a weighted mean based on the number of days that fall within the quarter.
+# the quarters are:
+# 30th November (day 334) – 28th (29th) February (day 59)  = 1 day of Nov, 31 days of Dec, 31 days of Jan and 28 days of Feb
+
+q1_vals <- c(nov_diffs, dec_diffs, jan_diffs, feb_diffs)
+q1_vals
+q1_wts <- c(1,31,31,28)
+
+q1_wt_mean <- terra::weighted.mean(q1_vals, q1_wts)
+q1_wt_mean
+q1_mean <- mean(q1_vals) 
+
+par(mfrow = c(1,2))
+plot(q1_wt_mean)
+plot(q1_mean)
+
+q1_wt_mean[50000:50010]
+q1_mean[50000:50010]
+
+# This all seems to be doing as we would like so repeat for the other ecological quarters
+# 1st March (day 60) – 6th June (day 157) = 31 days of March, 30 days of April, 31 days of May, 6 days of June
+
+q2_vals <- c(mar_diffs, apr_diffs, may_diffs, jun_diffs)
+q2_vals
+q2_wts <- c(31,30,31,6)
+
+q2_wt_mean <- terra::weighted.mean(q2_vals, q2_wts)
+q2_wt_mean
+
+# 7th June (day 158) – 9th August (day 221) = 24 days of June, 31 days of July, 9 days of August
+
+q3_vals <- c(jun_diffs, jul_diffs, aug_diffs)
+q3_vals
+q3_wts <- c(24,31,9)
+
+q3_wt_mean <- terra::weighted.mean(q3_vals, q3_wts)
+q3_wt_mean
+
+# 10th August (day 222)  - 29th November (day 333) = 22 days of August, 30 days of September, 31 days of October, 29 days of November, 
+
+q4_vals <- c(aug_diffs, sep_diffs, oct_diffs, nov_diffs)
+q4_vals
+q4_wts <- c(22,30,31,29)
+
+q4_wt_mean <- terra::weighted.mean(q4_vals, q4_wts)
+q4_wt_mean
 
 
+par(mfrow = c(2,2))
+plot(q1_wt_mean); plot(q2_wt_mean); plot(q3_wt_mean); plot(q4_wt_mean)
+
+#START HERE 
+##Seems a bit odd that the UK is only recording very small differences in temperature. Need to look at further
+
+
+#####################################
 # produce a couple of plots.
 #min_temp_first_quart <- terra::rast("data/variables/climate/climate_prepped/mean_tmin_first_quart.tif")
 min_temp_first_quart <- terra::rast("data/variables/climate/climate_prepped/mean_tmin_first_quart_10kres.tif")
