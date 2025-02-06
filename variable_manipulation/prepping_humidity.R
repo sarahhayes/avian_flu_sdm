@@ -20,15 +20,27 @@ hum_stack
 plot(hum_stack[[1]])
 hum_stack[[60]]
 
-# Split into the different quarters as the raw data are daily 
-first_quart_stack <- hum_stack[[1:90]]
+# # Split into the different quarters as the raw data are daily 
+# first_quart_stack <- hum_stack[[1:90]]
+# first_quart_stack
+# second_quart_stack <- hum_stack[[91:181]]
+# second_quart_stack
+# third_quart_stack <- hum_stack[[182:273]]
+# third_quart_stack
+# fourth_quart_stack <- hum_stack[[274:365]]
+# fourth_quart_stack
+
+
+### ecological quarters
+first_quart_stack <- c(hum_stack[[333:365]], hum_stack[[1:59]])
 first_quart_stack
-second_quart_stack <- hum_stack[[91:181]]
+second_quart_stack <- hum_stack[[60:157]]
 second_quart_stack
-third_quart_stack <- hum_stack[[182:273]]
+third_quart_stack <- hum_stack[[158:221]]
 third_quart_stack
-fourth_quart_stack <- hum_stack[[274:365]]
+fourth_quart_stack <- hum_stack[[222:333]]
 fourth_quart_stack
+
 
 # find the mean of the humidity in each quarter
 mean_humidity_q1 <- mean(first_quart_stack)
@@ -80,6 +92,11 @@ plot(mean_hum_q4_prj)
 #terra::writeRaster(mean_hum_q2_prj, "variable_manipulation/variable_outputs/mean_relative_humidity_q2_10kres.tif")
 #terra::writeRaster(mean_hum_q3_prj, "variable_manipulation/variable_outputs/mean_relative_humidity_q3_10kres.tif")
 #terra::writeRaster(mean_hum_q4_prj, "variable_manipulation/variable_outputs/mean_relative_humidity_q4_10kres.tif")
+
+# terra::writeRaster(mean_hum_q1_prj, "variable_manipulation/variable_outputs/mean_relative_humidity_q1_10kres_eco_quarts.tif")
+# terra::writeRaster(mean_hum_q2_prj, "variable_manipulation/variable_outputs/mean_relative_humidity_q2_10kres_eco_quarts.tif")
+# terra::writeRaster(mean_hum_q3_prj, "variable_manipulation/variable_outputs/mean_relative_humidity_q3_10kres_eco_quarts.tif")
+# terra::writeRaster(mean_hum_q4_prj, "variable_manipulation/variable_outputs/mean_relative_humidity_q4_10kres_eco_quarts.tif")
 
 
 

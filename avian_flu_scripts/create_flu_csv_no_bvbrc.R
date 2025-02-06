@@ -299,6 +299,7 @@ hpai <- ai_pos_birds %>% mutate(geometry = as.character(geometry))
 # Add a year and month and year_month to the data
 
 hpai$year <- lubridate::year(hpai$observation.date)
+
 hpai$month <- lubridate::month(hpai$observation.date)
 hpai$month_year <-  format(as.Date(hpai$observation.date), "%Y-%m")
 hpai$week <- format(hpai$observation.date, "%Y Week %W")

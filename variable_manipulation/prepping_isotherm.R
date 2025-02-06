@@ -21,13 +21,25 @@ plot(iso1)
 isotherm[[2]]
 
 # Split into the different quarters as the raw data are daily 
-first_quart_stack <- isotherm[[1:90]]
+
+## calendar quarters 
+# first_quart_stack <- isotherm[[1:90]] 
+# first_quart_stack
+# second_quart_stack <- isotherm[[91:181]]
+# second_quart_stack
+# third_quart_stack <- isotherm[[182:273]]
+# third_quart_stack
+# fourth_quart_stack <- isotherm[[274:365]]
+# fourth_quart_stack
+
+### ecological quarters
+first_quart_stack <- c(isotherm[[333:365]], isotherm[[1:59]])
 first_quart_stack
-second_quart_stack <- isotherm[[91:181]]
+second_quart_stack <- isotherm[[60:157]]
 second_quart_stack
-third_quart_stack <- isotherm[[182:273]]
+third_quart_stack <- isotherm[[158:221]]
 third_quart_stack
-fourth_quart_stack <- isotherm[[274:365]]
+fourth_quart_stack <- isotherm[[222:333]]
 fourth_quart_stack
 
 
@@ -65,7 +77,8 @@ min_q2_prj <- terra::project(min_q2, blank_3035, method = "min")
 min_q3_prj <- terra::project(min_q3, blank_3035, method = "min")
 min_q4_prj <- terra::project(min_q4, blank_3035, method = "min")
 
-pdf("plots/min_isotherm.pdf", height = 7, width = 7)
+#pdf("plots/min_isotherm.pdf", height = 7, width = 7)
+pdf("plots/min_isotherm_eco.pdf", height = 7, width = 7)
 par(mfrow = c(2,2))
 plot(min_q1_prj); plot(min_q2_prj); plot(min_q3_prj); plot(min_q4_prj)
 mtext("Minimum isotherm", side = 3, line = - 2, outer = TRUE)
@@ -79,6 +92,11 @@ plot(min_q1_prj) # bit unexpected that most of the UK doesn't seem to have a zer
 #terra::writeRaster(min_q2_prj, "variable_manipulation/variable_outputs/isotherm_min_q2.tif")
 #terra::writeRaster(min_q3_prj, "variable_manipulation/variable_outputs/isotherm_min_q3.tif")
 #terra::writeRaster(min_q4_prj, "variable_manipulation/variable_outputs/isotherm_min_q4.tif")
+
+# terra::writeRaster(min_q1_prj, "variable_manipulation/variable_outputs/isotherm_min_q1_eco_quarts.tif")
+# terra::writeRaster(min_q2_prj, "variable_manipulation/variable_outputs/isotherm_min_q2_eco_quarts.tif")
+# terra::writeRaster(min_q3_prj, "variable_manipulation/variable_outputs/isotherm_min_q3_eco_quarts.tif")
+# terra::writeRaster(min_q4_prj, "variable_manipulation/variable_outputs/isotherm_min_q4_eco_quarts.tif")
 
 
 # Next is to try to count number of times the value of 0 appears in the quarter. This will tell 
@@ -123,7 +141,8 @@ zero_one_q4 <- app(fourth_quart_stack, function(x) sum(x <=1))
 zero_ones_q4_prj <- terra::project(zero_one_q4, blank_3035, method = "max")
 zero_ones_q4_prj
 
-pdf("plots/isotherm_number_days_below1_midday.pdf", height = 7, width = 7)
+#pdf("plots/isotherm_number_days_below1_midday.pdf", height = 7, width = 7)
+pdf("plots/isotherm_number_days_below1_midday_eco_quarts.pdf", height = 7, width = 7)
 par(mfrow = c(2,2))
 plot(zero_ones_q1_prj, main = "Q1")
 plot(zero_ones_q2_prj, main = "Q2")
@@ -138,6 +157,12 @@ dev.off()
 #terra::writeRaster(zero_ones_q3_prj, "variable_manipulation/variable_outputs/isotherm_midday_days_below1_q3.tif")
 #terra::writeRaster(zero_ones_q4_prj, "variable_manipulation/variable_outputs/isotherm_midday_days_below1_q4.tif")
 
+terra::writeRaster(zero_ones_q1_prj, "variable_manipulation/variable_outputs/isotherm_midday_days_below1_q1_eco_quarts.tif")
+terra::writeRaster(zero_ones_q2_prj, "variable_manipulation/variable_outputs/isotherm_midday_days_below1_q2_eco_quarts.tif")
+terra::writeRaster(zero_ones_q3_prj, "variable_manipulation/variable_outputs/isotherm_midday_days_below1_q3_eco_quarts.tif")
+terra::writeRaster(zero_ones_q4_prj, "variable_manipulation/variable_outputs/isotherm_midday_days_below1_q4_eco_quarts.tif")
+
+#### START HERE FOR EDITS
 
 ## Next we want to look at the mean monthly data
 
@@ -185,6 +210,40 @@ plot(mean_iso_q3_prj, main = "Q3")
 plot(mean_iso_q4_prj, main = "Q4")
 mtext("Mean isotherm (m)", side = 3, outer = T, line = -1)
 dev.off()
+
+## Using the ecological quarters it is not as easy to use the monthly means. 
+## However, given we have the daily data we could use the means from that
+
+daily_mean_first_quart <- mean(first_quart_stack)
+daily_mean_first_quart
+daily_mean_iso_q1_prj <- terra::project(daily_mean_first_quart, blank_3035, method = "bilinear")
+daily_mean_iso_q1_prj
+plot(daily_mean_iso_q1_prj)
+
+daily_mean_second_quart <- mean(second_quart_stack)
+daily_mean_second_quart
+daily_mean_iso_q2_prj <- terra::project(daily_mean_second_quart, blank_3035, method = "bilinear")
+daily_mean_iso_q2_prj
+plot(daily_mean_iso_q2_prj)
+
+daily_mean_third_quart <- mean(third_quart_stack)
+daily_mean_third_quart
+daily_mean_iso_q3_prj <- terra::project(daily_mean_third_quart, blank_3035, method = "bilinear")
+daily_mean_iso_q3_prj
+plot(daily_mean_iso_q3_prj)
+
+daily_mean_fourth_quart <- mean(fourth_quart_stack)
+daily_mean_fourth_quart
+daily_mean_iso_q4_prj <- terra::project(daily_mean_fourth_quart, blank_3035, method = "bilinear")
+daily_mean_iso_q4_prj
+plot(daily_mean_iso_q4_prj)
+
+# terra::writeRaster(daily_mean_iso_q1_prj, "variable_manipulation/variable_outputs/isotherm_mean_q1_eco_quarts.tif")
+# terra::writeRaster(daily_mean_iso_q2_prj, "variable_manipulation/variable_outputs/isotherm_mean_q2_eco_quarts.tif")
+# terra::writeRaster(daily_mean_iso_q3_prj, "variable_manipulation/variable_outputs/isotherm_mean_q3_eco_quarts.tif")
+# terra::writeRaster(daily_mean_iso_q4_prj, "variable_manipulation/variable_outputs/isotherm_mean_q4_eco_quarts.tif")
+# 
+
 
 ###############
 ### Now repeat the daily process for data from midnight (c.f. midday) 
