@@ -5,6 +5,10 @@
 # Global storing optimised k value for BART - which may be updated
 K_OPT <- 2
 
+# Number of chains/threads for MCMC run. The code is set up to do one thread per
+# chains
+N_CHAINS <- 8L
+
 SKIP_AQ3 <- TRUE # Set to TRUE to skip small period A quarter 3 dataset
 
 # Optional command line arguments, must be passed as strings:
@@ -68,8 +72,8 @@ bart.flex <- function(x.data, y.data, ri.data = NULL,
                       power = power,
                       base = base,
                       keepTrees = TRUE,
-                      n.chains=1,
-                      n.threads=1) 
+                      nchain = N_CHAINS,
+                      nthread = N_CHAINS) 
   }
   return(model)
 }
@@ -487,7 +491,9 @@ basic_model <- bart.flex(x.data = xtrain,
                          y.data = ytrain,
                          ri.data = countrytrain,
                          power = power_opt,
-                         base = base_opt)
+                         base = base_opt,
+                         nchain = N_CHAINS,
+                         nthread = N_CHAINS)
 invisible(basic_model$fit$state)
 summary(basic_model)
 
@@ -614,7 +620,9 @@ basic_model <- bart.flex(x.data = xtrain,
                          y.data = ytrain,
                          ri.data = countrytrain,
                          power = power_opt,
-                         base = base_opt)
+                         base = base_opt,
+                         nchain = N_CHAINS,
+                         nthread = N_CHAINS)
 invisible(basic_model$fit$state)
 summary(basic_model)
 
@@ -743,7 +751,9 @@ if (!SKIP_AQ3){
                            y.data = ytrain,
                            ri.data = countrytrain,
                            power = power_opt,
-                           base = base_opt)
+                           base = base_opt,
+                           nchain = N_CHAINS,
+                           nthread = N_CHAINS)
   invisible(basic_model$fit$state)
   summary(basic_model)
   
@@ -869,7 +879,9 @@ basic_model <- bart.flex(x.data = xtrain,
                          y.data = ytrain,
                          ri.data = countrytrain,
                          power = power_opt,
-                         base = base_opt)
+                         base = base_opt,
+                         nchain = N_CHAINS,
+                         nthread = N_CHAINS)
 invisible(basic_model$fit$state)
 summary(basic_model)
 
@@ -990,7 +1002,9 @@ basic_model <- bart.flex(x.data = xtrain,
                          y.data = ytrain,
                          ri.data = countrytrain,
                          power = power_opt,
-                         base = base_opt)
+                         base = base_opt,
+                         nchain = N_CHAINS,
+                         nthread = N_CHAINS)
 invisible(basic_model$fit$state)
 summary(basic_model)
 
@@ -1110,7 +1124,9 @@ basic_model <- bart.flex(x.data = xtrain,
                          y.data = ytrain,
                          ri.data = countrytrain,
                          power = power_opt,
-                         base = base_opt)
+                         base = base_opt,
+                         nchain = N_CHAINS,
+                         nthread = N_CHAINS)
 invisible(basic_model$fit$state)
 summary(basic_model)
 
@@ -1231,7 +1247,9 @@ basic_model <- bart.flex(x.data = xtrain,
                          y.data = ytrain,
                          ri.data = countrytrain,
                          power = power_opt,
-                         base = base_opt)
+                         base = base_opt,
+                         nchain = N_CHAINS,
+                         nthread = N_CHAINS)
 invisible(basic_model$fit$state)
 summary(basic_model)
 
@@ -1352,7 +1370,9 @@ basic_model <- bart.flex(x.data = xtrain,
                          y.data = ytrain,
                          ri.data = countrytrain,
                          power = power_opt,
-                         base = base_opt)
+                         base = base_opt,
+                         nchain = N_CHAINS,
+                         nthread = N_CHAINS)
 invisible(basic_model$fit$state)
 summary(basic_model)
 

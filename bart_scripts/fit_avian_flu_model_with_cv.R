@@ -5,6 +5,10 @@
 # Global storing optimised k value for BART - which may be updated
 K_OPT <- 2
 
+# Number of chains/threads for MCMC run. The code is set up to do one thread per
+# chains
+N_CHAINS <- 8L
+
 SKIP_AQ3 <- TRUE # Set to TRUE to skip small period A quarter 3 dataset
 
 # Optional command line arguments, must be passed as strings:
@@ -51,7 +55,10 @@ bart.flex <- function(x.data, y.data,
                 k = k,
                 power = power,
                 base = base,
-                ntree = n.trees, keeptrees=TRUE)
+                ntree = n.trees,
+                keeptrees=TRUE,
+                nchain = N_CHAINS,
+                nthread = N_CHAINS)
   return(model)
 }
 
@@ -456,11 +463,13 @@ ytest <- test_data$y
 
 # Basic all-parameter model
 basic_model <- bart( xtrain,
-                         ytrain,
+                     ytrain,
                      x.test = xtest,
-                         k = K_OPT,
-                         power = power_opt,
-                         base = base_opt,
+                     k = K_OPT,
+                     power = power_opt,
+                     base = base_opt,,
+                     nchain = N_CHAINS,
+                     nthread = N_CHAINS,
                      keeptrees = TRUE)
 invisible(basic_model$fit$state)
 
@@ -586,8 +595,10 @@ ytest <- test_data$y
 basic_model <- bart(xtrain,
                     ytrain,
                     k = K_OPT,
-                         power = power_opt,
-                         base = base_opt)
+                    power = power_opt,
+                    base = base_opt,
+                    nchain = N_CHAINS,
+                    nthread = N_CHAINS)
 invisible(basic_model$fit$state)
 
 
@@ -711,8 +722,10 @@ if (!SKIP_AQ3){
   basic_model <- bart(xtrain,
                       ytrain,
                       k = K_OPT,
-                           power = power_opt,
-                           base = base_opt)
+                      power = power_opt,
+                      base = base_opt,
+                      nchain = N_CHAINS,
+                      nthread = N_CHAINS)
   invisible(basic_model$fit$state)
   
   
@@ -835,8 +848,10 @@ ytest <- test_data$y
 basic_model <- bart(xtrain,
                     ytrain,
                     k = K_OPT,
-                         power = power_opt,
-                         base = base_opt)
+                    power = power_opt,
+                    base = base_opt,
+                    nchain = N_CHAINS,
+                    nthread = N_CHAINS)
 invisible(basic_model$fit$state)
 
 
@@ -954,8 +969,10 @@ base_opt <- cv_results$base[argmax]
 basic_model <- bart(xtrain,
                     ytrain,
                     k = K_OPT,
-                         power = power_opt,
-                         base = base_opt)
+                    power = power_opt,
+                    base = base_opt,
+                    nchain = N_CHAINS,
+                    nthread = N_CHAINS)
 invisible(basic_model$fit$state)
 
 
@@ -1072,8 +1089,10 @@ base_opt <- cv_results$base[argmax]
 basic_model <- bart(xtrain,
                     ytrain,
                     k = K_OPT,
-                         power = power_opt,
-                         base = base_opt)
+                    power = power_opt,
+                    base = base_opt,
+                    nchain = N_CHAINS,
+                    nthread = N_CHAINS)
 invisible(basic_model$fit$state)
 
 
@@ -1190,8 +1209,10 @@ base_opt <- cv_results$base[argmax]
 basic_model <- bart(xtrain,
                     ytrain,
                     k = K_OPT,
-                         power = power_opt,
-                         base = base_opt)
+                    power = power_opt,
+                    base = base_opt,
+                    nchain = N_CHAINS,
+                    nthread = N_CHAINS)
 invisible(basic_model$fit$state)
 
 
@@ -1308,8 +1329,10 @@ base_opt <- cv_results$base[argmax]
 basic_model <- bart(xtrain,
                     ytrain,
                     k = K_OPT,
-                         power = power_opt,
-                         base = base_opt)
+                    power = power_opt,
+                    base = base_opt,
+                    nchain = N_CHAINS,
+                    nthread = N_CHAINS)
 invisible(basic_model$fit$state)
 
 

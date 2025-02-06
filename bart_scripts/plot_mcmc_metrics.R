@@ -327,3 +327,13 @@ auc_to_plot <- all_metrics %>% filter(grepl("auc", name))
 p_auc <- ggplot(auc_to_plot, aes(x=sample, y=value, colour=name)) +
   ggtitle("AUC by MCMC sample") +
   geom_line()
+
+sens_to_plot <- all_metrics %>% filter(grepl("sens", name))
+p_sens <- ggplot(sens_to_plot, aes(x=sample, y=value, colour=name)) +
+  ggtitle("Sensitivity by MCMC sample") +
+  geom_line()
+
+spec_to_plot <- all_metrics %>% filter(grepl("spec", name))
+p_spec <- ggplot(spec_to_plot, aes(x=sample, y=value, colour=name)) +
+  ggtitle("Specificity by MCMC sample") +
+  geom_line()
