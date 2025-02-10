@@ -52,7 +52,9 @@ bart.flex <- function(x.data, y.data, ri.data = NULL,
     train <- na.omit(train)
     model <- bart(y.train = train[,1], 
                   x.train = train[,2:ncol(train)], 
-                  ntree = n.trees, keeptrees=TRUE)
+                  ntree = n.trees, keeptrees=TRUE,
+                  nchain = N_CHAINS,
+                  nthread = N_CHAINS)
   } else { 
     train <- cbind(y.data, x.data, ri.data) 
     if(!is.null(y.name)) {colnames(train)[1] <- y.name}
@@ -68,12 +70,11 @@ bart.flex <- function(x.data, y.data, ri.data = NULL,
                       n.samples=1000,
                       n.burn=100,
                       n.trees = n.trees,
-                      k = K_OPT,
                       power = power,
                       base = base,
                       keepTrees = TRUE,
-                      nchain = N_CHAINS,
-                      nthread = N_CHAINS) 
+                      n.chains = N_CHAINS,
+                      n.threads = N_CHAINS) 
   }
   return(model)
 }
@@ -416,7 +417,7 @@ antifolds <- lapply(1:length(fold_ids),
 
 
 # Now cycle over possible parameter values
-k_vals = c(1, 2, 3)
+k_vals = c(K_OPT)
 power_vals = c(1.6, 1.8, 2)
 base_vals = c(0.75, 0.85, 0.95)
 kl <- length(k_vals)
@@ -491,11 +492,9 @@ basic_model <- bart.flex(x.data = xtrain,
                          y.data = ytrain,
                          ri.data = countrytrain,
                          power = power_opt,
-                         base = base_opt,
-                         nchain = N_CHAINS,
-                         nthread = N_CHAINS)
+                         base = base_opt)
 invisible(basic_model$fit$state)
-summary(basic_model)
+
 
 if (SAVE_FITS){
   save(basic_model,
@@ -511,7 +510,7 @@ sdm <- bart.step(x.data = xtrain,
                  full = TRUE,
                  quiet = TRUE)
 invisible(sdm$fit[[1]]$state)
-summary(sdm)
+
 if (SAVE_FITS){
   save(sdm,
        file = paste(PATH_TO_DATA, "fitted-BART-models-", INCLUDE_CROSSTERMS, "/ri_model_with_vs_A_Q1.rds", sep = ""))
@@ -546,7 +545,7 @@ antifolds <- lapply(1:length(fold_ids),
 
 
 
-k_vals = c(1, 2, 3)
+k_vals = c(K_OPT)
 power_vals = c(1.6, 1.8, 2)
 base_vals = c(0.75, 0.85, 0.95)
 kl <- length(k_vals)
@@ -620,11 +619,9 @@ basic_model <- bart.flex(x.data = xtrain,
                          y.data = ytrain,
                          ri.data = countrytrain,
                          power = power_opt,
-                         base = base_opt,
-                         nchain = N_CHAINS,
-                         nthread = N_CHAINS)
+                         base = base_opt)
 invisible(basic_model$fit$state)
-summary(basic_model)
+
 
 if (SAVE_FITS){
   save(basic_model,
@@ -639,7 +636,7 @@ sdm <- bart.step(x.data = xtrain,
                  full = TRUE,
                  quiet = TRUE)
 invisible(sdm$fit[[1]]$state)
-summary(sdm)
+
 if (SAVE_FITS){
   save(sdm,
        file = paste(PATH_TO_DATA, "fitted-BART-models-", INCLUDE_CROSSTERMS, "/ri_model_with_vs_A_Q2.rds", sep = ""))
@@ -677,7 +674,7 @@ if (!SKIP_AQ3){
   
   
   
-  k_vals = c(1, 2, 3)
+  k_vals = c(K_OPT)
   power_vals = c(1.6, 1.8, 2)
   base_vals = c(0.75, 0.85, 0.95)
   kl <- length(k_vals)
@@ -751,11 +748,9 @@ if (!SKIP_AQ3){
                            y.data = ytrain,
                            ri.data = countrytrain,
                            power = power_opt,
-                           base = base_opt,
-                           nchain = N_CHAINS,
-                           nthread = N_CHAINS)
+                           base = base_opt)
   invisible(basic_model$fit$state)
-  summary(basic_model)
+  
   
   if (SAVE_FITS){
     save(basic_model,
@@ -770,7 +765,7 @@ if (!SKIP_AQ3){
                    full = TRUE,
                    quiet = TRUE)
   invisible(sdm$fit[[1]]$state)
-  summary(sdm)
+  
   if (SAVE_FITS){
     save(sdm,
          file = paste(PATH_TO_DATA, "fitted-BART-models-", INCLUDE_CROSSTERMS, "/ri_model_with_vs_A_Q3.rds", sep = ""))
@@ -805,7 +800,7 @@ antifolds <- lapply(1:length(fold_ids),
 
 
 
-k_vals = c(1, 2, 3)
+k_vals = c(K_OPT)
 power_vals = c(1.6, 1.8, 2)
 base_vals = c(0.75, 0.85, 0.95)
 kl <- length(k_vals)
@@ -879,11 +874,9 @@ basic_model <- bart.flex(x.data = xtrain,
                          y.data = ytrain,
                          ri.data = countrytrain,
                          power = power_opt,
-                         base = base_opt,
-                         nchain = N_CHAINS,
-                         nthread = N_CHAINS)
+                         base = base_opt)
 invisible(basic_model$fit$state)
-summary(basic_model)
+
 
 if (SAVE_FITS){
   save(basic_model,
@@ -898,7 +891,7 @@ sdm <- bart.step(x.data = xtrain,
                  full = TRUE,
                  quiet = TRUE)
 invisible(sdm$fit[[1]]$state)
-summary(sdm)
+
 if (SAVE_FITS){
   save(sdm,
        file = paste(PATH_TO_DATA, "fitted-BART-models-", INCLUDE_CROSSTERMS, "/ri_model_with_vs_A_Q4.rds", sep = ""))
@@ -933,7 +926,7 @@ antifolds <- lapply(1:length(fold_ids),
 
 
 
-k_vals = c(1, 2, 3)
+k_vals = c(K_OPT)
 power_vals = c(1.6, 1.8, 2)
 base_vals = c(0.75, 0.85, 0.95)
 kl <- length(k_vals)
@@ -1002,11 +995,9 @@ basic_model <- bart.flex(x.data = xtrain,
                          y.data = ytrain,
                          ri.data = countrytrain,
                          power = power_opt,
-                         base = base_opt,
-                         nchain = N_CHAINS,
-                         nthread = N_CHAINS)
+                         base = base_opt)
 invisible(basic_model$fit$state)
-summary(basic_model)
+
 
 if (SAVE_FITS){
   save(basic_model,
@@ -1021,7 +1012,7 @@ sdm <- bart.step(x.data = xtrain,
                  full = TRUE,
                  quiet = TRUE)
 invisible(sdm$fit[[1]]$state)
-summary(sdm)
+
 if (SAVE_FITS){
   save(sdm,
        file = paste(PATH_TO_DATA, "fitted-BART-models-", INCLUDE_CROSSTERMS, "/ri_model_with_vs_B_Q1.rds", sep = ""))
@@ -1055,7 +1046,7 @@ antifolds <- lapply(1:length(fold_ids),
 
 
 
-k_vals = c(1, 2, 3)
+k_vals = c(K_OPT)
 power_vals = c(1.6, 1.8, 2)
 base_vals = c(0.75, 0.85, 0.95)
 kl <- length(k_vals)
@@ -1124,11 +1115,9 @@ basic_model <- bart.flex(x.data = xtrain,
                          y.data = ytrain,
                          ri.data = countrytrain,
                          power = power_opt,
-                         base = base_opt,
-                         nchain = N_CHAINS,
-                         nthread = N_CHAINS)
+                         base = base_opt)
 invisible(basic_model$fit$state)
-summary(basic_model)
+
 
 if (SAVE_FITS){
   save(basic_model,
@@ -1143,7 +1132,7 @@ sdm <- bart.step(x.data = xtrain,
                  full = TRUE,
                  quiet = TRUE)
 invisible(sdm$fit[[1]]$state)
-summary(sdm)
+
 if (SAVE_FITS){
   save(sdm,
        file = paste(PATH_TO_DATA, "fitted-BART-models-", INCLUDE_CROSSTERMS, "/ri_model_with_vs_B_Q2.rds", sep = ""))
@@ -1178,7 +1167,7 @@ antifolds <- lapply(1:length(fold_ids),
 
 
 
-k_vals = c(1, 2, 3)
+k_vals = c(K_OPT)
 power_vals = c(1.6, 1.8, 2)
 base_vals = c(0.75, 0.85, 0.95)
 kl <- length(k_vals)
@@ -1247,11 +1236,9 @@ basic_model <- bart.flex(x.data = xtrain,
                          y.data = ytrain,
                          ri.data = countrytrain,
                          power = power_opt,
-                         base = base_opt,
-                         nchain = N_CHAINS,
-                         nthread = N_CHAINS)
+                         base = base_opt)
 invisible(basic_model$fit$state)
-summary(basic_model)
+
 
 if (SAVE_FITS){
   save(basic_model,
@@ -1266,7 +1253,7 @@ sdm <- bart.step(x.data = xtrain,
                  full = TRUE,
                  quiet = TRUE)
 invisible(sdm$fit[[1]]$state)
-summary(sdm)
+
 if (SAVE_FITS){
   save(sdm,
        file = paste(PATH_TO_DATA, "fitted-BART-models-", INCLUDE_CROSSTERMS, "/ri_model_with_vs_B_Q3.rds", sep = ""))
@@ -1301,7 +1288,7 @@ antifolds <- lapply(1:length(fold_ids),
 
 
 
-k_vals = c(1, 2, 3)
+k_vals = c(K_OPT)
 power_vals = c(1.6, 1.8, 2)
 base_vals = c(0.75, 0.85, 0.95)
 kl <- length(k_vals)
@@ -1370,11 +1357,9 @@ basic_model <- bart.flex(x.data = xtrain,
                          y.data = ytrain,
                          ri.data = countrytrain,
                          power = power_opt,
-                         base = base_opt,
-                         nchain = N_CHAINS,
-                         nthread = N_CHAINS)
+                         base = base_opt)
 invisible(basic_model$fit$state)
-summary(basic_model)
+
 
 if (SAVE_FITS){
   save(basic_model,
@@ -1389,7 +1374,7 @@ sdm <- bart.step(x.data = xtrain,
                  full = TRUE,
                  quiet = TRUE)
 invisible(sdm$fit[[1]]$state)
-summary(sdm)
+
 if (SAVE_FITS){
   save(sdm,
        file = paste(PATH_TO_DATA, "fitted-BART-models-", INCLUDE_CROSSTERMS, "/ri_model_with_vs_B_Q4.rds", sep = ""))
