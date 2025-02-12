@@ -431,7 +431,17 @@ if (ALL_VARS_FOR_PD){
     pd_df <- pd_summ[[idx]] %>%
       bind_rows %>%
       mutate(var = gsub("_2022", "", var),
-             var = gsub("_lag.$", "", var)
+             var = gsub("_lag.$", "", var),
+             Q = case_when(Q == "Q1" ~ "NBS",
+                           Q == "Q2" ~ "PrBM)",
+                           Q == "Q3" ~ "BS",
+                           Q == "Q4" ~ "PoBM"
+             ),
+             Q = factor(Q, levels = c(
+               "NBS",
+               "PrBM",
+               "BS",
+               "PoBM"))
       ) %>% 
       left_join(plot_labels) %>%
       mutate(label_units = as.factor(label_units),
@@ -500,7 +510,17 @@ if (ALL_VARS_FOR_PD){
   pd_df <- pd_summ %>%
     bind_rows %>%
     mutate(var = gsub("_2022", "", var),
-           var = gsub("_lag.$", "", var)
+           var = gsub("_lag.$", "", var),
+           Q = case_when(Q == "Q1" ~ "NBS",
+                         Q == "Q2" ~ "PrBM)",
+                         Q == "Q3" ~ "BS",
+                         Q == "Q4" ~ "PoBM"
+           ),
+           Q = factor(Q, levels = c(
+             "NBS",
+             "PrBM",
+             "BS",
+             "PoBM"))
     ) %>% 
     left_join(plot_labels) %>%
     mutate(label_units = as.factor(label_units),
@@ -795,7 +815,17 @@ if (ALL_VARS_FOR_PD){
     pd_df <- pd_summ[[idx]] %>%
       bind_rows %>%
       mutate(var = gsub("_2022", "", var),
-             var = gsub("_lag.$", "", var)
+             var = gsub("_lag.$", "", var),
+             Q = case_when(Q == "Q1" ~ "NBS",
+                           Q == "Q2" ~ "PrBM)",
+                           Q == "Q3" ~ "BS",
+                           Q == "Q4" ~ "PoBM"
+             ),
+             Q = factor(Q, levels = c(
+               "NBS",
+               "PrBM",
+               "BS",
+               "PoBM"))
       ) %>% 
       left_join(plot_labels) %>%
       mutate(label_units = as.factor(label_units),
@@ -864,8 +894,18 @@ if (ALL_VARS_FOR_PD){
   pd_df <- pd_summ %>%
     bind_rows %>%
     mutate(var = gsub("_2022", "", var),
-           var = gsub("_lag.$", "", var)
-    ) %>% 
+           var = gsub("_lag.$", "", var),
+           Q = case_when(Q == "Q1" ~ "NBS",
+                         Q == "Q2" ~ "PrBM)",
+                         Q == "Q3" ~ "BS",
+                         Q == "Q4" ~ "PoBM"
+           ),
+           Q = factor(Q, levels = c(
+             "NBS",
+             "PrBM",
+             "BS",
+             "PoBM"))
+    )  %>% 
     left_join(plot_labels) %>%
     mutate(label_units = as.factor(label_units),
            label_units = fct_relevel(label_units, plot_labels$label_units) %>% suppressWarnings()) %>%
