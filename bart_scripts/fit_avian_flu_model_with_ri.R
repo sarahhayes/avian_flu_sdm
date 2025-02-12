@@ -53,6 +53,8 @@ bart.flex <- function(x.data, y.data, ri.data = NULL,
     model <- bart(y.train = train[,1], 
                   x.train = train[,2:ncol(train)], 
                   ntree = n.trees, keeptrees=TRUE,
+                  power = power,
+                  base = base,
                   nchain = N_CHAINS,
                   nthread = N_CHAINS)
   } else { 
@@ -74,9 +76,72 @@ bart.flex <- function(x.data, y.data, ri.data = NULL,
                       base = base,
                       keepTrees = TRUE,
                       n.chains = N_CHAINS,
-                      n.threads = N_CHAINS) 
+                      n.threads = N_CHAINS, combineChains = TRUE) 
   }
   return(model)
+}
+
+varimp <- function (model, plots = FALSE) 
+{
+  if (!("fit" %in% names(model))) {
+    stop("Please add \", keeptrees=TRUE\" to your dbarts model call")
+  }
+  if (class(model) == "rbart") {
+    basenames <- unlist(attr(model$fit[[1]]$data@x, "drop"))
+    names <- names(which(basenames == FALSE))
+    if (model$call$combineChains){
+      varimps <- colMeans(model$varcount/rowSums(model$varcount)) # Row and column references need to be swapped relative to vanilla embarcadero if combining trees
+    }else{
+      varimps <- rowMeans(model$varcount/colSums(model$varcount))
+    }
+    fitobj <- model$fit[[1]]
+  }
+  if (class(model) == "bart") {
+    basenames <- unlist(attr(model$fit$data@x, "drop"))
+    names <- names(which(basenames == FALSE))
+    varimps <- colMeans(model$varcount/rowSums(model$varcount))
+    fitobj <- model$fit
+  }
+  var.df <- data.frame(names, varimps)
+  missing <- attr(fitobj$data@x, "term.labels")[!(attr(fitobj$data@x, 
+                                                       "term.labels") %in% names(unlist(attr(fitobj$data@x, 
+                                                                                             "drop"))))]
+  if (length(missing) > 0) {
+    message("dbarts auto-dropped this variable(s). You will probably want to remove it")
+    message(paste(missing, collapse = " "), " \n")
+  }
+  if (length(missing) > 0) {
+    missing.df <- data.frame(names = missing, varimps = 0)
+    var.df <- rbind(var.df, missing.df)
+  }
+  var.df$names <- factor(var.df$names)
+  var.df <- transform(var.df, names = reorder(names, -varimps))
+  if (plots == TRUE) {
+    if (class(model) == "rbart") {
+      if (model$call$combineChains){
+        rel <- model$varcount/rowSums(model$varcount) # Row and column references need to be swapped relative to vanilla embarcadero if combining trees
+      }else{
+        rel <- t(model$varcount/rowSums(model$varcount))
+      }
+    }
+    else {
+      rel <- model$varcount/rowSums(model$varcount)
+    }
+    colnames(rel) <- names
+    p <- rel %>% data.frame() %>% gather() %>% group_by(key) %>% 
+      summarise(mean = mean(value), sd = sd(value, na.rm = TRUE)) %>% 
+      transform(Var = reorder(key, mean)) %>% ggplot(aes(x = Var, 
+                                                         y = mean)) + geom_pointrange(aes(y = mean, x = Var, 
+                                                                                          ymin = mean - sd, ymax = mean + sd), color = "#00AFDD") + 
+      xlab(NULL) + ylab("Variable importance") + coord_flip() + 
+      theme_bw() + theme(legend.position = "none", axis.title.x = element_text(size = rel(1.3), 
+                                                                               vjust = -0.8), axis.text.y = element_text(size = rel(1.4)), 
+                         plot.margin = margin(0.5, 0.5, 0.5, 0.5, "cm"), 
+                         panel.grid.minor = element_blank(), panel.grid.major.x = element_line(color = "grey", 
+                                                                                               linetype = "dashed"))
+    print(p)
+  }
+  return(var.df)
 }
 
 varimp.diag <- function(x.data, y.data, ri.data=NULL, iter=50, quiet=FALSE,
@@ -245,7 +310,6 @@ variable.step <- function(x.data, y.data, ri.data=NULL, n.trees=10, iter=50, qui
       } else {
         vi.j.df[,index+1] <- vi.j[,2]
       }
-      
       pred.p <- colMeans(pnorm(model.j$yhat.train))[y.data==1]
       pred.a <- colMeans(pnorm(model.j$yhat.train))[y.data==0]
       
