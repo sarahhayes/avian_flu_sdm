@@ -19,7 +19,7 @@ if (length(args)<3){
 }
 if (length(args)<1){
   # Set path to folder containing data, and where output will be stored
-  PATH_TO_OUTPUTS <- "../../../OneDrive - The University of Liverpool/AI_S2_SDM_storage/"
+  PATH_TO_OUTPUTS <- ""
 }else{
   PATH_TO_OUTPUTS <- args[1]
 }
@@ -28,7 +28,7 @@ if (length(args)<1){
 ECO_SEASONS <- TRUE
 if (ECO_SEASONS){
   PATH_TO_MODELS <- paste(PATH_TO_OUTPUTS,
-                          "fitted-BART-models-eco-seasons/",
+                          "",
                           sep="")
 }else{
   PATH_TO_MODELS <- PATH_TO_OUTPUTS

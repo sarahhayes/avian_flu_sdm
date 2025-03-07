@@ -1,13 +1,9 @@
- # In this script we train a BART model to classify sites for avian flu
+# In this script we train a BART model to classify sites for avian flu
 # presence/absence based on environmental and species abundance factors.
 # This script includes cross-validation of BART parameters.
 
 # Global storing optimised k value for BART - which may be updated
 K_OPT <- 2
-
-# Number of chains/threads for MCMC run. The code is set up to do one thread per
-# chains
-N_CHAINS <- 8L
 
 SKIP_AQ3 <- TRUE # Set to TRUE to skip small period A quarter 3 dataset
 
@@ -19,7 +15,7 @@ if (length(args)<3){
   SAVE_FITS <- as.logical(args[3])
 }
 if (length(args)<2){
-  INCLUDE_CROSSTERMS <- "no-crossterms" # Set to "no-crossterms" to do model without crossterms or "with-crossterms" to do model with crossterms
+  INCLUDE_CROSSTERMS <- "with-crossterms" # Set to "no-crossterms" to do model without crossterms or "with-crossterms" to do model with crossterms
 }else{
   INCLUDE_CROSSTERMS <- args[2]
 }
@@ -52,11 +48,10 @@ bart.flex <- function(x.data, y.data, ri.data = NULL,
     train <- na.omit(train)
     model <- bart(y.train = train[,1], 
                   x.train = train[,2:ncol(train)], 
-                  ntree = n.trees, keeptrees=TRUE,
                   power = power,
                   base = base,
-                  nchain = N_CHAINS,
-                  nthread = N_CHAINS)
+                  k = K_OPT,
+                  ntree = n.trees, keeptrees=TRUE)
   } else { 
     train <- cbind(y.data, x.data, ri.data) 
     if(!is.null(y.name)) {colnames(train)[1] <- y.name}
@@ -72,76 +67,14 @@ bart.flex <- function(x.data, y.data, ri.data = NULL,
                       n.samples=1000,
                       n.burn=100,
                       n.trees = n.trees,
+                      k = K_OPT,
                       power = power,
                       base = base,
                       keepTrees = TRUE,
-                      n.chains = N_CHAINS,
-                      n.threads = N_CHAINS, combineChains = TRUE) 
+                      n.chains=1,
+                      n.threads=1) 
   }
   return(model)
-}
-
-varimp <- function (model, plots = FALSE) 
-{
-  if (!("fit" %in% names(model))) {
-    stop("Please add \", keeptrees=TRUE\" to your dbarts model call")
-  }
-  if (class(model) == "rbart") {
-    basenames <- unlist(attr(model$fit[[1]]$data@x, "drop"))
-    names <- names(which(basenames == FALSE))
-    if (model$call$combineChains){
-      varimps <- colMeans(model$varcount/rowSums(model$varcount)) # Row and column references need to be swapped relative to vanilla embarcadero if combining trees
-    }else{
-      varimps <- rowMeans(model$varcount/colSums(model$varcount))
-    }
-    fitobj <- model$fit[[1]]
-  }
-  if (class(model) == "bart") {
-    basenames <- unlist(attr(model$fit$data@x, "drop"))
-    names <- names(which(basenames == FALSE))
-    varimps <- colMeans(model$varcount/rowSums(model$varcount))
-    fitobj <- model$fit
-  }
-  var.df <- data.frame(names, varimps)
-  missing <- attr(fitobj$data@x, "term.labels")[!(attr(fitobj$data@x, 
-                                                       "term.labels") %in% names(unlist(attr(fitobj$data@x, 
-                                                                                             "drop"))))]
-  if (length(missing) > 0) {
-    message("dbarts auto-dropped this variable(s). You will probably want to remove it")
-    message(paste(missing, collapse = " "), " \n")
-  }
-  if (length(missing) > 0) {
-    missing.df <- data.frame(names = missing, varimps = 0)
-    var.df <- rbind(var.df, missing.df)
-  }
-  var.df$names <- factor(var.df$names)
-  var.df <- transform(var.df, names = reorder(names, -varimps))
-  if (plots == TRUE) {
-    if (class(model) == "rbart") {
-      if (model$call$combineChains){
-        rel <- model$varcount/rowSums(model$varcount) # Row and column references need to be swapped relative to vanilla embarcadero if combining trees
-      }else{
-        rel <- t(model$varcount/rowSums(model$varcount))
-      }
-    }
-    else {
-      rel <- model$varcount/rowSums(model$varcount)
-    }
-    colnames(rel) <- names
-    p <- rel %>% data.frame() %>% gather() %>% group_by(key) %>% 
-      summarise(mean = mean(value), sd = sd(value, na.rm = TRUE)) %>% 
-      transform(Var = reorder(key, mean)) %>% ggplot(aes(x = Var, 
-                                                         y = mean)) + geom_pointrange(aes(y = mean, x = Var, 
-                                                                                          ymin = mean - sd, ymax = mean + sd), color = "#00AFDD") + 
-      xlab(NULL) + ylab("Variable importance") + coord_flip() + 
-      theme_bw() + theme(legend.position = "none", axis.title.x = element_text(size = rel(1.3), 
-                                                                               vjust = -0.8), axis.text.y = element_text(size = rel(1.4)), 
-                         plot.margin = margin(0.5, 0.5, 0.5, 0.5, "cm"), 
-                         panel.grid.minor = element_blank(), panel.grid.major.x = element_line(color = "grey", 
-                                                                                               linetype = "dashed"))
-    print(p)
-  }
-  return(var.df)
 }
 
 varimp.diag <- function(x.data, y.data, ri.data=NULL, iter=50, quiet=FALSE,
@@ -310,6 +243,7 @@ variable.step <- function(x.data, y.data, ri.data=NULL, n.trees=10, iter=50, qui
       } else {
         vi.j.df[,index+1] <- vi.j[,2]
       }
+      
       pred.p <- colMeans(pnorm(model.j$yhat.train))[y.data==1]
       pred.a <- colMeans(pnorm(model.j$yhat.train))[y.data==0]
       
@@ -481,7 +415,7 @@ antifolds <- lapply(1:length(fold_ids),
 
 
 # Now cycle over possible parameter values
-k_vals = c(K_OPT)
+k_vals = c(1, 2, 3)
 power_vals = c(1.6, 1.8, 2)
 base_vals = c(0.75, 0.85, 0.95)
 kl <- length(k_vals)
@@ -503,7 +437,7 @@ for (i in 1:length(k_vals)){
     for (m in 1:length(base_vals)){
       base_val <- base_vals[m]
       idx <- (i-1)*pl*bl + (j-1)*bl + m
-#      cat("Crossvalidating parameter set ", idx, " of ", kl*pl*bl,"\n") # Uncomment to print where we are in the cycle
+      #      cat("Crossvalidating parameter set ", idx, " of ", kl*pl*bl,"\n") # Uncomment to print where we are in the cycle
       cv_results$k[idx] <- k_val
       cv_results$power[idx] <- power_val
       cv_results$base[idx] <- base_val
@@ -535,21 +469,16 @@ for (i in 1:length(k_vals)){
 
 # Calculate fold-wise mean AUC associated with each parameter set and choose optimum parameters based on maximum AUC
 cv_results <- cv_results %>%
-              rowwise() %>%
-              mutate(mean_err = mean(auc1,
-                                     auc2,
-                                     auc3,
-                                     auc4,
-                                     auc5))
+  rowwise() %>%
+  mutate(mean_err = mean(auc1,
+                         auc2,
+                         auc3,
+                         auc4,
+                         auc5))
 argmin <- which.max(cv_results$mean_err)
 K_OPT <- cv_results$k[argmin]
 power_opt <- cv_results$power[argmin]
 base_opt <- cv_results$base[argmin]
-
-test_data <- read.csv(paste(PATH_TO_DATA, "training_sets/test_data_eco_seasons_A_Q1.csv", sep=""))
-xtest <- test_data %>% dplyr::select(!("y"|"ri"))
-ytest <- test_data$y
-countrytest <- test_data$ri
 
 # Basic all-parameter model
 basic_model <- bart.flex(x.data = xtrain,
@@ -558,7 +487,7 @@ basic_model <- bart.flex(x.data = xtrain,
                          power = power_opt,
                          base = base_opt)
 invisible(basic_model$fit$state)
-
+summary(basic_model)
 
 if (SAVE_FITS){
   save(basic_model,
@@ -574,7 +503,7 @@ sdm <- bart.step(x.data = xtrain,
                  full = TRUE,
                  quiet = TRUE)
 invisible(sdm$fit[[1]]$state)
-
+summary(sdm)
 if (SAVE_FITS){
   save(sdm,
        file = paste(PATH_TO_DATA, "fitted-BART-models-", INCLUDE_CROSSTERMS, "/ri_model_with_vs_A_Q1.rds", sep = ""))
@@ -609,7 +538,7 @@ antifolds <- lapply(1:length(fold_ids),
 
 
 
-k_vals = c(K_OPT)
+k_vals = c(1, 2, 3)
 power_vals = c(1.6, 1.8, 2)
 base_vals = c(0.75, 0.85, 0.95)
 kl <- length(k_vals)
@@ -631,7 +560,7 @@ for (i in 1:length(k_vals)){
     for (m in 1:length(base_vals)){
       base_val <- base_vals[m]
       idx <- (i-1)*pl*bl + (j-1)*bl + m
-#      cat("Crossvalidating parameter set ", idx, " of ", kl*pl*bl,"\n")
+      #      cat("Crossvalidating parameter set ", idx, " of ", kl*pl*bl,"\n")
       cv_results$k[idx] <- k_val
       cv_results$power[idx] <- power_val
       cv_results$base[idx] <- base_val
@@ -673,11 +602,6 @@ K_OPT <- cv_results$k[argmin]
 power_opt <- cv_results$power[argmin]
 base_opt <- cv_results$base[argmin]
 
-test_data <- read.csv(paste(PATH_TO_DATA, "training_sets/test_data_eco_seasons_A_Q2.csv", sep=""))
-xtest <- test_data %>% dplyr::select(!("y"|"ri"))
-ytest <- test_data$y
-countrytest <- test_data$ri
-
 # Basic all-parameter model
 basic_model <- bart.flex(x.data = xtrain,
                          y.data = ytrain,
@@ -685,7 +609,7 @@ basic_model <- bart.flex(x.data = xtrain,
                          power = power_opt,
                          base = base_opt)
 invisible(basic_model$fit$state)
-
+summary(basic_model)
 
 if (SAVE_FITS){
   save(basic_model,
@@ -700,7 +624,7 @@ sdm <- bart.step(x.data = xtrain,
                  full = TRUE,
                  quiet = TRUE)
 invisible(sdm$fit[[1]]$state)
-
+summary(sdm)
 if (SAVE_FITS){
   save(sdm,
        file = paste(PATH_TO_DATA, "fitted-BART-models-", INCLUDE_CROSSTERMS, "/ri_model_with_vs_A_Q2.rds", sep = ""))
@@ -711,7 +635,7 @@ if (SAVE_FITS){
 #### Period A Q3 ####
 
 if (!SKIP_AQ3){
-
+  
   training_data <- read.csv(paste(PATH_TO_DATA, "training_sets/training_data_eco_seasons_A_Q3.csv", sep=""))
   if (INCLUDE_CROSSTERMS=="no-crossterms"){
     all_excludes <- grep("quart|_q", colnames(training_data), value = TRUE)
@@ -738,7 +662,7 @@ if (!SKIP_AQ3){
   
   
   
-  k_vals = c(K_OPT)
+  k_vals = c(1, 2, 3)
   power_vals = c(1.6, 1.8, 2)
   base_vals = c(0.75, 0.85, 0.95)
   kl <- length(k_vals)
@@ -760,7 +684,7 @@ if (!SKIP_AQ3){
       for (m in 1:length(base_vals)){
         base_val <- base_vals[m]
         idx <- (i-1)*pl*bl + (j-1)*bl + m
-  #      cat("Crossvalidating parameter set ", idx, " of ", kl*pl*bl,"\n")
+        #      cat("Crossvalidating parameter set ", idx, " of ", kl*pl*bl,"\n")
         cv_results$k[idx] <- k_val
         cv_results$power[idx] <- power_val
         cv_results$base[idx] <- base_val
@@ -802,11 +726,6 @@ if (!SKIP_AQ3){
   power_opt <- cv_results$power[argmin]
   base_opt <- cv_results$base[argmin]
   
-  test_data <- read.csv(paste(PATH_TO_DATA, "training_sets/test_data_eco_seasons_A_Q3.csv", sep=""))
-  xtest <- test_data %>% dplyr::select(!("y"|"ri"))
-  ytest <- test_data$y
-  countrytest <- test_data$ri
-  
   # Basic all-parameter model
   basic_model <- bart.flex(x.data = xtrain,
                            y.data = ytrain,
@@ -814,7 +733,7 @@ if (!SKIP_AQ3){
                            power = power_opt,
                            base = base_opt)
   invisible(basic_model$fit$state)
-  
+  summary(basic_model)
   
   if (SAVE_FITS){
     save(basic_model,
@@ -829,12 +748,12 @@ if (!SKIP_AQ3){
                    full = TRUE,
                    quiet = TRUE)
   invisible(sdm$fit[[1]]$state)
-  
+  summary(sdm)
   if (SAVE_FITS){
     save(sdm,
          file = paste(PATH_TO_DATA, "fitted-BART-models-", INCLUDE_CROSSTERMS, "/ri_model_with_vs_A_Q3.rds", sep = ""))
   }
-
+  
 }
 #### Period A Q4 ####
 
@@ -864,7 +783,7 @@ antifolds <- lapply(1:length(fold_ids),
 
 
 
-k_vals = c(K_OPT)
+k_vals = c(1, 2, 3)
 power_vals = c(1.6, 1.8, 2)
 base_vals = c(0.75, 0.85, 0.95)
 kl <- length(k_vals)
@@ -886,7 +805,7 @@ for (i in 1:length(k_vals)){
     for (m in 1:length(base_vals)){
       base_val <- base_vals[m]
       idx <- (i-1)*pl*bl + (j-1)*bl + m
-#      cat("Crossvalidating parameter set ", idx, " of ", kl*pl*bl,"\n")
+      #      cat("Crossvalidating parameter set ", idx, " of ", kl*pl*bl,"\n")
       cv_results$k[idx] <- k_val
       cv_results$power[idx] <- power_val
       cv_results$base[idx] <- base_val
@@ -928,11 +847,6 @@ K_OPT <- cv_results$k[argmin]
 power_opt <- cv_results$power[argmin]
 base_opt <- cv_results$base[argmin]
 
-test_data <- read.csv(paste(PATH_TO_DATA, "training_sets/test_data_eco_seasons_A_Q4.csv", sep=""))
-xtest <- test_data %>% dplyr::select(!("y"|"ri"))
-ytest <- test_data$y
-countrytest <- test_data$ri
-
 # Basic all-parameter model
 basic_model <- bart.flex(x.data = xtrain,
                          y.data = ytrain,
@@ -940,7 +854,7 @@ basic_model <- bart.flex(x.data = xtrain,
                          power = power_opt,
                          base = base_opt)
 invisible(basic_model$fit$state)
-
+summary(basic_model)
 
 if (SAVE_FITS){
   save(basic_model,
@@ -955,7 +869,7 @@ sdm <- bart.step(x.data = xtrain,
                  full = TRUE,
                  quiet = TRUE)
 invisible(sdm$fit[[1]]$state)
-
+summary(sdm)
 if (SAVE_FITS){
   save(sdm,
        file = paste(PATH_TO_DATA, "fitted-BART-models-", INCLUDE_CROSSTERMS, "/ri_model_with_vs_A_Q4.rds", sep = ""))
@@ -990,7 +904,7 @@ antifolds <- lapply(1:length(fold_ids),
 
 
 
-k_vals = c(K_OPT)
+k_vals = c(1, 2, 3)
 power_vals = c(1.6, 1.8, 2)
 base_vals = c(0.75, 0.85, 0.95)
 kl <- length(k_vals)
@@ -1012,7 +926,7 @@ for (i in 1:length(k_vals)){
     for (m in 1:length(base_vals)){
       base_val <- base_vals[m]
       idx <- (i-1)*pl*bl + (j-1)*bl + m
-#      cat("Crossvalidating parameter set ", idx, " of ", kl*pl*bl,"\n")
+      #      cat("Crossvalidating parameter set ", idx, " of ", kl*pl*bl,"\n")
       cv_results$k[idx] <- k_val
       cv_results$power[idx] <- power_val
       cv_results$base[idx] <- base_val
@@ -1061,7 +975,7 @@ basic_model <- bart.flex(x.data = xtrain,
                          power = power_opt,
                          base = base_opt)
 invisible(basic_model$fit$state)
-
+summary(basic_model)
 
 if (SAVE_FITS){
   save(basic_model,
@@ -1076,7 +990,7 @@ sdm <- bart.step(x.data = xtrain,
                  full = TRUE,
                  quiet = TRUE)
 invisible(sdm$fit[[1]]$state)
-
+summary(sdm)
 if (SAVE_FITS){
   save(sdm,
        file = paste(PATH_TO_DATA, "fitted-BART-models-", INCLUDE_CROSSTERMS, "/ri_model_with_vs_B_Q1.rds", sep = ""))
@@ -1110,7 +1024,7 @@ antifolds <- lapply(1:length(fold_ids),
 
 
 
-k_vals = c(K_OPT)
+k_vals = c(1, 2, 3)
 power_vals = c(1.6, 1.8, 2)
 base_vals = c(0.75, 0.85, 0.95)
 kl <- length(k_vals)
@@ -1132,7 +1046,7 @@ for (i in 1:length(k_vals)){
     for (m in 1:length(base_vals)){
       base_val <- base_vals[m]
       idx <- (i-1)*pl*bl + (j-1)*bl + m
-#      cat("Crossvalidating parameter set ", idx, " of ", kl*pl*bl,"\n")
+      #      cat("Crossvalidating parameter set ", idx, " of ", kl*pl*bl,"\n")
       cv_results$k[idx] <- k_val
       cv_results$power[idx] <- power_val
       cv_results$base[idx] <- base_val
@@ -1181,7 +1095,7 @@ basic_model <- bart.flex(x.data = xtrain,
                          power = power_opt,
                          base = base_opt)
 invisible(basic_model$fit$state)
-
+summary(basic_model)
 
 if (SAVE_FITS){
   save(basic_model,
@@ -1196,7 +1110,7 @@ sdm <- bart.step(x.data = xtrain,
                  full = TRUE,
                  quiet = TRUE)
 invisible(sdm$fit[[1]]$state)
-
+summary(sdm)
 if (SAVE_FITS){
   save(sdm,
        file = paste(PATH_TO_DATA, "fitted-BART-models-", INCLUDE_CROSSTERMS, "/ri_model_with_vs_B_Q2.rds", sep = ""))
@@ -1231,7 +1145,7 @@ antifolds <- lapply(1:length(fold_ids),
 
 
 
-k_vals = c(K_OPT)
+k_vals = c(1, 2, 3)
 power_vals = c(1.6, 1.8, 2)
 base_vals = c(0.75, 0.85, 0.95)
 kl <- length(k_vals)
@@ -1253,7 +1167,7 @@ for (i in 1:length(k_vals)){
     for (m in 1:length(base_vals)){
       base_val <- base_vals[m]
       idx <- (i-1)*pl*bl + (j-1)*bl + m
-#      cat("Crossvalidating parameter set ", idx, " of ", kl*pl*bl,"\n")
+      #      cat("Crossvalidating parameter set ", idx, " of ", kl*pl*bl,"\n")
       cv_results$k[idx] <- k_val
       cv_results$power[idx] <- power_val
       cv_results$base[idx] <- base_val
@@ -1302,7 +1216,7 @@ basic_model <- bart.flex(x.data = xtrain,
                          power = power_opt,
                          base = base_opt)
 invisible(basic_model$fit$state)
-
+summary(basic_model)
 
 if (SAVE_FITS){
   save(basic_model,
@@ -1317,7 +1231,7 @@ sdm <- bart.step(x.data = xtrain,
                  full = TRUE,
                  quiet = TRUE)
 invisible(sdm$fit[[1]]$state)
-
+summary(sdm)
 if (SAVE_FITS){
   save(sdm,
        file = paste(PATH_TO_DATA, "fitted-BART-models-", INCLUDE_CROSSTERMS, "/ri_model_with_vs_B_Q3.rds", sep = ""))
@@ -1352,7 +1266,7 @@ antifolds <- lapply(1:length(fold_ids),
 
 
 
-k_vals = c(K_OPT)
+k_vals = c(1, 2, 3)
 power_vals = c(1.6, 1.8, 2)
 base_vals = c(0.75, 0.85, 0.95)
 kl <- length(k_vals)
@@ -1374,7 +1288,7 @@ for (i in 1:length(k_vals)){
     for (m in 1:length(base_vals)){
       base_val <- base_vals[m]
       idx <- (i-1)*pl*bl + (j-1)*bl + m
-#      cat("Crossvalidating parameter set ", idx, " of ", kl*pl*bl,"\n")
+      #      cat("Crossvalidating parameter set ", idx, " of ", kl*pl*bl,"\n")
       cv_results$k[idx] <- k_val
       cv_results$power[idx] <- power_val
       cv_results$base[idx] <- base_val
@@ -1423,7 +1337,7 @@ basic_model <- bart.flex(x.data = xtrain,
                          power = power_opt,
                          base = base_opt)
 invisible(basic_model$fit$state)
-
+summary(basic_model)
 
 if (SAVE_FITS){
   save(basic_model,
@@ -1438,7 +1352,7 @@ sdm <- bart.step(x.data = xtrain,
                  full = TRUE,
                  quiet = TRUE)
 invisible(sdm$fit[[1]]$state)
-
+summary(sdm)
 if (SAVE_FITS){
   save(sdm,
        file = paste(PATH_TO_DATA, "fitted-BART-models-", INCLUDE_CROSSTERMS, "/ri_model_with_vs_B_Q4.rds", sep = ""))

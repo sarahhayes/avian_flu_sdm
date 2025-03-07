@@ -19,7 +19,7 @@ if (length(args)<3){
   SAVE_FITS <- as.logical(args[3])
 }
 if (length(args)<2){
-  INCLUDE_CROSSTERMS <- "no-crossterms" # Set to "no-crossterms" to do model without crossterms or "with-crossterms" to do model with crossterms
+  INCLUDE_CROSSTERMS <- "with-crossterms" # Set to "no-crossterms" to do model without crossterms or "with-crossterms" to do model with crossterms
 }else{
   INCLUDE_CROSSTERMS <- args[2]
 }

@@ -18,18 +18,19 @@ if (length(args)<3){
 }
 if (length(args)<1){
   # Set path to folder containing data, and where output will be stored
-  PATH_TO_OUTPUTS <- "../../../OneDrive - The University of Liverpool/AI_S2_SDM_storage/"
+  PATH_TO_OUTPUTS <- ""
 }else{
   PATH_TO_OUTPUTS <- args[1]
 }
 
-#PATH_TO_OUTPUTS <- "H:/Working/avian_flu_sdm/output/"
-
-# Decide whether to use models with ecological season boundaries
+# Decide whether to use models with ecological season boundaries.
+# If you want to distinguish between models based on bird behavioural seasons vs
+# calendar quarters you can do it by storing the fitted models in the directory
+# specified here.
 ECO_SEASONS <- TRUE
 if (ECO_SEASONS){
   PATH_TO_MODELS <- paste(PATH_TO_OUTPUTS,
-                          "fitted-BART-models-eco-seasons/",
+                          "",
                           sep="")
 }else{
   PATH_TO_MODELS <- PATH_TO_OUTPUTS
@@ -77,7 +78,7 @@ plot_labels <- data.frame(
     "Grasslands",
     "Permanent_Wetlands",
     "Croplands",
-    "Urban_and_Built-up_Lands",
+    "Urban_and_Built.up_Lands", # Note the "." here in "Built.up". At some point the name appears to change from "Built-up" to this form, but I can't track down the change.
     "Cropland/Natural_Vegetation_Mosaics",
     "Permanent_snow/ice",
     "Non-Vegetated_Lands",
