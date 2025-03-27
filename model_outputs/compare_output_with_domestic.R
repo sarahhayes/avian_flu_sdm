@@ -50,11 +50,19 @@ pred_layers_B_Q4_mean <- terra::rast(pred_layers_B_Q4_mean)
 set.crs(pred_layers_B_Q4_mean, value = crs)
 
 # read in the domestic cases
+# calendar quarters
+# dom_bq1 <- terra::rast("data/flu_data/prepped_data/domestic_cases_rasters/dom_b_q1_pres_abs.tif")
+# dom_bq2 <- terra::rast("data/flu_data/prepped_data/domestic_cases_rasters/dom_b_q2_pres_abs.tif")
+# dom_bq3 <- terra::rast("data/flu_data/prepped_data/domestic_cases_rasters/dom_b_q3_pres_abs.tif")
+# dom_bq4 <- terra::rast("data/flu_data/prepped_data/domestic_cases_rasters/dom_b_q4_pres_abs.tif")
 
-dom_bq1 <- terra::rast("data/flu_data/prepped_data/domestic_cases_rasters/dom_b_q1_pres_abs.tif")
-dom_bq2 <- terra::rast("data/flu_data/prepped_data/domestic_cases_rasters/dom_b_q2_pres_abs.tif")
-dom_bq3 <- terra::rast("data/flu_data/prepped_data/domestic_cases_rasters/dom_b_q3_pres_abs.tif")
-dom_bq4 <- terra::rast("data/flu_data/prepped_data/domestic_cases_rasters/dom_b_q4_pres_abs.tif")
+# eco seasons
+dom_bq1 <- terra::rast("data/flu_data/prepped_data/domestic_cases_rasters/dom_b_q1_eco_pres_abs.tif")
+dom_bq2 <- terra::rast("data/flu_data/prepped_data/domestic_cases_rasters/dom_b_q2_eco_pres_abs.tif")
+dom_bq3 <- terra::rast("data/flu_data/prepped_data/domestic_cases_rasters/dom_b_q3_eco_pres_abs.tif")
+dom_bq4 <- terra::rast("data/flu_data/prepped_data/domestic_cases_rasters/dom_b_q4_eco_pres_abs.tif")
+
+
 
 # dom_bq1_counts <- terra::rast("data/flu_data/prepped_data/domestic_cases_rasters/dom_b_q1_counts.tif")
 # dom_bq2_counts <- terra::rast("data/flu_data/prepped_data/domestic_cases_rasters/dom_b_q2_counts.tif")
