@@ -14,7 +14,8 @@ PLOT_RAW_CASE_DATA <- FALSE
 # Below is adapted from Joe's code in plot_projections
 
 ## For outputs from model B 
-PATH_TO_OUTPUTSB <- "model_outputs/preds_B/"
+#PATH_TO_OUTPUTSB <- "model_outputs/preds_B/"
+PATH_TO_OUTPUTSB <- "model_outputs/preds_eco_B/"
 
 predsB <- list()
 
@@ -31,7 +32,7 @@ for (idx in 1:4){
                     sep = ""))
 }
 
-
+# extract the mean from the predictions
 pred_layers_B_Q1_mean <- pred_layers_B_Q1$Mean
 pred_layers_B_Q2_mean <- pred_layers_B_Q2$Mean
 pred_layers_B_Q3_mean <- pred_layers_B_Q3$Mean
@@ -105,12 +106,12 @@ dom_bq4 <- terra::rast("data/flu_data/prepped_data/domestic_cases_rasters/dom_b_
 # dev.off()
 
 # look at trying to outline the area of the rasters that have values and overlaying this on the map.
-# Try chat GPT to get the code for this??
 
 # 
 euro_rast <- terra::rast("output/euro_rast_10k.tif")
 euro_map <- terra::vect("output/euro_map.shp")
 
+# extract the predictions from the areas with domestic cases
 masked_bq1 <- terra::mask(pred_layers_B_Q1_mean, dom_bq1) 
 masked_bq2 <- terra::mask(pred_layers_B_Q2_mean, dom_bq2) 
 masked_bq3 <- terra::mask(pred_layers_B_Q3_mean, dom_bq3) 
@@ -122,7 +123,8 @@ masked_bq4 <- terra::mask(pred_layers_B_Q4_mean, dom_bq4)
 library(viridis)
 
 #dev.off()
-png("plots/dom_over_predsB_masked.png", width = 700, height = 600)
+#png("plots/dom_over_predsB_masked.png", width = 700, height = 600)
+png("plots/dom_over_predsB_eco_masked.png", width = 700, height = 600)
 #pdf("plots/dom_over_predsB_masked.pdf", width = 7, height = 6)
 par(mfrow = c(2,2))
 par(mar = c(0,0,0,0))
@@ -215,7 +217,7 @@ bq1_dnc
 plot(bq1_dnc)
 ## from this layer, make another layer with the 0-10% probabilities
 bq1_dnc_0010 <- bq1_dnc
-bq1_dnc_0010[bq1_dnc_0010 >= 0.1] <- NA
+bq1_dnc_0010[bq1_dnc_0010 > 0.1] <- NA
 #plot(bq1_dnc_0010)
 #plot(dom_bq1, add = T , col = "red")
 pos_doms_try <- terra::mask(bq1_dnc_0010, dom_bq1)
@@ -234,7 +236,7 @@ odds_0010 <- inf_cells/non_inf_cells
 odds_fun <- function(prediction_rast, cd_rast, min_prob, max_prob, dom_rast){
   pred_masked <- terra::mask(prediction_rast, cd_rast)
   prob_rast <- pred_masked
-  prob_rast[prob_rast < min_prob | prob_rast >= max_prob] <- NA
+  prob_rast[prob_rast <= min_prob | prob_rast > max_prob] <- NA
   pos_doms <- terra::mask(prob_rast, dom_rast)
   inf_cells <- sum(table(values(pos_doms))) 
   non_inf_cells <- sum(table(values(prob_rast))) - inf_cells
@@ -254,7 +256,7 @@ odds_fun(prediction_rast =  pred_layers_B_Q1_mean, cd_rast = dnc_1000, min_prob 
 odds_fun(prediction_rast =  pred_layers_B_Q1_mean, cd_rast = dnc_1000, min_prob = 0.6, max_prob = 0.7, dom_rast = dom_bq1)
 odds_fun(prediction_rast =  pred_layers_B_Q1_mean, cd_rast = dnc_1000, min_prob = 0.7, max_prob = 0.8, dom_rast = dom_bq1)
 odds_fun(prediction_rast =  pred_layers_B_Q1_mean, cd_rast = dnc_1000, min_prob = 0.8, max_prob = 0.9, dom_rast = dom_bq1)
-odds_fun(prediction_rast =  pred_layers_B_Q1_mean, cd_rast = dnc_1000, min_prob = 0.9, max_prob = 1.00001, dom_rast = dom_bq1)
+odds_fun(prediction_rast =  pred_layers_B_Q1_mean, cd_rast = dnc_1000, min_prob = 0.9, max_prob = 1.0, dom_rast = dom_bq1)
 
 # looks good
 
@@ -283,7 +285,8 @@ sum(!is.na(values(dnc_1000))) + sum(is.na(values(dnc_1000)))
 490*440
 
 # something not quite adding up. 
-# next try looking at the number of values in each band in the masked predictions rast. USe hist and values
+# next try looking at the number of values in each band in the masked predictions rast. 
+# Use hist and values
 pred_masked <- terra::mask(pred_layers_B_Q1_mean, dnc_1000)
 sum(hist(pred_masked, breaks = seq(0,1,0.1))$counts)
 sum(!is.na(values(pred_layers_B_Q1_mean)))
@@ -420,7 +423,7 @@ q4_hist
 
 combo_hists_B <- gridExtra::grid.arrange(q1_hist, q2_hist, q3_hist, q4_hist, ncol = 2, nrow = 2)
 #ggsave("plots/histograms_for_B_with_cnd.png", combo_hists_B)
-
+#ggsave("plots/histograms_for_B_eco_with_cnd.png", combo_hists_B)
 
 ##################################################################################################
 
@@ -428,9 +431,9 @@ combo_hists_B <- gridExtra::grid.arrange(q1_hist, q2_hist, q3_hist, q4_hist, nco
 
 
 ## For outputs from model A
-PATH_TO_OUTPUTSA <- "model_outputs/preds_A/"
-
-for (idx in 1:4){
+#PATH_TO_OUTPUTSA <- "model_outputs/preds_A/"
+PATH_TO_OUTPUTSA <- "model_outputs/preds_eco_A/"
+for (idx in c(1,2,4)){
  load(file = paste(PATH_TO_OUTPUTSA,
                     "cv_predictions_A_Q",
                     idx,
@@ -441,36 +444,42 @@ for (idx in 1:4){
 
 pred_layers_A_Q1_mean <- pred_layers_A_Q1$Mean
 pred_layers_A_Q2_mean <- pred_layers_A_Q2$Mean
-pred_layers_A_Q3_mean <- pred_layers_A_Q3$Mean
+#pred_layers_A_Q3_mean <- pred_layers_A_Q3$Mean
 pred_layers_A_Q4_mean <- pred_layers_A_Q4$Mean
 
 pred_layers_A_Q1_mean <- terra::rast(pred_layers_A_Q1_mean)
 set.crs(pred_layers_A_Q1_mean, value = crs)
 pred_layers_A_Q2_mean <- terra::rast(pred_layers_A_Q2_mean)
 set.crs(pred_layers_A_Q2_mean, value = crs)
-pred_layers_A_Q3_mean <- terra::rast(pred_layers_A_Q3_mean)
-set.crs(pred_layers_A_Q3_mean, value = crs)
+#pred_layers_A_Q3_mean <- terra::rast(pred_layers_A_Q3_mean)
+#set.crs(pred_layers_A_Q3_mean, value = crs)
 pred_layers_A_Q4_mean <- terra::rast(pred_layers_A_Q4_mean)
 set.crs(pred_layers_A_Q4_mean, value = crs)
 
 # read in the domestic cases
 
-dom_aq1 <- terra::rast("data/flu_data/prepped_data/domestic_cases_rasters/dom_a_q1_pres_abs.tif")
-dom_aq2 <- terra::rast("data/flu_data/prepped_data/domestic_cases_rasters/dom_a_q2_pres_abs.tif")
-dom_aq3 <- terra::rast("data/flu_data/prepped_data/domestic_cases_rasters/dom_a_q3_pres_abs.tif")
-dom_aq4 <- terra::rast("data/flu_data/prepped_data/domestic_cases_rasters/dom_a_q4_pres_abs.tif")
+# dom_aq1 <- terra::rast("data/flu_data/prepped_data/domestic_cases_rasters/dom_a_q1_pres_abs.tif")
+# dom_aq2 <- terra::rast("data/flu_data/prepped_data/domestic_cases_rasters/dom_a_q2_pres_abs.tif")
+# dom_aq3 <- terra::rast("data/flu_data/prepped_data/domestic_cases_rasters/dom_a_q3_pres_abs.tif")
+# dom_aq4 <- terra::rast("data/flu_data/prepped_data/domestic_cases_rasters/dom_a_q4_pres_abs.tif")
+
+dom_aq1 <- terra::rast("data/flu_data/prepped_data/domestic_cases_rasters/dom_a_q1_eco_pres_abs.tif")
+dom_aq2 <- terra::rast("data/flu_data/prepped_data/domestic_cases_rasters/dom_a_q2_eco_pres_abs.tif")
+dom_aq4 <- terra::rast("data/flu_data/prepped_data/domestic_cases_rasters/dom_a_q4_eco_pres_abs.tif")
+
 
 
 masked_aq1 <- terra::mask(pred_layers_A_Q1_mean, dom_aq1) 
 masked_aq2 <- terra::mask(pred_layers_A_Q2_mean, dom_aq2) 
-masked_aq3 <- terra::mask(pred_layers_A_Q3_mean, dom_aq3) 
+#masked_aq3 <- terra::mask(pred_layers_A_Q3_mean, dom_aq3) 
 masked_aq4 <- terra::mask(pred_layers_A_Q4_mean, dom_aq4) 
 
 
 # four panel plot of these maps
 
 #dev.off()
-png("plots/dom_over_predsA_masked.png", width = 700, height = 600)
+#png("plots/dom_over_predsA_masked.png", width = 700, height = 600)
+png("plots/dom_over_predsA_eco_masked.png", width = 700, height = 600)
 #pdf("plots/dom_over_predsA_masked.pdf", width = 7, height = 6)
 par(mfrow = c(2,2))
 par(mar = c(0,0,0,0))
@@ -482,9 +491,9 @@ plot(euro_rast, col = "black", alpha = 0.4, legend = F)
 plot(masked_aq2, add = T, col = viridis(100))
 title("A-Q2", adj = 0)
 
-plot(euro_rast, col = "black", alpha = 0.4, legend = F)
-plot(masked_aq3, add = T, col = viridis(100))
-title("A-Q3", adj = 0)
+#plot(euro_rast, col = "black", alpha = 0.4, legend = F)
+#plot(masked_aq3, add = T, col = viridis(100))
+#title("A-Q3", adj = 0)
 
 plot(euro_rast, col = "black", alpha = 0.4, legend = F)
 plot(masked_aq4, add = T, col = viridis(100))
@@ -558,34 +567,34 @@ aq2_hist
 
 # Q3
 
-AQ3_inf_cells <- c()
-AQ3_non_inf_cells <- c()
-AQ3_odds <- c()
-
-for (i in 1:length(min_prob_vect)) {
-  ressy <- odds_fun(prediction_rast =  pred_layers_A_Q3_mean,
-                    cd_rast = dnc_1000,
-                    min_prob = min_prob_vect[i],
-                    max_prob = max_prob_vect[i],
-                    dom_rast = dom_aq3)
-  AQ3_inf_cells[i] <- ressy[1]
-  AQ3_non_inf_cells[i] <- ressy[2]
-  AQ3_odds[i] <- ressy[3]
-}
-
-aq3_hist_dat <- data.frame(
-  Odds = AQ3_odds,
-  Predicted_prob = c("0.0-0.1", "0.1-0.2", "0.2-0.3", "0.3-0.4", "0.4-0.5", "0.5-0.6", 
-                     "0.6-0.7", "0.7-0.8", "0.8-0.9", "0.9-1.0")
-)
-
-# Create a bar plot
-aq3_hist <- ggplot(aq3_hist_dat, aes(x = Predicted_prob, y = AQ3_odds)) +
-  geom_bar(stat = "identity", fill = "#359B73") +
-  labs(title = "A-Q3", x = "Predicted probability", y = "Odds") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
-aq3_hist
+#AQ3_inf_cells <- c()
+#AQ3_non_inf_cells <- c()
+#AQ3_odds <- c()
+# 
+# for (i in 1:length(min_prob_vect)) {
+#   ressy <- odds_fun(prediction_rast =  pred_layers_A_Q3_mean,
+#                     cd_rast = dnc_1000,
+#                     min_prob = min_prob_vect[i],
+#                     max_prob = max_prob_vect[i],
+#                     dom_rast = dom_aq3)
+#   AQ3_inf_cells[i] <- ressy[1]
+#   AQ3_non_inf_cells[i] <- ressy[2]
+#   AQ3_odds[i] <- ressy[3]
+# }
+# 
+# aq3_hist_dat <- data.frame(
+#   Odds = AQ3_odds,
+#   Predicted_prob = c("0.0-0.1", "0.1-0.2", "0.2-0.3", "0.3-0.4", "0.4-0.5", "0.5-0.6", 
+#                      "0.6-0.7", "0.7-0.8", "0.8-0.9", "0.9-1.0")
+# )
+# 
+# # Create a bar plot
+# aq3_hist <- ggplot(aq3_hist_dat, aes(x = Predicted_prob, y = AQ3_odds)) +
+#   geom_bar(stat = "identity", fill = "#359B73") +
+#   labs(title = "A-Q3", x = "Predicted probability", y = "Odds") +
+#   theme_minimal() +
+#   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+# aq3_hist
 
 # Q4
 AQ4_inf_cells <- c()
@@ -618,12 +627,17 @@ aq4_hist <- ggplot(aq4_hist_dat, aes(x = Predicted_prob, y = AQ4_odds)) +
 aq4_hist
 
 
-combo_hists_A <- gridExtra::grid.arrange(aq1_hist, aq2_hist, aq3_hist, aq4_hist, ncol = 2, nrow = 2)
+#combo_hists_A <- gridExtra::grid.arrange(aq1_hist, aq2_hist, aq3_hist, aq4_hist, ncol = 2, nrow = 2)
 #ggsave("plots/histograms_for_A_with_cnd.png", combo_hists_A)
 
+combo_hists_A <- gridExtra::grid.arrange(aq1_hist, aq2_hist, aq4_hist, ncol = 2, nrow = 2)
+#ggsave("plots/histograms_for_A_eco_with_cnd.png", combo_hists_A)
+#
 
-
-
+m <- matrix(c(rep(1:2, each=1), c(0,3)), ncol=2, byrow=TRUE)
+m
+gridExtra::grid.arrange(aq1_hist, aq2_hist, aq4_hist, matrix = m)
+grid.arrange(grobs=P, layout_matrix = m)
 
 # 
 # png("plots/dom_over_preds_a1.png")
