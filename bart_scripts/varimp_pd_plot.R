@@ -224,7 +224,7 @@ for (idx in plt_idx){
   load(file = paste(PATH_TO_MODELS,
                     "fitted-BART-models-",
                     INCLUDE_CROSSTERMS,
-                    "/",
+                    "-multichain/",
                     CV_OR_RI,
                     "_model_with_vs_A_Q",
                     idx,
@@ -347,6 +347,7 @@ ggsave(paste("plots/",
 # Define variables of interest 
 ### NB this could alternatively be done by count across models!
 selected_vars <- top_var %>% arrange(-g_mean) %>% pull(var) %>% .[1:6]
+# selected_vars <- top_var %>% arrange(-count, -g_mean) %>% pull(var) %>% .[1:6]
 
 pd_summ <- lapply(1:4, function(x) list()) # initialise empty list of lists
 
@@ -355,7 +356,7 @@ for(idx in plt_idx){
   load(file = paste(PATH_TO_MODELS,
                     "fitted-BART-models-",
                     INCLUDE_CROSSTERMS,
-                    "/",
+                    "-multichain/",
                     CV_OR_RI,
                     "_model_with_vs_A_Q",
                     idx,
@@ -433,16 +434,16 @@ if (ALL_VARS_FOR_PD){
       bind_rows %>%
       mutate(var = gsub("_2022", "", var),
              var = gsub("_lag.$", "", var),
-             Q = case_when(Q == "Q1" ~ "NBS",
-                           Q == "Q2" ~ "PrBM)",
-                           Q == "Q3" ~ "BS",
-                           Q == "Q4" ~ "PoBM"
+             Q = case_when(Q == "Q1" ~ "NB",
+                           Q == "Q2" ~ "PrM",
+                           Q == "Q3" ~ "B",
+                           Q == "Q4" ~ "PoM"
              ),
              Q = factor(Q, levels = c(
-               "NBS",
-               "PrBM",
-               "BS",
-               "PoBM"))
+               "NB",
+               "PrM",
+               "B",
+               "PoM"))
       ) %>% 
       left_join(plot_labels) %>%
       mutate(label_units = as.factor(label_units),
@@ -512,16 +513,16 @@ if (ALL_VARS_FOR_PD){
     bind_rows %>%
     mutate(var = gsub("_2022", "", var),
            var = gsub("_lag.$", "", var),
-           Q = case_when(Q == "Q1" ~ "NBS",
-                         Q == "Q2" ~ "PrBM)",
-                         Q == "Q3" ~ "BS",
-                         Q == "Q4" ~ "PoBM"
+           Q = case_when(Q == "Q1" ~ "NB",
+                         Q == "Q2" ~ "PrM",
+                         Q == "Q3" ~ "B",
+                         Q == "Q4" ~ "PoM"
            ),
            Q = factor(Q, levels = c(
-             "NBS",
-             "PrBM",
-             "BS",
-             "PoBM"))
+             "NB",
+             "PrM",
+             "B",
+             "PoM"))
     ) %>% 
     left_join(plot_labels) %>%
     mutate(label_units = as.factor(label_units),
@@ -557,11 +558,11 @@ if (ALL_VARS_FOR_PD){
           scale_x_continuous(trans = "log10", expand = c(0,0))
         )} +
       scale_colour_manual("",
-                          breaks = c("Q1", "Q2", "Q3", "Q4", "ns"),
+                          breaks = c("NB", "PrM", "B", "PoM", "ns"),
                           values = c(pal, "black"),
                           drop = FALSE) +
       scale_fill_manual("",
-                        breaks = c("Q1", "Q2", "Q3", "Q4", "ns"),
+                        breaks = c("NB", "PrM", "B", "PoM", "ns"),
                         values = c(pal, "black"),
                         drop = FALSE) +
       scale_linetype_manual("",
@@ -599,7 +600,7 @@ for(idx in 1:4){
   load(file = paste(PATH_TO_MODELS,
                     "fitted-BART-models-",
                     INCLUDE_CROSSTERMS,
-                    "/",
+                    "-multichain/",
                     CV_OR_RI,
                     "_model_with_vs_B_Q",
                     idx,
@@ -687,7 +688,7 @@ fig_varimp_B <- ggplot(df, aes(x = mean, y = label, xmin = lower, xmax = upper, 
   geom_errorbar(width=0, position=position_dodge(0.6)) + 
   geom_point(position=position_dodge(0.6)) +
   geom_hline(yintercept=seq(1.5, nrow(df)-0.5, 1), lwd=.5, colour="grey75") +  # add custom gridlines
-  geom_hline(yintercept=c(7.5,13.5), lwd=1.5, colour="grey75") + # separate bioclimatic, topographic, livestock, host ecological variables - must set manually each recalculation!
+  geom_hline(yintercept=c(7.5,14.5), lwd=1.5, colour="grey75") + # separate bioclimatic, topographic, livestock, host ecological variables - must set manually each recalculation!
   scale_x_continuous() +
   scale_y_discrete() +
   scale_colour_manual(name = element_blank(),
@@ -721,6 +722,7 @@ ggsave(paste("plots/",
 
 # Define variables of interest
 selected_vars <- top_var %>% arrange(-g_mean) %>% pull(var) %>% .[1:6]
+# selected_vars <- top_var %>% arrange(-count, -g_mean) %>% pull(var) %>% .[1:6]
 
 pd_summ <- lapply(1:4, function(x) list()) # initialise empty list of lists
 
@@ -729,7 +731,7 @@ for(idx in 1:4){
   load(file = paste(PATH_TO_MODELS,
                     "fitted-BART-models-",
                     INCLUDE_CROSSTERMS,
-                    "/",
+                    "-multichain/",
                     CV_OR_RI,
                     "_model_with_vs_B_Q",
                     idx,
@@ -741,16 +743,6 @@ for(idx in 1:4){
   }else{
     vars <- selected_vars
   }
-  
-  load(file = paste(PATH_TO_MODELS,
-                    "fitted-BART-models-",
-                    INCLUDE_CROSSTERMS,
-                    "/",
-                    CV_OR_RI,
-                    "_model_with_vs_B_Q",
-                    idx,
-                    ".rds",
-                    sep = ""))
   
   for(j in 1:length(vars)){ # for variables for interest..
     
@@ -817,16 +809,16 @@ if (ALL_VARS_FOR_PD){
       bind_rows %>%
       mutate(var = gsub("_2022", "", var),
              var = gsub("_lag.$", "", var),
-             Q = case_when(Q == "Q1" ~ "NBS",
-                           Q == "Q2" ~ "PrBM)",
-                           Q == "Q3" ~ "BS",
-                           Q == "Q4" ~ "PoBM"
+             Q = case_when(Q == "Q1" ~ "NB",
+                           Q == "Q2" ~ "PrM",
+                           Q == "Q3" ~ "B",
+                           Q == "Q4" ~ "PoM"
              ),
              Q = factor(Q, levels = c(
-               "NBS",
-               "PrBM",
-               "BS",
-               "PoBM"))
+               "NB",
+               "PrM",
+               "B",
+               "PoM"))
       ) %>% 
       left_join(plot_labels) %>%
       mutate(label_units = as.factor(label_units),
@@ -896,16 +888,16 @@ if (ALL_VARS_FOR_PD){
     bind_rows %>%
     mutate(var = gsub("_2022", "", var),
            var = gsub("_lag.$", "", var),
-           Q = case_when(Q == "Q1" ~ "NBS",
-                         Q == "Q2" ~ "PrBM)",
-                         Q == "Q3" ~ "BS",
-                         Q == "Q4" ~ "PoBM"
+           Q = case_when(Q == "Q1" ~ "NB",
+                         Q == "Q2" ~ "PrM",
+                         Q == "Q3" ~ "B",
+                         Q == "Q4" ~ "PoM"
            ),
            Q = factor(Q, levels = c(
-             "NBS",
-             "PrBM",
-             "BS",
-             "PoBM"))
+             "NB",
+             "PrM",
+             "B",
+             "PoM"))
     )  %>% 
     left_join(plot_labels) %>%
     mutate(label_units = as.factor(label_units),
@@ -941,11 +933,11 @@ if (ALL_VARS_FOR_PD){
           scale_x_continuous(trans = "log10", expand = c(0,0))
         )} +
       scale_colour_manual("",
-                          breaks = c("Q1", "Q2", "Q3", "Q4", "ns"),
+                          breaks = c("NB", "PrM", "B", "PoM", "ns"),
                           values = c(pal, "black"),
                           drop = FALSE) +
       scale_fill_manual("",
-                        breaks = c("Q1", "Q2", "Q3", "Q4", "ns"),
+                        breaks = c("NB", "PrM", "B", "PoM", "ns"),
                         values = c(pal, "black"),
                         drop = FALSE) +
       scale_linetype_manual("",
@@ -978,11 +970,15 @@ if (ALL_VARS_FOR_PD){
 
 # Combination plots
 
+plot_annotation(theme = theme(plot.margin = margin()))
+
+
 fig_varimp_combi <- wrap_plots(list(fig_varimp_A, fig_varimp_B), ncol = 2) +
   plot_annotation(tag_levels = 'A') +
   plot_layout(guides = "collect", axis_titles = "collect") &
   theme(legend.position = 'bottom',
-        plot.tag = element_text(size = 14))
+        plot.tag = element_text(size = 14),
+        plot.margin = margin(5,5,5,20))
 
 # Ensure same y ranges for all plots; adapted from https://stackoverflow.com/a/60018428
 flipped_y_range <- c(ggplot_build(fig_varimp_combi[[1]])$layout$panel_scales_x[[1]]$range$range,
@@ -996,7 +992,7 @@ ggsave(paste("plots/",
              CV_OR_RI,
              "_variable_importance_quarterly_combi.png", sep=""),
        plot = fig_varimp_combi,
-       width = 16,
+       width = 18,
        height = 8)
 
 fig_pd_combi <- (fig_pd_chosen_A)/(fig_pd_chosen_B) +

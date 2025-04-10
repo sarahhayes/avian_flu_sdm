@@ -10,6 +10,7 @@ ebird/ebird_data
 *.tif
 LandCoverData
 output/fitted-BART-models*
+output/old*
 Z_old_or_unused_scripts/test_ebird_sightings.R
 Z_old_or_unused_scripts/resample_training_data_barkla.R
 plots/resampling/retired
