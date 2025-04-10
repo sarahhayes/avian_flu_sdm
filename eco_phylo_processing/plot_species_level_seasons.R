@@ -86,12 +86,34 @@ season_df <- season_df %>% pivot_longer(everything(),
 season_df$Season <- season_names[season_df$Season]
 season_table <- table(season_df) %>% data.frame()
 
+# Check to make sure we get same number of species every day:
+count_sp_by_day <- function(this_day){
+  total_spec <- season_table %>%
+    filter(Day == this_day) %>%
+    select(Freq) %>%
+    colSums()
+  return(total_spec)
+}
+count_sp_by_day <- Vectorize(count_sp_by_day)
+req_by_day <- data.frame(Day = unique(season_table$Day)) %>%
+  mutate(Species_count = count_sp_by_day(Day))
+
+# If the following has length 1, then we know we have consistent species
+# numbers.
+unique(req_by_day$Species_count)
+
 h <- ggplot(season_table, aes(x=as.Date(Day), y=Freq, fill=Season)) +
   geom_bar(stat="identity", position="fill") +
   scale_x_date(date_breaks="months") +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
   xlab("Date") +
   ylab("Proportion of species")
+
+ggsave(paste("plots/species_seasons_by_week.png",
+             sep=""),
+       plot = h,
+       width = 8.5,
+       height = 4.5)
 
 season_df_short <- pivot_wider(season_table, names_from = "Season", values_from = "Freq")
 get_largest <- apply(season_df_short[,2:5], 1, max)
