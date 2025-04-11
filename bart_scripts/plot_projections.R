@@ -8,7 +8,7 @@ PLOT_RAW_CASE_DATA <- FALSE
 # Optional command line arguments, must be passed as strings:
 args <- commandArgs(trailingOnly = T)
 if (length(args)<4){
-  INCLUDE_CROSSTERMS <- "with-crossterms" # Set to "no-crossterms" to do model without crossterms or "with-crossterms" to do model with crossterms
+  INCLUDE_CROSSTERMS <- "with-crossterms-multichain" # Set to "no-crossterms" to do model without crossterms or "with-crossterms" to do model with crossterms
 }else{
   INCLUDE_CROSSTERMS <- args[4]
 }
@@ -48,6 +48,12 @@ if (!SKIP_AQ3){
   plt_idx <- c(1, 2, 4) %>% as.integer()
 }
 
+# Add breeding season labels for quarters
+season_names <- c("NB",
+                  "PrM",
+                  "B",
+                  "PoM")
+
 for (idx in plt_idx){
   # Slightly hacky way to load in predictions and give it an arbitrary name.
   # This is needed because readRDS appears to be deprecated and the load
@@ -68,14 +74,14 @@ for (idx in plt_idx){
                                      INCLUDE_CROSSTERMS,
                                      "/",
                                      CV_OR_RI,
-                                     "_predictions_A_Q",
-                                     idx,
+                                     "_predictions_A_",
+                                     season_names[idx],
                                      ".rds",
                                      sep = "")) %>% get
   preds[[idx]] <- pred_layer
-  names(preds[[idx]]) <- c(paste0("Q",idx),
-                           paste0("Q",idx,"_2.5th_percentile"),
-                           paste0("Q",idx,"_97.5th_percentile"))
+  names(preds[[idx]]) <- c(paste0(season_names[idx]),
+                           paste0(season_names[idx],"_2.5th_percentile"),
+                           paste0(season_names[idx],"_97.5th_percentile"))
   
 }
 
@@ -250,14 +256,14 @@ for (idx in 1:4){
                                   INCLUDE_CROSSTERMS,
                                   "/",
                                   CV_OR_RI,
-                                  "_predictions_B_Q",
-                                  idx,
+                                  "_predictions_B_",
+                                  season_names[idx],
                                   ".rds",
                                   sep = "")) %>% get
   preds[[idx]] <- pred_layer
-  names(preds[[idx]]) <- c(paste0("Q",idx),
-                           paste0("Q",idx,"_2.5th_percentile"),
-                           paste0("Q",idx,"_97.5th_percentile"))
+  names(preds[[idx]]) <- c(paste0(season_names[idx]),
+                           paste0(season_names[idx],"_2.5th_percentile"),
+                           paste0(season_names[idx],"_97.5th_percentile"))
   
 }
 

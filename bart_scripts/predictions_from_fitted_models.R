@@ -6,7 +6,7 @@ SKIP_AQ3 <- TRUE # Set to TRUE to skip small period A quarter 3 dataset
 # Optional command line arguments, must be passed as strings:
 args <- commandArgs(trailingOnly = T)
 if (length(args)<4){
-  INCLUDE_CROSSTERMS <- "with-crossterms" # Set to "no-crossterms" to do model without crossterms or "with-crossterms" to do model with crossterms
+  INCLUDE_CROSSTERMS <- "with-crossterms-multichain" # Set to "no-crossterms" to do model without crossterms or "with-crossterms" to do model with crossterms
 }else{
   INCLUDE_CROSSTERMS <- args[4]
 }
@@ -17,13 +17,13 @@ if (length(args)<3){
 }
 if (length(args)<2){
   # Set path to folder containing data, and where output will be stored
-  PATH_TO_COVS <- ""
+  PATH_TO_COVS <- "../../../OneDrive - The University of Liverpool/AI_S2_SDM_storage/"
 }else{
   PATH_TO_COVS <- args[2]
 }
 if (length(args)<1){
   # Set path to folder containing data, and where output will be stored
-  PATH_TO_OUTPUTS <- "."
+  PATH_TO_OUTPUTS <- ""
 }else{
   PATH_TO_OUTPUTS <- args[1]
 }

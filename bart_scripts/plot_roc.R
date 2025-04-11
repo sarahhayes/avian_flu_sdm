@@ -179,7 +179,7 @@ if (B_TEST_DATA_AVAILABLE){
     
   }
   
-  cat("Dataset B Q1, test metrics:\n sens =",
+  {cat("Dataset B Q1, test metrics:\n sens =",
       signif(metrics_B_Q1$sens, digits=2),
       " (",
       signif(metric_cis_B_Q1$sens, digits=2),
@@ -230,7 +230,7 @@ if (B_TEST_DATA_AVAILABLE){
       signif(metrics_B_Q4$auc, digits=2),
       " (",
       signif(metric_cis_B_Q4$auc, digits=2),
-      ")\n")
+      ")\n")}
   
   Q1_x <- performance(metrics_B_Q1$pred, "tpr", "fpr")
   Q2_x <- performance(metrics_B_Q2$pred, "tpr", "fpr")
