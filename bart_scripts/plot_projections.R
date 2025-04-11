@@ -74,8 +74,8 @@ for (idx in plt_idx){
                                      INCLUDE_CROSSTERMS,
                                      "/",
                                      CV_OR_RI,
-                                     "_predictions_A_",
-                                     season_names[idx],
+                                     "_predictions_A_Q",
+                                     idx,
                                      ".rds",
                                      sep = "")) %>% get
   preds[[idx]] <- pred_layer
@@ -256,8 +256,8 @@ for (idx in 1:4){
                                   INCLUDE_CROSSTERMS,
                                   "/",
                                   CV_OR_RI,
-                                  "_predictions_B_",
-                                  season_names[idx],
+                                  "_predictions_B_Q",
+                                  idx,
                                   ".rds",
                                   sep = "")) %>% get
   preds[[idx]] <- pred_layer
