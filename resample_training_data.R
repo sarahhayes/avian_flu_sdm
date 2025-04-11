@@ -6,8 +6,8 @@ rm(list=ls())
 
 library(tidyverse)
 library(magrittr)
-library(flexsdm)
-library(ibis.iSDM)
+# library(flexsdm)
+# library(ibis.iSDM)
 library(terra)
 library(sf)
 library(patchwork)
@@ -53,7 +53,7 @@ q1_start <- as.Date("0000-11-30") # non-breeding season
 year_end <- as.Date("0000-12-31")
 
 # Read in positive flu site data 
-pos_sites <- read.csv("data_offline\\Avian flu data\\hpai_pos_birds_nobvbrc.csv") %>% 
+pos_sites <- read.csv("hpai_pos_birds_nobvbrc.csv") %>% 
   rename(date = observation.date) %>%
   mutate(date = as.Date(date),
          Q = case_when((format(date, "%m%-%d") >= format(year_start, "%m%-%d")) & (format(date, "%m%-%d") < format(q2_start-1, "%m%-%d)")) ~ "Q1",
