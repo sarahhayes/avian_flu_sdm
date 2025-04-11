@@ -40,7 +40,7 @@ library(tidyverse)
 library(dbarts)
 library(patchwork)
 
-# Set plot palette
+# Set season plot palette
 
 pal <- c("#2271B2",
          "#F748A5",

@@ -20,6 +20,13 @@ pseud_ratio <- 1
 
 INIT_ENV_VARS <- FALSE
 
+# Set season plot palette
+
+pal <- c("#2271B2",
+         "#F748A5",
+         "#359B73",
+         "#e69f00")
+
 #############
 # Read data #
 #############
@@ -133,38 +140,38 @@ timeplot_seas <- pos_sites %>%
     serotype_HN == "H5N6" ~ "H5N6",
     TRUE ~ "H5NX"
   )) %>%
-  ggplot(aes(x = date, fill = serotype_HN)) +
-  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2016-08-10"), xmax = as.Date("2016-11-30"), ymin = -Inf, ymax = Inf), fill = "limegreen", alpha = 0.1) +
-  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2017-08-10"), xmax = as.Date("2017-11-30"), ymin = -Inf, ymax = Inf), fill = "limegreen", alpha = 0.1) +
-  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2018-08-10"), xmax = as.Date("2018-11-30"), ymin = -Inf, ymax = Inf), fill = "limegreen", alpha = 0.1) +
-  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2019-08-10"), xmax = as.Date("2019-11-30"), ymin = -Inf, ymax = Inf), fill = "limegreen", alpha = 0.1) +
-  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2020-08-10"), xmax = as.Date("2020-11-30"), ymin = -Inf, ymax = Inf), fill = "limegreen", alpha = 0.1) +
-  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2021-08-10"), xmax = as.Date("2021-11-30"), ymin = -Inf, ymax = Inf), fill = "limegreen", alpha = 0.1) +
-  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2022-08-10"), xmax = as.Date("2022-11-30"), ymin = -Inf, ymax = Inf), fill = "limegreen", alpha = 0.1) +
-  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2023-08-10"), xmax = as.Date("2023-11-30"), ymin = -Inf, ymax = Inf), fill = "limegreen", alpha = 0.1) +
-  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2016-11-30"), xmax = as.Date("2017-03-01"), ymin = -Inf, ymax = Inf), fill = "red", alpha = 0.1) +
-  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2017-11-30"), xmax = as.Date("2018-03-01"), ymin = -Inf, ymax = Inf), fill = "red", alpha = 0.1) +
-  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2018-11-30"), xmax = as.Date("2019-03-01"), ymin = -Inf, ymax = Inf), fill = "red", alpha = 0.1) +
-  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2019-11-30"), xmax = as.Date("2020-03-01"), ymin = -Inf, ymax = Inf), fill = "red", alpha = 0.1) +
-  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2020-11-30"), xmax = as.Date("2021-03-01"), ymin = -Inf, ymax = Inf), fill = "red", alpha = 0.1) +
-  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2021-11-30"), xmax = as.Date("2022-03-01"), ymin = -Inf, ymax = Inf), fill = "red", alpha = 0.1) +
-  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2022-11-30"), xmax = as.Date("2023-03-01"), ymin = -Inf, ymax = Inf), fill = "red", alpha = 0.1) +
-  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2023-11-30"), xmax = as.Date("2024-03-01"), ymin = -Inf, ymax = Inf), fill = "red", alpha = 0.1) +
-  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2017-03-01"), xmax = as.Date("2017-06-07"), ymin = -Inf, ymax = Inf), fill = "orange", alpha = 0.1) + geom_vline(xintercept = as.Date("2020-08-10")) +
-  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2018-03-01"), xmax = as.Date("2018-06-07"), ymin = -Inf, ymax = Inf), fill = "orange", alpha = 0.1) + geom_vline(xintercept = as.Date("2020-08-10")) +
-  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2019-03-01"), xmax = as.Date("2019-06-07"), ymin = -Inf, ymax = Inf), fill = "orange", alpha = 0.1) + geom_vline(xintercept = as.Date("2020-08-10")) +
-  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2020-03-01"), xmax = as.Date("2020-06-07"), ymin = -Inf, ymax = Inf), fill = "orange", alpha = 0.1) + geom_vline(xintercept = as.Date("2020-08-10")) +
-  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2021-03-01"), xmax = as.Date("2021-06-07"), ymin = -Inf, ymax = Inf), fill = "orange", alpha = 0.1) + geom_vline(xintercept = as.Date("2020-08-10")) +
-  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2022-03-01"), xmax = as.Date("2022-06-07"), ymin = -Inf, ymax = Inf), fill = "orange", alpha = 0.1) + geom_vline(xintercept = as.Date("2020-08-10")) +
-  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2023-03-01"), xmax = as.Date("2023-06-07"), ymin = -Inf, ymax = Inf), fill = "orange", alpha = 0.1) + geom_vline(xintercept = as.Date("2020-08-10")) +
-  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2017-06-07"), xmax = as.Date("2017-08-10"), ymin = -Inf, ymax = Inf), fill = "yellow", alpha = 0.1) + geom_vline(xintercept = as.Date("2020-08-10")) +
-  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2018-06-07"), xmax = as.Date("2018-08-10"), ymin = -Inf, ymax = Inf), fill = "yellow", alpha = 0.1) + geom_vline(xintercept = as.Date("2020-08-10")) +
-  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2019-06-07"), xmax = as.Date("2019-08-10"), ymin = -Inf, ymax = Inf), fill = "yellow", alpha = 0.1) + geom_vline(xintercept = as.Date("2020-08-10")) +
-  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2020-06-07"), xmax = as.Date("2020-08-10"), ymin = -Inf, ymax = Inf), fill = "yellow", alpha = 0.1) + geom_vline(xintercept = as.Date("2020-08-10")) +
-  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2021-06-07"), xmax = as.Date("2021-08-10"), ymin = -Inf, ymax = Inf), fill = "yellow", alpha = 0.1) + geom_vline(xintercept = as.Date("2020-08-10")) +
-  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2022-06-07"), xmax = as.Date("2022-08-10"), ymin = -Inf, ymax = Inf), fill = "yellow", alpha = 0.1) + geom_vline(xintercept = as.Date("2020-08-10")) +
-  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2023-06-07"), xmax = as.Date("2023-08-10"), ymin = -Inf, ymax = Inf), fill = "yellow", alpha = 0.1) + geom_vline(xintercept = as.Date("2020-08-10")) +
-  geom_histogram(bins = round(as.numeric((max(pos_sites$date)-min(pos_sites$date))/30)), position = "stack") +
+  ggplot(aes(x = date)) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2016-08-10"), xmax = as.Date("2016-11-30"), ymin = -Inf, ymax = Inf), fill = pal[1], alpha = 0.2) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2017-08-10"), xmax = as.Date("2017-11-30"), ymin = -Inf, ymax = Inf), fill = pal[1], alpha = 0.2) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2018-08-10"), xmax = as.Date("2018-11-30"), ymin = -Inf, ymax = Inf), fill = pal[1], alpha = 0.2) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2019-08-10"), xmax = as.Date("2019-11-30"), ymin = -Inf, ymax = Inf), fill = pal[1], alpha = 0.2) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2020-08-10"), xmax = as.Date("2020-11-30"), ymin = -Inf, ymax = Inf), fill = pal[1], alpha = 0.2) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2021-08-10"), xmax = as.Date("2021-11-30"), ymin = -Inf, ymax = Inf), fill = pal[1], alpha = 0.2) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2022-08-10"), xmax = as.Date("2022-11-30"), ymin = -Inf, ymax = Inf), fill = pal[1], alpha = 0.2) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2023-08-10"), xmax = as.Date("2023-11-30"), ymin = -Inf, ymax = Inf), fill = pal[1], alpha = 0.2) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2016-11-30"), xmax = as.Date("2017-03-01"), ymin = -Inf, ymax = Inf), fill = pal[2], alpha = 0.2) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2017-11-30"), xmax = as.Date("2018-03-01"), ymin = -Inf, ymax = Inf), fill = pal[2], alpha = 0.2) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2018-11-30"), xmax = as.Date("2019-03-01"), ymin = -Inf, ymax = Inf), fill = pal[2], alpha = 0.2) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2019-11-30"), xmax = as.Date("2020-03-01"), ymin = -Inf, ymax = Inf), fill = pal[2], alpha = 0.2) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2020-11-30"), xmax = as.Date("2021-03-01"), ymin = -Inf, ymax = Inf), fill = pal[2], alpha = 0.2) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2021-11-30"), xmax = as.Date("2022-03-01"), ymin = -Inf, ymax = Inf), fill = pal[2], alpha = 0.2) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2022-11-30"), xmax = as.Date("2023-03-01"), ymin = -Inf, ymax = Inf), fill = pal[2], alpha = 0.2) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2023-11-30"), xmax = as.Date("2024-03-01"), ymin = -Inf, ymax = Inf), fill = pal[2], alpha = 0.2) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2017-03-01"), xmax = as.Date("2017-06-07"), ymin = -Inf, ymax = Inf), fill = pal[3], alpha = 0.2) + geom_vline(xintercept = as.Date("2020-08-10")) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2018-03-01"), xmax = as.Date("2018-06-07"), ymin = -Inf, ymax = Inf), fill = pal[3], alpha = 0.2) + geom_vline(xintercept = as.Date("2020-08-10")) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2019-03-01"), xmax = as.Date("2019-06-07"), ymin = -Inf, ymax = Inf), fill = pal[3], alpha = 0.2) + geom_vline(xintercept = as.Date("2020-08-10")) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2020-03-01"), xmax = as.Date("2020-06-07"), ymin = -Inf, ymax = Inf), fill = pal[3], alpha = 0.2) + geom_vline(xintercept = as.Date("2020-08-10")) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2021-03-01"), xmax = as.Date("2021-06-07"), ymin = -Inf, ymax = Inf), fill = pal[3], alpha = 0.2) + geom_vline(xintercept = as.Date("2020-08-10")) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2022-03-01"), xmax = as.Date("2022-06-07"), ymin = -Inf, ymax = Inf), fill = pal[3], alpha = 0.2) + geom_vline(xintercept = as.Date("2020-08-10")) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2023-03-01"), xmax = as.Date("2023-06-07"), ymin = -Inf, ymax = Inf), fill = pal[3], alpha = 0.2) + geom_vline(xintercept = as.Date("2020-08-10")) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2017-06-07"), xmax = as.Date("2017-08-10"), ymin = -Inf, ymax = Inf), fill = pal[4], alpha = 0.2) + geom_vline(xintercept = as.Date("2020-08-10")) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2018-06-07"), xmax = as.Date("2018-08-10"), ymin = -Inf, ymax = Inf), fill = pal[4], alpha = 0.2) + geom_vline(xintercept = as.Date("2020-08-10")) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2019-06-07"), xmax = as.Date("2019-08-10"), ymin = -Inf, ymax = Inf), fill = pal[4], alpha = 0.2) + geom_vline(xintercept = as.Date("2020-08-10")) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2020-06-07"), xmax = as.Date("2020-08-10"), ymin = -Inf, ymax = Inf), fill = pal[4], alpha = 0.2) + geom_vline(xintercept = as.Date("2020-08-10")) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2021-06-07"), xmax = as.Date("2021-08-10"), ymin = -Inf, ymax = Inf), fill = pal[4], alpha = 0.2) + geom_vline(xintercept = as.Date("2020-08-10")) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2022-06-07"), xmax = as.Date("2022-08-10"), ymin = -Inf, ymax = Inf), fill = pal[4], alpha = 0.2) + geom_vline(xintercept = as.Date("2020-08-10")) +
+  geom_rect(data = slice(pos_sites,1), aes(xmin = as.Date("2023-06-07"), xmax = as.Date("2023-08-10"), ymin = -Inf, ymax = Inf), fill = pal[4], alpha = 0.2) + geom_vline(xintercept = as.Date("2020-08-10")) +
+  geom_histogram(bins = round(as.numeric((max(pos_sites$date)-min(pos_sites$date))/30)), position = "stack", fill = "grey20") +
   geom_vline(xintercept = as.Date("2021-08-10")) +
   geom_vline(xintercept = as.Date("2023-03-01")) +
   geom_text(aes(x = as.Date("2016-08-10")+(as.Date("2020-08-10")-as.Date("2016-08-10"))/2, y = 330 ,label = "A. Train", hjust = 0.5)) +
@@ -174,11 +181,7 @@ timeplot_seas <- pos_sites %>%
   scale_x_date(date_labels = "%Y", date_breaks = "1 year") +
   ylab("Monthly reports") +
   xlab("Date") +
-  labs(fill = "subtype") +
-  theme_bw() +
-  theme(legend.position = c(0.05,0.77),
-        legend.title=element_blank(),
-        legend.margin=margin(c(1,5,5,5)))
+  theme_bw()
 
 ggsave(paste("plots/timeplot.png"),
        plot = timeplot,
@@ -606,7 +609,7 @@ thinner <- function (maindf, nbins){
            pch=16, cex=0.2, col = "gray40")
     points(thinned_rand %>% pull(X),
            thinned_rand %>% pull(Y), 
-           pch=16, cex=0.2, col = "red")
+           pch=16, cex=0.2, col = pal[2])
     dev.off()
     
     thinned_rand %>% saveRDS(paste0("training_sets\\raw\\", dfname, "_Q", i, "_thinned_rand.RDS"))
@@ -618,7 +621,7 @@ thinner <- function (maindf, nbins){
            pch=16, cex=0.2, col = "gray40")
     points(thinned_env %>% pull(X),
            thinned_env %>% pull(Y), 
-           pch=16, cex=0.2, col = "red")
+           pch=16, cex=0.2, col = pal[2])
     dev.off()
     
     thinned_env %>% saveRDS(paste0("training_sets\\raw\\", dfname, "_Q", i, "_thinned_env_", nbins, ".RDS"))
