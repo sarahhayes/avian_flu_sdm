@@ -22,6 +22,13 @@ library(stringr)
 library(terra)
 library(tidyr)
 
+# Set season plot palette
+
+pal <- c("#2271B2",
+         "#F748A5",
+         "#359B73",
+         "#e69f00")
+
 ### First get list of birds which appear in Europe with eBird species codes, along
 # with estimates of global population sizes. ####
 
