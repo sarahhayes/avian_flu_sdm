@@ -3,7 +3,7 @@
 The code in this repository was used to conduct the analysis outlined in the following bioRxiv preprint:
 * Sarah Hayes, Joe Hilton, Joaquin Mould-Quevedo, Christl Donnelly, Matthew Baylis, Liam Brierley (2024) &quot;Ecology and environment predict spatially stratified risk of H5 highly pathogenic avian influenza clade 2.3.4.4b in wild birds across Europe.&quot; <i>bioRxiv</i> doi:10.1101/2024.07.17.603912
 
-The covariate rasters calculated in the data preparation section of our analysis and used to train our BART models are available at [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13273108.svg)](https://doi.org/10.5281/zenodo.13273108)."
+The covariate rasters calculated in the data preparation section of our analysis and used to train our BART models are available at [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13273108.svg)](https://doi.org/10.5281/zenodo.13273108).
 
 Below we outline the steps involved in using the code to conduct the analysis.
 
