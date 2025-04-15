@@ -6,12 +6,12 @@ SKIP_AQ3 <- TRUE # Set to TRUE to skip small period A quarter 3 dataset
 # Optional command line arguments, must be passed as strings:
 args <- commandArgs(trailingOnly = T)
 if (length(args)<4){
-  INCLUDE_CROSSTERMS <- "with-crossterms-multichain" # Set to "no-crossterms" to do model without crossterms or "with-crossterms" to do model with crossterms
+  INCLUDE_CROSSTERMS <- "with-crossterms" # Set to "no-crossterms" to do model without crossterms or "with-crossterms" to do model with crossterms
 }else{
   INCLUDE_CROSSTERMS <- args[4]
 }
 if (length(args)<3){
-  CV_OR_RI <- "cv" # Set to "cv" to do crossvalidated model or "ri" to do crossvalidation + random intercept model
+  CV_OR_RI <- "ri" # Set to "cv" to do crossvalidated model or "ri" to do crossvalidation + random intercept model
 }else{
   CV_OR_RI <- args[3]
 }
@@ -164,20 +164,21 @@ if (SAVE_OUTPUTS){
        file = paste(PATH_TO_MODELS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_metrics_A_Q1.rds", sep = ""))
 }
 
-# Generate risk map with percentiles
-pred_layers_A_Q1 <- predict(object = sdm,
-                      x.layers = covstack,
-                      quantiles = c(0.025, 0.975),
-                      splitby = 20
-)
-names(pred_layers_A_Q1) <- c("Mean",
-                             "Lower 95 percent confidence bound",
-                             "Upper 95 percent confidence bound")
-if (SAVE_OUTPUTS){
-  save(pred_layers_A_Q1,
-       file = paste(PATH_TO_MODELS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_predictions_A_Q1.rds", sep = ""))
+if (CV_OR_RI=="cv"){
+  # Generate risk map with percentiles
+  pred_layers_A_Q1 <- predict(object = sdm,
+                        x.layers = covstack,
+                        quantiles = c(0.025, 0.975),
+                        splitby = 20
+  )
+  names(pred_layers_A_Q1) <- c("Mean",
+                               "Lower 95 percent confidence bound",
+                               "Upper 95 percent confidence bound")
+  if (SAVE_OUTPUTS){
+    save(pred_layers_A_Q1,
+         file = paste(PATH_TO_MODELS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_predictions_A_Q1.rds", sep = ""))
+  }
 }
-
 
 #### Dataset A Q2 ####
 
@@ -203,18 +204,20 @@ if (SAVE_OUTPUTS){
        file = paste(PATH_TO_MODELS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_metrics_A_Q2.rds", sep = ""))
 }
 
-# Generate risk map with percentiles
-pred_layers_A_Q2 <- predict(object = sdm,
-                            x.layers = covstack,
-                            quantiles = c(0.025, 0.975),
-                            splitby = 20
-)
-names(pred_layers_A_Q2) <- c("Mean",
-                             "Lower 95 percent confidence bound",
-                             "Upper 95 percent confidence bound")
-if (SAVE_OUTPUTS){
-  save(pred_layers_A_Q2,
-       file = paste(PATH_TO_MODELS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_predictions_A_Q2.rds", sep = ""))
+if (CV_OR_RI=="cv"){
+  # Generate risk map with percentiles
+  pred_layers_A_Q2 <- predict(object = sdm,
+                              x.layers = covstack,
+                              quantiles = c(0.025, 0.975),
+                              splitby = 20
+  )
+  names(pred_layers_A_Q2) <- c("Mean",
+                               "Lower 95 percent confidence bound",
+                               "Upper 95 percent confidence bound")
+  if (SAVE_OUTPUTS){
+    save(pred_layers_A_Q2,
+         file = paste(PATH_TO_MODELS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_predictions_A_Q2.rds", sep = ""))
+  }
 }
 
 
@@ -243,18 +246,20 @@ if (!SKIP_AQ3){
          file = paste(PATH_TO_MODELS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_metrics_A_Q3.rds", sep = ""))
   }
   
-  # Generate risk map with percentiles
-  pred_layers_A_Q3 <- predict(object = sdm,
-                              x.layers = covstack,
-                              quantiles = c(0.025, 0.975),
-                              splitby = 20
-  )
-  names(pred_layers_A_Q3) <- c("Mean",
-                               "Lower 95 percent confidence bound",
-                               "Upper 95 percent confidence bound")
-  if (SAVE_OUTPUTS){
-    save(pred_layers_A_Q3,
-         file = paste(PATH_TO_MODELS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_predictions_A_Q3.rds", sep = ""))
+  if (CV_OR_RI=="cv"){
+    # Generate risk map with percentiles
+    pred_layers_A_Q3 <- predict(object = sdm,
+                                x.layers = covstack,
+                                quantiles = c(0.025, 0.975),
+                                splitby = 20
+    )
+    names(pred_layers_A_Q3) <- c("Mean",
+                                 "Lower 95 percent confidence bound",
+                                 "Upper 95 percent confidence bound")
+    if (SAVE_OUTPUTS){
+      save(pred_layers_A_Q3,
+           file = paste(PATH_TO_MODELS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_predictions_A_Q3.rds", sep = ""))
+    }
   }
 
 }
@@ -338,18 +343,20 @@ if (SAVE_OUTPUTS){
        file = paste(PATH_TO_MODELS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_metrics_A_Q4.rds", sep = ""))
 }
 
-# Generate risk map with percentiles
-pred_layers_A_Q4 <- predict(object = sdm,
-                            x.layers = covstack,
-                            quantiles = c(0.025, 0.975),
-                            splitby = 20
-)
-names(pred_layers_A_Q4) <- c("Mean",
-                             "Lower 95 percent confidence bound",
-                             "Upper 95 percent confidence bound")
-if (SAVE_OUTPUTS){
-  save(pred_layers_A_Q4,
-       file = paste(PATH_TO_MODELS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_predictions_A_Q4.rds", sep = ""))
+if (CV_OR_RI=="cv"){
+  # Generate risk map with percentiles
+  pred_layers_A_Q4 <- predict(object = sdm,
+                              x.layers = covstack,
+                              quantiles = c(0.025, 0.975),
+                              splitby = 20
+  )
+  names(pred_layers_A_Q4) <- c("Mean",
+                               "Lower 95 percent confidence bound",
+                               "Upper 95 percent confidence bound")
+  if (SAVE_OUTPUTS){
+    save(pred_layers_A_Q4,
+         file = paste(PATH_TO_MODELS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_predictions_A_Q4.rds", sep = ""))
+  }
 }
 
 
@@ -379,18 +386,20 @@ if (B_TEST_DATA_AVAILABLE){
   }
 }
 
-# Generate risk map with percentiles
-pred_layers_B_Q1 <- predict(object = sdm,
-                            x.layers = covstack,
-                            quantiles = c(0.025, 0.975),
-                            splitby = 20
-)
-names(pred_layers_B_Q1) <- c("Mean",
-                             "Lower 95 percent confidence bound",
-                             "Upper 95 percent confidence bound")
-if (SAVE_OUTPUTS){
-  save(pred_layers_B_Q1,
-       file = paste(PATH_TO_MODELS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_predictions_B_Q1.rds", sep = ""))
+if (CV_OR_RI=="cv"){
+  # Generate risk map with percentiles
+  pred_layers_B_Q1 <- predict(object = sdm,
+                              x.layers = covstack,
+                              quantiles = c(0.025, 0.975),
+                              splitby = 20
+  )
+  names(pred_layers_B_Q1) <- c("Mean",
+                               "Lower 95 percent confidence bound",
+                               "Upper 95 percent confidence bound")
+  if (SAVE_OUTPUTS){
+    save(pred_layers_B_Q1,
+         file = paste(PATH_TO_MODELS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_predictions_B_Q1.rds", sep = ""))
+  }
 }
 
 
@@ -422,18 +431,20 @@ if (B_TEST_DATA_AVAILABLE){
   }
 }
 
-# Generate risk map with percentiles
-pred_layers_B_Q2 <- predict(object = sdm,
-                            x.layers = covstack,
-                            quantiles = c(0.025, 0.975),
-                            splitby = 20
-)
-names(pred_layers_B_Q2) <- c("Mean",
-                             "Lower 95 percent confidence bound",
-                             "Upper 95 percent confidence bound")
-if (SAVE_OUTPUTS){
-  save(pred_layers_B_Q2,
-       file = paste(PATH_TO_MODELS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_predictions_B_Q2.rds", sep = ""))
+if (CV_OR_RI=="cv"){
+  # Generate risk map with percentiles
+  pred_layers_B_Q2 <- predict(object = sdm,
+                              x.layers = covstack,
+                              quantiles = c(0.025, 0.975),
+                              splitby = 20
+  )
+  names(pred_layers_B_Q2) <- c("Mean",
+                               "Lower 95 percent confidence bound",
+                               "Upper 95 percent confidence bound")
+  if (SAVE_OUTPUTS){
+    save(pred_layers_B_Q2,
+         file = paste(PATH_TO_MODELS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_predictions_B_Q2.rds", sep = ""))
+  }
 }
 
 
@@ -466,18 +477,20 @@ if (B_TEST_DATA_AVAILABLE){
   }
 }
 
-# Generate risk map with percentiles
-pred_layers_B_Q3 <- predict(object = sdm,
-                            x.layers = covstack,
-                            quantiles = c(0.025, 0.975),
-                            splitby = 20
-)
-names(pred_layers_B_Q3) <- c("Mean",
-                             "Lower 95 percent confidence bound",
-                             "Upper 95 percent confidence bound")
-if (SAVE_OUTPUTS){
-  save(pred_layers_B_Q3,
-       file = paste(PATH_TO_MODELS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_predictions_B_Q3.rds", sep = ""))
+if (CV_OR_RI=="cv"){
+  # Generate risk map with percentiles
+  pred_layers_B_Q3 <- predict(object = sdm,
+                              x.layers = covstack,
+                              quantiles = c(0.025, 0.975),
+                              splitby = 20
+  )
+  names(pred_layers_B_Q3) <- c("Mean",
+                               "Lower 95 percent confidence bound",
+                               "Upper 95 percent confidence bound")
+  if (SAVE_OUTPUTS){
+    save(pred_layers_B_Q3,
+         file = paste(PATH_TO_MODELS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_predictions_B_Q3.rds", sep = ""))
+  }
 }
 
 
@@ -562,18 +575,20 @@ if (B_TEST_DATA_AVAILABLE){
   }
 }
 
-# Generate risk map with percentiles
-pred_layers_B_Q4 <- predict(object = sdm,
-                            x.layers = covstack,
-                            quantiles = c(0.025, 0.975),
-                            splitby = 20
-)
-names(pred_layers_B_Q4) <- c("Mean",
-                             "Lower 95 percent confidence bound",
-                             "Upper 95 percent confidence bound")
-if (SAVE_OUTPUTS){
-  save(pred_layers_B_Q4,
-       file = paste(PATH_TO_MODELS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_predictions_B_Q4.rds", sep = ""))
+if (CV_OR_RI=="cv"){
+  # Generate risk map with percentiles
+  pred_layers_B_Q4 <- predict(object = sdm,
+                              x.layers = covstack,
+                              quantiles = c(0.025, 0.975),
+                              splitby = 20
+  )
+  names(pred_layers_B_Q4) <- c("Mean",
+                               "Lower 95 percent confidence bound",
+                               "Upper 95 percent confidence bound")
+  if (SAVE_OUTPUTS){
+    save(pred_layers_B_Q4,
+         file = paste(PATH_TO_MODELS, "fitted-BART-models-", INCLUDE_CROSSTERMS,"/", CV_OR_RI, "_predictions_B_Q4.rds", sep = ""))
+  }
 }
 
 
