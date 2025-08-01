@@ -119,9 +119,9 @@ timeplot <- pos_sites %>%
   geom_vline(xintercept = as.Date("2020-08-10")) +
   geom_vline(xintercept = as.Date("2021-08-10")) +
   geom_vline(xintercept = as.Date("2023-03-01")) +
-  geom_text(aes(x = as.Date("2016-08-10")+(as.Date("2020-08-10")-as.Date("2016-08-10"))/2, y = 330 ,label = "A. Train", hjust = 0.5)) +
+  geom_text(aes(x = as.Date("2016-08-10")+(as.Date("2020-08-10")-as.Date("2016-08-10"))/2, y = 330 ,label = "A. Training", hjust = 0.5)) +
   geom_text(aes(x = as.Date("2020-08-10")+(as.Date("2021-08-10")-as.Date("2020-08-10"))/2, y = 330 ,label = "A. Test", hjust = 0.5)) +
-  geom_text(aes(x = as.Date("2021-08-10")+(as.Date("2023-03-01")-as.Date("2021-08-10"))/2, y = 330 ,label = "B. Train", hjust = 0.5)) +
+  geom_text(aes(x = as.Date("2021-08-10")+(as.Date("2023-03-01")-as.Date("2021-08-10"))/2, y = 330 ,label = "B. Training", hjust = 0.5)) +
   geom_text(aes(x = as.Date("2024-01-01"), y = 330 ,label = "B. Test", hjust = 0.5)) +
   scale_x_date(date_labels = "%Y", date_breaks = "1 year") +
   ylab("Monthly reports") +
@@ -174,9 +174,9 @@ timeplot_seas <- pos_sites %>%
   geom_histogram(bins = round(as.numeric((max(pos_sites$date)-min(pos_sites$date))/30)), position = "stack", fill = "grey20") +
   geom_vline(xintercept = as.Date("2021-08-10")) +
   geom_vline(xintercept = as.Date("2023-03-01")) +
-  geom_text(aes(x = as.Date("2016-08-10")+(as.Date("2020-08-10")-as.Date("2016-08-10"))/2, y = 330 ,label = "A. Train", hjust = 0.5)) +
+  geom_text(aes(x = as.Date("2016-08-10")+(as.Date("2020-08-10")-as.Date("2016-08-10"))/2, y = 330 ,label = "A. Training", hjust = 0.5)) +
   geom_text(aes(x = as.Date("2020-08-10")+(as.Date("2021-08-10")-as.Date("2020-08-10"))/2, y = 330 ,label = "A. Test", hjust = 0.5)) +
-  geom_text(aes(x = as.Date("2021-08-10")+(as.Date("2023-03-01")-as.Date("2021-08-10"))/2, y = 330 ,label = "B. Train", hjust = 0.5)) +
+  geom_text(aes(x = as.Date("2021-08-10")+(as.Date("2023-03-01")-as.Date("2021-08-10"))/2, y = 330 ,label = "B. Training", hjust = 0.5)) +
   geom_text(aes(x = as.Date("2024-01-01"), y = 330 ,label = "B. Test", hjust = 0.5)) +
   scale_x_date(date_labels = "%Y", date_breaks = "1 year") +
   ylab("Monthly reports") +
